@@ -32,14 +32,20 @@ namespace Gotcha.UI
 
         void Awake()
         {
-            if (flow == null) flow = FindObjectOfType<GameFlow>();
+            if (flow == null) flow = GameFlow.Instance;
             font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            EnsureEventSystem();
             Build();
 
             flow.LevelStarted += OnLevelStarted;
             flow.LevelFinished += OnLevelFinished;
             flow.GameCompleted += OnGameCompleted;
+        }
+
+        void Start()
+        {
+            // Senza EventSystem i pulsanti non rispondono; di norma è già nella scena
+            if (EventSystem.current == null)
+                new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
         }
 
         void OnDestroy()
@@ -317,12 +323,6 @@ namespace Gotcha.UI
             rt.anchorMin = anchorMin;
             rt.anchorMax = anchorMax;
             rt.offsetMin = rt.offsetMax = Vector2.zero;
-        }
-
-        static void EnsureEventSystem()
-        {
-            if (FindObjectOfType<EventSystem>() != null) return;
-            new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
         }
     }
 }
