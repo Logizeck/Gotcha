@@ -1,4 +1,4 @@
-# Gotcha! — v0.4 (stile doodle)
+# Gotcha! — v0.5 (quattro livelli, stile doodle)
 
 Progetto Unity 2022.3 LTS o Unity 6, C#, 2D (Built-in Render Pipeline).
 Grafica in stile cartone "doodle" generata da codice (nessuna immagine esterna da importare).
@@ -11,6 +11,8 @@ Grafica in stile cartone "doodle" generata da codice (nessuna immagine esterna d
    scena `Assets/Scenes/Main.unity` e impostazioni Android (verticale, ARM64 + ARMv7, IL2CPP).
    Con Unity 6 imposta anche Active Input Handling = Both e chiede di riavviare.
    Si può rilanciare da **Gotcha > Build Scene and Levels** (ricrea scena, sprite e prefab generati).
+   Quando un aggiornamento cambia grafica o livelli (`BuilderVersion` nel builder), all'apertura del progetto
+   la rigenerazione parte da sola.
 3. Apri `Assets/Scenes/Main.unity` e premi Play. Nell'Editor il mouse sostituisce il dito
    (rotella = pizzico, frecce = inclinazione).
 4. APK: File > Build Settings > Android > Switch Platform > Build (o Build And Run col telefono collegato).
@@ -27,12 +29,12 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Font: Luckiest Guy (titoli, Apache 2.0) e Patrick Hand (testi, SIL OFL), in `Assets/Resources/Fonts` con licenze.
 
 ## Struttura
-- `Core/GameFlow` regista: carica livelli, salva progressi, pausa, pause pubblicitarie, schermo sempre acceso
-  nei livelli che non usano il touch (`LevelDefinition.keepScreenAwake`).
+- `Core/GameFlow` regista: carica livelli, salva progressi, pausa, pause pubblicitarie. Mentre il gioco è aperto
+  lo schermo non si spegne e non abbassa la luminosità.
 - `Core/PointerInput`, `Core/SaveData` utilità touch/mouse e salvataggio.
 - `Sensors/SensorHub` unico accesso ai sensori.
 - `Ads/AdBreakManager` regola 5 livelli / 120 s di gioco attivo; `LogAdProvider` simula gli annunci in Editor.
-- `Levels/` LevelController, LevelDefinition, LevelCatalog e i livelli KeyDoor, Maze, Snowman.
+- `Levels/` LevelController, LevelDefinition, LevelCatalog e i livelli KeyDoor, Maze, Snowman, Idle.
 - `Components/` Draggable2D (con limite allo schermo), DropSlot, PinchScalable, TiltGravity, GoalZone, IdleTimer,
   SensorCondition, EasterEggTrigger, LockedDoor, CameraFit, DoodleWobble, Pulse, StrokeDrawer (disegno col dito),
   SmokeEmitter/SmokePuff (fumo), SpeechBubble (fumetto), ChromeBall (sfera cromata che riflette l'ambiente).
@@ -46,15 +48,24 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Con la chiave nella serratura la chiave gira, la porta si apre e il livello è superato.
 
 ## Livello 2 — Tilt Maze
-- La sfera cromata parte fuori dal labirinto e va portata alla stella al centro inclinando il telefono.
-- Risposta all'inclinazione più reattiva (TiltGravity: `strength`, `response`). Lo schermo non va in stand-by.
-- La sfera riflette le pareti che ha intorno (camera di riflesso + shader).
+- Una biglia d'acciaio da flipper parte fuori dal labirinto e va portata alla stella al centro inclinando il telefono.
+- Risposta rapida all'inclinazione (TiltGravity: `strength` 46, `response` 0.5), poco attrito, scia luminosa.
+- La biglia riflette le pareti al neon che ha intorno (camera di riflesso + shader `Gotcha/ChromeBall`).
 
 ## Livello 3 — Snowman
-- Occhi (carboni) e naso (carota) vanno trascinati dove vuoi sulla faccia; la bocca si disegna col dito sulla faccia.
-  Nessuna posizione è suggerita. Gli oggetti lasciati fuori dalla faccia cadono nella neve.
-- Easter egg `snowman_butt`: avvicina la carota al sedere del pupazzo. Arrossisce, fuma, dice "Oh noooo!" e si
-  scioglie lentamente in una pozzanghera.
+- Occhi (carboni) e naso (carota) restano attaccati dove li lasci sulla testa; altrove cadono nella neve.
+  Nessuna posizione è indicata. Per vincere ogni occhio deve stare nella sua zona (ampia e invisibile: metà
+  sinistra/destra della parte alta della faccia) e il naso al centro.
+- La bocca si disegna col dito sulla faccia e resta come un solco nella neve. Conta solo se è un sorriso
+  (largo almeno 0.25, con le punte più in alto del centro). Un nuovo tratto sostituisce il precedente.
+- Easter egg `snowman_butt`: lascia la carota sulla pancia (zona ampia). Il pupazzo arrossisce, fuma, dice
+  "Oh noooo!" e si scioglie lentamente dalla testa in giù; la base resta a terra in una pozzanghera.
+- Il pupazzo è in parti (base, pancia, braccia, testa, cappello) per lo scioglimento progressivo.
+  Zone e misure sono regolabili dall'Inspector del prefab `Level_Snowman`.
+
+## Livello 4 — Big Red Button
+- Un gatto dorme e c'è un grosso pulsante rosso "PRESS ME". Si vince aspettando 5 secondi senza toccare
+  lo schermo e senza muovere il telefono. Ogni tocco o scossone sveglia il gatto e fa ripartire l'attesa.
 
 ## Regola pubblicità
 Un livello solo "superato" aumenta il contatore livelli. Il tempo conta solo mentre si gioca (non in pausa, menu o app in background).

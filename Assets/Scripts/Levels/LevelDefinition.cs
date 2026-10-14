@@ -9,7 +9,5 @@ namespace Gotcha.Levels
         public string title;
         [TextArea] public string hint;
         public GameObject prefab;   // prefab con un LevelController sulla radice
-        [Tooltip("Livelli che non usano il touch (es. inclinazione): lo schermo non va in stand-by.")]
-        public bool keepScreenAwake;
     }
 }

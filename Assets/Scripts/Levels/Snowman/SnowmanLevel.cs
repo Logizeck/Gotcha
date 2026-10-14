@@ -1,49 +1,60 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using Gotcha.Components;
 
 namespace Gotcha.Levels
 {
     /// <summary>
-    /// Livello 3 — pupazzo di neve. Occhi (2 carboni) e naso (carota) vanno trascinati in un punto qualsiasi
-    /// della faccia; la bocca va tracciata col dito sulla faccia. Nessuna posizione è indicata.
-    /// Easter egg: avvicinare la carota al sedere del pupazzo → arrossisce, fuma, dice "Oh noooo!" e si scioglie.
+    /// Livello 3 — pupazzo di neve.
+    /// Occhi (2 carboni) e naso (carota) si attaccano dove li lasci sulla testa: nessuna posizione è indicata.
+    /// Per vincere ogni occhio deve stare nella sua zona (ampia, invisibile), il naso nella sua, e la bocca va
+    /// disegnata col dito: un sorriso che resta come un solco nella neve.
+    /// Easter egg: lasciare la carota sulla pancia → il pupazzo arrossisce, fuma, "Oh noooo!" e si scioglie
+    /// lentamente dalla testa in giù, mentre la base resta a terra.
     /// </summary>
     public class SnowmanLevel : LevelController
     {
-        [SerializeField] Transform snowman;          // pivot ai piedi: si scioglie verso il basso
-        [SerializeField] SpriteRenderer body;
+        [Header("Parti del pupazzo (pivot sui punti di appoggio)")]
+        [SerializeField] Transform snowman;      // radice ai piedi
+        [SerializeField] Transform basePart;     // pivot y = 0
+        [SerializeField] Transform middlePart;   // pivot y = 1.95
+        [SerializeField] Transform armsPart;     // pivot alle spalle, y = 2.85
+        [SerializeField] Transform headPart;     // pivot y = 3.42
+        [SerializeField] Transform hatPart;      // pivot y = 4.55
+        [SerializeField] SpriteRenderer[] bodyRenderers;
         [SerializeField] SpriteRenderer blush;
         [SerializeField] Transform puddle;
         [SerializeField] SpeechBubble bubble;
         [SerializeField] SmokeEmitter smoke;
-        [SerializeField] StrokeDrawer mouthPen;
+        [SerializeField] StrokeDrawer mouthPen;  // centrato sulla testa
 
-        [Header("Faccia (coordinate locali del pupazzo)")]
-        [SerializeField] Vector2 faceCenter = new Vector2(0f, 4.0f);
-        [SerializeField] float faceRadius = 0.52f;
+        [Header("Zone invisibili (coordinate del pupazzo, piedi in 0,0)")]
+        [SerializeField] Vector2 headCenter = new Vector2(0f, 4.02f);
+        [SerializeField] float stickRadius = 0.8f;                              // dove gli oggetti restano attaccati
+        [SerializeField] Rect leftEyeZone = new Rect(-0.65f, 3.98f, 0.63f, 0.55f);
+        [SerializeField] Rect rightEyeZone = new Rect(0.02f, 3.98f, 0.63f, 0.55f);
+        [SerializeField] Rect noseZone = new Rect(-0.5f, 3.68f, 1.0f, 0.45f);
+        [SerializeField] Rect mouthZone = new Rect(-0.6f, 3.4f, 1.2f, 0.58f);  // dove deve stare il sorriso
+        [SerializeField] Vector2 bellyCenter = new Vector2(0f, 1.6f);
+        [SerializeField] float bellyRadius = 1.45f;                             // zona ampia della pancia
 
         [Header("Easter egg")]
         [SerializeField] string eggId = "snowman_butt";
-        [SerializeField] Vector2 buttPoint = new Vector2(0f, 0.35f);
-        [SerializeField] float meltSeconds = 3.5f;
-
-        [Header("Oggetti lasciati fuori dalla faccia cadono nella neve")]
         [SerializeField] float groundY = -3.9f;
 
-        static readonly Color BlushTint = new Color(1f, 0.8f, 0.85f);
+        const float MiddlePivot = 1.95f, ShoulderY = 2.85f, HeadPivot = 3.42f, HatPivot = 4.55f;
+        static readonly Color BlushTint = new Color(1f, 0.78f, 0.83f);
+        static readonly Color MeltTint = new Color(0.86f, 0.94f, 1f);
 
         Draggable2D[] items;
-        EasterEggTrigger egg;
         bool resolving;
+        bool smileOk;
 
         public override void OnLevelStart()
         {
             items = GetComponentsInChildren<Draggable2D>(true);
             foreach (Draggable2D d in items) d.Dropped += OnItemDropped;
-
-            egg = GetComponentInChildren<EasterEggTrigger>(true);
-            if (egg != null) egg.Triggered += OnEggTriggered;
             if (mouthPen != null) mouthPen.StrokeFinished += OnMouthDrawn;
 
             if (blush != null) blush.color = new Color(1f, 1f, 1f, 0f);
@@ -54,24 +65,27 @@ namespace Gotcha.Levels
         void OnDestroy()
         {
             if (items != null) foreach (Draggable2D d in items) if (d != null) d.Dropped -= OnItemDropped;
-            if (egg != null) egg.Triggered -= OnEggTriggered;
             if (mouthPen != null) mouthPen.StrokeFinished -= OnMouthDrawn;
         }
 
-        // ---------- Faccia ----------
+        Vector2 Local(Vector3 world) { return snowman.InverseTransformPoint(world); }
 
-        bool OnFace(Vector3 world)
-        {
-            Vector2 local = snowman.InverseTransformPoint(world);
-            return Vector2.Distance(local, faceCenter) <= faceRadius;
-        }
+        // ---------- Faccia ----------
 
         void OnItemDropped(Draggable2D item, DropSlot slot)
         {
             if (IsFinished || resolving) return;
-            if (OnFace(item.transform.position))
+            Vector2 p = Local(item.transform.position);
+
+            if (item.itemId == "carrot" && Vector2.Distance(p, bellyCenter) <= bellyRadius && Vector2.Distance(p, headCenter) > stickRadius)
             {
-                item.transform.SetParent(snowman, true);   // ora fa parte del pupazzo
+                resolving = true;
+                StartCoroutine(MeltRoutine(item));
+                return;
+            }
+            if (Vector2.Distance(p, headCenter) <= stickRadius)
+            {
+                item.transform.SetParent(headPart, true);   // resta lì, attaccato alla testa
                 CheckComplete();
             }
             else
@@ -81,20 +95,51 @@ namespace Gotcha.Levels
             }
         }
 
-        void OnMouthDrawn(StrokeDrawer pen) { CheckComplete(); }
+        void OnMouthDrawn(StrokeDrawer pen)
+        {
+            smileOk = IsSmile(pen.LastStrokePoints);
+            CheckComplete();
+        }
+
+        /// <summary>Un sorriso: abbastanza largo, nella zona della bocca, con le punte più in alto del centro.</summary>
+        bool IsSmile(IReadOnlyList<Vector3> pts)
+        {
+            if (pts == null || pts.Count < 3) return false;
+            float minX = float.MaxValue, maxX = float.MinValue, minY = float.MaxValue, sumY = 0f;
+            int lowest = 0;
+            for (int i = 0; i < pts.Count; i++)
+            {
+                Vector2 p = Local(mouthPen.transform.TransformPoint(pts[i]));
+                if (!mouthZone.Contains(p)) return false;
+                minX = Mathf.Min(minX, p.x);
+                maxX = Mathf.Max(maxX, p.x);
+                if (p.y < minY) { minY = p.y; lowest = i; }
+                sumY += p.y;
+            }
+            Vector2 a = Local(mouthPen.transform.TransformPoint(pts[0]));
+            Vector2 b = Local(mouthPen.transform.TransformPoint(pts[pts.Count - 1]));
+            bool wide = maxX - minX >= 0.25f;
+            bool curved = (a.y + b.y) * 0.5f - minY >= 0.03f;
+            bool lowInMiddle = lowest > 0 && lowest < pts.Count - 1;
+            return wide && curved && lowInMiddle;
+        }
 
         void CheckComplete()
         {
             if (IsFinished || resolving) return;
-            int eyes = 0;
-            bool nose = false;
+            bool left = false, right = false, nose = false;
             foreach (Draggable2D d in items)
             {
-                if (d == null || d.transform.parent != snowman) continue;
-                if (d.itemId == "eye") eyes++;
-                if (d.itemId == "carrot") nose = true;
+                if (d == null || d.transform.parent != headPart) continue;
+                Vector2 p = Local(d.transform.position);
+                if (d.itemId == "eye")
+                {
+                    if (!left && leftEyeZone.Contains(p)) left = true;
+                    else if (!right && rightEyeZone.Contains(p)) right = true;
+                }
+                if (d.itemId == "carrot" && noseZone.Contains(p)) nose = true;
             }
-            if (eyes >= 2 && nose && mouthPen != null && mouthPen.HasStroke)
+            if (left && right && nose && smileOk)
             {
                 resolving = true;
                 StartCoroutine(WinRoutine());
@@ -108,7 +153,7 @@ namespace Gotcha.Levels
             float v = 0f;
             while (t != null && t.position.y > target)
             {
-                if (t.parent == snowman || Draggable2D.Active != null && Draggable2D.Active.transform == t) yield break;
+                if (t.parent == headPart || Draggable2D.Active != null && Draggable2D.Active.transform == t) yield break;
                 v += 18f * Time.deltaTime;
                 t.position += Vector3.down * (v * Time.deltaTime);
                 yield return null;
@@ -116,9 +161,15 @@ namespace Gotcha.Levels
             if (t != null) t.position = new Vector3(t.position.x, target, t.position.z);
         }
 
-        IEnumerator WinRoutine()
+        void LockInput()
         {
             foreach (Draggable2D d in items) if (d != null) d.enabled = false;
+            if (mouthPen != null) mouthPen.enabled = false;
+        }
+
+        IEnumerator WinRoutine()
+        {
+            LockInput();
             if (bubble != null) bubble.Show("Yay!");
             Vector3 start = snowman.localPosition;
             for (int hop = 0; hop < 2; hop++)
@@ -128,68 +179,80 @@ namespace Gotcha.Levels
                     yield return null;
                 }
             snowman.localPosition = start;
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSeconds(0.4f);
             Win();
         }
 
-        // ---------- Easter egg: carota sul sedere ----------
-
-        void OnEggTriggered(string id)
-        {
-            if (IsFinished || resolving) return;
-            resolving = true;
-            StartCoroutine(MeltRoutine(Draggable2D.Active));
-        }
+        // ---------- Easter egg: carota sulla pancia ----------
 
         IEnumerator MeltRoutine(Draggable2D carrot)
         {
-            foreach (Draggable2D d in items) if (d != null) d.enabled = false;
-            if (mouthPen != null) mouthPen.enabled = false;
+            LockInput();
+            carrot.transform.SetParent(transform, true);
+            StartCoroutine(FallToGround(carrot.transform));
 
-            // la carota "punge" e poi cade nella neve
-            if (carrot != null)
+            // 1. arrossisce
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.9f)
             {
-                Transform t = carrot.transform;
-                t.SetParent(transform, true);
-                Vector3 from = t.position, poke = snowman.TransformPoint(buttPoint);
-                poke.z = from.z;
-                for (float k = 0f; k < 1f; k += Time.deltaTime / 0.12f) { t.position = Vector3.Lerp(from, poke, k); yield return null; }
-                StartCoroutine(FallToGround(t));
-            }
-
-            // arrossisce
-            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.6f)
-            {
-                SetBlush(k);
+                SetTint(Color.Lerp(Color.white, BlushTint, k), k);
                 yield return null;
             }
-            SetBlush(1f);
+            SetTint(BlushTint, 1f);
 
+            // 2. fuma e strilla
             if (bubble != null) bubble.Show("Oh noooo!");
             if (smoke != null) smoke.Play();
-            yield return new WaitForSeconds(0.6f);
+            yield return new WaitForSeconds(0.9f);
 
-            // si scioglie lentamente
-            Vector3 baseScale = snowman.localScale;
-            for (float k = 0f; k < 1f; k += Time.deltaTime / meltSeconds)
-            {
-                float e = k * k * (3f - 2f * k);
-                snowman.localScale = new Vector3(baseScale.x * (1f + 0.45f * e), baseScale.y * (1f - 0.9f * e), baseScale.z);
-                if (puddle != null) puddle.localScale = Vector3.one * Mathf.Min(1f, e * 1.3f);
-                if (body != null) body.color = Color.Lerp(BlushTint, new Color(0.88f, 0.95f, 1f), e);
-                if (blush != null) blush.color = new Color(1f, 1f, 1f, 1f - e);
-                yield return null;
-            }
+            // 3. si scioglie lentamente dalla testa in giù; la base resta a terra
+            float sh = 1f, sm = 1f, sb = 1f;
+            yield return Melt(1.8f, k => { sh = Mathf.Lerp(1f, 0.18f, k); Pose(sb, sm, sh, 0.25f * k); });
+            yield return Melt(1.8f, k => { sm = Mathf.Lerp(1f, 0.22f, k); Pose(sb, sm, sh, 0.25f + 0.35f * k); });
+            yield return Melt(2.2f, k => { sb = Mathf.Lerp(1f, 0.42f, k); Pose(sb, sm, sh, 0.6f + 0.4f * k); });
 
             if (smoke != null) smoke.Stop();
             yield return new WaitForSeconds(1.0f);
             FailWithEgg(eggId);
         }
 
-        void SetBlush(float k)
+        delegate void MeltStep(float k);
+
+        IEnumerator Melt(float seconds, MeltStep step)
         {
-            if (blush != null) blush.color = new Color(1f, 1f, 1f, k);
-            if (body != null) body.color = Color.Lerp(Color.white, BlushTint, k);
+            for (float k = 0f; k < 1f; k += Time.deltaTime / seconds)
+            {
+                step(k * k * (3f - 2f * k));
+                yield return null;
+            }
+            step(1f);
+        }
+
+        /// <summary>Mette in posa le parti: ognuna appoggiata su quella sotto, schiacciata del suo fattore.</summary>
+        void Pose(float sb, float sm, float sh, float overall)
+        {
+            Squash(basePart, 0f, sb);
+            float middleY = MiddlePivot * sb;
+            Squash(middlePart, middleY, sm);
+            if (armsPart != null) armsPart.localPosition = new Vector3(0f, middleY + (ShoulderY - MiddlePivot) * sm, 0f);
+            float headY = middleY + (HeadPivot - MiddlePivot) * sm;
+            Squash(headPart, headY, sh);
+            if (hatPart != null) hatPart.localPosition = new Vector3(0f, headY + (HatPivot - HeadPivot) * sh, 0f);
+
+            if (puddle != null) puddle.localScale = Vector3.one * Mathf.Min(1f, overall * 1.1f);
+            SetTint(Color.Lerp(BlushTint, MeltTint, overall), 1f - Mathf.Clamp01(overall * 2.5f));
+        }
+
+        static void Squash(Transform t, float y, float s)
+        {
+            if (t == null) return;
+            t.localPosition = new Vector3(0f, y, 0f);
+            t.localScale = new Vector3(1f + (1f - s) * 0.35f, s, 1f);
+        }
+
+        void SetTint(Color c, float blushAlpha)
+        {
+            if (bodyRenderers != null) foreach (SpriteRenderer r in bodyRenderers) if (r != null) r.color = c;
+            if (blush != null) blush.color = new Color(1f, 1f, 1f, blushAlpha);
         }
     }
 }

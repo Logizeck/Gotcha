@@ -6,8 +6,8 @@ Shader "Gotcha/ChromeBall"
     {
         [PerRendererData] _MainTex ("Sprite", 2D) = "white" {}
         _ReflectionTex ("Reflection", 2D) = "gray" {}
-        _Reflectivity ("Reflectivity", Range(0, 1)) = 0.6
-        _Radius ("Sphere radius in UV", Range(0.1, 0.5)) = 0.446
+        _Reflectivity ("Reflectivity", Range(0, 1)) = 0.8
+        _Radius ("Sphere radius in UV", Range(0.1, 0.5)) = 0.463
     }
 
     SubShader
@@ -66,11 +66,12 @@ Shader "Gotcha/ChromeBall"
                 float2 ruv = 0.5 + p * (0.22 + 0.28 * r2);
                 fixed3 refl = tex2D(_ReflectionTex, ruv).rgb;
 
-                // il riflesso evita il contorno a inchiostro (bordo) e si attenua dove la base è molto scura
-                float inside = 1.0 - smoothstep(0.80, 0.90, sqrt(r2));
-                float fresnel = 0.75 + 0.25 * r2;
+                // il riflesso evita il contorno a inchiostro (bordo); le luci (pareti al neon) si sommano
+                // all'acciaio, il fondo scuro lo scurisce solo un po': la biglia resta brillante
+                float inside = 1.0 - smoothstep(0.86, 0.94, sqrt(r2));
+                float fresnel = 0.7 + 0.3 * r2;
                 float k = _Reflectivity * inside * fresnel;
-                fixed3 col = lerp(baseCol.rgb, refl * 1.15 + baseCol.rgb * 0.25, k);
+                fixed3 col = baseCol.rgb * (1.0 - 0.3 * k) + refl * (1.25 * k);
 
                 // luce speculare in alto a sinistra
                 float3 L = normalize(float3(-0.45, 0.55, 0.7));

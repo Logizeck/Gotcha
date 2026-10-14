@@ -13,12 +13,15 @@ namespace Gotcha.Components
         public float spread = 0.35f;
         public int sortingOrder = 40;
         public Color tint = new Color(0.85f, 0.86f, 0.9f, 0.95f);
+        public float spinRange = 60f;    // gradi al secondo, a caso tra -spinRange e +spinRange
+        public float growth = 1.4f;      // quanto si allarga lo sbuffo durante la vita
+        public float sideDrift = 0.25f;
 
         public bool IsPlaying { get; private set; }
 
         float timer;
 
-        public void Play() { IsPlaying = true; }
+        public void Play() { if (!IsPlaying) timer = 1f / puffsPerSecond; IsPlaying = true; }
         public void Stop() { IsPlaying = false; }
 
         void Update()
@@ -45,8 +48,8 @@ namespace Gotcha.Components
             sr.color = tint;
             sr.sortingOrder = sortingOrder;
             SmokePuff puff = go.AddComponent<SmokePuff>();
-            puff.Init(life, new Vector3(Random.Range(-0.25f, 0.25f), riseSpeed * Random.Range(0.8f, 1.2f), 0),
-                      startScale * Random.Range(0.8f, 1.2f), Random.Range(-60f, 60f));
+            puff.Init(life, new Vector3(Random.Range(-sideDrift, sideDrift), riseSpeed * Random.Range(0.8f, 1.2f), 0),
+                      startScale * Random.Range(0.8f, 1.2f), Random.Range(-spinRange, spinRange), growth);
         }
     }
 }

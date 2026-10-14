@@ -45,6 +45,14 @@ namespace Gotcha.Core
         {
             Instance = this;
             Ads = new AdBreakManager(new LogAdProvider());
+            // Mentre il gioco è aperto lo schermo non si spegne e non si abbassa (molti livelli si giocano
+            // senza toccarlo: inclinazione, attesa...). Su Android è il flag KEEP_SCREEN_ON.
+            Screen.sleepTimeout = SleepTimeout.NeverSleep;
+        }
+
+        void OnApplicationFocus(bool focus)
+        {
+            if (focus) Screen.sleepTimeout = SleepTimeout.NeverSleep;
         }
 
         void OnDestroy()
@@ -86,7 +94,6 @@ namespace Gotcha.Core
                 return;
             }
             current.Finished += OnFinished;
-            Screen.sleepTimeout = CurrentDefinition.keepScreenAwake ? SleepTimeout.NeverSleep : SleepTimeout.SystemSetting;
             current.OnLevelStart();
             LevelStarted?.Invoke(CurrentDefinition, index);
         }
@@ -94,7 +101,6 @@ namespace Gotcha.Core
         void OnFinished(LevelResult result, string eggId)
         {
             lastResult = result;
-            Screen.sleepTimeout = SleepTimeout.SystemSetting;
             Ads.RegisterLevelResult(result == LevelResult.Solved);
             if (result == LevelResult.Solved) SaveData.UnlockUpTo(CurrentIndex + 1);
             if (!string.IsNullOrEmpty(eggId)) SaveData.AddEasterEgg(eggId);

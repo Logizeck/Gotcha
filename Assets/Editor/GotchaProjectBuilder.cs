@@ -30,6 +30,10 @@ public static class GotchaProjectBuilder
     const string LevelDir = "Assets/Levels";
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
+    // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
+    const int BuilderVersion = 5;
+    const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
+
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
     static readonly Color InkColor = new Color(0.17f, 0.13f, 0.2f);
 
@@ -40,7 +44,7 @@ public static class GotchaProjectBuilder
     {
         EditorApplication.delayCall += () =>
         {
-            if (!File.Exists(ScenePath)) BuildAll();
+            if (!File.Exists(ScenePath) || InstalledVersion() < BuilderVersion) BuildAll();
         };
     }
 
@@ -73,13 +77,16 @@ public static class GotchaProjectBuilder
         {
             Define("KeyDoor", "key_door", "PINCH & OPEN",
                 "That key is far too big for the lock. Can you change its size?",
-                false, BuildKeyDoorLevel(keyPrefab, doorPrefab)),
+                BuildKeyDoorLevel(keyPrefab, doorPrefab)),
             Define("Maze", "tilt_maze", "TILT MAZE",
                 "No buttons here: the phone itself moves the ball. Reach the glowing star.",
-                true, BuildMazeLevel()),
+                BuildMazeLevel()),
             Define("Snowman", "snowman", "SNOWMAN",
-                "Give the snowman a face. Put the pieces wherever you like... and the mouth? Draw it!",
-                false, BuildSnowmanLevel(carrotPrefab, coalPrefab)),
+                "Give the snowman a happy face. Eyes and nose go on the head... and the smile? Draw it in the snow!",
+                BuildSnowmanLevel(carrotPrefab, coalPrefab)),
+            Define("Idle", "do_nothing", "BIG RED BUTTON",
+                "Sometimes the best move is no move at all.",
+                BuildIdleLevel()),
         };
 
         LevelCatalog catalog = LoadOrCreate<LevelCatalog>(LevelDir + "/LevelCatalog.asset");
@@ -89,16 +96,21 @@ public static class GotchaProjectBuilder
 
         BuildScene(catalog);
         ConfigurePlayer();
+        File.WriteAllText(VersionFile, BuilderVersion.ToString());
         Debug.Log("[Gotcha] Scena e livelli generati. Apri " + ScenePath + " e premi Play.");
     }
 
-    static LevelDefinition Define(string folder, string id, string title, string hint, bool keepAwake, GameObject prefab)
+    static int InstalledVersion()
+    {
+        return File.Exists(VersionFile) && int.TryParse(File.ReadAllText(VersionFile).Trim(), out int v) ? v : 0;
+    }
+
+    static LevelDefinition Define(string folder, string id, string title, string hint, GameObject prefab)
     {
         LevelDefinition def = LoadOrCreate<LevelDefinition>(LevelDir + "/" + folder + "/" + folder + ".asset");
         def.levelId = id;
         def.title = title;
         def.hint = hint;
-        def.keepScreenAwake = keepAwake;
         def.prefab = prefab;
         EditorUtility.SetDirty(def);
         return def;
@@ -239,8 +251,8 @@ public static class GotchaProjectBuilder
         var root = new GameObject("Level_Maze");
         MazeLevel level = root.AddComponent<MazeLevel>();
         TiltGravity tilt = root.AddComponent<TiltGravity>();
-        tilt.strength = 32f;
-        tilt.response = 0.65f;
+        tilt.strength = 46f;     // risposta rapida, come una biglia d'acciaio su un piano da flipper
+        tilt.response = 0.5f;
         Art(root.transform, "Night", "maze_bg", -20, false);
 
         var maze = new GameObject("Maze").transform;
@@ -275,7 +287,7 @@ public static class GotchaProjectBuilder
         ball.layer = BallLayer;
         ball.transform.SetParent(maze, false);
         ball.transform.localPosition = new Vector3(-2.35f, -3.0f, 0);
-        ball.transform.localScale = Vector3.one * 0.34f;
+        ball.transform.localScale = Vector3.one * 0.4f;
         SpriteRenderer sr = ball.AddComponent<SpriteRenderer>();
         sr.sprite = sprites["chrome_ball"];
         sr.sharedMaterial = ChromeMaterial();
@@ -290,6 +302,20 @@ public static class GotchaProjectBuilder
         rb.sharedMaterial = BallPhysics();
         ChromeBall chrome = ball.AddComponent<ChromeBall>();
         chrome.background = new Color(0.04f, 0.055f, 0.11f);
+        chrome.captureRadius = 1.1f;
+        // scia luminosa dietro la biglia
+        TrailRenderer trail = ball.AddComponent<TrailRenderer>();
+        trail.time = 0.12f;
+        trail.widthMultiplier = 0.3f;
+        trail.widthCurve = AnimationCurve.Linear(0f, 1f, 1f, 0f);
+        trail.minVertexDistance = 0.02f;
+        trail.sharedMaterial = StrokeMaterial();
+        trail.sortingOrder = 9;
+        var gradient = new Gradient();
+        gradient.SetKeys(
+            new[] { new GradientColorKey(new Color(0.75f, 0.95f, 1f), 0f), new GradientColorKey(new Color(0.24f, 0.9f, 1f), 1f) },
+            new[] { new GradientAlphaKey(0.55f, 0f), new GradientAlphaKey(0f, 1f) });
+        trail.colorGradient = gradient;
 
         SetField(level, "ball", rb);
         return SavePrefab(root, LevelDir + "/Maze/Level_Maze.prefab");
@@ -305,8 +331,8 @@ public static class GotchaProjectBuilder
             mat = new PhysicsMaterial2D("Ball");
             AssetDatabase.CreateAsset(mat, path);
         }
-        mat.friction = 0.05f;
-        mat.bounciness = 0.25f;
+        mat.friction = 0.02f;
+        mat.bounciness = 0.3f;
         EditorUtility.SetDirty(mat);
         return mat;
     }
@@ -327,6 +353,8 @@ public static class GotchaProjectBuilder
             AssetDatabase.CreateAsset(mat, path);
         }
         mat.shader = shader;
+        if (mat.HasProperty("_Reflectivity")) mat.SetFloat("_Reflectivity", 0.8f);
+        if (mat.HasProperty("_Radius")) mat.SetFloat("_Radius", 0.463f);   // raggio 0.5 su uno sprite di 1.08 unità
         EditorUtility.SetDirty(mat);
         return mat;
     }
@@ -390,58 +418,105 @@ public static class GotchaProjectBuilder
         SnowmanLevel level = root.AddComponent<SnowmanLevel>();
         Art(root.transform, "Landscape", "snow_bg", -20, false);
 
-        // Pupazzo: pivot ai piedi, così si scioglie verso il basso
+        // Pupazzo in parti, ognuna col pivot sul suo punto d'appoggio: si scioglie dalla testa in giù
         var snowman = new GameObject("Snowman").transform;
         snowman.SetParent(root.transform, false);
         snowman.localPosition = new Vector3(0, -3.0f, 0);
-        SpriteRenderer body = Art(snowman, "Body", "snowman", 2).GetComponent<SpriteRenderer>();
-        SpriteRenderer blush = Art(snowman, "Blush", "blush", 4, true, new Vector2(0, 3.93f)).GetComponent<SpriteRenderer>();
+        Transform basePart = Part(snowman, "Base", 0f);
+        Transform middlePart = Part(snowman, "Middle", DoodleSprites.SnowMiddlePivot);
+        Transform armsPart = Part(snowman, "Arms", 2.85f);
+        Transform headPart = Part(snowman, "Head", DoodleSprites.SnowHeadPivot);
+        Transform hatPart = Part(snowman, "Hat", DoodleSprites.SnowHatPivot);
+        var bodies = new List<SpriteRenderer>
+        {
+            Art(basePart, "Art", "sm_base", 2, true, Vector2.zero).GetComponent<SpriteRenderer>(),
+            Art(middlePart, "Art", "sm_middle", 3, true, new Vector2(0, -DoodleSprites.SnowMiddlePivot)).GetComponent<SpriteRenderer>(),
+            Art(headPart, "Art", "sm_head", 4, true, new Vector2(0, -DoodleSprites.SnowHeadPivot)).GetComponent<SpriteRenderer>(),
+        };
+        Art(armsPart, "Art", "sm_arms", 1, true, new Vector2(0, -2.85f));
+        Art(hatPart, "Art", "sm_hat", 7, true, new Vector2(0, -DoodleSprites.SnowHatPivot));
+        float headLocal = DoodleSprites.SnowHeadCenterY - DoodleSprites.SnowHeadPivot;   // centro della testa nel pivot della testa
+        SpriteRenderer blush = Art(headPart, "Blush", "blush", 5, true, new Vector2(0, headLocal - 0.08f)).GetComponent<SpriteRenderer>();
 
-        // Bocca da disegnare col dito: l'area è la faccia
+        // Bocca: si disegna col dito sulla testa e resta come un solco nella neve
         var pen = new GameObject("MouthPen");
-        pen.transform.SetParent(snowman, false);
-        pen.transform.localPosition = new Vector3(0, 4.0f, 0);
+        pen.transform.SetParent(headPart, false);
+        pen.transform.localPosition = new Vector3(0, headLocal, 0);
         CircleCollider2D face = pen.AddComponent<CircleCollider2D>();
         face.isTrigger = true;
-        face.radius = 0.52f;
+        face.radius = DoodleSprites.SnowHeadRadius;
         StrokeDrawer drawer = pen.AddComponent<StrokeDrawer>();
-        drawer.width = 0.07f;
-        drawer.color = InkColor;
-        drawer.minLength = 0.25f;
-        drawer.sortingOrder = 12;
+        drawer.minLength = 0.2f;
+        drawer.sortingOrder = 6;
         drawer.material = StrokeMaterial();
-
-        // Easter egg: la carota vicino al sedere
-        var butt = new GameObject("Butt");
-        butt.transform.SetParent(snowman, false);
-        butt.transform.localPosition = new Vector3(0, 0.35f, 0);
-        CircleCollider2D buttArea = butt.AddComponent<CircleCollider2D>();
-        buttArea.isTrigger = true;
-        buttArea.radius = 0.55f;
-        EasterEggTrigger egg = butt.AddComponent<EasterEggTrigger>();
-        egg.eggId = "snowman_butt";
-        egg.triggerItemId = "carrot";
+        drawer.layers = new[]
+        {
+            new StrokeDrawer.Layer { color = Color.white, width = 0.085f, offset = new Vector2(0, -0.022f) },               // bordo illuminato
+            new StrokeDrawer.Layer { color = new Color(0.61f, 0.73f, 0.84f), width = 0.08f, offset = new Vector2(0, 0.006f) }, // pareti del solco
+            new StrokeDrawer.Layer { color = new Color(0.42f, 0.55f, 0.71f), width = 0.04f, offset = new Vector2(0, 0.012f) }, // fondo in ombra
+        };
 
         var smokeGo = new GameObject("Smoke");
-        smokeGo.transform.SetParent(snowman, false);
-        smokeGo.transform.localPosition = new Vector3(0, 3.7f, 0);
+        smokeGo.transform.SetParent(headPart, false);
+        smokeGo.transform.localPosition = new Vector3(0, headLocal + 0.2f, 0);
         SmokeEmitter smoke = smokeGo.AddComponent<SmokeEmitter>();
         smoke.puffSprite = sprites["puff"];
-        smoke.spread = 0.6f;
+        smoke.spread = 0.55f;
 
         var puddle = new GameObject("Puddle").transform;
         puddle.SetParent(root.transform, false);
         puddle.localPosition = new Vector3(0, -2.95f, 0);
-        Art(puddle, "Art", "puddle", 3);
+        Art(puddle, "Art", "puddle", 8);
 
-        // Fumetto con testo
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(0.95f, 2.45f));
+
+        // Pezzi sparsi nella neve: nessuna posizione è suggerita sul pupazzo
+        Instance(coalPrefab, root.transform, new Vector2(-2.0f, -3.95f)).name = "Eye1";
+        Instance(coalPrefab, root.transform, new Vector2(-1.35f, -4.35f)).name = "Eye2";
+        Instance(carrotPrefab, root.transform, new Vector2(1.55f, -4.1f)).name = "Carrot";
+
+        SetField(level, "snowman", snowman);
+        SetField(level, "basePart", basePart);
+        SetField(level, "middlePart", middlePart);
+        SetField(level, "armsPart", armsPart);
+        SetField(level, "headPart", headPart);
+        SetField(level, "hatPart", hatPart);
+        SetArray(level, "bodyRenderers", bodies.ToArray());
+        SetField(level, "blush", blush);
+        SetField(level, "puddle", puddle);
+        SetField(level, "bubble", bubble);
+        SetField(level, "smoke", smoke);
+        SetField(level, "mouthPen", drawer);
+        return SavePrefab(root, LevelDir + "/Snowman/Level_Snowman.prefab");
+    }
+
+    static Transform Part(Transform parent, string name, float pivotY)
+    {
+        var t = new GameObject(name).transform;
+        t.SetParent(parent, false);
+        t.localPosition = new Vector3(0, pivotY, 0);
+        return t;
+    }
+
+    /// <summary>Fumetto con testo (TextMesh col font dei titoli).</summary>
+    static SpeechBubble Bubble(Transform parent, Vector2 pos)
+    {
         var bubbleGo = new GameObject("Bubble");
-        bubbleGo.transform.SetParent(root.transform, false);
-        bubbleGo.transform.localPosition = new Vector3(0.95f, 2.45f, 0);
+        bubbleGo.transform.SetParent(parent, false);
+        bubbleGo.transform.localPosition = pos;
         Art(bubbleGo.transform, "Art", "bubble", 60);
+        TextMesh text = Label(bubbleGo.transform, new Vector2(0, 0.07f), 61);
+        SpeechBubble bubble = bubbleGo.AddComponent<SpeechBubble>();
+        bubble.text = text;
+        bubble.maxTextWidth = 2.5f;
+        return bubble;
+    }
+
+    static TextMesh Label(Transform parent, Vector2 pos, int order, string value = "", float characterSize = 0.05f)
+    {
         var textGo = new GameObject("Text");
-        textGo.transform.SetParent(bubbleGo.transform, false);
-        textGo.transform.localPosition = new Vector3(0, 0.07f, -0.01f);
+        textGo.transform.SetParent(parent, false);
+        textGo.transform.localPosition = new Vector3(pos.x, pos.y, -0.01f);
         TextMesh text = textGo.AddComponent<TextMesh>();
         Font font = AssetDatabase.LoadAssetAtPath<Font>("Assets/Resources/Fonts/LuckiestGuy-Regular.ttf");
         if (font != null)
@@ -449,29 +524,83 @@ public static class GotchaProjectBuilder
             text.font = font;
             textGo.GetComponent<MeshRenderer>().sharedMaterial = font.material;
         }
+        text.text = value;
         text.fontSize = 80;
-        text.characterSize = 0.05f;
+        text.characterSize = characterSize;
         text.anchor = TextAnchor.MiddleCenter;
         text.alignment = TextAlignment.Center;
         text.color = InkColor;
-        textGo.GetComponent<MeshRenderer>().sortingOrder = 61;
-        SpeechBubble bubble = bubbleGo.AddComponent<SpeechBubble>();
-        bubble.text = text;
-        bubble.maxTextWidth = 2.5f;
+        textGo.GetComponent<MeshRenderer>().sortingOrder = order;
+        return text;
+    }
 
-        // Pezzi sparsi nella neve: nessuna posizione suggerita sul pupazzo
-        Instance(coalPrefab, root.transform, new Vector2(-2.0f, -3.95f)).name = "Eye1";
-        Instance(coalPrefab, root.transform, new Vector2(-1.35f, -4.35f)).name = "Eye2";
-        Instance(carrotPrefab, root.transform, new Vector2(1.55f, -4.1f)).name = "Carrot";
+    // ---------- Livello 4: non fare niente ----------
 
-        SetField(level, "snowman", snowman);
-        SetField(level, "body", body);
-        SetField(level, "blush", blush);
-        SetField(level, "puddle", puddle);
-        SetField(level, "bubble", bubble);
-        SetField(level, "smoke", smoke);
-        SetField(level, "mouthPen", drawer);
-        return SavePrefab(root, LevelDir + "/Snowman/Level_Snowman.prefab");
+    static GameObject BuildIdleLevel()
+    {
+        var root = new GameObject("Level_Idle");
+        IdleLevel level = root.AddComponent<IdleLevel>();
+        Art(root.transform, "Room", "night_bg", -20, false);
+
+        IdleTimer timer = root.AddComponent<IdleTimer>();
+        timer.seconds = 5f;
+        timer.resetOnMotion = true;
+        timer.motionThreshold = 1.2f;
+
+        var cat = new GameObject("Cat").transform;
+        cat.SetParent(root.transform, false);
+        cat.localPosition = new Vector3(0, -1.5f, 0);
+        cat.localScale = Vector3.one * 1.35f;
+        Transform catArt = Art(cat, "Art", "cat", 2);
+        var breathe = catArt.gameObject.AddComponent<Pulse>();   // respira piano
+        breathe.amount = 0.025f;
+        breathe.speed = 2.2f;
+        GameObject eyes = Art(cat, "EyesOpen", "cat_eyes", 3, false).gameObject;
+        GameObject alert = Art(cat, "Alert", "alert", 4, true, new Vector2(-0.7f, 1.05f)).gameObject;
+
+        var zzzGo = new GameObject("Zzz");
+        zzzGo.transform.SetParent(cat, false);
+        zzzGo.transform.localPosition = new Vector3(-0.35f, 0.75f, 0);
+        SmokeEmitter zzz = zzzGo.AddComponent<SmokeEmitter>();
+        zzz.puffSprite = sprites["zzz"];
+        zzz.puffsPerSecond = 1.3f;
+        zzz.life = 2.2f;
+        zzz.riseSpeed = 0.45f;
+        zzz.startScale = 0.7f;
+        zzz.spread = 0.1f;
+        zzz.spinRange = 12f;
+        zzz.growth = 0.9f;
+        zzz.sideDrift = 0.15f;
+        zzz.tint = Color.white;
+
+        var heartsGo = new GameObject("Hearts");
+        heartsGo.transform.SetParent(cat, false);
+        heartsGo.transform.localPosition = new Vector3(-0.4f, 0.6f, 0);
+        SmokeEmitter hearts = heartsGo.AddComponent<SmokeEmitter>();
+        hearts.puffSprite = sprites["heart"];
+        hearts.puffsPerSecond = 5f;
+        hearts.life = 1.2f;
+        hearts.riseSpeed = 0.9f;
+        hearts.startScale = 0.8f;
+        hearts.spread = 0.5f;
+        hearts.spinRange = 30f;
+        hearts.growth = 0.4f;
+        hearts.tint = Color.white;
+
+        // Il pulsantone: un'esca, toccarlo sveglia il gatto
+        var button = new GameObject("BigButton").transform;
+        button.SetParent(root.transform, false);
+        button.localPosition = new Vector3(0, -3.75f, 0);
+        Art(button, "Art", "big_button", 6);
+        Label(root.transform, new Vector2(0, -4.45f), 7, "PRESS ME", 0.045f).color = new Color(1f, 0.93f, 0.75f);
+
+        SetField(level, "timer", timer);
+        SetField(level, "eyesOpen", eyes);
+        SetField(level, "alert", alert);
+        SetField(level, "zzz", zzz);
+        SetField(level, "hearts", hearts);
+        SetField(level, "button", button);
+        return SavePrefab(root, LevelDir + "/Idle/Level_Idle.prefab");
     }
 
     // ---------- Aiuti per la costruzione ----------
@@ -599,6 +728,16 @@ public static class GotchaProjectBuilder
         SerializedProperty p = so.FindProperty(field);
         if (p == null) { Debug.LogError("[Gotcha] Campo non trovato: " + target.GetType().Name + "." + field); return; }
         p.objectReferenceValue = value;
+        so.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    static void SetArray(Object target, string field, Object[] values)
+    {
+        var so = new SerializedObject(target);
+        SerializedProperty p = so.FindProperty(field);
+        if (p == null || !p.isArray) { Debug.LogError("[Gotcha] Array non trovato: " + target.GetType().Name + "." + field); return; }
+        p.arraySize = values.Length;
+        for (int i = 0; i < values.Length; i++) p.GetArrayElementAtIndex(i).objectReferenceValue = values[i];
         so.ApplyModifiedPropertiesWithoutUndo();
     }
 
