@@ -3,8 +3,8 @@
 Progetto Unity 2022.3 LTS, C#, 2D (Built-in Render Pipeline). Grafica ancora segnaposto, generata da codice.
 
 ## Come aprirlo
-1. Unity Hub > **Add project from disk** > seleziona questa cartella `Gotcha/` (Unity 2022.3 LTS o Unity 6,
-   con Android Build Support). Non creare un progetto nuovo: va aperta proprio questa cartella.
+1. Clona o scarica questo repository, poi Unity Hub > **Add project from disk** > seleziona la cartella del
+   repository (Unity 2022.3 LTS o Unity 6, con Android Build Support). Non creare un progetto nuovo.
 2. Alla prima apertura lo script `Assets/Editor/GotchaProjectBuilder.cs` genera da solo sprite segnaposto,
    prefab (Chiave, Porta, livelli), LevelDefinition, LevelCatalog, scena `Assets/Scenes/Main.unity` e impostazioni
    Android (verticale, 64 bit ARM64 + ARMv7, IL2CPP). Con Unity 6 imposta anche Active Input Handling = Both
