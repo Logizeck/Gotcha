@@ -1,4 +1,4 @@
-# Gotcha! — v0.6 (cinque livelli, musica, pubblicità simulata)
+# Gotcha! — v0.7 (cinque livelli, musica, pubblicità simulata)
 
 Progetto Unity 2022.3 LTS o Unity 6, C#, 2D (Built-in Render Pipeline).
 Grafica in stile cartone "doodle" generata da codice (nessuna immagine esterna da importare).
@@ -15,7 +15,10 @@ Grafica in stile cartone "doodle" generata da codice (nessuna immagine esterna d
    la rigenerazione parte da sola.
 3. Apri `Assets/Scenes/Main.unity` e premi Play. Nell'Editor il mouse sostituisce il dito
    (rotella = pizzico, frecce = inclinazione).
-4. APK: File > Build Settings > Android > Switch Platform > Build (o Build And Run col telefono collegato).
+4. APK: menu **Gotcha > Build Android APK** (oppure **Gotcha > Build And Run on Phone** col telefono collegato).
+   Meglio di File > Build Settings > Build: da quella finestra Unity a volte scrive in Console
+   "GUI Error: Invalid GUILayout state in BuildPlayerWindow" e "ArgumentException: Getting control 1's position...",
+   un bug noto e innocuo dell'Editor che dal menu Gotcha non si presenta.
    Package name provvisorio: `com.gotcha.game` (da cambiare prima della pubblicazione).
 
 Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli asset generati.
@@ -25,7 +28,7 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
   ombre a mezzaluna, tratteggi. `Editor/Art/DoodleSprites.cs` contiene tutti i disegni (chiave, porta, pupazzo,
   carota, pareti al neon, sfondi...). Per cambiare un disegno si modifica lì e si rilancia il builder.
 - `DoodleWobble` fa "vibrare" i disegni come nei cartoni animati fatti a mano.
-- Pareti del labirinto ispirate al logo: barre smussate giallo/magenta con neon ciano (colori in `DoodleSprites`).
+- Pareti del labirinto: tubi al neon con estremità arrotondate (ciano, magenta, giallo come il logo), `DoodleSprites.NeonTube`.
 - Font: Luckiest Guy (titoli, Apache 2.0) e Patrick Hand (testi, SIL OFL), in `Assets/Resources/Fonts` con licenze.
 
 ## Struttura
@@ -49,6 +52,8 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 
 ## Livello 2 — Tilt Maze
 - Una biglia d'acciaio parte fuori dal labirinto e va portata alla stella al centro inclinando il telefono.
+- Pareti a tubi al neon arrotondati (anche i collider sono a capsula, così la biglia scorre morbida sugli spigoli):
+  recinto e anello interno ciano, primo anello magenta, secondo anello giallo.
 - Sensibilità: TiltGravity `strength` 41.4 (-10% rispetto alla v0.5), `response` 0.5; poco attrito, scia luminosa.
 - Aspetto realistico calcolato dallo shader `Gotcha/ChromeBall`: al centro riflette il "soffitto" (luce di studio
   con softbox), ai bordi le pareti al neon che ha intorno (camera di riflesso), fresnel, due luci speculari,

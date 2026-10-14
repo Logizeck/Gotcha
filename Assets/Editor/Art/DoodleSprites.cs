@@ -180,37 +180,27 @@ namespace Gotcha.EditorArt
         }
 
         /// <summary>
-        /// Pezzo di parete al neon (9-slice): barra smussata con facce gialle (su/sinistra) e magenta (giù/destra),
-        /// contorno ciano luminoso. Nucleo di semi-spessore 0.11, alone di 0.11 attorno.
+        /// Tubo al neon (9-slice): estremità arrotondate, nucleo quasi bianco, corpo colorato e alone diffuso.
+        /// Allungato dal 9-slice diventa una capsula; dove due tubi si incontrano gli alone si sommano come nel neon vero.
+        /// Raggio del tubo 0.08, alone fino a 0.23 dal centro.
         /// </summary>
-        public static DoodleArt WallPiece()
+        public static DoodleArt NeonTube(string name, Rgba color)
         {
-            const float core = 0.11f, half = 0.22f;
-            var p = new DoodlePainter(-half - 0.01f, -half - 0.01f, half + 0.01f, half + 0.01f, 300) { Wobble = 0f };
-            Sdf bar = Sd.Box(0, 0, core, core, 0.015f);
-            // alone e linea al neon
+            const float radius = 0.08f, half = 0.23f;
+            var p = new DoodlePainter(-half, -half, half, half, 300) { Wobble = 0f };
+            Sdf tube = Sd.Box(0, 0, radius, radius, radius);   // un cerchio: il 9-slice lo allunga in capsula
             p.FillFunc(Sd.Box(0, 0, half, half), (x, y) =>
             {
-                float d = Math.Max(0f, bar(x, y));
-                float a = (float)Math.Exp(-d * 28f) * 0.55f;
-                return NeonCyan.WithAlpha(a);
+                float d = Math.Max(0f, tube(x, y));
+                return color.WithAlpha((float)Math.Exp(-d * 20f) * 0.6f);
             });
-            p.Fill(Sd.Subtract(Sd.Grow(bar, 0.035f), Sd.Grow(bar, 0.018f)), Rgba.Lerp(NeonCyan, Rgba.White, 0.35f), false);
-            // facce smussate
-            p.FillFunc(bar, (x, y) =>
+            p.FillFunc(tube, (x, y) =>
             {
-                bool vertical = Math.Abs(y) >= Math.Abs(x);
-                bool lit = vertical ? y > 0 : x < 0;
-                float depth = 1f - Math.Max(Math.Abs(x), Math.Abs(y)) / core;   // 0 sul bordo, 1 sulla cresta
-                Rgba face = lit ? Rgba.Lerp(NeonYellow, NeonYellowDeep, depth * 0.6f) : Rgba.Lerp(NeonMagenta, NeonMagentaDeep, depth * 0.6f);
-                if (!vertical && lit) face = Rgba.Lerp(face, Rgba.Hex("B8FF3A"), 0.35f);
-                if (!vertical && !lit) face = Rgba.Lerp(face, Rgba.Hex("FF7BE9"), 0.25f);
-                return face;
+                float t = Clamp(-tube(x, y) / radius);            // 0 sul bordo del tubo, 1 al centro
+                Rgba c = Rgba.Lerp(Rgba.Lerp(color, Rgba.White, 0.15f), Rgba.White, Clamp((t - 0.45f) / 0.45f));
+                return Rgba.Lerp(Rgba.Lerp(color, Ink, 0.15f), c, Clamp(t * 4f));
             });
-            // spigoli: cresta centrale e diagonali, più un filo di luce sul bordo esterno
-            p.Fill(Sd.Intersect(bar, Sd.Union(Sd.Capsule(-core, -core, core, core, 0.004f), Sd.Capsule(-core, core, core, -core, 0.004f))), Rgba.Hex("1A0F25", 0.45f), false);
-            p.Fill(Sd.Subtract(bar, Sd.Grow(bar, -0.012f)), Rgba.White.WithAlpha(0.55f), false);
-            return new DoodleArt("maze_wall", p, 68);   // bordo = metà sprite meno 2 px centrali da stirare
+            return new DoodleArt(name, p, 68);   // bordo = metà sprite meno 2 px centrali da stirare
         }
 
         /// <summary>

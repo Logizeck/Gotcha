@@ -322,7 +322,9 @@ namespace Gotcha.EditorArt
             {
                 DoodleSprites.Panel(), DoodleSprites.Key(), DoodleSprites.DoorFrame(), DoodleSprites.DoorPanel(),
                 DoodleSprites.Keyhole(), DoodleSprites.RoomBackdrop(), DoodleSprites.MazeBackdrop(),
-                DoodleSprites.WallPiece(), DoodleSprites.ChromeBall(), DoodleSprites.BallShadow(), DoodleSprites.Goal(),
+                DoodleSprites.NeonTube("tube_cyan", DoodleSprites.NeonCyan),
+                DoodleSprites.NeonTube("tube_magenta", DoodleSprites.NeonMagenta),
+                DoodleSprites.NeonTube("tube_yellow", DoodleSprites.NeonYellow), DoodleSprites.ChromeBall(), DoodleSprites.BallShadow(), DoodleSprites.Goal(),
                 DoodleSprites.SnowBackdrop(), DoodleSprites.SnowBase(), DoodleSprites.SnowMiddle(), DoodleSprites.SnowArms(), DoodleSprites.SnowHead(),
                 DoodleSprites.SnowHat(), DoodleSprites.Blush(), DoodleSprites.Puddle(),
                 DoodleSprites.Carrot(), DoodleSprites.Coal(), DoodleSprites.Puff(), DoodleSprites.Bubble(),

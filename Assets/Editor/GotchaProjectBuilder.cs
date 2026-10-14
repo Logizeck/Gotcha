@@ -31,7 +31,7 @@ public static class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 6;
+    const int BuilderVersion = 7;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -250,8 +250,8 @@ public static class GotchaProjectBuilder
 
     // ---------- Livello 2: labirinto a inclinazione ----------
 
-    const float WallT = 0.22f;        // spessore delle pareti (= nucleo dello sprite maze_wall)
-    const float WallMargin = 0.12f;   // alone al neon attorno al nucleo, nello sprite
+    const float WallT = 0.16f;        // spessore delle pareti (= diametro dei tubi al neon)
+    const float WallMargin = 0.15f;   // alone attorno al tubo, nello sprite
 
     static GameObject BuildMazeLevel()
     {
@@ -267,14 +267,14 @@ public static class GotchaProjectBuilder
         maze.localPosition = new Vector3(0, -0.4f, 0);
 
         // Recinto esterno: la sfera non può uscire dallo schermo
-        Rect(maze, "Arena", 2.8f, 3.5f, null);
+        Rect(maze, "Arena", 2.8f, 3.5f, null, "tube_cyan");
         // Anelli dall'esterno all'interno, ognuno con un varco su un lato diverso
-        Rect(maze, "Ring1", 2.1f, 2.1f, "top");
-        Rect(maze, "Ring2", 1.4f, 1.4f, "bottom");
-        Rect(maze, "Ring3", 0.7f, 0.7f, "top");
+        Rect(maze, "Ring1", 2.1f, 2.1f, "top", "tube_magenta");
+        Rect(maze, "Ring2", 1.4f, 1.4f, "bottom", "tube_yellow");
+        Rect(maze, "Ring3", 0.7f, 0.7f, "top", "tube_cyan");
         // Sbarramenti nei corridoi: obbligano a fare il giro lungo
-        HWall(maze, "Block1", 1.4f, 2.1f, 0f);
-        HWall(maze, "Block2", -1.4f, -0.7f, 0f);
+        HWall(maze, "Block1", 1.4f, 2.1f, 0f, "tube_magenta");
+        HWall(maze, "Block2", -1.4f, -0.7f, 0f, "tube_yellow");
 
         // Stella luminosa al centro
         var goal = new GameObject("Goal");
@@ -397,43 +397,45 @@ public static class GotchaProjectBuilder
         return mat;
     }
 
-    /// <summary>Rettangolo di muri (semi-larghezza hx, semi-altezza hy) con un varco opzionale al centro di un lato.</summary>
-    static void Rect(Transform parent, string name, float hx, float hy, string gapSide)
+    /// <summary>Rettangolo di tubi (semi-larghezza hx, semi-altezza hy) con un varco opzionale al centro di un lato.</summary>
+    static void Rect(Transform parent, string name, float hx, float hy, string gapSide, string tube)
     {
         const float gap = 0.35f;   // metà larghezza del varco
         var g = new GameObject(name).transform;
         g.SetParent(parent, false);
 
-        if (gapSide == "top") { HWall(g, "TopL", -hx, -gap, hy); HWall(g, "TopR", gap, hx, hy); }
-        else HWall(g, "Top", -hx, hx, hy);
-        if (gapSide == "bottom") { HWall(g, "BottomL", -hx, -gap, -hy); HWall(g, "BottomR", gap, hx, -hy); }
-        else HWall(g, "Bottom", -hx, hx, -hy);
-        VWall(g, "Left", -hx, -hy, hy);
-        VWall(g, "Right", hx, -hy, hy);
+        if (gapSide == "top") { HWall(g, "TopL", -hx, -gap, hy, tube); HWall(g, "TopR", gap, hx, hy, tube); }
+        else HWall(g, "Top", -hx, hx, hy, tube);
+        if (gapSide == "bottom") { HWall(g, "BottomL", -hx, -gap, -hy, tube); HWall(g, "BottomR", gap, hx, -hy, tube); }
+        else HWall(g, "Bottom", -hx, hx, -hy, tube);
+        VWall(g, "Left", -hx, -hy, hy, tube);
+        VWall(g, "Right", hx, -hy, hy, tube);
     }
 
-    static void HWall(Transform parent, string name, float x1, float x2, float y)
+    static void HWall(Transform parent, string name, float x1, float x2, float y, string tube)
     {
-        Wall(parent, name, new Vector2((x1 + x2) / 2f, y), new Vector2(x2 - x1 + WallT, WallT));
+        Wall(parent, name, new Vector2((x1 + x2) / 2f, y), new Vector2(x2 - x1 + WallT, WallT), tube);
     }
 
-    static void VWall(Transform parent, string name, float x, float y1, float y2)
+    static void VWall(Transform parent, string name, float x, float y1, float y2, string tube)
     {
-        Wall(parent, name, new Vector2(x, (y1 + y2) / 2f), new Vector2(WallT, y2 - y1 + WallT));
+        Wall(parent, name, new Vector2(x, (y1 + y2) / 2f), new Vector2(WallT, y2 - y1 + WallT), tube);
     }
 
-    /// <summary>Parete al neon: sprite 9-slice allungato, collider grande quanto il nucleo.</summary>
-    static void Wall(Transform parent, string name, Vector2 pos, Vector2 core)
+    /// <summary>Tubo al neon: sprite 9-slice allungato (estremità tonde), collider a capsula grande quanto il tubo.</summary>
+    static void Wall(Transform parent, string name, Vector2 pos, Vector2 core, string tube)
     {
         var go = new GameObject(name);
         go.transform.SetParent(parent, false);
         go.transform.localPosition = pos;
         SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = sprites["maze_wall"];
+        sr.sprite = sprites[tube];
         sr.drawMode = SpriteDrawMode.Sliced;
         sr.size = core + Vector2.one * (2f * WallMargin);
         sr.sortingOrder = 5;
-        go.AddComponent<BoxCollider2D>().size = core;
+        CapsuleCollider2D col = go.AddComponent<CapsuleCollider2D>();   // tondo anche per la fisica: la biglia scivola sugli spigoli
+        col.size = core;
+        col.direction = core.x >= core.y ? CapsuleDirection2D.Horizontal : CapsuleDirection2D.Vertical;
     }
 
     // ---------- Livello 3: pupazzo di neve ----------
