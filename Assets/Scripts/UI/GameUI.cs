@@ -17,11 +17,13 @@ namespace Gotcha.UI
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
 
-        static readonly Color Accent = new Color(1f, 0.42f, 0.2f);
-        static readonly Color Dark = new Color(0.12f, 0.14f, 0.2f);
-        static readonly Color CardColor = new Color(1f, 1f, 1f, 0.97f);
+        // Palette "doodle": inchiostro scuro, corallo, verde acqua, carta
+        static readonly Color Accent = new Color(1f, 0.36f, 0.42f);
+        static readonly Color Dark = new Color(0.17f, 0.75f, 0.71f);
+        static readonly Color Ink = new Color(0.17f, 0.13f, 0.2f);
+        static readonly Color CardColor = new Color(1f, 0.98f, 0.92f, 1f);
 
-        Font font;
+        Font displayFont, bodyFont;
         RectTransform safeRoot;
         Rect lastSafeArea;
 
@@ -33,7 +35,9 @@ namespace Gotcha.UI
         void Awake()
         {
             if (flow == null) flow = GameFlow.Instance;
-            font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            Font fallback = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            displayFont = Resources.Load<Font>("Fonts/LuckiestGuy-Regular") ?? fallback;
+            bodyFont = Resources.Load<Font>("Fonts/PatrickHand-Regular") ?? fallback;
             Build();
 
             flow.LevelStarted += OnLevelStarted;
@@ -173,14 +177,14 @@ namespace Gotcha.UI
             Place(menu.transform, new Vector2(0, 0), new Vector2(0.27f, 1));
             Button hint = CreateButton(bar, "HINT", Accent, OpenHint);
             Place(hint.transform, new Vector2(0.73f, 0), new Vector2(1, 1));
-            titleText = CreateText(bar, "", 54, Dark, FontStyle.Bold);
+            titleText = CreateText(bar, "", 54, Ink, FontStyle.Bold);
             Place(titleText.transform, new Vector2(0.28f, 0), new Vector2(0.72f, 1));
 
             // Hint
             RectTransform hintCard;
             hintPanel = CreateOverlay("HintPanel", out hintCard);
             AddHeader(hintCard, "HINT");
-            hintBody = CreateText(hintCard, "", 46, Dark, FontStyle.Normal);
+            hintBody = CreateText(hintCard, "", 52, Ink, FontStyle.Normal);
             Place(hintBody.transform, new Vector2(0.08f, 0.3f), new Vector2(0.92f, 0.78f));
             Place(CreateButton(hintCard, "OK", Accent, () => CloseOverlay(hintPanel)).transform, new Vector2(0.25f, 0.06f), new Vector2(0.75f, 0.24f));
 
@@ -188,7 +192,7 @@ namespace Gotcha.UI
             RectTransform menuCard;
             menuPanel = CreateOverlay("MenuPanel", out menuCard, 1300);
             AddHeader(menuCard, "MENU");
-            menuEggs = CreateText(menuCard, "", 40, Dark, FontStyle.Normal);
+            menuEggs = CreateText(menuCard, "", 46, Ink, FontStyle.Normal);
             Place(menuEggs.transform, new Vector2(0.08f, 0.76f), new Vector2(0.92f, 0.84f));
             levelList = CreateRect("Levels", menuCard, new Vector2(0.1f, 0.2f), new Vector2(0.9f, 0.74f));
             VerticalLayoutGroup layout = levelList.gameObject.AddComponent<VerticalLayoutGroup>();
@@ -204,7 +208,7 @@ namespace Gotcha.UI
             resultTitle = AddHeader(resultCard, "");
             resultTitle.fontSize = 90;
             resultTitle.color = Accent;
-            resultBody = CreateText(resultCard, "", 46, Dark, FontStyle.Normal);
+            resultBody = CreateText(resultCard, "", 52, Ink, FontStyle.Normal);
             Place(resultBody.transform, new Vector2(0.08f, 0.3f), new Vector2(0.92f, 0.7f));
             Button next = CreateButton(resultCard, "", Accent, () =>
             {
@@ -218,7 +222,7 @@ namespace Gotcha.UI
             RectTransform doneCard;
             completedPanel = CreateOverlay("CompletedPanel", out doneCard);
             AddHeader(doneCard, "YOU DID IT!");
-            Text doneBody = CreateText(doneCard, "All levels solved.\nMore coming soon!", 46, Dark, FontStyle.Normal);
+            Text doneBody = CreateText(doneCard, "All levels solved.\nMore coming soon!", 52, Ink, FontStyle.Normal);
             Place(doneBody.transform, new Vector2(0.08f, 0.3f), new Vector2(0.92f, 0.7f));
             Place(CreateButton(doneCard, "PLAY AGAIN", Accent, () =>
             {
@@ -241,7 +245,7 @@ namespace Gotcha.UI
         {
             RectTransform veil = CreateRect(name, safeRoot.parent, Vector2.zero, Vector2.one);
             Image dim = veil.gameObject.AddComponent<Image>();
-            dim.color = new Color(0, 0, 0, 0.6f);
+            dim.color = new Color(Ink.r, Ink.g, Ink.b, 0.55f);
 
             card = CreateRect("Card", veil, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
             card.sizeDelta = new Vector2(900, cardHeight);
@@ -255,7 +259,7 @@ namespace Gotcha.UI
 
         Text AddHeader(RectTransform card, string label)
         {
-            Text t = CreateText(card, label, 70, Dark, FontStyle.Bold);
+            Text t = CreateText(card, label, 70, Ink, FontStyle.Bold);
             RectTransform rt = (RectTransform)t.transform;
             rt.anchorMin = new Vector2(0, 1);
             rt.anchorMax = new Vector2(1, 1);
@@ -270,6 +274,11 @@ namespace Gotcha.UI
             Image img = rt.gameObject.AddComponent<Image>();
             SetSprite(img);
             img.color = color;
+            // ombra da cartone e leggera inclinazione "fatta a mano"
+            Shadow shadow = rt.gameObject.AddComponent<Shadow>();
+            shadow.effectColor = Ink;
+            shadow.effectDistance = new Vector2(6, -7);
+            rt.localRotation = Quaternion.Euler(0, 0, ((label.GetHashCode() & 7) - 3.5f) * 0.7f);
             Button b = rt.gameObject.AddComponent<Button>();
             b.targetGraphic = img;
             b.onClick.AddListener(() => onClick());
@@ -284,10 +293,10 @@ namespace Gotcha.UI
         {
             RectTransform rt = CreateRect("Text", parent, Vector2.zero, Vector2.one);
             Text t = rt.gameObject.AddComponent<Text>();
-            t.font = font;
+            t.font = style == FontStyle.Bold ? displayFont : bodyFont;
             t.text = value;
             t.fontSize = size;
-            t.fontStyle = style;
+            t.fontStyle = FontStyle.Normal;   // i font hanno già il loro peso
             t.color = color;
             t.alignment = TextAnchor.MiddleCenter;
             t.horizontalOverflow = HorizontalWrapMode.Wrap;

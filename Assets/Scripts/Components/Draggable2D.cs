@@ -10,6 +10,10 @@ namespace Gotcha.Components
     {
         public string itemId;
         public bool returnOnMiss = true;
+        [Tooltip("Impedisce di trascinare l'oggetto fuori dallo schermo (margine in unità mondo; in alto c'è la barra).")]
+        public bool clampToCamera = true;
+        public float screenMargin = 0.25f;
+        public float topMargin = 1.1f;
 
         public static Draggable2D Active { get; private set; }
 
@@ -50,7 +54,18 @@ namespace Gotcha.Components
 
             if (!dragging) return;
             if (ended) { Drop(); return; }
-            transform.position = new Vector3(world.x + offset.x, world.y + offset.y, transform.position.z);
+            Vector2 target = ClampToCamera(world + offset);
+            transform.position = new Vector3(target.x, target.y, transform.position.z);
+        }
+
+        Vector2 ClampToCamera(Vector2 p)
+        {
+            if (!clampToCamera || cam == null || !cam.orthographic) return p;
+            float h = cam.orthographicSize, w = h * cam.aspect;
+            Vector3 c = cam.transform.position;
+            return new Vector2(
+                Mathf.Clamp(p.x, c.x - w + screenMargin, c.x + w - screenMargin),
+                Mathf.Clamp(p.y, c.y - h + screenMargin, c.y + h - topMargin));
         }
 
         bool IsTopAt(Vector2 world)

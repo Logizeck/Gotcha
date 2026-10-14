@@ -5,87 +5,191 @@ using Gotcha.Components;
 namespace Gotcha.Levels
 {
     /// <summary>
-    /// Livello 1 — pupazzo di neve. Si vince mettendo occhi, naso e bocca sulla testa (tutti i DropSlot pieni).
-    /// Easter egg: portare la carota al coniglio, che se la mangia (fallimento divertente).
-    /// Slot e trigger vengono cercati tra i figli, così il prefab si può ridisegnare senza toccare il codice.
+    /// Livello 3 — pupazzo di neve. Occhi (2 carboni) e naso (carota) vanno trascinati in un punto qualsiasi
+    /// della faccia; la bocca va tracciata col dito sulla faccia. Nessuna posizione è indicata.
+    /// Easter egg: avvicinare la carota al sedere del pupazzo → arrossisce, fuma, dice "Oh noooo!" e si scioglie.
     /// </summary>
     public class SnowmanLevel : LevelController
     {
-        [SerializeField] Transform snowman;
-        [SerializeField] Transform bunny;
-        [SerializeField] float animSeconds = 0.45f;
+        [SerializeField] Transform snowman;          // pivot ai piedi: si scioglie verso il basso
+        [SerializeField] SpriteRenderer body;
+        [SerializeField] SpriteRenderer blush;
+        [SerializeField] Transform puddle;
+        [SerializeField] SpeechBubble bubble;
+        [SerializeField] SmokeEmitter smoke;
+        [SerializeField] StrokeDrawer mouthPen;
 
-        DropSlot[] slots;
+        [Header("Faccia (coordinate locali del pupazzo)")]
+        [SerializeField] Vector2 faceCenter = new Vector2(0f, 4.0f);
+        [SerializeField] float faceRadius = 0.52f;
+
+        [Header("Easter egg")]
+        [SerializeField] string eggId = "snowman_butt";
+        [SerializeField] Vector2 buttPoint = new Vector2(0f, 0.35f);
+        [SerializeField] float meltSeconds = 3.5f;
+
+        [Header("Oggetti lasciati fuori dalla faccia cadono nella neve")]
+        [SerializeField] float groundY = -3.9f;
+
+        static readonly Color BlushTint = new Color(1f, 0.8f, 0.85f);
+
+        Draggable2D[] items;
         EasterEggTrigger egg;
         bool resolving;
 
         public override void OnLevelStart()
         {
-            slots = GetComponentsInChildren<DropSlot>(true);
-            foreach (DropSlot s in slots) s.Filled += OnSlotFilled;
+            items = GetComponentsInChildren<Draggable2D>(true);
+            foreach (Draggable2D d in items) d.Dropped += OnItemDropped;
 
             egg = GetComponentInChildren<EasterEggTrigger>(true);
             if (egg != null) egg.Triggered += OnEggTriggered;
+            if (mouthPen != null) mouthPen.StrokeFinished += OnMouthDrawn;
+
+            if (blush != null) blush.color = new Color(1f, 1f, 1f, 0f);
+            if (puddle != null) puddle.localScale = Vector3.zero;
+            if (bubble != null) bubble.Hide();
         }
 
         void OnDestroy()
         {
-            if (slots != null) foreach (DropSlot s in slots) s.Filled -= OnSlotFilled;
+            if (items != null) foreach (Draggable2D d in items) if (d != null) d.Dropped -= OnItemDropped;
             if (egg != null) egg.Triggered -= OnEggTriggered;
+            if (mouthPen != null) mouthPen.StrokeFinished -= OnMouthDrawn;
         }
 
-        void OnSlotFilled(DropSlot slot, Draggable2D item)
+        // ---------- Faccia ----------
+
+        bool OnFace(Vector3 world)
         {
-            item.transform.SetParent(slot.transform, true);   // il pezzo ora segue il pupazzo
-            if (IsFinished || resolving) return;
-            foreach (DropSlot s in slots) if (s.Occupant == null) return;
-            resolving = true;
-            StartCoroutine(WinRoutine());
+            Vector2 local = snowman.InverseTransformPoint(world);
+            return Vector2.Distance(local, faceCenter) <= faceRadius;
         }
 
-        void OnEggTriggered(string eggId)
+        void OnItemDropped(Draggable2D item, DropSlot slot)
         {
             if (IsFinished || resolving) return;
-            resolving = true;
-            StartCoroutine(EggRoutine(Draggable2D.Active, eggId));
+            if (OnFace(item.transform.position))
+            {
+                item.transform.SetParent(snowman, true);   // ora fa parte del pupazzo
+                CheckComplete();
+            }
+            else
+            {
+                item.transform.SetParent(transform, true);
+                StartCoroutine(FallToGround(item.transform));
+            }
+        }
+
+        void OnMouthDrawn(StrokeDrawer pen) { CheckComplete(); }
+
+        void CheckComplete()
+        {
+            if (IsFinished || resolving) return;
+            int eyes = 0;
+            bool nose = false;
+            foreach (Draggable2D d in items)
+            {
+                if (d == null || d.transform.parent != snowman) continue;
+                if (d.itemId == "eye") eyes++;
+                if (d.itemId == "carrot") nose = true;
+            }
+            if (eyes >= 2 && nose && mouthPen != null && mouthPen.HasStroke)
+            {
+                resolving = true;
+                StartCoroutine(WinRoutine());
+            }
+        }
+
+        IEnumerator FallToGround(Transform t)
+        {
+            float target = groundY + Random.Range(-0.35f, 0.25f);
+            if (t.position.y <= target + 0.3f) yield break;
+            float v = 0f;
+            while (t != null && t.position.y > target)
+            {
+                if (t.parent == snowman || Draggable2D.Active != null && Draggable2D.Active.transform == t) yield break;
+                v += 18f * Time.deltaTime;
+                t.position += Vector3.down * (v * Time.deltaTime);
+                yield return null;
+            }
+            if (t != null) t.position = new Vector3(t.position.x, target, t.position.z);
         }
 
         IEnumerator WinRoutine()
         {
-            if (snowman != null) yield return Hop(snowman, 0.35f);
+            foreach (Draggable2D d in items) if (d != null) d.enabled = false;
+            if (bubble != null) bubble.Show("Yay!");
+            Vector3 start = snowman.localPosition;
+            for (int hop = 0; hop < 2; hop++)
+                for (float k = 0f; k < 1f; k += Time.deltaTime / 0.35f)
+                {
+                    snowman.localPosition = start + Vector3.up * (Mathf.Sin(k * Mathf.PI) * 0.3f);
+                    yield return null;
+                }
+            snowman.localPosition = start;
+            yield return new WaitForSeconds(0.3f);
             Win();
         }
 
-        IEnumerator EggRoutine(Draggable2D carrot, string eggId)
+        // ---------- Easter egg: carota sul sedere ----------
+
+        void OnEggTriggered(string id)
         {
+            if (IsFinished || resolving) return;
+            resolving = true;
+            StartCoroutine(MeltRoutine(Draggable2D.Active));
+        }
+
+        IEnumerator MeltRoutine(Draggable2D carrot)
+        {
+            foreach (Draggable2D d in items) if (d != null) d.enabled = false;
+            if (mouthPen != null) mouthPen.enabled = false;
+
+            // la carota "punge" e poi cade nella neve
             if (carrot != null)
             {
-                carrot.enabled = false;   // lascia il dito: la carota ora è del coniglio
                 Transform t = carrot.transform;
-                Vector3 from = t.position;
-                Vector3 to = bunny != null ? new Vector3(bunny.position.x, bunny.position.y, from.z) : from;
-                Vector3 scale = t.localScale;
-                for (float k = 0f; k < 1f; k += Time.deltaTime / animSeconds)
-                {
-                    t.position = Vector3.Lerp(from, to, k);
-                    t.localScale = scale * (1f - k);
-                    yield return null;
-                }
-                carrot.gameObject.SetActive(false);
+                t.SetParent(transform, true);
+                Vector3 from = t.position, poke = snowman.TransformPoint(buttPoint);
+                poke.z = from.z;
+                for (float k = 0f; k < 1f; k += Time.deltaTime / 0.12f) { t.position = Vector3.Lerp(from, poke, k); yield return null; }
+                StartCoroutine(FallToGround(t));
             }
-            if (bunny != null) yield return Hop(bunny, 0.25f);
+
+            // arrossisce
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.6f)
+            {
+                SetBlush(k);
+                yield return null;
+            }
+            SetBlush(1f);
+
+            if (bubble != null) bubble.Show("Oh noooo!");
+            if (smoke != null) smoke.Play();
+            yield return new WaitForSeconds(0.6f);
+
+            // si scioglie lentamente
+            Vector3 baseScale = snowman.localScale;
+            for (float k = 0f; k < 1f; k += Time.deltaTime / meltSeconds)
+            {
+                float e = k * k * (3f - 2f * k);
+                snowman.localScale = new Vector3(baseScale.x * (1f + 0.45f * e), baseScale.y * (1f - 0.9f * e), baseScale.z);
+                if (puddle != null) puddle.localScale = Vector3.one * Mathf.Min(1f, e * 1.3f);
+                if (body != null) body.color = Color.Lerp(BlushTint, new Color(0.88f, 0.95f, 1f), e);
+                if (blush != null) blush.color = new Color(1f, 1f, 1f, 1f - e);
+                yield return null;
+            }
+
+            if (smoke != null) smoke.Stop();
+            yield return new WaitForSeconds(1.0f);
             FailWithEgg(eggId);
         }
 
-        IEnumerator Hop(Transform t, float height)
+        void SetBlush(float k)
         {
-            Vector3 start = t.localPosition;
-            for (float k = 0f; k < 1f; k += Time.deltaTime / animSeconds)
-            {
-                t.localPosition = start + Vector3.up * (Mathf.Sin(k * Mathf.PI) * height);
-                yield return null;
-            }
-            t.localPosition = start;
+            if (blush != null) blush.color = new Color(1f, 1f, 1f, k);
+            if (body != null) body.color = Color.Lerp(Color.white, BlushTint, k);
         }
     }
 }
