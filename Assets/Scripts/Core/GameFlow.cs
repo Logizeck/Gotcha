@@ -21,7 +21,12 @@ namespace Gotcha.Core
         public event Action<LevelDefinition, LevelResult, string> LevelFinished;
         public event Action GameCompleted;
 
-        public bool Paused { get; set; }
+        /// <summary>Pausa (menu, hint): ferma il tempo di gioco, quindi timer e animazioni dei livelli.</summary>
+        public bool Paused
+        {
+            get => paused;
+            set { paused = value; Time.timeScale = value ? 0f : 1f; }
+        }
         public int CurrentIndex { get; private set; } = -1;
         public int LevelCount => catalog != null ? catalog.levels.Count : 0;
         public AdBreakManager Ads { get; private set; }
@@ -29,11 +34,23 @@ namespace Gotcha.Core
 
         LevelController current;
         LevelResult lastResult;
+        bool paused;
+
+        public LevelDefinition GetDefinition(int index)
+        {
+            return index >= 0 && index < LevelCount ? catalog.levels[index] : null;
+        }
 
         void Awake()
         {
             Instance = this;
             Ads = new AdBreakManager(new LogAdProvider());
+        }
+
+        void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+            Time.timeScale = 1f;
         }
 
         void Start()
@@ -50,6 +67,7 @@ namespace Gotcha.Core
         public void StartLevel(int index)
         {
             if (index < 0 || index >= LevelCount) return;
+            Paused = false;
 
             if (current != null)
             {
