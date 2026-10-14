@@ -214,28 +214,33 @@ namespace Gotcha.EditorArt
         }
 
         /// <summary>
-        /// Biglia d'acciaio da flipper (raggio 0.5): cielo chiaro in alto, orizzonte scuro, pavimento riflesso in basso,
-        /// due luci speculari nette. Il riflesso delle pareti lo aggiunge lo shader.
+        /// Biglia d'acciaio (raggio 0.5): solo un disco neutro con bordo sottile. Tutto l'aspetto metallico
+        /// (riflessi dell'ambiente, luci, fresnel) lo calcola lo shader Gotcha/ChromeBall in tempo reale.
+        /// Se lo shader mancasse, resta comunque una sfera grigia sfumata.
         /// </summary>
         public static DoodleArt ChromeBall()
         {
-            var p = new DoodlePainter(-0.54f, -0.54f, 0.54f, 0.54f, 220) { Ink = 0.035f, Wobble = 0.002f };
+            var p = new DoodlePainter(-0.54f, -0.54f, 0.54f, 0.54f, 220) { Ink = 0.02f, Wobble = 0f };
             Sdf ball = Sd.Circle(0, 0, 0.5f);
             p.FillFunc(ball, (x, y) =>
             {
-                float horizon = -0.04f + 0.25f * x * x;   // orizzonte curvo come su una sfera
-                Rgba c;
-                if (y > horizon + 0.05f) c = Rgba.Lerp(Rgba.Hex("BFC8D2"), Rgba.Hex("FFFFFF"), Clamp((y - horizon) / 0.42f));
-                else if (y > horizon - 0.03f) c = Rgba.Hex("232A33");
-                else c = Rgba.Lerp(Rgba.Hex("3B434D"), Rgba.Hex("C3CCD6"), Clamp((horizon - y) / 0.45f));
                 float r = (float)Math.Sqrt(x * x + y * y) / 0.5f;
-                return Rgba.Lerp(c, Rgba.Hex("1C2128"), Clamp((r - 0.82f) * 4f) * 0.7f);
+                return Rgba.Lerp(Rgba.Hex("D9DEE4"), Rgba.Hex("6E7782"), Clamp(r * r + (0.1f - y) * 0.4f));
             });
-            p.Fill(Sd.Rotate(Sd.Ellipse(-0.18f, 0.24f, 0.16f, 0.075f), -0.18f, 0.24f, 35f), Rgba.White);
-            p.Fill(Sd.Circle(-0.3f, 0.08f, 0.035f), Rgba.White.WithAlpha(0.9f));
-            p.Fill(Sd.Rotate(Sd.Ellipse(0.22f, -0.3f, 0.1f, 0.03f), 0.22f, -0.3f, 40f), Rgba.White.WithAlpha(0.65f));
             p.Shape(ball, Rgba.Clear);
             return new DoodleArt("chrome_ball", p);
+        }
+
+        /// <summary>Ombra morbida sotto la biglia.</summary>
+        public static DoodleArt BallShadow()
+        {
+            var p = new DoodlePainter(-0.7f, -0.7f, 0.7f, 0.7f, 100) { Wobble = 0f };
+            p.FillFunc(Sd.Circle(0, 0, 0.7f), (x, y) =>
+            {
+                float d = (float)Math.Sqrt(x * x + y * y) / 0.7f;
+                return new Rgba(0, 0, 0, 0.75f * Clamp(1f - d) * Clamp(1f - d) * 1.6f);
+            });
+            return new DoodleArt("ball_shadow", p);
         }
 
         static float Clamp(float v) { return v < 0f ? 0f : v > 1f ? 1f : v; }
@@ -301,106 +306,116 @@ namespace Gotcha.EditorArt
             return new DoodleArt("snow_bg", p);
         }
 
-        // Il pupazzo è diviso in parti per potersi sciogliere dalla testa in giù. Coordinate: piedi in (0,0).
-        // Punti di appoggio (pivot delle parti): base 0, pancia 1.95, testa 3.42, cappello 4.55.
+        // Il pupazzo è in posa di 3/4 (guarda verso sinistra, la schiena è a destra) e diviso in parti per potersi
+        // sciogliere dalla testa in giù. Coordinate: piedi in (0,0). Pivot: base 0, pancia 1.95, testa 3.42, cappello 4.55.
         public const float SnowMiddlePivot = 1.95f, SnowHeadPivot = 3.42f, SnowHatPivot = 4.55f;
-        public const float SnowHeadCenterY = 4.02f, SnowHeadRadius = 0.62f;
+        public const float SnowHeadCenterX = -0.12f, SnowHeadCenterY = 4.02f, SnowHeadRadius = 0.62f;
+        public const float SnowButtX = 1.58f, SnowButtY = 0.78f;   // punta della fessura del sedere
 
-        /// <summary>Palla di neve irregolare con ombra a due toni, tratteggio, puntini e scintille.</summary>
-        static void SnowBall(DoodlePainter p, float cx, float cy, float r, int sparkleSeed)
+        /// <summary>Forma di neve irregolare con ombra a due toni, tratteggio, puntini e scintilla.</summary>
+        static void SnowBody(DoodlePainter p, Sdf shape, float cx, float cy, float r, int seed, float lightX = -1f)
         {
             float wobble = p.Wobble, freq = p.WobbleFreq;
             p.Wobble = 0.022f; p.WobbleFreq = 2.4f;   // contorno da neve, un po' bitorzoluto
-            Sdf ball = Sd.Circle(cx, cy, r);
-            p.Fill(ball, Snow);
-            p.Fill(Sd.Crescent(ball, -r * 0.1f, r * 0.12f), Rgba.Hex("E4EFFA"));
-            Sdf deep = Sd.Crescent(ball, -r * 0.22f, r * 0.26f);
+            p.Fill(shape, Snow);
+            p.Fill(Sd.Crescent(shape, r * 0.1f * lightX, r * 0.12f), Rgba.Hex("E4EFFA"));
+            Sdf deep = Sd.Crescent(shape, r * 0.24f * lightX, r * 0.26f);
             p.Fill(deep, SnowShade);
             p.Hatch(deep, SnowHatch, 0.07f, 0.016f, 55f);
-            var rnd = new Random(sparkleSeed);
+            var rnd = new Random(seed);
             for (int i = 0; i < (int)(r * 9); i++)
             {
                 double a = rnd.NextDouble() * Math.PI * 2, d = Math.Sqrt(rnd.NextDouble()) * r * 0.8;
                 float x = cx + (float)(Math.Cos(a) * d), y = cy + (float)(Math.Sin(a) * d);
-                p.Fill(Sd.Circle(x, y, 0.018f + (float)rnd.NextDouble() * 0.015f), Rgba.Hex("BFD6EE"), false);
+                p.Fill(Sd.Intersect(Sd.Circle(x, y, 0.018f + (float)rnd.NextDouble() * 0.015f), shape), Rgba.Hex("BFD6EE"), false);
             }
             p.Fill(Sd.Capsule(cx - r * 0.55f, cy + r * 0.45f, cx - r * 0.3f, cy + r * 0.62f, r * 0.05f), Rgba.White);
-            p.Shape(ball, Rgba.Clear);
-            // scintilla a quattro punte
-            float sx = cx + r * 0.42f, sy = cy + r * 0.45f, k = r * 0.12f;
+            p.Shape(shape, Rgba.Clear);
+            float sx = cx - r * 0.35f, sy = cy + r * 0.2f, k = r * 0.1f;
             p.Line(Rgba.Hex("8EC5F5"), 0.018f, sx - k, sy, sx + k, sy);
             p.Line(Rgba.Hex("8EC5F5"), 0.018f, sx, sy - k, sx, sy + k);
             p.Wobble = wobble; p.WobbleFreq = freq;
         }
 
-        /// <summary>Base: cumulo di neve e palla grande (resta a terra quando si scioglie).</summary>
+        /// <summary>Base: cumulo di neve e palla grande, col sedere che sporge sul retro (destra).</summary>
         public static DoodleArt SnowBase()
         {
-            var p = new DoodlePainter(-1.8f, -0.25f, 1.8f, 2.42f, 100) { Ink = 0.06f };
-            Sdf mound = Sd.Union(Sd.Ellipse(0, 0.1f, 1.6f, 0.26f), Sd.Circle(-1.3f, 0.18f, 0.24f), Sd.Circle(1.36f, 0.15f, 0.2f));
+            var p = new DoodlePainter(-1.8f, -0.25f, 1.95f, 2.42f, 100) { Ink = 0.06f };
+            Sdf mound = Sd.Union(Sd.Ellipse(0.05f, 0.1f, 1.65f, 0.26f), Sd.Circle(-1.3f, 0.18f, 0.24f), Sd.Circle(1.42f, 0.15f, 0.2f));
             Body(p, mound, Snow, SnowShade, SnowHatch, -0.05f, 0.08f);
-            SnowBall(p, 0, 1.15f, 1.15f, 11);
+            // il sedere: due rotondità che sporgono sul retro (destra), con la fessura ben visibile
+            Sdf upper = Sd.Circle(1.02f, 0.98f, 0.5f), lower = Sd.Circle(1.12f, 0.5f, 0.45f);
+            Sdf bottom = Sd.Union(Sd.Circle(0, 1.15f, 1.15f), upper, lower);
+            SnowBody(p, bottom, 0, 1.15f, 1.15f, 11);
+            p.Fill(Sd.Intersect(lower, Sd.Crescent(lower, -0.08f, 0.1f)), SnowShade);
+            p.Shape(Sd.Intersect(upper, Sd.Circle(1.12f, 0.5f, 0.47f)), Rgba.Clear, 0.01f);
+            p.InkLine(0.04f, 1.58f, 0.78f, 1.4f, 0.74f, 1.18f, 0.76f, 0.98f, 0.84f);
+            p.Line(SnowShade, 0.06f, 1.55f, 0.7f, 1.35f, 0.66f, 1.15f, 0.69f);
+            p.Shape(bottom, Rgba.Clear);
+            // cucitura della palla davanti (si capisce che è girato di 3/4)
+            p.Line(Rgba.Hex("D6E6F6"), 0.03f, -0.55f, 2.05f, -0.75f, 1.2f, -0.6f, 0.35f);
             return new DoodleArt("sm_base", p);
         }
 
-        /// <summary>Braccia di rametti con le muffole (spalle a y = 2.85).</summary>
+        /// <summary>Braccia di rametti con le muffole: il braccio vicino davanti a sinistra, quello lontano più corto.</summary>
         public static DoodleArt SnowArms()
         {
-            var p = new DoodlePainter(-2.25f, 2.65f, 2.25f, 3.85f, 100) { Ink = 0.05f };
-            foreach (int side in new[] { -1, 1 })
+            var p = new DoodlePainter(-2.25f, 2.6f, 2.0f, 3.9f, 100) { Ink = 0.05f };
+            for (int side = -1; side <= 1; side += 2)
             {
-                float s = side;
+                float s = side, len = side < 0 ? 1f : 0.82f, x0 = side < 0 ? -0.75f : 0.55f;
                 Sdf arm = Sd.Union(
-                    Sd.Polyline(0.045f, s * 0.55f, 2.8f, s * 1.3f, 3.2f, s * 1.78f, 3.42f),
-                    Sd.Polyline(0.032f, s * 1.3f, 3.2f, s * 1.42f, 3.55f),
-                    Sd.Polyline(0.028f, s * 1.05f, 3.05f, s * 1.0f, 2.85f));
+                    Sd.Polyline(0.045f, x0, 2.8f, x0 + s * 0.65f * len, 3.2f, x0 + s * 1.15f * len, 3.42f),
+                    Sd.Polyline(0.032f, x0 + s * 0.65f * len, 3.2f, x0 + s * 0.75f * len, 3.55f),
+                    Sd.Polyline(0.028f, x0 + s * 0.35f * len, 3.02f, x0 + s * 0.3f * len, 2.84f));
                 p.Shape(arm, Twig, 0.035f);
-                // muffola rossa lavorata a maglia
-                Sdf mitten = Sd.Union(Sd.Rotate(Sd.Ellipse(s * 1.95f, 3.5f, 0.17f, 0.21f), s * 1.95f, 3.5f, -s * 25f),
-                                      Sd.Rotate(Sd.Ellipse(s * 1.78f, 3.62f, 0.06f, 0.1f), s * 1.78f, 3.62f, s * 35f));
+                float mx = x0 + s * 1.32f * len, my = 3.5f;
+                Sdf mitten = Sd.Union(Sd.Rotate(Sd.Ellipse(mx, my, 0.17f * len, 0.21f * len), mx, my, -s * 25f),
+                                      Sd.Rotate(Sd.Ellipse(mx - s * 0.17f * len, my + 0.12f * len, 0.06f, 0.1f), mx, my, s * 35f));
                 Body(p, mitten, Scarf, Rgba.Hex("B92D2A"), null, -s * 0.03f, 0.04f);
-                p.Shape(Sd.Rotate(Sd.Box(s * 1.85f, 3.33f, 0.16f, 0.06f, 0.04f), s * 1.85f, 3.33f, -s * 25f), ScarfStripe, 0.03f);
+                p.Shape(Sd.Rotate(Sd.Box(mx - s * 0.1f * len, my - 0.17f * len, 0.16f * len, 0.06f, 0.04f), mx, my, -s * 25f), ScarfStripe, 0.03f);
             }
             return new DoodleArt("sm_arms", p);
         }
 
-        /// <summary>Pancia con bottoni.</summary>
+        /// <summary>Pancia con i bottoni spostati verso sinistra (il davanti), in 3/4.</summary>
         public static DoodleArt SnowMiddle()
         {
-            var p = new DoodlePainter(-1.0f, 1.7f, 1.0f, 3.7f, 100) { Ink = 0.05f };
-            SnowBall(p, 0, 2.72f, 0.86f, 23);
-            foreach (float y in new[] { 3.02f, 2.72f, 2.42f })
+            var p = new DoodlePainter(-1.05f, 1.7f, 1.0f, 3.7f, 100) { Ink = 0.05f };
+            Sdf ball = Sd.Circle(-0.06f, 2.72f, 0.86f);
+            SnowBody(p, ball, -0.06f, 2.72f, 0.86f, 23);
+            foreach (var b in new[] { new[] { -0.36f, 3.02f }, new[] { -0.4f, 2.72f }, new[] { -0.37f, 2.42f } })
             {
-                Sdf b = Sd.Circle(0.02f, y, 0.075f);
-                p.Shape(b, CoalColor, 0.03f);
-                p.Fill(Sd.Circle(0f, y + 0.025f, 0.02f), Rgba.White.WithAlpha(0.6f));
+                Sdf btn = Sd.Ellipse(b[0], b[1], 0.065f, 0.075f);
+                p.Shape(btn, CoalColor, 0.03f);
+                p.Fill(Sd.Circle(b[0] - 0.02f, b[1] + 0.025f, 0.02f), Rgba.White.WithAlpha(0.6f));
             }
             return new DoodleArt("sm_middle", p);
         }
 
-        /// <summary>Testa (senza faccia: occhi, naso e bocca li mette il giocatore) e sciarpa a maglia.</summary>
+        /// <summary>Testa (senza faccia) e sciarpa a maglia con la coda sul retro.</summary>
         public static DoodleArt SnowHead()
         {
             var p = new DoodlePainter(-1.0f, 2.55f, 1.0f, 4.72f, 100) { Ink = 0.055f };
-            SnowBall(p, 0, SnowHeadCenterY, SnowHeadRadius, 37);
+            Sdf head = Sd.Circle(SnowHeadCenterX, SnowHeadCenterY, SnowHeadRadius);
+            SnowBody(p, head, SnowHeadCenterX, SnowHeadCenterY, SnowHeadRadius, 37);
 
-            Sdf tail = Sd.Rotate(Sd.Box(0.42f, 3.05f, 0.14f, 0.4f, 0.07f), 0.42f, 3.05f, 12f);
+            Sdf tail = Sd.Rotate(Sd.Box(0.48f, 3.05f, 0.14f, 0.4f, 0.07f), 0.48f, 3.05f, 10f);
             Body(p, tail, Scarf, Rgba.Hex("B92D2A"));
-            p.Hatch(Sd.Grow(tail, -0.03f), ScarfStripe, 0.22f, 0.08f, 102f);
+            p.Hatch(Sd.Grow(tail, -0.03f), ScarfStripe, 0.22f, 0.08f, 100f);
             p.Shape(tail, Rgba.Clear);
             for (int i = 0; i < 4; i++)
             {
-                float x = 0.31f + i * 0.075f;
+                float x = 0.37f + i * 0.075f;
                 p.Line(Rgba.Hex("B92D2A"), 0.03f, x + 0.08f, 2.68f, x + 0.07f, 2.56f);
             }
 
-            Sdf wrap = Sd.Rotate(Sd.Box(0, 3.47f, 0.68f, 0.15f, 0.13f), 0, 3.47f, -4f);
+            Sdf wrap = Sd.Rotate(Sd.Box(-0.08f, 3.47f, 0.68f, 0.15f, 0.13f), -0.08f, 3.47f, -5f);
             Body(p, wrap, Scarf, Rgba.Hex("B92D2A"));
             p.Hatch(Sd.Grow(wrap, -0.03f), ScarfStripe, 0.24f, 0.09f, 82f);
-            // segni della maglia
             for (int i = -4; i <= 4; i++)
             {
-                float x = i * 0.14f, y = 3.47f - x * 0.07f;
+                float x = -0.08f + i * 0.14f, y = 3.47f - (x + 0.08f) * 0.09f;
                 p.Line(Rgba.Hex("8E1F1C", 0.6f), 0.014f, x - 0.03f, y + 0.04f, x, y, x + 0.03f, y + 0.04f);
             }
             p.Shape(wrap, Rgba.Clear);
@@ -410,23 +425,22 @@ namespace Gotcha.EditorArt
         /// <summary>Cilindro inclinato con toppa e rametto di agrifoglio.</summary>
         public static DoodleArt SnowHat()
         {
-            var p = new DoodlePainter(-0.85f, 4.4f, 0.85f, 5.5f, 100) { Ink = 0.05f };
-            const float tilt = 9f;
-            Sdf brim = Sd.Rotate(Sd.Box(0.03f, 4.6f, 0.62f, 0.075f, 0.05f), 0, 4.6f, tilt);
-            Sdf crown = Sd.Rotate(Sd.Box(0.03f, 4.98f, 0.4f, 0.37f, 0.06f), 0, 4.6f, tilt);
-            Sdf band = Sd.Intersect(crown, Sd.Rotate(Sd.Box(0.03f, 4.74f, 0.5f, 0.085f), 0, 4.6f, tilt));
+            var p = new DoodlePainter(-0.95f, 4.4f, 0.75f, 5.5f, 100) { Ink = 0.05f };
+            const float tilt = 9f, cx = -0.07f;
+            Sdf brim = Sd.Rotate(Sd.Box(cx, 4.6f, 0.62f, 0.075f, 0.05f), cx, 4.6f, tilt);
+            Sdf crown = Sd.Rotate(Sd.Box(cx, 4.98f, 0.4f, 0.37f, 0.06f), cx, 4.6f, tilt);
+            Sdf band = Sd.Intersect(crown, Sd.Rotate(Sd.Box(cx, 4.74f, 0.5f, 0.085f), cx, 4.6f, tilt));
             Body(p, crown, CoalColor, Rgba.Hex("24212A"));
             p.Fill(band, Scarf);
-            Sdf patch = Sd.Rotate(Sd.Box(-0.12f, 5.08f, 0.1f, 0.09f, 0.01f), 0, 4.6f, tilt + 6f);
+            Sdf patch = Sd.Rotate(Sd.Box(cx - 0.15f, 5.08f, 0.1f, 0.09f, 0.01f), cx, 4.6f, tilt + 6f);
             p.Shape(patch, Rgba.Hex("6B5E7A"), 0.02f);
             p.Shape(crown, Rgba.Clear);
             Body(p, brim, CoalColor, Rgba.Hex("24212A"));
-            p.Fill(Sd.Rotate(Sd.Capsule(-0.24f, 5.2f, -0.24f, 4.92f, 0.025f), 0, 4.6f, tilt), Rgba.White.WithAlpha(0.35f));
-            // agrifoglio sulla fascia
+            p.Fill(Sd.Rotate(Sd.Capsule(cx - 0.27f, 5.2f, cx - 0.27f, 4.92f, 0.025f), cx, 4.6f, tilt), Rgba.White.WithAlpha(0.35f));
             foreach (float a in new[] { -35f, 25f })
-                p.Shape(Sd.Rotate(Sd.Ellipse(0.32f, 4.82f, 0.13f, 0.055f), 0.26f, 4.8f, a), Leaf, 0.025f);
-            foreach (var b in new[] { new[] { 0.24f, 4.78f }, new[] { 0.3f, 4.74f }, new[] { 0.21f, 4.71f } })
-                p.Shape(Sd.Circle(b[0], b[1], 0.04f), Rgba.Hex("E23B3B"), 0.02f);
+                p.Shape(Sd.Rotate(Sd.Ellipse(cx + 0.3f, 4.82f, 0.13f, 0.055f), cx + 0.24f, 4.8f, a), Leaf, 0.025f);
+            foreach (var b in new[] { new[] { 0.21f, 4.78f }, new[] { 0.27f, 4.74f }, new[] { 0.18f, 4.71f } })
+                p.Shape(Sd.Circle(cx + b[0], b[1], 0.04f), Rgba.Hex("E23B3B"), 0.02f);
             return new DoodleArt("sm_hat", p);
         }
 
@@ -545,12 +559,14 @@ namespace Gotcha.EditorArt
                 Sdf curtain = Sd.Polygon(x - 0.22f, 3.55f, x + 0.22f, 3.55f, x + 0.12f * side + 0.1f, 1.0f, x - 0.1f + 0.12f * side, 1.0f);
                 Body(p, curtain, Rgba.Hex("7C63D9"), Rgba.Hex("5D47B3"));
             }
-            // quadretto col gatto stilizzato
-            p.Shape(Sd.Box(-1.9f, 2.6f, 0.45f, 0.38f, 0.04f), Gold);
-            p.Fill(Sd.Box(-1.9f, 2.6f, 0.33f, 0.27f), Rgba.Hex("FDF0D5"));
-            Sdf fish = Sd.Union(Sd.Ellipse(-1.95f, 2.6f, 0.17f, 0.1f), Sd.Polygon(-1.8f, 2.6f, -1.65f, 2.7f, -1.65f, 2.5f));
-            p.Shape(fish, Rgba.Hex("6EC6FF"), 0.025f);
-            p.Fill(Sd.Circle(-2.03f, 2.62f, 0.018f), Ink);
+            // quadro col mare: il pesce (oggetto a parte) si può prendere e dare al gatto
+            p.Shape(Sd.Box(-1.65f, 2.3f, 0.68f, 0.56f, 0.04f), Gold);
+            Sdf picture = Sd.Box(-1.65f, 2.3f, 0.54f, 0.42f);
+            p.FillFunc(picture, (x, y) => Rgba.Lerp(Rgba.Hex("8FD8FF"), Rgba.Hex("3E9BDB"), Clamp((2.6f - y) / 0.7f)));
+            for (int i = 0; i < 3; i++)
+                p.Line(Rgba.White.WithAlpha(0.7f), 0.02f, -2.1f, 2.0f + i * 0.2f, -1.95f, 2.05f + i * 0.2f, -1.8f, 2.0f + i * 0.2f, -1.65f, 2.05f + i * 0.2f, -1.5f, 2.0f + i * 0.2f, -1.35f, 2.05f + i * 0.2f, -1.2f, 2.0f + i * 0.2f);
+            p.Shape(Sd.Union(Sd.Ellipse(-1.95f, 1.95f, 0.1f, 0.18f), Sd.Ellipse(-1.35f, 1.93f, 0.08f, 0.13f)), Leaf, 0.02f);
+            p.Shape(picture, Rgba.Clear, 0.035f);
             return new DoodleArt("night_bg", p);
         }
 
@@ -660,6 +676,110 @@ namespace Gotcha.EditorArt
             Body(p, dome, Rgba.Hex("FF4D5E"), Rgba.Hex("D12F43"), null, -0.06f, 0.06f);
             p.Fill(Sd.Rotate(Sd.Ellipse(-0.25f, 0.3f, 0.14f, 0.05f), -0.25f, 0.3f, 20f), Rgba.White.WithAlpha(0.8f));
             return new DoodleArt("big_button", p);
+        }
+
+        /// <summary>Pesce del quadro (centro in 0,0, guarda a sinistra).</summary>
+        public static DoodleArt Fish()
+        {
+            var p = new DoodlePainter(-0.36f, -0.22f, 0.36f, 0.22f, 160) { Ink = 0.03f };
+            Sdf fish = Sd.Union(Sd.Ellipse(-0.04f, 0, 0.22f, 0.13f), Sd.Polygon(0.12f, 0, 0.3f, 0.13f, 0.3f, -0.13f));
+            Body(p, fish, Rgba.Hex("FF9F43"), Rgba.Hex("E07B1F"), null, -0.02f, 0.03f);
+            p.Line(Rgba.Hex("E07B1F"), 0.02f, 0.04f, 0.1f, 0.0f, 0f, 0.04f, -0.1f);
+            p.Fill(Sd.Circle(-0.15f, 0.03f, 0.035f), Rgba.White);
+            p.Fill(Sd.Circle(-0.155f, 0.03f, 0.018f), Ink);
+            p.Shape(Sd.Polygon(-0.02f, 0.11f, 0.1f, 0.2f, 0.12f, 0.08f), Rgba.Hex("FFC36B"), 0.02f);
+            return new DoodleArt("fish", p);
+        }
+
+        // ---------- Livello 5: taglia la mela ----------
+
+        static readonly Rgba AppleRed = Rgba.Hex("E8443A"), AppleShade = Rgba.Hex("B92E2A"), Flesh = Rgba.Hex("FFF1C9");
+        public const float AppleRadius = 0.75f;
+
+        /// <summary>Cucina: piastrelle, mensola con barattoli, piano di lavoro (coordinate del livello; piano sotto y = -2).</summary>
+        public static DoodleArt Kitchen()
+        {
+            var p = new DoodlePainter(-4.5f, -7f, 4.5f, 7f, 50) { Ink = 0.06f };
+            Sdf wall = Sd.Box(0, 2.5f, 5f, 4.6f);
+            p.Fill(wall, Rgba.Hex("D4F1E8"), false);
+            p.Hatch(wall, Rgba.Hex("A8DCCB"), 0.5f, 0.03f, 0f);
+            p.Hatch(wall, Rgba.Hex("A8DCCB"), 0.5f, 0.03f, 90f);
+            // mensola con barattoli
+            p.Shape(Sd.Box(-1.2f, 1.6f, 1.4f, 0.07f, 0.02f), Wood);
+            Rgba[] jar = { Rgba.Hex("FFD25A"), Rgba.Hex("FF8FA3"), Rgba.Hex("7FD1FF") };
+            for (int i = 0; i < 3; i++)
+            {
+                float x = -2.1f + i * 0.85f;
+                Body(p, Sd.Box(x, 2.0f, 0.25f, 0.33f, 0.08f), jar[i], Rgba.Lerp(jar[i], Ink, 0.25f));
+                p.Shape(Sd.Box(x, 2.38f, 0.2f, 0.06f, 0.02f), Rgba.Hex("8C6A55"), 0.03f);
+            }
+            // padella appesa
+            p.InkLine(0.03f, 1.9f, 3.1f, 1.9f, 2.7f);
+            p.Shape(Sd.Capsule(1.9f, 2.6f, 1.9f, 1.9f, 0.06f), Rgba.Hex("5A4A55"));
+            Body(p, Sd.Circle(1.9f, 1.4f, 0.5f), Rgba.Hex("6B6F7E"), Rgba.Hex("4A4E5C"));
+            p.Fill(Sd.Circle(1.9f, 1.4f, 0.36f), Rgba.Hex("3A3D49"));
+            // piano di lavoro
+            Sdf counter = Sd.Box(0, -4.6f, 5f, 2.6f);
+            p.Fill(counter, Rgba.Hex("C98B55"), false);
+            foreach (float y in new[] { -2.6f, -3.4f, -4.4f }) p.Line(Ink.WithAlpha(0.4f), 0.03f, -4.5f, y, 4.5f, y + 0.03f);
+            p.Shape(Sd.Box(0, -2.0f, 5f, 0.12f), Rgba.Hex("E2A86F"));
+            return new DoodleArt("kitchen_bg", p);
+        }
+
+        /// <summary>Tagliere di legno (centro in 0,0).</summary>
+        public static DoodleArt Board()
+        {
+            var p = new DoodlePainter(-1.8f, -0.4f, 1.8f, 0.4f, 100) { Ink = 0.05f };
+            Sdf board = Sd.Union(Sd.Box(-0.2f, 0, 1.4f, 0.28f, 0.2f), Sd.Box(1.4f, 0, 0.32f, 0.12f, 0.1f));
+            Body(p, board, Rgba.Hex("E9B97A"), Rgba.Hex("C98F4E"));
+            p.Shape(Sd.Circle(1.55f, 0, 0.05f), Rgba.Hex("C98F4E"), 0.02f);
+            p.Line(Rgba.Hex("C98F4E"), 0.02f, -1.3f, 0.08f, -0.5f, 0.1f, 0.3f, 0.07f);
+            return new DoodleArt("board", p);
+        }
+
+        /// <summary>Mela intera (centro in 0,0, raggio 0.75).</summary>
+        public static DoodleArt Apple()
+        {
+            var p = new DoodlePainter(-0.85f, -0.82f, 0.85f, 1.15f, 120) { Ink = 0.05f };
+            float r = AppleRadius;
+            p.Shape(Sd.Polyline(0.04f, 0.0f, 0.62f, 0.05f, 0.85f, 0.12f, 1.0f), Rgba.Hex("7A4A2A"), 0.03f);
+            p.Shape(Sd.Rotate(Sd.Ellipse(0.32f, 0.88f, 0.22f, 0.09f), 0.12f, 0.85f, 20f), Leaf, 0.035f);
+            p.Line(LeafShade, 0.015f, 0.14f, 0.85f, 0.48f, 0.94f);
+            Sdf apple = Sd.Union(Sd.Circle(-0.2f, 0.02f, r * 0.82f), Sd.Circle(0.2f, 0.02f, r * 0.82f), Sd.Circle(0, -0.08f, r * 0.85f));
+            Body(p, apple, AppleRed, AppleShade, null, -0.08f, 0.1f);
+            p.Fill(Sd.Rotate(Sd.Ellipse(-0.35f, 0.25f, 0.13f, 0.07f), -0.35f, 0.25f, 40f), Rgba.White.WithAlpha(0.8f));
+            p.Line(AppleShade, 0.025f, -0.05f, 0.55f, 0.0f, 0.62f, 0.05f, 0.55f);
+            foreach (var d in new[] { new[] { 0.3f, -0.2f }, new[] { 0.42f, 0.1f }, new[] { -0.1f, -0.45f } })
+                p.Fill(Sd.Circle(d[0], d[1], 0.025f), Rgba.Hex("FFB0A0"), false);
+            return new DoodleArt("apple", p);
+        }
+
+        /// <summary>Metà mela vista dal taglio: buccia, polpa e semi. side = -1 sinistra, +1 destra (il taglio è in x = 0).</summary>
+        public static DoodleArt AppleHalf(int side)
+        {
+            float s = side, r = AppleRadius;
+            var p = new DoodlePainter(side < 0 ? -0.82f : -0.05f, -0.82f, side < 0 ? 0.05f : 0.82f, 0.95f, 120) { Ink = 0.05f };
+            Sdf whole = Sd.Union(Sd.Circle(-0.2f, 0.02f, r * 0.82f), Sd.Circle(0.2f, 0.02f, r * 0.82f), Sd.Circle(0, -0.08f, r * 0.85f));
+            Sdf half = Sd.Intersect(whole, Sd.Box(s * 0.5f, 0, 0.5f, 1.2f));
+            Body(p, half, AppleRed, AppleShade, null, -0.08f, 0.1f);
+            Sdf face = Sd.Intersect(Sd.Grow(whole, -0.07f), Sd.Box(s * 0.32f, 0, 0.32f, 1.2f));
+            p.Fill(face, Flesh);
+            p.Hatch(face, Rgba.Hex("F4DFA6"), 0.08f, 0.015f, 70f);
+            p.Shape(Sd.Ellipse(s * 0.06f, -0.02f, 0.05f, 0.3f), Rgba.Hex("F4DFA6"), 0.02f);
+            foreach (float y in new[] { 0.1f, -0.15f })
+                p.Shape(Sd.Rotate(Sd.Ellipse(s * 0.13f, y, 0.035f, 0.06f), s * 0.13f, y, s * 20f), Rgba.Hex("5A3420"), 0.015f);
+            p.Shape(half, Rgba.Clear);
+            return new DoodleArt(side < 0 ? "apple_left" : "apple_right", p);
+        }
+
+        /// <summary>Goccia di succo.</summary>
+        public static DoodleArt JuiceDrop()
+        {
+            var p = new DoodlePainter(-0.12f, -0.12f, 0.12f, 0.16f, 120) { Ink = 0.025f };
+            Sdf drop = Sd.Union(Sd.Circle(0, -0.03f, 0.07f), Sd.Polygon(-0.06f, 0f, 0.06f, 0f, 0, 0.13f));
+            p.Shape(drop, Rgba.Hex("FFE58A"));
+            p.Fill(Sd.Circle(-0.025f, -0.01f, 0.018f), Rgba.White);
+            return new DoodleArt("juice", p);
         }
     }
 }

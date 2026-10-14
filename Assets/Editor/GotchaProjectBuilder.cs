@@ -31,7 +31,7 @@ public static class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 5;
+    const int BuilderVersion = 6;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -85,8 +85,11 @@ public static class GotchaProjectBuilder
                 "Give the snowman a happy face. Eyes and nose go on the head... and the smile? Draw it in the snow!",
                 BuildSnowmanLevel(carrotPrefab, coalPrefab)),
             Define("Idle", "do_nothing", "BIG RED BUTTON",
-                "Sometimes the best move is no move at all.",
+                "A hungry cat never sleeps. Is there anything to eat around here?",
                 BuildIdleLevel()),
+            Define("Apple", "slice_apple", "SLICE IT!",
+                "No knife? No problem. A quick finger is sharp enough.",
+                BuildAppleLevel()),
         };
 
         LevelCatalog catalog = LoadOrCreate<LevelCatalog>(LevelDir + "/LevelCatalog.asset");
@@ -134,6 +137,10 @@ public static class GotchaProjectBuilder
         camGo.AddComponent<CameraFit>();
 
         new GameObject("SensorHub").AddComponent<SensorHub>();
+
+        var musicGo = new GameObject("Music", typeof(AudioSource));
+        MusicPlayer music = musicGo.AddComponent<MusicPlayer>();
+        music.soundtrack = Soundtrack();
         new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
 
         var flowGo = new GameObject("GameFlow");
@@ -251,7 +258,7 @@ public static class GotchaProjectBuilder
         var root = new GameObject("Level_Maze");
         MazeLevel level = root.AddComponent<MazeLevel>();
         TiltGravity tilt = root.AddComponent<TiltGravity>();
-        tilt.strength = 46f;     // risposta rapida, come una biglia d'acciaio su un piano da flipper
+        tilt.strength = 41.4f;   // risposta rapida ma un po' più dolce (-10% rispetto a 46)
         tilt.response = 0.5f;
         Art(root.transform, "Night", "maze_bg", -20, false);
 
@@ -303,6 +310,9 @@ public static class GotchaProjectBuilder
         ChromeBall chrome = ball.AddComponent<ChromeBall>();
         chrome.background = new Color(0.04f, 0.055f, 0.11f);
         chrome.captureRadius = 1.1f;
+        // ombra morbida sotto la biglia (stesso layer: non compare nel riflesso)
+        Transform shadow = Art(ball.transform, "Shadow", "ball_shadow", 8, false, new Vector2(0.15f, -0.22f));
+        shadow.gameObject.layer = BallLayer;
         // scia luminosa dietro la biglia
         TrailRenderer trail = ball.AddComponent<TrailRenderer>();
         trail.time = 0.12f;
@@ -357,6 +367,22 @@ public static class GotchaProjectBuilder
         if (mat.HasProperty("_Radius")) mat.SetFloat("_Radius", 0.463f);   // raggio 0.5 su uno sprite di 1.08 unità
         EditorUtility.SetDirty(mat);
         return mat;
+    }
+
+    /// <summary>Colonna sonora: importata compressa (Vorbis) per non appesantire l'APK.</summary>
+    static AudioClip Soundtrack()
+    {
+        const string path = "Assets/Audio/Soundtrack.wav";
+        var importer = AssetImporter.GetAtPath(path) as AudioImporter;
+        if (importer == null) { Debug.LogWarning("[Gotcha] Colonna sonora non trovata in " + path); return null; }
+        AudioImporterSampleSettings settings = importer.defaultSampleSettings;
+        settings.loadType = AudioClipLoadType.CompressedInMemory;
+        settings.compressionFormat = AudioCompressionFormat.Vorbis;
+        settings.quality = 0.5f;
+        importer.defaultSampleSettings = settings;
+        importer.loadInBackground = true;
+        importer.SaveAndReimport();
+        return AssetDatabase.LoadAssetAtPath<AudioClip>(path);
     }
 
     static Material StrokeMaterial()
@@ -436,12 +462,13 @@ public static class GotchaProjectBuilder
         Art(armsPart, "Art", "sm_arms", 1, true, new Vector2(0, -2.85f));
         Art(hatPart, "Art", "sm_hat", 7, true, new Vector2(0, -DoodleSprites.SnowHatPivot));
         float headLocal = DoodleSprites.SnowHeadCenterY - DoodleSprites.SnowHeadPivot;   // centro della testa nel pivot della testa
-        SpriteRenderer blush = Art(headPart, "Blush", "blush", 5, true, new Vector2(0, headLocal - 0.08f)).GetComponent<SpriteRenderer>();
+        float headX = DoodleSprites.SnowHeadCenterX;
+        SpriteRenderer blush = Art(headPart, "Blush", "blush", 5, true, new Vector2(headX - 0.06f, headLocal - 0.08f)).GetComponent<SpriteRenderer>();
 
         // Bocca: si disegna col dito sulla testa e resta come un solco nella neve
         var pen = new GameObject("MouthPen");
         pen.transform.SetParent(headPart, false);
-        pen.transform.localPosition = new Vector3(0, headLocal, 0);
+        pen.transform.localPosition = new Vector3(headX, headLocal, 0);
         CircleCollider2D face = pen.AddComponent<CircleCollider2D>();
         face.isTrigger = true;
         face.radius = DoodleSprites.SnowHeadRadius;
@@ -458,7 +485,7 @@ public static class GotchaProjectBuilder
 
         var smokeGo = new GameObject("Smoke");
         smokeGo.transform.SetParent(headPart, false);
-        smokeGo.transform.localPosition = new Vector3(0, headLocal + 0.2f, 0);
+        smokeGo.transform.localPosition = new Vector3(headX, headLocal + 0.2f, 0);
         SmokeEmitter smoke = smokeGo.AddComponent<SmokeEmitter>();
         smoke.puffSprite = sprites["puff"];
         smoke.spread = 0.55f;
@@ -587,6 +614,19 @@ public static class GotchaProjectBuilder
         hearts.growth = 0.4f;
         hearts.tint = Color.white;
 
+        // Il pesce del quadro: va dato al gatto
+        var fishGo = new GameObject("Fish");
+        fishGo.transform.SetParent(root.transform, false);
+        fishGo.transform.localPosition = new Vector3(-1.6f, 2.25f, 0);
+        fishGo.AddComponent<CircleCollider2D>().radius = 0.35f;
+        Draggable2D fish = fishGo.AddComponent<Draggable2D>();
+        fish.itemId = "fish";
+        fish.returnOnMiss = false;
+        Art(fishGo.transform, "Art", "fish", 5);
+
+        SpeechBubble meow = Bubble(root.transform, new Vector2(-0.1f, 0.3f));
+        meow.transform.localScale = Vector3.one * 0.55f;
+
         // Il pulsantone: un'esca, toccarlo sveglia il gatto
         var button = new GameObject("BigButton").transform;
         button.SetParent(root.transform, false);
@@ -594,6 +634,9 @@ public static class GotchaProjectBuilder
         Art(button, "Art", "big_button", 6);
         Label(root.transform, new Vector2(0, -4.45f), 7, "PRESS ME", 0.045f).color = new Color(1f, 0.93f, 0.75f);
 
+        SetField(level, "cat", cat);
+        SetField(level, "fish", fish);
+        SetField(level, "meow", meow);
         SetField(level, "timer", timer);
         SetField(level, "eyesOpen", eyes);
         SetField(level, "alert", alert);
@@ -601,6 +644,82 @@ public static class GotchaProjectBuilder
         SetField(level, "hearts", hearts);
         SetField(level, "button", button);
         return SavePrefab(root, LevelDir + "/Idle/Level_Idle.prefab");
+    }
+
+    // ---------- Livello 5: taglia la mela ----------
+
+    static GameObject BuildAppleLevel()
+    {
+        var root = new GameObject("Level_Apple");
+        AppleLevel level = root.AddComponent<AppleLevel>();
+        Art(root.transform, "Kitchen", "kitchen_bg", -20, false);
+
+        var board = new GameObject("Board");
+        board.transform.SetParent(root.transform, false);
+        board.transform.localPosition = new Vector3(0, -1.85f, 0);
+        Art(board.transform, "Art", "board", 1);
+        board.AddComponent<BoxCollider2D>().size = new Vector2(8f, 0.56f);   // le metà si appoggiano qui
+        foreach (float x in new[] { -3.3f, 3.3f })                          // pareti invisibili ai lati
+        {
+            var wall = new GameObject("Wall");
+            wall.transform.SetParent(root.transform, false);
+            wall.transform.localPosition = new Vector3(x, 0, 0);
+            wall.AddComponent<BoxCollider2D>().size = new Vector2(0.4f, 12f);
+        }
+
+        // Mela intera: il cerchio da tagliare è centrato sul frutto
+        var apple = new GameObject("Apple");
+        apple.transform.SetParent(root.transform, false);
+        apple.transform.localPosition = new Vector3(0, -0.85f, 0);
+        var whole = new GameObject("Whole");
+        whole.transform.SetParent(apple.transform, false);
+        Art(whole.transform, "Art", "apple", 5);
+        SwipeCutter cutter = apple.AddComponent<SwipeCutter>();
+        cutter.radius = DoodleSprites.AppleRadius - 0.03f;
+        cutter.minChord = 1.1f;
+        cutter.trailMaterial = StrokeMaterial();
+
+        // Le due metà (nascoste finché non si taglia)
+        var halves = new GameObject("Halves").transform;
+        halves.SetParent(apple.transform, false);
+        Rigidbody2D left = Half(halves, "LeftHalf", "apple_left", -1);
+        Rigidbody2D right = Half(halves, "RightHalf", "apple_right", 1);
+
+        var juiceGo = new GameObject("Juice");
+        juiceGo.transform.SetParent(apple.transform, false);
+        SmokeEmitter juice = juiceGo.AddComponent<SmokeEmitter>();
+        juice.puffSprite = sprites["juice"];
+        juice.puffsPerSecond = 30f;
+        juice.life = 0.7f;
+        juice.riseSpeed = -1.4f;   // le gocce cadono
+        juice.sideDrift = 1.6f;
+        juice.spread = 0.3f;
+        juice.startScale = 0.9f;
+        juice.growth = -0.4f;
+        juice.spinRange = 0f;
+        juice.tint = Color.white;
+        juice.sortingOrder = 45;
+
+        SetField(level, "cutter", cutter);
+        SetField(level, "wholeApple", whole);
+        SetField(level, "halves", halves);
+        SetField(level, "leftHalf", left);
+        SetField(level, "rightHalf", right);
+        SetField(level, "juice", juice);
+        return SavePrefab(root, LevelDir + "/Apple/Level_Apple.prefab");
+    }
+
+    static Rigidbody2D Half(Transform parent, string name, string sprite, int side)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        Art(go.transform, "Art", sprite, 5);
+        CircleCollider2D c = go.AddComponent<CircleCollider2D>();
+        c.offset = new Vector2(side * 0.3f, -0.05f);
+        c.radius = 0.36f;
+        Rigidbody2D rb = go.AddComponent<Rigidbody2D>();
+        rb.gravityScale = 1f;
+        return rb;
     }
 
     // ---------- Aiuti per la costruzione ----------

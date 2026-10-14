@@ -10,8 +10,9 @@ namespace Gotcha.Levels
     /// Occhi (2 carboni) e naso (carota) si attaccano dove li lasci sulla testa: nessuna posizione è indicata.
     /// Per vincere ogni occhio deve stare nella sua zona (ampia, invisibile), il naso nella sua, e la bocca va
     /// disegnata col dito: un sorriso che resta come un solco nella neve.
-    /// Easter egg: lasciare la carota sulla pancia → il pupazzo arrossisce, fuma, "Oh noooo!" e si scioglie
-    /// lentamente dalla testa in giù, mentre la base resta a terra.
+    /// Il pupazzo è in posa di 3/4 (guarda a sinistra): il sedere sporge sul retro, a destra in basso.
+    /// Easter egg: lasciare la carota sul sedere → la carota resta piantata lì, il pupazzo arrossisce, fuma,
+    /// "Oh noooo!" e si scioglie lentamente dalla testa in giù, mentre la base resta a terra.
     /// </summary>
     public class SnowmanLevel : LevelController
     {
@@ -30,14 +31,15 @@ namespace Gotcha.Levels
         [SerializeField] StrokeDrawer mouthPen;  // centrato sulla testa
 
         [Header("Zone invisibili (coordinate del pupazzo, piedi in 0,0)")]
-        [SerializeField] Vector2 headCenter = new Vector2(0f, 4.02f);
+        [SerializeField] Vector2 headCenter = new Vector2(-0.12f, 4.02f);
         [SerializeField] float stickRadius = 0.8f;                              // dove gli oggetti restano attaccati
-        [SerializeField] Rect leftEyeZone = new Rect(-0.65f, 3.98f, 0.63f, 0.55f);
-        [SerializeField] Rect rightEyeZone = new Rect(0.02f, 3.98f, 0.63f, 0.55f);
-        [SerializeField] Rect noseZone = new Rect(-0.5f, 3.68f, 1.0f, 0.45f);
-        [SerializeField] Rect mouthZone = new Rect(-0.6f, 3.4f, 1.2f, 0.58f);  // dove deve stare il sorriso
-        [SerializeField] Vector2 bellyCenter = new Vector2(0f, 1.6f);
-        [SerializeField] float bellyRadius = 1.45f;                             // zona ampia della pancia
+        [SerializeField] Rect leftEyeZone = new Rect(-0.8f, 3.98f, 0.6f, 0.55f);
+        [SerializeField] Rect rightEyeZone = new Rect(-0.22f, 3.98f, 0.62f, 0.55f);
+        [SerializeField] Rect noseZone = new Rect(-0.8f, 3.66f, 1.0f, 0.46f);
+        [SerializeField] Rect mouthZone = new Rect(-0.78f, 3.38f, 1.25f, 0.6f); // dove deve stare il sorriso
+        [SerializeField] Vector2 buttCenter = new Vector2(1.45f, 0.78f);
+        [SerializeField] float buttRadius = 0.6f;
+        [SerializeField] Vector2 buttSurface = new Vector2(1.58f, 0.78f);         // dove si pianta la punta della carota
 
         [Header("Easter egg")]
         [SerializeField] string eggId = "snowman_butt";
@@ -77,7 +79,7 @@ namespace Gotcha.Levels
             if (IsFinished || resolving) return;
             Vector2 p = Local(item.transform.position);
 
-            if (item.itemId == "carrot" && Vector2.Distance(p, bellyCenter) <= bellyRadius && Vector2.Distance(p, headCenter) > stickRadius)
+            if (item.itemId == "carrot" && Vector2.Distance(p, buttCenter) <= buttRadius)
             {
                 resolving = true;
                 StartCoroutine(MeltRoutine(item));
@@ -183,13 +185,20 @@ namespace Gotcha.Levels
             Win();
         }
 
-        // ---------- Easter egg: carota sulla pancia ----------
+        // ---------- Easter egg: carota sul sedere ----------
 
         IEnumerator MeltRoutine(Draggable2D carrot)
         {
             LockInput();
-            carrot.transform.SetParent(transform, true);
-            StartCoroutine(FallToGround(carrot.transform));
+            // la carota resta piantata nel sedere, con la punta verso il pupazzo
+            Transform t = carrot.transform;
+            t.SetParent(basePart, true);
+            t.localScale = new Vector3(-Mathf.Abs(t.localScale.x), t.localScale.y, t.localScale.z);
+            Vector3 target = snowman.TransformPoint(buttSurface + new Vector2(0.36f, 0f));
+            target.z = t.position.z;
+            Vector3 from = t.position;
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.15f) { t.position = Vector3.Lerp(from, target, k); yield return null; }
+            t.position = target;
 
             // 1. arrossisce
             for (float k = 0f; k < 1f; k += Time.deltaTime / 0.9f)

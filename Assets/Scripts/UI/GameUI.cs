@@ -29,7 +29,7 @@ namespace Gotcha.UI
 
         Text titleText;
         GameObject hintPanel, menuPanel, resultPanel, completedPanel;
-        Text hintBody, menuEggs, resultTitle, resultBody, resultButton;
+        Text hintBody, menuEggs, resultTitle, resultBody, resultButton, musicLabel;
         RectTransform levelList;
 
         void Awake()
@@ -120,9 +120,24 @@ namespace Gotcha.UI
             if (resultPanel.activeSelf || completedPanel.activeSelf) return;
             RebuildLevelList();
             menuEggs.text = "Easter eggs found: " + SaveData.EasterEggCount;
+            RefreshMusicLabel();
             hintPanel.SetActive(false);
             menuPanel.SetActive(true);
             flow.Paused = true;
+        }
+
+        void ToggleMusic()
+        {
+            if (MusicPlayer.Instance == null) return;
+            MusicPlayer.Instance.SetMuted(!MusicPlayer.Instance.Muted);
+            RefreshMusicLabel();
+        }
+
+        void RefreshMusicLabel()
+        {
+            if (musicLabel == null) return;
+            bool on = MusicPlayer.Instance != null && !MusicPlayer.Instance.Muted;
+            musicLabel.text = on ? "MUSIC: ON" : "MUSIC: OFF";
         }
 
         void CloseOverlay(GameObject panel)
@@ -146,7 +161,7 @@ namespace Gotcha.UI
                     menuPanel.SetActive(false);
                     flow.StartLevel(index);
                 });
-                b.gameObject.AddComponent<LayoutElement>().preferredHeight = 130;
+                b.gameObject.AddComponent<LayoutElement>().preferredHeight = 105;
             }
         }
 
@@ -190,17 +205,20 @@ namespace Gotcha.UI
 
             // Menu
             RectTransform menuCard;
-            menuPanel = CreateOverlay("MenuPanel", out menuCard, 1300);
+            menuPanel = CreateOverlay("MenuPanel", out menuCard, 1500);
             AddHeader(menuCard, "MENU");
             menuEggs = CreateText(menuCard, "", 46, Ink, FontStyle.Normal);
             Place(menuEggs.transform, new Vector2(0.08f, 0.76f), new Vector2(0.92f, 0.84f));
-            levelList = CreateRect("Levels", menuCard, new Vector2(0.1f, 0.2f), new Vector2(0.9f, 0.74f));
+            levelList = CreateRect("Levels", menuCard, new Vector2(0.1f, 0.27f), new Vector2(0.9f, 0.75f));
             VerticalLayoutGroup layout = levelList.gameObject.AddComponent<VerticalLayoutGroup>();
-            layout.spacing = 20;
+            layout.spacing = 14;
             layout.childControlHeight = true;
             layout.childControlWidth = true;
             layout.childForceExpandHeight = false;
-            Place(CreateButton(menuCard, "RESUME", Accent, () => CloseOverlay(menuPanel)).transform, new Vector2(0.25f, 0.05f), new Vector2(0.75f, 0.15f));
+            Button music = CreateButton(menuCard, "MUSIC: ON", Dark, ToggleMusic);
+            musicLabel = music.GetComponentInChildren<Text>();
+            Place(music.transform, new Vector2(0.25f, 0.155f), new Vector2(0.75f, 0.235f));
+            Place(CreateButton(menuCard, "RESUME", Accent, () => CloseOverlay(menuPanel)).transform, new Vector2(0.25f, 0.05f), new Vector2(0.75f, 0.13f));
 
             // Esito livello
             RectTransform resultCard;

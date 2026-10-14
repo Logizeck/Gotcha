@@ -44,7 +44,7 @@ namespace Gotcha.Core
         void Awake()
         {
             Instance = this;
-            Ads = new AdBreakManager(new LogAdProvider());
+            Ads = new AdBreakManager(new SimulatedAdProvider());   // pubblicità simulata finché non c'è AdMob
             // Mentre il gioco è aperto lo schermo non si spegne e non si abbassa (molti livelli si giocano
             // senza toccarlo: inclinazione, attesa...). Su Android è il flag KEEP_SCREEN_ON.
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
