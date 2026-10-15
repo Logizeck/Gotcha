@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Gotcha.Core;
+using Gotcha.Sensors;
 using Gotcha.Levels;
 
 namespace Gotcha.UI
@@ -15,7 +16,7 @@ namespace Gotcha.UI
     public class GameUI : MonoBehaviour
     {
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.11";
+        public const string Version = "0.12";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
@@ -67,6 +68,7 @@ namespace Gotcha.UI
         void Update()
         {
             if (Screen.safeArea != lastSafeArea) ApplySafeArea();
+            if (menuPanel.activeSelf) RefreshMusicLabel();   // si aggiorna se alzi il volume col menu aperto
 
             if (Input.GetKeyDown(KeyCode.Escape))
             {
@@ -158,7 +160,10 @@ namespace Gotcha.UI
         {
             if (musicLabel == null) return;
             bool on = MusicPlayer.Instance != null && !MusicPlayer.Instance.Muted;
-            musicLabel.text = on ? "MUSIC: ON" : "MUSIC: OFF";
+            // se la musica è accesa ma il telefono è a volume zero (es. dopo il livello del gatto) lo diciamo,
+            // altrimenti sembra che l'interruttore funzioni al contrario
+            bool phoneSilent = SensorHub.Instance != null && SensorHub.Instance.SystemVolume01 <= 0.01f;
+            musicLabel.text = !on ? "MUSIC: OFF" : phoneSilent ? "MUSIC: ON (PHONE VOLUME 0)" : "MUSIC: ON";
         }
 
         void CloseOverlay(GameObject panel)

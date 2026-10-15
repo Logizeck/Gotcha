@@ -8,7 +8,7 @@ namespace Gotcha.EditorArt
     /// ombre a tratteggio. Le coordinate sono quelle locali dell'oggetto che userà lo sprite
     /// (es. la chiave ha la punta in 0,0; il pupazzo ha i piedi in 0,0).
     /// </summary>
-    public static class DoodleSprites
+    public static partial class DoodleSprites
     {
         static readonly Rgba Ink = DoodlePainter.DefaultInk;
         static readonly Rgba Gold = Rgba.Hex("FFC93C"), GoldShade = Rgba.Hex("E39B1B"), GoldLight = Rgba.Hex("FFF3B0");
@@ -1109,7 +1109,7 @@ namespace Gotcha.EditorArt
             var p = new DoodlePainter(-0.75f, -0.6f, 0.75f, 0.6f, 110) { Ink = 0.05f };
             Body(p, Sd.Box(0, 0, 0.66f, 0.5f, 0.1f), Rgba.Hex("3A3D49"), Rgba.Hex("2A2C36"));
             p.Shape(Sd.Box(0, 0.22f, 0.5f, 0.12f, 0.03f), Rgba.Hex("103B2A"), 0.03f);
-            p.Line(Rgba.Hex("5CFF9D"), 0.03f, -0.4f, 0.2f, -0.3f, 0.28f, -0.2f, 0.16f, -0.1f, 0.3f, 0f, 0.18f, 0.1f, 0.27f, 0.2f, 0.2f, 0.3f, 0.26f, 0.4f, 0.22f);
+            // sul display ci sono le barre LED del volume (oggetti a parte, VolumeLeds)
             foreach (float x in new[] { -0.35f, 0f, 0.35f }) p.Shape(Sd.Circle(x, -0.18f, 0.11f), Rgba.Hex("B7BCC9"), 0.03f);
             p.Fill(Sd.Box(-0.35f, -0.12f, 0.012f, 0.06f), Ink);
             p.Fill(Sd.Box(0.35f, -0.12f, 0.012f, 0.06f), Ink);

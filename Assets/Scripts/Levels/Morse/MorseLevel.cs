@@ -45,7 +45,7 @@ namespace Gotcha.Levels
         {
             if (keys != null) foreach (TapButton k in keys) if (k != null) k.Pressed -= OnKey;
             if (radio != null) radio.Pressed -= OnRadio;
-            if (MusicPlayer.Instance != null) MusicPlayer.Instance.SetDucked(false);
+            if (MusicPlayer.Instance != null) MusicPlayer.Instance.Unduck(this);
             foreach (AudioClip c in new[] { dot, dash, buzz }) if (c != null) Destroy(c);
         }
 
@@ -57,7 +57,7 @@ namespace Gotcha.Levels
         IEnumerator PlayCode(float delay)
         {
             playing = true;
-            if (MusicPlayer.Instance != null) MusicPlayer.Instance.SetDucked(true);
+            if (MusicPlayer.Instance != null) MusicPlayer.Instance.Duck(this);
             yield return new WaitForSeconds(delay);
             foreach (char c in Codes[answer])
             {
@@ -68,7 +68,7 @@ namespace Gotcha.Levels
                 if (lamp != null) lamp.SetActive(false);
                 yield return new WaitForSeconds(gapSeconds);
             }
-            if (MusicPlayer.Instance != null) MusicPlayer.Instance.SetDucked(false);
+            if (MusicPlayer.Instance != null) MusicPlayer.Instance.Unduck(this);
             playing = false;
         }
 

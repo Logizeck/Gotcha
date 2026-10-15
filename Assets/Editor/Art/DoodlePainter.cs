@@ -342,6 +342,11 @@ namespace Gotcha.EditorArt
                 DoodleSprites.KeyPainting(), DoodleSprites.Plain(), DoodleSprites.HangingLamp(), DoodleSprites.Glow(), DoodleSprites.LightCone(),
                 DoodleSprites.Jar(), DoodleSprites.Cookie(), DoodleSprites.Mouse(), DoodleSprites.PartyRoom(), DoodleSprites.Cake(),
                 DoodleSprites.Candle(), DoodleSprites.Flame(), DoodleSprites.Confetti(),
+                DoodleSprites.TrapMazeNeon(), DoodleSprites.DarkMazeNeon(), DoodleSprites.GateBar(), DoodleSprites.Pit(),
+                DoodleSprites.LaserBeam(), DoodleSprites.LaserNode(), DoodleSprites.Darkness(), DoodleSprites.WaspFurious(),
+                DoodleSprites.Led(), DoodleSprites.Portrait(), DoodleSprites.PaintingBack(), DoodleSprites.Safe(),
+                DoodleSprites.SafeOpen(), DoodleSprites.KeypadKey(), DoodleSprites.BedsideLamp(), DoodleSprites.LaunchSite(),
+                DoodleSprites.Rocket(), DoodleSprites.FuelCan(), DoodleSprites.SafetyCover(),
             };
         }
     }

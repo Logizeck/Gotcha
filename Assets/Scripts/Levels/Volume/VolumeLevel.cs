@@ -33,7 +33,7 @@ namespace Gotcha.Levels
         {
             if (MusicPlayer.Instance != null)
             {
-                MusicPlayer.Instance.SetDucked(true, 0f);   // suona solo lo stereo
+                MusicPlayer.Instance.Duck(this, 0f);   // suona solo lo stereo
                 if (stereo != null && stereo.clip == null) stereo.clip = MusicPlayer.Instance.soundtrack;
             }
             if (stereo != null) { stereo.loop = true; stereo.Play(); }
@@ -43,7 +43,7 @@ namespace Gotcha.Levels
 
         void OnDestroy()
         {
-            if (MusicPlayer.Instance != null) MusicPlayer.Instance.SetDucked(false);
+            if (MusicPlayer.Instance != null) MusicPlayer.Instance.Unduck(this);
         }
 
         void Update()
@@ -79,7 +79,10 @@ namespace Gotcha.Levels
             if (notes != null) notes.Stop();
             if (stereo != null) stereo.Stop();
             if (zzz != null) zzz.Play();
-            yield return new WaitForSeconds(1.6f);
+            // il gatto dorme: la colonna sonora del gioco torna subito (il volume del telefono però è a zero)
+            if (MusicPlayer.Instance != null) MusicPlayer.Instance.Unduck(this);
+            if (bubble != null) bubble.Show("Purrr...");
+            yield return new WaitForSeconds(2.2f);
             Win();
         }
 

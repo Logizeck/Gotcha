@@ -47,6 +47,25 @@ namespace Gotcha.Core
             return EventSystem.current.IsPointerOverGameObject();
         }
 
+        /// <summary>True se almeno un dito (o il mouse) sta premendo dentro il collider.</summary>
+        public static bool IsHeld(Camera cam, Collider2D area)
+        {
+            if (area == null || cam == null) return false;
+            for (int i = 0; i < Input.touchCount; i++)
+            {
+                Touch t = Input.GetTouch(i);
+                if (t.phase != TouchPhase.Ended && t.phase != TouchPhase.Canceled && area.OverlapPoint(ToWorld(cam, t.position))) return true;
+            }
+            return Input.touchCount == 0 && Input.GetMouseButton(0) && area.OverlapPoint(ToWorld(cam, Input.mousePosition));
+        }
+
+        /// <summary>True nel frame in cui un dito qualsiasi (o il mouse) tocca lo schermo.</summary>
+        public static bool AnyTouchBegan()
+        {
+            for (int i = 0; i < Input.touchCount; i++) if (Input.GetTouch(i).phase == TouchPhase.Began) return true;
+            return Input.GetMouseButtonDown(0);
+        }
+
         public static Vector2 ToWorld(Camera cam, Vector2 screen)
         {
             Vector3 p = cam.ScreenToWorldPoint(new Vector3(screen.x, screen.y, Mathf.Abs(cam.transform.position.z)));

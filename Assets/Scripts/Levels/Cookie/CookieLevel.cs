@@ -16,11 +16,17 @@ namespace Gotcha.Levels
         [SerializeField] SmokeEmitter hearts;
         [SerializeField] SpeechBubble bubble;
         [SerializeField] float eatDistance = 0.65f;
+        [Tooltip("Resistenza dell'aria: il biscotto non accelera all'infinito.")]
+        [SerializeField] float airDrag = 0.35f;
+        [Tooltip("Attrito di rotolamento: un biscotto non gira come una ruota di bicicletta.")]
+        [SerializeField] float rollingDrag = 1.2f;
 
         bool done;
+        Vector2 lastPos;
 
         public override void OnLevelStart()
         {
+            if (cookie != null) lastPos = cookie.position;
             if (bubble != null) { bubble.Show("Cookie..."); StartCoroutine(HideLater(2f)); }
         }
 
@@ -32,6 +38,16 @@ namespace Gotcha.Levels
                 done = true;
                 StartCoroutine(Eat());
             }
+        }
+
+        void FixedUpdate()
+        {
+            if (done || cookie == null || !cookie.simulated) return;
+            // velocità ricavata dalla posizione (le API della velocità cambiano nome tra Unity 2022 e Unity 6)
+            Vector2 v = (cookie.position - lastPos) / Time.fixedDeltaTime;
+            lastPos = cookie.position;
+            cookie.AddForce(-v * airDrag * cookie.mass);
+            cookie.angularVelocity *= Mathf.Exp(-rollingDrag * Time.fixedDeltaTime);
         }
 
         IEnumerator Eat()

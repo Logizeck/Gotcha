@@ -44,6 +44,23 @@ namespace Gotcha.Sensors
             lastAccel = Tilt;
         }
 
+        void Start()
+        {
+            // Il permesso del microfono si chiede una volta sola all'avvio del gioco, non a metà livello.
+            RequestMicPermission();
+        }
+
+        /// <summary>Mostra la richiesta di Android per il microfono, se non è già stato concesso o chiesto.</summary>
+        public void RequestMicPermission()
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            string perm = UnityEngine.Android.Permission.Microphone;
+            if (micPermissionAsked || UnityEngine.Android.Permission.HasUserAuthorizedPermission(perm)) return;
+            micPermissionAsked = true;
+            UnityEngine.Android.Permission.RequestUserPermission(perm);
+#endif
+        }
+
         void Update()
         {
             Vector3 a = Tilt;
@@ -129,11 +146,7 @@ namespace Gotcha.Sensors
             string perm = UnityEngine.Android.Permission.Microphone;
             if (!UnityEngine.Android.Permission.HasUserAuthorizedPermission(perm))
             {
-                if (!micPermissionAsked)
-                {
-                    micPermissionAsked = true;
-                    UnityEngine.Android.Permission.RequestUserPermission(perm);
-                }
+                RequestMicPermission();   // di norma già chiesto all'avvio: qui non ricompare
                 return;
             }
 #endif

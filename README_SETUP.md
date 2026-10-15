@@ -1,4 +1,4 @@
-# Gotcha! — v0.11 (quindici livelli, video da condividere, icona)
+# Gotcha! — v0.12 (venti livelli)
 
 La versione installata si legge nel MENU del gioco (accanto al conteggio degli Easter egg).
 
@@ -143,12 +143,34 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Torta con 5 candeline: si spengono soffiando davvero nel microfono (al primo avvio Android chiede il permesso).
   Ogni soffio deciso ne spegne una; poi coriandoli. Nell'Editor: tieni premuto B.
 
+## Livello 16 — Trap Maze
+- Labirinto a inclinazione a serpentina con buche (ci cadi dentro: si riprova) e due laser intermittenti
+  (prima di accendersi tremolano; se ti prendono accesi: ZAP!).
+
+## Livello 17 — In the Dark
+- Labirinto al buio: si vede solo intorno alla sfera. L'uscita è chiusa da un cancello rosso: prima bisogna
+  trovare la chiave in un vicolo cieco, poi tornare all'uscita.
+
+## Livello 18 — Hidden Safe (azioni in sequenza)
+- Scuoti il telefono finché il quadro cade (Editor: tasto S) → dietro c'è una cassaforte e sul retro del quadro
+  un post-it col codice (casuale) → tocca la cassaforte e digita il codice → prendi la chiave → apri la porta.
+
+## Livello 19 — Bedtime (azioni in sequenza)
+- Spegni l'abat-jour, abbassa a zero il volume del telefono, poi non toccare niente per 5 secondi.
+
+## Livello 20 — Lift Off (azioni in sequenza)
+- Trascina la tanica sul razzo, alza il coperchio di sicurezza, tieni premuto il pulsante per tutto il
+  conto alla rovescia (se lo lasci: ABORT!). Editor: barra spaziatrice per tenere premuto.
+
 ## Icona dell'app
 - L'icona "G!" al neon è ridisegnata dal codice (`DoodleSprites.AppIcon`). Per usare il logo originale basta
   copiare il PNG (quadrato, 1024×1024) in `Assets/Art/Icon/AppIcon.png` e rilanciare il builder: ha la precedenza.
 
 ## Musica
-- Colonna sonora `Assets/Audio/Soundtrack.wav` ("Dolce Pizzicato") in loop (importata compressa Vorbis). Si spegne/accende dal MENU
+- Colonna sonora `Assets/Audio/Soundtrack.wav` ("Dolce Pizzicato") in loop. I livelli possono abbassarla solo
+  finché esistono (`MusicPlayer.Duck/Unduck`): non può più restare muta per errore. Se la musica è accesa ma il
+  telefono è a volume zero, il menu lo scrive ("MUSIC: ON (PHONE VOLUME 0)").
+- Il permesso del microfono viene chiesto all'avvio del gioco. (importata compressa Vorbis). Si spegne/accende dal MENU
   (la scelta resta salvata). Durante la pubblicità la musica è in pausa.
 
 ## Regola pubblicità

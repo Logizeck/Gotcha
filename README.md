@@ -18,5 +18,10 @@ Livelli attuali:
 13. **Lights On** — accendi le due lampade insieme per leggere il messaggio sul muro.
 14. **Cookie Jar** — capovolgi il telefono per far uscire il biscotto dal barattolo.
 15. **Make a Wish** — spegni le candeline soffiando nel microfono.
+16. **Trap Maze** — labirinto a inclinazione con buche e laser.
+17. **In the Dark** — labirinto al buio: trova la chiave, poi l'uscita.
+18. **Hidden Safe** — scuoti, leggi il codice, apri la cassaforte e poi la porta.
+19. **Bedtime** — luce spenta, volume a zero, e nessun tocco.
+20. **Lift Off** — carburante, coperchio, conto alla rovescia.
 
 Istruzioni per aprire il progetto e creare l'APK: vedi [README_SETUP.md](README_SETUP.md).

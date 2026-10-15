@@ -31,7 +31,7 @@ public static class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 11;
+    const int BuilderVersion = 12;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -120,6 +120,21 @@ public static class GotchaProjectBuilder
             Define("Birthday", "birthday", "MAKE A WISH",
                 "Candles don't like wind. Your phone has a microphone...",
                 BuildBirthdayLevel()),
+            Define("TrapMaze", "trap_maze", "TRAP MAZE",
+                "Same old maze? Mind the holes... and the lasers keep a rhythm.",
+                BuildTrapMazeLevel()),
+            Define("DarkMaze", "dark_maze", "IN THE DARK",
+                "Who turned off the lights? Every locked gate has a key somewhere.",
+                BuildDarkMazeLevel()),
+            Define("Safe", "hidden_safe", "HIDDEN SAFE",
+                "That painting is stuck to the wall. Maybe a good shake would help?",
+                BuildSafeLevel(keyPrefab, doorPrefab)),
+            Define("Bedtime", "bedtime", "BEDTIME",
+                "A sleepy cat needs darkness, silence... and nobody poking it.",
+                BuildBedtimeLevel()),
+            Define("Rocket", "lift_off", "LIFT OFF",
+                "Rockets need fuel. And launch buttons are always protected.",
+                BuildRocketLevel()),
         };
 
         LevelCatalog catalog = LoadOrCreate<LevelCatalog>(LevelDir + "/LevelCatalog.asset");
@@ -326,11 +341,20 @@ public static class GotchaProjectBuilder
         zone.holdSeconds = 0.25f;
 
         // Sfera cromata, fuori dal labirinto (in basso a sinistra)
+        Rigidbody2D rb = MazeBall(maze, new Vector2(-2.35f, -3.0f));
+
+        SetField(level, "ball", rb);
+        return SavePrefab(root, LevelDir + "/Maze/Level_Maze.prefab");
+    }
+
+    /// <summary>Sfera cromata dei labirinti (riflessi, ombra, scia), figlia del labirinto.</summary>
+    static Rigidbody2D MazeBall(Transform maze, Vector2 pos)
+    {
         var ball = new GameObject("Ball");
         ball.tag = "Player";
         ball.layer = BallLayer;
         ball.transform.SetParent(maze, false);
-        ball.transform.localPosition = new Vector3(-2.35f, -3.0f, 0);
+        ball.transform.localPosition = pos;
         ball.transform.localScale = Vector3.one * 0.4f;
         SpriteRenderer sr = ball.AddComponent<SpriteRenderer>();
         sr.sprite = sprites["chrome_ball"];
@@ -363,9 +387,24 @@ public static class GotchaProjectBuilder
             new[] { new GradientColorKey(new Color(0.75f, 0.95f, 1f), 0f), new GradientColorKey(new Color(0.24f, 0.9f, 1f), 1f) },
             new[] { new GradientAlphaKey(0.55f, 0f), new GradientAlphaKey(0f, 1f) });
         trail.colorGradient = gradient;
+        return rb;
+    }
 
-        SetField(level, "ball", rb);
-        return SavePrefab(root, LevelDir + "/Maze/Level_Maze.prefab");
+    /// <summary>Biscotto: attrito vero (rotola invece di scivolare) e quasi nessun rimbalzo.</summary>
+    static PhysicsMaterial2D CookiePhysics()
+    {
+        string path = LevelDir + "/Cookie/Cookie.physicsMaterial2D";
+        EnsureFolder(LevelDir + "/Cookie");
+        PhysicsMaterial2D mat = AssetDatabase.LoadAssetAtPath<PhysicsMaterial2D>(path);
+        if (mat == null)
+        {
+            mat = new PhysicsMaterial2D("Cookie");
+            AssetDatabase.CreateAsset(mat, path);
+        }
+        mat.friction = 0.6f;
+        mat.bounciness = 0.12f;
+        EditorUtility.SetDirty(mat);
+        return mat;
     }
 
     static PhysicsMaterial2D BallPhysics()
@@ -967,6 +1006,7 @@ public static class GotchaProjectBuilder
         hifi.SetParent(root.transform, false);
         hifi.localPosition = new Vector3(0, 0.75f, 0);
         Art(hifi, "Unit", "hifi", 4);
+        Leds(hifi, 5);   // barre del volume del telefono, dal verde al rosso
         var speakers = new List<Pulse>();
         foreach (float x in new[] { -1.55f, 1.55f })
         {
@@ -1226,8 +1266,10 @@ public static class GotchaProjectBuilder
 
         var wasp = new GameObject("Wasp").transform;
         wasp.SetParent(root.transform, false);
-        wasp.localPosition = new Vector3(-1.2f, 2.8f, 0);
-        SpriteRenderer body = Art(wasp, "Body", "wasp", 12).GetComponent<SpriteRenderer>();
+        wasp.localPosition = new Vector3(-0.9f, 2.6f, 0);
+        wasp.localScale = Vector3.one;
+        SpriteRenderer body = Art(wasp, "Body", "wasp_furious", 12).GetComponent<SpriteRenderer>();
+        GameObject waspAnger = Art(wasp, "Anger", "anger", 14, false, new Vector2(-0.12f, 0.36f)).gameObject;
         foreach (var w in new[] { new { x = -0.02f, order = 11, rot = 15f }, new { x = 0.08f, order = 13, rot = -10f } })
         {
             Transform wing = Art(wasp, "Wing", "wasp_wing", w.order, false, new Vector2(w.x, 0.12f));
@@ -1271,6 +1313,7 @@ public static class GotchaProjectBuilder
         SetField(level, "countdown", countdown);
         SetField(level, "bubble", bubble);
         SetField(level, "buzz", buzz);
+        SetField(level, "waspAnger", waspAnger);
         return SavePrefab(root, LevelDir + "/Defend/Level_Defend.prefab");
     }
 
@@ -1333,8 +1376,10 @@ public static class GotchaProjectBuilder
         var root = new GameObject("Level_Cookie");
         CookieLevel level = root.AddComponent<CookieLevel>();
         TiltGravity tilt = root.AddComponent<TiltGravity>();
-        tilt.strength = 22f;
-        tilt.response = 0.6f;
+        tilt.strength = 16f;     // gravità proporzionale all'inclinazione (niente scatti)
+        tilt.response = 1f;
+        tilt.smoothing = 0.12f;  // filtra il tremolio dell'accelerometro
+        tilt.deadZone = 0.02f;
         Art(root.transform, "Kitchen", "kitchen_bg", -20, false);
 
         // bordi della stanza (il biscotto non esce dallo schermo); il piano di lavoro è a y = -2
@@ -1369,7 +1414,16 @@ public static class GotchaProjectBuilder
         cookie.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         cookie.interpolation = RigidbodyInterpolation2D.Interpolate;
         cookie.sleepMode = RigidbodySleepMode2D.NeverSleep;
-        cookie.sharedMaterial = BallPhysics();
+        cookie.sharedMaterial = CookiePhysics();
+        cookie.mass = 0.3f;
+        SmokeEmitter crumbs = Sparks(root.transform, "Crumbs", new Color(0.78f, 0.55f, 0.3f));
+        crumbs.riseSpeed = -0.6f;
+        crumbs.startScale = 0.8f;
+        crumbs.life = 0.6f;
+        crumbs.puffsPerSecond = 35f;
+        ImpactCrumbs impact = cookieGo.AddComponent<ImpactCrumbs>();
+        impact.crumbs = crumbs;
+        impact.minImpact = 2.2f;
 
         var mouse = new GameObject("Mouse").transform;
         mouse.SetParent(root.transform, false);
@@ -1461,6 +1515,493 @@ public static class GotchaProjectBuilder
         SetArray(level, "confetti", confetti.ToArray());
         SetField(level, "bubble", bubble);
         return SavePrefab(root, LevelDir + "/Birthday/Level_Birthday.prefab");
+    }
+
+    // ---------- Livelli 16-17: labirinti con trappole e al buio ----------
+
+    /// <summary>Pareti fisiche invisibili che ricalcano esattamente i tubi al neon di un labirinto a segmenti.</summary>
+    static void SegWalls(Transform maze, DoodleSprites.MazeSeg[] segs)
+    {
+        var walls = new GameObject("Walls").transform;
+        walls.SetParent(maze, false);
+        for (int i = 0; i < segs.Length; i++)
+        {
+            DoodleSprites.MazeSeg g = segs[i];
+            if (Mathf.Approximately(g.y1, g.y2)) HWall(walls, "Wall" + i, Mathf.Min(g.x1, g.x2), Mathf.Max(g.x1, g.x2), g.y1);
+            else VWall(walls, "Wall" + i, g.x1, Mathf.Min(g.y1, g.y2), Mathf.Max(g.y1, g.y2));
+        }
+    }
+
+    static GoalZone MazeGoal(Transform maze, Vector2 pos)
+    {
+        var goal = new GameObject("Goal");
+        goal.transform.SetParent(maze, false);
+        goal.transform.localPosition = pos;
+        Transform star = Art(goal.transform, "Art", "goal_star", 2);
+        star.gameObject.AddComponent<Pulse>();
+        CircleCollider2D area = goal.AddComponent<CircleCollider2D>();
+        area.isTrigger = true;
+        area.radius = 0.22f;
+        GoalZone zone = goal.AddComponent<GoalZone>();
+        zone.requiredTag = "Player";
+        zone.holdSeconds = 0.25f;
+        return zone;
+    }
+
+    static SmokeEmitter Sparks(Transform parent, string name, Color tint)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        SmokeEmitter e = go.AddComponent<SmokeEmitter>();
+        e.puffSprite = sprites["confetti"];
+        e.puffsPerSecond = 40f;
+        e.life = 0.45f;
+        e.riseSpeed = 0.6f;
+        e.spread = 0.35f;
+        e.startScale = 1.1f;
+        e.growth = 0f;
+        e.spinRange = 400f;
+        e.sideDrift = 1.2f;
+        e.tint = tint;
+        e.sortingOrder = 45;
+        return e;
+    }
+
+    static GameObject BuildTrapMazeLevel()
+    {
+        var root = new GameObject("Level_TrapMaze");
+        TrapMazeLevel level = root.AddComponent<TrapMazeLevel>();
+        TiltGravity tilt = root.AddComponent<TiltGravity>();
+        tilt.strength = 32f;     // un filo più lento del livello 2: qui un errore costa caro
+        tilt.response = 0.55f;
+        Art(root.transform, "Night", "maze_bg", -20, false);
+
+        var maze = new GameObject("Maze").transform;
+        maze.SetParent(root.transform, false);
+        maze.localPosition = new Vector3(0, -0.4f, 0);
+        Art(maze, "Neon", "maze_trap", 5, false);
+        SegWalls(maze, DoodleSprites.TrapMaze);
+
+        var pits = new List<Transform>();
+        float[] pp = DoodleSprites.TrapPits;
+        for (int i = 0; i < pp.Length; i += 2)
+            pits.Add(Art(maze, "Pit", "pit", 3, false, new Vector2(pp[i], pp[i + 1])));
+
+        var lasers = new List<LaserBeam>();
+        float[] lz = DoodleSprites.TrapLasers;
+        for (int i = 0; i < lz.Length; i += 3)
+        {
+            float len = lz[i + 2] - lz[i + 1];
+            var go = new GameObject("Laser");
+            go.transform.SetParent(maze, false);
+            go.transform.localPosition = new Vector3(lz[i], (lz[i + 1] + lz[i + 2]) * 0.5f, 0);
+            LaserBeam beam = go.AddComponent<LaserBeam>();
+            Transform b = Art(go.transform, "Beam", "laser", 7, false);
+            b.localScale = new Vector3(1f, len, 1f);
+            beam.beam = b.GetComponent<SpriteRenderer>();
+            Transform top = Art(go.transform, "NodeTop", "laser_node", 8, false, new Vector2(0, len * 0.5f - 0.02f));
+            Transform bottom = Art(go.transform, "NodeBottom", "laser_node", 8, false, new Vector2(0, -len * 0.5f + 0.02f));
+            bottom.localRotation = Quaternion.Euler(0, 0, 180f);
+            beam.lenses = new[] { top.GetComponent<SpriteRenderer>(), bottom.GetComponent<SpriteRenderer>() };
+            beam.length = len;
+            beam.onTime = 1.4f;
+            beam.offTime = 1.7f;
+            beam.phase = i == 0 ? 0f : 1.55f;
+            lasers.Add(beam);
+        }
+
+        MazeGoal(maze, new Vector2(-2.2f, 2.6f));
+        Rigidbody2D ball = MazeBall(maze, new Vector2(-2.2f, -3.0f));
+        SmokeEmitter sparks = Sparks(root.transform, "Sparks", new Color(1f, 0.45f, 0.3f));
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(1.5f, -4.45f));
+        bubble.transform.localScale = Vector3.one * 0.5f;
+
+        SetField(level, "ball", ball);
+        SetArray(level, "pits", pits.ToArray());
+        SetArray(level, "lasers", lasers.ToArray());
+        SetField(level, "sparks", sparks);
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/TrapMaze/Level_TrapMaze.prefab");
+    }
+
+    static GameObject BuildDarkMazeLevel()
+    {
+        var root = new GameObject("Level_DarkMaze");
+        DarkMazeLevel level = root.AddComponent<DarkMazeLevel>();
+        TiltGravity tilt = root.AddComponent<TiltGravity>();
+        tilt.strength = 34f;
+        tilt.response = 0.5f;
+        Art(root.transform, "Night", "maze_bg", -20, false);
+
+        var maze = new GameObject("Maze").transform;
+        maze.SetParent(root.transform, false);
+        maze.localPosition = new Vector3(0, -0.4f, 0);
+        Art(maze, "Neon", "maze_dark", 5, false);
+        SegWalls(maze, DoodleSprites.DarkMaze);
+
+        // cancello rosso con lucchetto davanti all'uscita
+        DoodleSprites.MazeSeg g = DoodleSprites.DarkGate;
+        var gate = new GameObject("Gate");
+        gate.transform.SetParent(maze, false);
+        gate.transform.localPosition = new Vector3((g.x1 + g.x2) * 0.5f, (g.y1 + g.y2) * 0.5f, 0);
+        Transform bar = Art(gate.transform, "Art", "gate_bar", 6, false);
+        bool vertical = Mathf.Approximately(g.x1, g.x2);
+        if (vertical) bar.localRotation = Quaternion.Euler(0, 0, 90f);
+        CapsuleCollider2D gateCol = gate.AddComponent<CapsuleCollider2D>();
+        gateCol.size = vertical ? new Vector2(WallT, 1f + WallT) : new Vector2(1f + WallT, WallT);
+        gateCol.direction = vertical ? CapsuleDirection2D.Vertical : CapsuleDirection2D.Horizontal;
+
+        // chiave luminosa in un vicolo cieco
+        var key = new GameObject("Key").transform;
+        key.SetParent(maze, false);
+        key.localPosition = new Vector3(DoodleSprites.DarkKeyX, DoodleSprites.DarkKeyY, 0);
+        key.localScale = Vector3.one * 0.32f;
+        SpriteRenderer halo = Art(key, "Glow", "glow", 4, false).GetComponent<SpriteRenderer>();
+        halo.color = new Color(1f, 0.85f, 0.3f, 0.9f);
+        halo.transform.localScale = Vector3.one * 2.4f;
+        Art(key, "Art", "key", 11, false, new Vector2(0.6f, 0f));
+
+        MazeGoal(maze, new Vector2(DoodleSprites.DarkExitX, DoodleSprites.DarkExitY));
+        Rigidbody2D ball = MazeBall(maze, new Vector2(-2.2f, -3.0f));
+        Transform darkness = Art(root.transform, "Darkness", "darkness", 20, false);
+        SmokeEmitter sparkle = Sparks(root.transform, "Sparkle", new Color(1f, 0.85f, 0.3f));
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(1.5f, -4.45f));
+        bubble.transform.localScale = Vector3.one * 0.5f;
+
+        SetField(level, "ball", ball);
+        SetField(level, "darkness", darkness);
+        SetField(level, "key", key);
+        SetField(level, "gate", gate);
+        SetField(level, "sparkle", sparkle);
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/DarkMaze/Level_DarkMaze.prefab");
+    }
+
+    // ---------- Livello 18: la cassaforte nascosta ----------
+
+    static GameObject BuildSafeLevel(GameObject keyPrefab, GameObject doorPrefab)
+    {
+        var root = new GameObject("Level_Safe");
+        SafeLevel level = root.AddComponent<SafeLevel>();
+        Art(root.transform, "Room", "room_bg", -20, false);
+        GameObject door = Instance(doorPrefab, root.transform, new Vector2(1.3f, -0.9f));
+        door.name = "Door";
+
+        // cassaforte a muro (coperta dal quadro)
+        var safe = new GameObject("Safe").transform;
+        safe.SetParent(root.transform, false);
+        safe.localPosition = new Vector3(-1.65f, 1.75f, 0);
+        safe.localScale = Vector3.one * 0.7f;
+        GameObject closed = Art(safe, "Closed", "safe", 1).gameObject;
+        GameObject open = Art(safe, "Open", "safe_open", 1).gameObject;
+        TextMesh safeDisplay = Label(closed.transform, new Vector2(0, 0.68f), 2, "_ _ _", 0.05f);
+        BoxCollider2D safeArea = safe.gameObject.AddComponent<BoxCollider2D>();
+        safeArea.size = new Vector2(1.9f, 2.1f);
+
+        GameObject key = Instance(keyPrefab, root.transform, new Vector2(-1.3f, 1.62f));
+        key.transform.localScale = Vector3.one * 0.45f;
+
+        var portrait = new GameObject("Portrait").transform;
+        portrait.SetParent(root.transform, false);
+        portrait.localPosition = new Vector3(-1.65f, 1.75f, 0);
+        portrait.localScale = Vector3.one * 0.78f;
+        Art(portrait, "Art", "portrait", 3);
+        portrait.gameObject.AddComponent<BoxCollider2D>().size = new Vector2(1.9f, 2.2f);
+
+        var back = new GameObject("PaintingBack").transform;
+        back.SetParent(root.transform, false);
+        back.localPosition = new Vector3(-1.35f, -3.05f, 0);
+        back.localRotation = Quaternion.Euler(0, 0, -6f);
+        back.localScale = Vector3.one * 0.72f;
+        Art(back, "Art", "painting_back", 3);
+        TextMesh note = Label(back, new Vector2(0, -0.17f), 4, "000", 0.08f);
+        note.transform.localRotation = Quaternion.Euler(0, 0, -4f);
+
+        var dustGo = new GameObject("Dust");
+        dustGo.transform.SetParent(root.transform, false);
+        SmokeEmitter dust = dustGo.AddComponent<SmokeEmitter>();
+        dust.puffSprite = sprites["puff"];
+        dust.puffsPerSecond = 30f;
+        dust.life = 0.9f;
+        dust.riseSpeed = 0.4f;
+        dust.spread = 0.8f;
+        dust.sideDrift = 1.0f;
+        dust.startScale = 0.5f;
+        dust.tint = new Color(0.9f, 0.85f, 0.75f, 0.9f);
+
+        // tastiera ingrandita (compare toccando la cassaforte)
+        var keypad = new GameObject("Keypad").transform;
+        keypad.SetParent(root.transform, false);
+        SpriteRenderer dim = Art(keypad, "Dim", "plain", 30, false).GetComponent<SpriteRenderer>();
+        dim.transform.localScale = new Vector3(12f, 16f, 1f);
+        dim.color = new Color(0f, 0f, 0f, 0.45f);
+        SpriteRenderer panel = Art(keypad, "Panel", "plain", 31, false, new Vector2(0, 0.95f)).GetComponent<SpriteRenderer>();
+        panel.transform.localScale = new Vector3(4.3f, 5.6f, 1f);
+        panel.color = new Color(0.55f, 0.58f, 0.66f);
+        BoxCollider2D panelCol = keypad.gameObject.AddComponent<BoxCollider2D>();
+        panelCol.size = new Vector2(4.3f, 5.6f);
+        panelCol.offset = new Vector2(0, 0.95f);
+        SpriteRenderer screen = Art(keypad, "Screen", "plain", 32, false, new Vector2(0, 3.05f)).GetComponent<SpriteRenderer>();
+        screen.transform.localScale = new Vector3(3.4f, 0.85f, 1f);
+        screen.color = new Color(0.06f, 0.23f, 0.16f);
+        TextMesh display = Label(keypad, new Vector2(0, 3.05f), 33, "_ _ _", 0.13f);
+        var digits = new List<TapButton>();
+        for (int n = 0; n <= 9; n++)
+        {
+            Vector2 pos = n == 0 ? new Vector2(0, -1.4f) : new Vector2(-1.2f + ((n - 1) % 3) * 1.2f, 1.95f - ((n - 1) / 3) * 1.12f);
+            var k = new GameObject("Key" + n);
+            k.transform.SetParent(keypad, false);
+            k.transform.localPosition = pos;
+            Transform art = Art(k.transform, "Art", "keypad_key", 33, false);
+            art.localScale = Vector3.one * 2.7f;
+            Label(art, new Vector2(0, 0.01f), 34, n.ToString(), 0.05f);
+            k.AddComponent<BoxCollider2D>().size = new Vector2(1.05f, 1.0f);
+            TapButton tb = k.AddComponent<TapButton>();
+            tb.id = n.ToString();
+            tb.visual = art;
+            digits.Add(tb);
+        }
+        keypad.gameObject.SetActive(false);
+
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(0.55f, 2.9f));
+        bubble.transform.localScale = Vector3.one * 0.5f;
+
+        SetField(level, "portrait", portrait);
+        SetField(level, "paintingBack", back.gameObject);
+        SetField(level, "codeNote", note);
+        SetField(level, "safeArea", safeArea);
+        SetField(level, "safeClosed", closed);
+        SetField(level, "safeOpen", open);
+        SetField(level, "keypad", keypad.gameObject);
+        SetField(level, "keypadPanel", panelCol);
+        SetArray(level, "digits", digits.ToArray());
+        SetField(level, "display", display);
+        SetField(level, "safeDisplay", safeDisplay);
+        SetField(level, "key", key.GetComponent<Draggable2D>());
+        SetField(level, "dust", dust);
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/Safe/Level_Safe.prefab");
+    }
+
+    // ---------- Livello 19: a nanna ----------
+
+    /// <summary>Barre LED del volume sul display dello stereo (dal verde al rosso).</summary>
+    static VolumeLeds Leds(Transform hifi, int order)
+    {
+        var go = new GameObject("Leds");
+        go.transform.SetParent(hifi, false);
+        var bars = new List<SpriteRenderer>();
+        for (int i = 0; i < 10; i++)
+        {
+            Transform t = Art(go.transform, "Led" + i, "led", order, false, new Vector2(-0.405f + i * 0.09f, 0.22f));
+            t.localScale = new Vector3(0.85f, 1.15f, 1f);
+            SpriteRenderer sr = t.GetComponent<SpriteRenderer>();
+            sr.color = i < 6 ? new Color(0.35f, 1f, 0.45f) : i < 8 ? new Color(1f, 0.85f, 0.2f) : new Color(1f, 0.25f, 0.25f);
+            bars.Add(sr);
+        }
+        VolumeLeds leds = go.AddComponent<VolumeLeds>();
+        leds.bars = bars.ToArray();
+        return leds;
+    }
+
+    static GameObject BuildBedtimeLevel()
+    {
+        var root = new GameObject("Level_Bedtime");
+        BedtimeLevel level = root.AddComponent<BedtimeLevel>();
+        AudioSource stereo = root.AddComponent<AudioSource>();
+        stereo.playOnAwake = false;
+        stereo.loop = true;
+        stereo.clip = Soundtrack();
+        Art(root.transform, "Room", "night_bg", -20, false);
+
+        // stereo sul mobile
+        var hifi = new GameObject("HiFi").transform;
+        hifi.SetParent(root.transform, false);
+        hifi.localPosition = new Vector3(-1.3f, -0.55f, 0);
+        hifi.localScale = Vector3.one * 0.85f;
+        Art(hifi, "Unit", "hifi", 4);
+        Leds(hifi, 5);
+        Transform sp = Art(hifi, "Speaker", "speaker", 4, false, new Vector2(1.25f, 0.1f));
+        Pulse pulse = sp.gameObject.AddComponent<Pulse>();
+        pulse.speed = 14f;
+        pulse.amount = 0.05f;
+        var notesGo = new GameObject("Notes");
+        notesGo.transform.SetParent(hifi, false);
+        notesGo.transform.localPosition = new Vector3(0, 0.6f, 0);
+        SmokeEmitter notes = notesGo.AddComponent<SmokeEmitter>();
+        notes.puffSprite = sprites["note"];
+        notes.puffsPerSecond = 4f;
+        notes.life = 1.6f;
+        notes.riseSpeed = 0.7f;
+        notes.spread = 1.2f;
+        notes.sideDrift = 0.4f;
+        notes.startScale = 0.9f;
+        notes.growth = 0.3f;
+        notes.spinRange = 25f;
+        notes.tint = Color.white;
+        SpriteRenderer shelf = Art(root.transform, "Shelf", "plain", 2, false, new Vector2(-1.0f, -1.1f)).GetComponent<SpriteRenderer>();
+        shelf.transform.localScale = new Vector3(2.9f, 0.14f, 1f);
+        shelf.color = new Color(0.55f, 0.36f, 0.24f);
+
+        // abat-jour sul comodino
+        SpriteRenderer stand = Art(root.transform, "Nightstand", "plain", 1, false, new Vector2(1.95f, -2.15f)).GetComponent<SpriteRenderer>();
+        stand.transform.localScale = new Vector3(1.3f, 1.3f, 1f);
+        stand.color = new Color(0.62f, 0.42f, 0.28f);
+        var lamp = new GameObject("Lamp").transform;
+        lamp.SetParent(root.transform, false);
+        lamp.localPosition = new Vector3(1.95f, -1.5f, 0);
+        Transform lampArt = Art(lamp, "Art", "bedside_lamp", 6);
+        BoxCollider2D lampCol = lamp.gameObject.AddComponent<BoxCollider2D>();
+        lampCol.size = new Vector2(1.6f, 1.9f);
+        lampCol.offset = new Vector2(0, 0.85f);
+        TapButton lampSwitch = lamp.gameObject.AddComponent<TapButton>();
+        lampSwitch.visual = lampArt;
+        lampSwitch.pressedScaleY = 0.92f;
+        var lightGo = new GameObject("Light");
+        lightGo.transform.SetParent(lamp, false);
+        SpriteRenderer glow = Art(lightGo.transform, "Glow", "glow", 0, false, new Vector2(0, 1.12f)).GetComponent<SpriteRenderer>();
+        glow.color = new Color(1f, 0.9f, 0.55f, 0.75f);
+        glow.transform.localScale = Vector3.one * 5f;
+        SpriteRenderer bulb = Art(lightGo.transform, "Bulb", "glow", 7, false, new Vector2(0, 1.12f)).GetComponent<SpriteRenderer>();
+        bulb.color = new Color(1f, 0.95f, 0.6f, 1f);
+        bulb.transform.localScale = Vector3.one * 0.7f;
+
+        // gatto assonnato sul cuscino
+        var cat = new GameObject("Cat").transform;
+        cat.SetParent(root.transform, false);
+        cat.localPosition = new Vector3(-0.55f, -2.85f, 0);
+        cat.localScale = Vector3.one * 1.1f;
+        Transform catArt = Art(cat, "Art", "cat", 2);
+        Pulse breathe = catArt.gameObject.AddComponent<Pulse>();
+        breathe.amount = 0.02f;
+        breathe.speed = 1.8f;
+        GameObject eyesOpen = Art(cat, "EyesOpen", "cat_eyes", 3, false).gameObject;
+        GameObject eyesHalf = Art(cat, "EyesHalf", "cat_face_3", 3, false).gameObject;
+        eyesHalf.SetActive(false);
+        var zzzGo = new GameObject("Zzz");
+        zzzGo.transform.SetParent(cat, false);
+        zzzGo.transform.localPosition = new Vector3(-0.35f, 0.75f, 0);
+        SmokeEmitter zzz = zzzGo.AddComponent<SmokeEmitter>();
+        zzz.puffSprite = sprites["zzz"];
+        zzz.puffsPerSecond = 1.3f;
+        zzz.life = 2.2f;
+        zzz.riseSpeed = 0.45f;
+        zzz.startScale = 0.7f;
+        zzz.spread = 0.1f;
+        zzz.spinRange = 12f;
+        zzz.growth = 0.9f;
+        zzz.sideDrift = 0.15f;
+        zzz.tint = Color.white;
+
+        SpriteRenderer dark = Art(root.transform, "Dark", "plain", 15, false).GetComponent<SpriteRenderer>();
+        dark.transform.localScale = new Vector3(12f, 16f, 1f);
+        dark.color = new Color(0.02f, 0.02f, 0.08f, 0f);
+
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(0.3f, -0.9f));
+        bubble.transform.localScale = Vector3.one * 0.55f;
+
+        SetField(level, "lampSwitch", lampSwitch);
+        SetField(level, "lampLight", lightGo);
+        SetField(level, "roomDark", dark);
+        SetField(level, "stereo", stereo);
+        SetField(level, "notes", notes);
+        SetField(level, "catEyesOpen", eyesOpen);
+        SetField(level, "catEyesHalf", eyesHalf);
+        SetField(level, "zzz", zzz);
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/Bedtime/Level_Bedtime.prefab");
+    }
+
+    // ---------- Livello 20: il razzo ----------
+
+    static GameObject BuildRocketLevel()
+    {
+        var root = new GameObject("Level_Rocket");
+        RocketLevel level = root.AddComponent<RocketLevel>();
+        Art(root.transform, "Site", "launch_bg", -20, false);
+
+        var rocket = new GameObject("Rocket").transform;
+        rocket.SetParent(root.transform, false);
+        rocket.localPosition = new Vector3(0.3f, -2.63f, 0);
+        Art(rocket, "Art", "rocket", 5);
+        var flame = new GameObject("Flame").transform;
+        flame.SetParent(rocket, false);
+        flame.localPosition = new Vector3(0, 0.02f, 0);
+        Transform fl = Art(flame, "Art", "flame", 4, false);
+        fl.localRotation = Quaternion.Euler(0, 0, 180f);
+        fl.localPosition = Vector3.zero;
+        fl.localScale = Vector3.one * 3.2f;
+        var cap = new GameObject("FuelCap");
+        cap.transform.SetParent(rocket, false);
+        cap.transform.localPosition = new Vector3(0, 1.0f, 0);
+        cap.AddComponent<CircleCollider2D>().radius = 0.55f;
+        DropSlot slot = cap.AddComponent<DropSlot>();
+        slot.acceptedId = "fuel";
+
+        var can = new GameObject("FuelCan");
+        can.transform.SetParent(root.transform, false);
+        can.transform.localPosition = new Vector3(1.95f, -3.7f, 0);
+        Art(can.transform, "Art", "fuel_can", 12);
+        can.AddComponent<BoxCollider2D>().size = new Vector2(1.0f, 1.2f);
+        Draggable2D drag = can.AddComponent<Draggable2D>();
+        drag.itemId = "fuel";
+
+        var smokeGo = new GameObject("Smoke");
+        smokeGo.transform.SetParent(root.transform, false);
+        smokeGo.transform.localPosition = new Vector3(0.3f, -2.7f, 0);
+        SmokeEmitter smoke = smokeGo.AddComponent<SmokeEmitter>();
+        smoke.puffSprite = sprites["puff"];
+        smoke.puffsPerSecond = 12f;
+        smoke.life = 1.4f;
+        smoke.riseSpeed = 0.25f;
+        smoke.spread = 0.6f;
+        smoke.sideDrift = 1.4f;
+        smoke.startScale = 0.9f;
+        smoke.growth = 1.6f;
+        smoke.tint = new Color(0.95f, 0.95f, 0.97f, 0.95f);
+        smoke.sortingOrder = 9;
+
+        // pannello di lancio: carburante, coperchio di sicurezza, pulsante
+        TextMesh fuelLabel = Label(root.transform, new Vector2(-2.45f, -3.25f), 8, "FUEL", 0.035f);
+        fuelLabel.color = Color.white;
+        SpriteRenderer gaugeBg = Art(root.transform, "GaugeBg", "plain", 7, false, new Vector2(-1.3f, -3.25f)).GetComponent<SpriteRenderer>();
+        gaugeBg.transform.localScale = new Vector3(1.7f, 0.26f, 1f);
+        gaugeBg.color = new Color(0.17f, 0.13f, 0.2f);
+        var fill = new GameObject("FuelFill").transform;
+        fill.SetParent(root.transform, false);
+        fill.localPosition = new Vector3(-2.11f, -3.25f, 0);
+        SpriteRenderer fillArt = Art(fill, "Bar", "plain", 8, false, new Vector2(0.81f, 0f)).GetComponent<SpriteRenderer>();
+        fillArt.transform.localScale = new Vector3(1.62f, 0.18f, 1f);
+        fillArt.color = new Color(0.36f, 1f, 0.45f);
+
+        Transform launchVisual = HoldButton(root.transform, "LaunchButton", "big_button", new Vector2(-1.3f, -4.2f), out Collider2D launchCol);
+        var cover = new GameObject("SafetyCover");
+        cover.transform.SetParent(root.transform, false);
+        cover.transform.localPosition = new Vector3(-1.3f, -3.55f, 0);
+        Transform coverArt = Art(cover.transform, "Art", "safety_cover", 9, false);
+        BoxCollider2D coverCol = cover.AddComponent<BoxCollider2D>();
+        coverCol.size = new Vector2(1.6f, 0.9f);
+        coverCol.offset = new Vector2(0, -0.4f);
+        TapButton coverButton = cover.AddComponent<TapButton>();
+        coverButton.visual = coverArt;
+        coverButton.pressedScaleY = 0.95f;
+
+        TextMesh countdown = Label(root.transform, new Vector2(0, 3.1f), 30, "", 0.13f);
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(1.75f, 0.9f));
+        bubble.transform.localScale = Vector3.one * 0.5f;
+
+        SetField(level, "rocket", rocket);
+        SetField(level, "fuelCap", slot);
+        SetField(level, "fuelFill", fill);
+        SetField(level, "cover", coverButton);
+        SetField(level, "coverHinge", cover.transform);
+        SetField(level, "launchButton", launchCol);
+        SetField(level, "launchVisual", launchVisual);
+        SetField(level, "countdown", countdown);
+        SetField(level, "flame", flame);
+        SetField(level, "smoke", smoke);
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/Rocket/Level_Rocket.prefab");
     }
 
     static TapButton BombButton(Transform parent, string name, string sprite, Vector2 pos, out Transform wireStart)
