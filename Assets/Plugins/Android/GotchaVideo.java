@@ -156,6 +156,24 @@ public class GotchaVideo {
      * Salva il video nella galleria (Movies/Gotcha) e apre il menu di condivisione di Android
      * (WhatsApp, Instagram, TikTok, ...). Restituisce false se qualcosa va storto.
      */
+    /** Condivide solo un testo (es. l'invito con il link): menu di condivisione di Android. */
+    public static boolean shareText(final String text, final String chooserTitle) {
+        try {
+            final Activity activity = UnityPlayer.currentActivity;
+            activity.runOnUiThread(new Runnable() {
+                @Override public void run() {
+                    Intent send = new Intent(Intent.ACTION_SEND);
+                    send.setType("text/plain");
+                    send.putExtra(Intent.EXTRA_TEXT, text);
+                    activity.startActivity(Intent.createChooser(send, chooserTitle));
+                }
+            });
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public static boolean share(String path, String chooserTitle, String text) {
         try {
             Activity activity = UnityPlayer.currentActivity;

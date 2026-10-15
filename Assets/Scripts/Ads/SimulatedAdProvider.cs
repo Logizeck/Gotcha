@@ -12,13 +12,20 @@ namespace Gotcha.Ads
     public class SimulatedAdProvider : IAdProvider
     {
         public float closeAfterSeconds = 3f;
+        public float rewardedSeconds = 5f;
 
         public bool IsReady => true;
 
         public void Show(Action onClosed)
         {
             var go = new GameObject("SimulatedAd");
-            go.AddComponent<SimulatedAdOverlay>().Show(closeAfterSeconds, onClosed);
+            go.AddComponent<SimulatedAdOverlay>().Show(closeAfterSeconds, onClosed, "CLOSE IN ", "CLOSE  X");
+        }
+
+        public void ShowRewarded(Action<bool> onDone)
+        {
+            var go = new GameObject("SimulatedRewardedAd");
+            go.AddComponent<SimulatedAdOverlay>().Show(rewardedSeconds, () => onDone?.Invoke(true), "REWARD IN ", "GET +1 LIFE");
         }
     }
 
@@ -31,9 +38,13 @@ namespace Gotcha.Ads
         Text closeLabel;
         float previousTimeScale;
 
-        public void Show(float closeAfter, Action onClosed)
+        string waitText, doneText;
+
+        public void Show(float closeAfter, Action onClosed, string waitText, string doneText)
         {
             this.onClosed = onClosed;
+            this.waitText = waitText;
+            this.doneText = doneText;
             previousTimeScale = Time.timeScale;
             Time.timeScale = 0f;
             AudioListener.pause = true;
@@ -46,10 +57,10 @@ namespace Gotcha.Ads
             closeButton.interactable = false;
             for (float t = seconds; t > 0f; t -= Time.unscaledDeltaTime)
             {
-                closeLabel.text = "CLOSE IN " + Mathf.CeilToInt(t);
+                closeLabel.text = waitText + Mathf.CeilToInt(t);
                 yield return null;
             }
-            closeLabel.text = "CLOSE  X";
+            closeLabel.text = doneText;
             closeButton.interactable = true;
         }
 

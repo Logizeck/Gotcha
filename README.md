@@ -28,7 +28,7 @@ Livelli attuali:
 23. **Frozen Key** — strofina il ghiaccio, pizzica la chiave, apri.
 24. **Campfire** — strofina per la scintilla, soffia piano.
 25. **Chicken Button** — prendi il pulsante che scappa.
-26. **Thirsty Plant** — versa l'acqua inclinando il telefono.
+26. **Thirsty Plant** — fionda le gocce nel vaso.
 27. **Shell Game** — dov'è il topolino?
 28. **Sky Wire** — taglia il filo del colore del cielo.
 29. **Sunny Day** — proteggi il pupazzo con una nuvola.

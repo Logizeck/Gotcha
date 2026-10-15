@@ -20,6 +20,13 @@ namespace Gotcha.Core
         public event Action<LevelDefinition, int> LevelStarted;
         public event Action<LevelDefinition, LevelResult, string> LevelFinished;
         public event Action GameCompleted;
+        /// <summary>Si voleva giocare ma le vite sono finite: la UI mostra il pannello (attesa, pubblicità, invito).</summary>
+        public event Action<int> OutOfLives;
+
+        [Tooltip("Se falso, i fallimenti che svelano un Easter egg non costano vite (sono una scoperta, non un errore).")]
+        [SerializeField] bool easterEggCostsLife = false;
+
+        public LivesManager Lives { get; private set; }
 
         /// <summary>Pausa (menu, hint): ferma il tempo di gioco, quindi timer e animazioni dei livelli.</summary>
         public bool Paused
@@ -45,6 +52,8 @@ namespace Gotcha.Core
         {
             Instance = this;
             Ads = new AdBreakManager(new SimulatedAdProvider());   // pubblicità simulata finché non c'è AdMob
+            Lives = GetComponent<LivesManager>();
+            if (Lives == null) Lives = gameObject.AddComponent<LivesManager>();
             // Mentre il gioco è aperto lo schermo non si spegne e non si abbassa (molti livelli si giocano
             // senza toccarlo: inclinazione, attesa...). Su Android è il flag KEEP_SCREEN_ON.
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
@@ -63,7 +72,17 @@ namespace Gotcha.Core
 
         void Start()
         {
-            StartLevel(Mathf.Min(SaveData.HighestUnlocked, LevelCount - 1));
+            int first = Mathf.Min(SaveData.HighestUnlocked, LevelCount - 1);
+            StartLevel(first);
+            if (!Lives.CanPlay) { Paused = true; OutOfLives?.Invoke(first); }
+        }
+
+        /// <summary>Avvia un livello solo se c'è almeno una vita; altrimenti avvisa la UI.</summary>
+        public bool TryStartLevel(int index)
+        {
+            if (!Lives.CanPlay) { OutOfLives?.Invoke(index); return false; }
+            StartLevel(index);
+            return true;
         }
 
         void Update()
@@ -104,6 +123,7 @@ namespace Gotcha.Core
             Ads.RegisterLevelResult(result == LevelResult.Solved);
             if (result == LevelResult.Solved) SaveData.UnlockUpTo(CurrentIndex + 1);
             if (!string.IsNullOrEmpty(eggId)) SaveData.AddEasterEgg(eggId);
+            if (result == LevelResult.Failed && (string.IsNullOrEmpty(eggId) || easterEggCostsLife)) Lives.LoseLife();
             LevelFinished?.Invoke(CurrentDefinition, result, eggId);
         }
 
@@ -119,7 +139,7 @@ namespace Gotcha.Core
                 GameCompleted?.Invoke();
                 return;
             }
-            Ads.TryShowBreak(() => StartLevel(next));
+            Ads.TryShowBreak(() => TryStartLevel(next));
         }
     }
 }

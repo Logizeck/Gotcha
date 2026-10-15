@@ -16,16 +16,20 @@ namespace Gotcha.UI
     public class GameUI : MonoBehaviour
     {
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.13";
+        public const string Version = "0.14";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
+        [SerializeField] Sprite heartSprite;     // cuori delle vite
 
         // Palette "doodle": inchiostro scuro, corallo, verde acqua, carta
         static readonly Color Accent = new Color(1f, 0.36f, 0.42f);
         static readonly Color Dark = new Color(0.17f, 0.75f, 0.71f);
         static readonly Color Ink = new Color(0.17f, 0.13f, 0.2f);
         static readonly Color CardColor = new Color(1f, 0.98f, 0.92f, 1f);
+        static readonly Color EggColor = new Color(0.58f, 0.36f, 0.9f);
+        static readonly Color LockedColor = new Color(0.72f, 0.7f, 0.75f);
+        const int LevelsPerPage = 10;
 
         Font displayFont, bodyFont;
         RectTransform safeRoot;
@@ -35,8 +39,20 @@ namespace Gotcha.UI
         GameObject hintPanel, menuPanel, resultPanel, completedPanel;
         Text hintBody, menuEggs, resultTitle, resultBody, resultButton, musicLabel, shareLabel;
         Button shareButton;
-        RectTransform levelList;
+        RectTransform pagesContent;
+        PagerSwipe pager;
+        RectTransform pageDots;
+        Text pageLabel;
 
+        // vite
+        Image[] hearts;
+        Text livesTimer;
+        GameObject livesPanel;
+        Text livesTitle, livesBody, playLabel;
+        Button adButton, playButton;
+        int pendingLevel = -1;
+        int brokenHeart = -1;
+        float brokenAt;
         void Awake()
         {
             if (flow == null) flow = GameFlow.Instance;
@@ -48,6 +64,7 @@ namespace Gotcha.UI
             flow.LevelStarted += OnLevelStarted;
             flow.LevelFinished += OnLevelFinished;
             flow.GameCompleted += OnGameCompleted;
+            flow.OutOfLives += OnOutOfLives;
         }
 
         void Start()
@@ -63,16 +80,22 @@ namespace Gotcha.UI
             flow.LevelStarted -= OnLevelStarted;
             flow.LevelFinished -= OnLevelFinished;
             flow.GameCompleted -= OnGameCompleted;
+            flow.OutOfLives -= OnOutOfLives;
+            if (flow.Lives != null) flow.Lives.Changed -= OnLivesChanged;
         }
 
         void Update()
         {
             if (Screen.safeArea != lastSafeArea) ApplySafeArea();
+            if (!livesHooked && flow.Lives != null) { flow.Lives.Changed += OnLivesChanged; livesHooked = true; }
+            UpdateHearts();
+            if (livesPanel.activeSelf) RefreshLivesPanel();
             if (menuPanel.activeSelf) RefreshMusicLabel();   // si aggiorna se alzi il volume col menu aperto
 
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                if (hintPanel.activeSelf) CloseOverlay(hintPanel);
+                if (livesPanel.activeSelf) CloseLives();
+                else if (hintPanel.activeSelf) CloseOverlay(hintPanel);
                 else if (menuPanel.activeSelf) CloseOverlay(menuPanel);
                 else if (!resultPanel.activeSelf && !completedPanel.activeSelf) OpenMenu();
             }
@@ -99,7 +122,11 @@ namespace Gotcha.UI
             resultTitle.text = solved ? "SOLVED!" : "GOTCHA!";
             if (solved) resultBody.text = "Nice one.";
             else if (!string.IsNullOrEmpty(eggId)) resultBody.text = "You found a secret!\nEaster eggs: " + SaveData.EasterEggCount;
-            else resultBody.text = "Not quite. Try again.";
+            else
+            {
+                int lives = flow.Lives != null ? flow.Lives.Lives : 1;
+                resultBody.text = lives > 0 ? "Not quite. Try again.\nLives left: " + lives : "Not quite...\nand you're out of lives!";
+            }
             resultButton.text = solved ? "NEXT" : "RETRY";
             // video da condividere (es. il pupazzo che si scioglie)
             bool clip = !string.IsNullOrEmpty(eggId) && ClipRecorder.Instance != null && ClipRecorder.Instance.HasClip;
@@ -172,23 +199,185 @@ namespace Gotcha.UI
             flow.Paused = false;
         }
 
+        // ---------- Selezione livelli a pagine ----------
+
         void RebuildLevelList()
         {
-            for (int i = levelList.childCount - 1; i >= 0; i--) Destroy(levelList.GetChild(i).gameObject);
+            for (int i = pagesContent.childCount - 1; i >= 0; i--) Destroy(pagesContent.GetChild(i).gameObject);
+            for (int i = pageDots.childCount - 1; i >= 0; i--) Destroy(pageDots.GetChild(i).gameObject);
 
-            int unlocked = Mathf.Min(SaveData.HighestUnlocked, flow.LevelCount - 1);
-            for (int i = 0; i <= unlocked; i++)
+            int count = flow.LevelCount;
+            int pages = Mathf.Max(1, (count + LevelsPerPage - 1) / LevelsPerPage);
+            int unlocked = Mathf.Min(SaveData.HighestUnlocked, count - 1);
+            for (int p = 0; p < pages; p++)
             {
-                int index = i;
-                LevelDefinition def = flow.GetDefinition(i);
-                string label = (i + 1) + ". " + (def != null ? def.title : "?");
-                Button b = CreateButton(levelList, label, i == flow.CurrentIndex ? Accent : Dark, () =>
+                RectTransform page = CreateRect("Page" + p, pagesContent, new Vector2(p, 0f), new Vector2(p + 1, 1f));
+                for (int k = 0; k < LevelsPerPage; k++)
                 {
-                    menuPanel.SetActive(false);
-                    flow.StartLevel(index);
-                });
-                b.gameObject.AddComponent<LayoutElement>().preferredHeight = 105;
+                    int index = p * LevelsPerPage + k;
+                    if (index >= count) break;
+                    int col = k % 2, row = k / 2;
+                    RectTransform cell = LevelCell(page, index, index <= unlocked);
+                    Place(cell, new Vector2(col * 0.5f + 0.015f, 1f - (row + 1) * 0.2f + 0.012f), new Vector2((col + 1) * 0.5f - 0.015f, 1f - row * 0.2f - 0.012f));
+                }
+                Image dot = CreateRect("Dot" + p, pageDots, Vector2.zero, Vector2.zero).gameObject.AddComponent<Image>();
+                SetSprite(dot);
+                dot.raycastTarget = false;
             }
+            pager.PageCount = pages;
+            int current = Mathf.Max(0, flow.CurrentIndex) / LevelsPerPage;
+            pager.SetPage(current, true);
+            LayoutDots();
+        }
+
+        RectTransform LevelCell(Transform page, int index, bool open)
+        {
+            LevelDefinition def = flow.GetDefinition(index);
+            bool egg = def != null && !string.IsNullOrEmpty(def.easterEggId);
+            bool found = egg && SaveData.HasEasterEgg(def.easterEggId);
+            Color color = !open ? LockedColor : index == flow.CurrentIndex ? Accent : egg ? EggColor : Dark;
+            Button b = CreateButton(page, "", color, () =>
+            {
+                menuPanel.SetActive(false);
+                flow.Paused = false;
+                flow.TryStartLevel(index);
+            });
+            b.interactable = open;
+            b.transform.localRotation = Quaternion.identity;
+            Text label = b.GetComponentInChildren<Text>();
+            label.text = (index + 1).ToString();
+            label.fontSize = 64;
+            label.resizeTextMaxSize = 64;
+            label.alignment = TextAnchor.MiddleLeft;
+            Place(label.transform, new Vector2(0.06f, 0.05f), new Vector2(0.32f, 0.95f));
+            Text title = CreateText(b.transform, open ? (def != null ? def.title : "?") : "LOCKED", 34, Color.white, FontStyle.Bold);
+            title.alignment = TextAnchor.MiddleLeft;
+            Place(title.transform, new Vector2(0.32f, egg ? 0.36f : 0.08f), new Vector2(0.97f, 0.92f));
+            if (egg)
+            {
+                Text tag = CreateText(b.transform, found ? "EGG FOUND!" : "SECRET EGG", 24, new Color(1f, 0.92f, 0.5f), FontStyle.Normal);
+                tag.alignment = TextAnchor.MiddleLeft;
+                Place(tag.transform, new Vector2(0.32f, 0.06f), new Vector2(0.97f, 0.4f));
+            }
+            return (RectTransform)b.transform;
+        }
+
+        void OnPageChanged(int page)
+        {
+            if (pageLabel != null) pageLabel.text = "LEVELS " + (page * LevelsPerPage + 1) + "-" + Mathf.Min(flow.LevelCount, (page + 1) * LevelsPerPage);
+            LayoutDots();
+        }
+
+        void LayoutDots()
+        {
+            int n = pageDots.childCount;
+            for (int i = 0; i < n; i++)
+            {
+                RectTransform d = (RectTransform)pageDots.GetChild(i);
+                bool on = pager != null && i == pager.Page;
+                float size = on ? 34f : 24f;
+                d.anchorMin = d.anchorMax = new Vector2(0.5f, 0.5f);
+                d.sizeDelta = new Vector2(size, size);
+                d.anchoredPosition = new Vector2((i - (n - 1) * 0.5f) * 50f, 0f);
+                d.GetComponent<Image>().color = on ? Accent : new Color(Ink.r, Ink.g, Ink.b, 0.3f);
+            }
+        }
+
+        // ---------- Vite ----------
+
+        bool livesHooked;
+
+        void UpdateHearts()
+        {
+            if (hearts == null || flow.Lives == null) return;
+            int lives = flow.Lives.Lives;
+            float t = Time.unscaledTime;
+            for (int i = 0; i < hearts.Length; i++)
+            {
+                RectTransform rt = (RectTransform)hearts[i].transform;
+                bool full = i < lives;
+                if (i == brokenHeart && t - brokenAt < 0.8f)
+                {
+                    // il cuore appena perso: si gonfia, trema e si spegne
+                    float k = (t - brokenAt) / 0.8f;
+                    rt.localScale = Vector3.one * (1f + Mathf.Sin(k * Mathf.PI) * 0.7f);
+                    rt.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(k * 40f) * 20f * (1f - k));
+                    hearts[i].color = Color.Lerp(Color.white, new Color(0.45f, 0.4f, 0.5f, 0.35f), k);
+                    continue;
+                }
+                rt.localRotation = Quaternion.identity;
+                hearts[i].color = full ? Color.white : new Color(0.45f, 0.4f, 0.5f, 0.35f);
+                float beat = full ? Mathf.Pow(Mathf.Abs(Mathf.Sin(t * 2.6f + i * 0.35f)), 8f) * 0.18f : 0f;   // battito
+                rt.localScale = Vector3.one * (1f + beat);
+            }
+            livesTimer.text = lives >= LivesManager.MaxLives ? "FULL" : "+1 IN " + FormatTime(flow.Lives.SecondsToNext);
+        }
+
+        static string FormatTime(float seconds)
+        {
+            int s = Mathf.CeilToInt(seconds);
+            return (s / 60) + ":" + (s % 60).ToString("00");
+        }
+
+        void OnLivesChanged(int before, int after)
+        {
+            if (after < before) { brokenHeart = after; brokenAt = Time.unscaledTime; }
+        }
+
+        void OnOutOfLives(int level)
+        {
+            pendingLevel = level;
+            resultPanel.SetActive(false);
+            menuPanel.SetActive(false);
+            hintPanel.SetActive(false);
+            OpenLives(true);
+        }
+
+        void OpenLives(bool outOfLives)
+        {
+            livesTitle.text = outOfLives ? "OUT OF LIVES!" : "LIVES";
+            RefreshLivesPanel();
+            livesPanel.SetActive(true);
+            flow.Paused = true;
+        }
+
+        void RefreshLivesPanel()
+        {
+            LivesManager lm = flow.Lives;
+            if (lm == null) return;
+            bool full = lm.Lives >= LivesManager.MaxLives;
+            livesBody.text = "Lives: " + lm.Lives + " / " + LivesManager.MaxLives + "\n" +
+                (full ? "Your hearts are full!" : "Next life in " + FormatTime(lm.SecondsToNext)) +
+                "\nInvite a friend: +1 life when they join!";
+            adButton.interactable = !full;
+            bool canPlay = pendingLevel >= 0 && lm.CanPlay;
+            playButton.interactable = pendingLevel < 0 || canPlay;
+            playLabel.text = pendingLevel >= 0 ? (canPlay ? "PLAY!" : "WAITING...") : "CLOSE";
+        }
+
+        void WatchAdForLife()
+        {
+            adButton.interactable = false;
+            flow.Ads.ShowRewarded(ok =>
+            {
+                if (ok && flow.Lives != null) flow.Lives.GrantLife();
+                RefreshLivesPanel();
+            });
+        }
+
+        void CloseLives()
+        {
+            if (pendingLevel >= 0)
+            {
+                if (!flow.Lives.CanPlay) return;   // senza vite non si gioca
+                int level = pendingLevel;
+                pendingLevel = -1;
+                livesPanel.SetActive(false);
+                flow.Paused = false;
+                flow.StartLevel(level);
+                return;
+            }
+            CloseOverlay(livesPanel);
         }
 
         // ---------- Costruzione ----------
@@ -221,6 +410,30 @@ namespace Gotcha.UI
             titleText = CreateText(bar, "", 54, Ink, FontStyle.Bold);
             Place(titleText.transform, new Vector2(0.28f, 0), new Vector2(0.72f, 1));
 
+            // Vite: cuori pulsanti sotto la barra (toccandoli si apre il pannello delle vite)
+            RectTransform heartsRow = CreateRect("Lives", safeRoot, new Vector2(0, 1), new Vector2(1, 1));
+            heartsRow.offsetMin = new Vector2(30, -265);
+            heartsRow.offsetMax = new Vector2(-30, -180);
+            Image rowHit = heartsRow.gameObject.AddComponent<Image>();
+            rowHit.color = new Color(0, 0, 0, 0);
+            Button rowButton = heartsRow.gameObject.AddComponent<Button>();
+            rowButton.transition = Selectable.Transition.None;
+            rowButton.onClick.AddListener(() => { if (!resultPanel.activeSelf && !completedPanel.activeSelf) OpenLives(false); });
+            hearts = new Image[LivesManager.MaxLives];
+            for (int i = 0; i < hearts.Length; i++)
+            {
+                RectTransform h = CreateRect("Heart" + i, heartsRow, new Vector2(0, 0.5f), new Vector2(0, 0.5f));
+                h.sizeDelta = new Vector2(76, 76);
+                h.anchoredPosition = new Vector2(55 + i * 88, 0);
+                hearts[i] = h.gameObject.AddComponent<Image>();
+                hearts[i].sprite = heartSprite;
+                hearts[i].preserveAspect = true;
+                hearts[i].raycastTarget = false;
+            }
+            livesTimer = CreateText(heartsRow, "", 40, Ink, FontStyle.Bold);
+            livesTimer.alignment = TextAnchor.MiddleRight;
+            Place(livesTimer.transform, new Vector2(0.55f, 0), new Vector2(1, 1));
+
             // Hint
             RectTransform hintCard;
             hintPanel = CreateOverlay("HintPanel", out hintCard);
@@ -235,16 +448,40 @@ namespace Gotcha.UI
             AddHeader(menuCard, "MENU");
             menuEggs = CreateText(menuCard, "", 46, Ink, FontStyle.Normal);
             Place(menuEggs.transform, new Vector2(0.08f, 0.76f), new Vector2(0.92f, 0.84f));
-            levelList = CreateRect("Levels", menuCard, new Vector2(0.1f, 0.27f), new Vector2(0.9f, 0.75f));
-            VerticalLayoutGroup layout = levelList.gameObject.AddComponent<VerticalLayoutGroup>();
-            layout.spacing = 14;
-            layout.childControlHeight = true;
-            layout.childControlWidth = true;
-            layout.childForceExpandHeight = false;
+            // livelli a pagine da 10, scorrevoli con lo swipe (o con le frecce)
+            pageLabel = CreateText(menuCard, "", 40, Ink, FontStyle.Bold);
+            Place(pageLabel.transform, new Vector2(0.2f, 0.715f), new Vector2(0.8f, 0.765f));
+            RectTransform viewport = CreateRect("Levels", menuCard, new Vector2(0.06f, 0.315f), new Vector2(0.94f, 0.71f));
+            viewport.gameObject.AddComponent<RectMask2D>();
+            Image hit = viewport.gameObject.AddComponent<Image>();
+            hit.color = new Color(0, 0, 0, 0);
+            pagesContent = CreateRect("Pages", viewport, Vector2.zero, Vector2.one);
+            pager = viewport.gameObject.AddComponent<PagerSwipe>();
+            pager.viewport = viewport;
+            pager.content = pagesContent;
+            pager.PageChanged += OnPageChanged;
+            pageDots = CreateRect("Dots", menuCard, new Vector2(0.25f, 0.255f), new Vector2(0.75f, 0.305f));
+            Button prev = CreateButton(menuCard, "<", Dark, () => pager.SetPage(pager.Page - 1));
+            Place(prev.transform, new Vector2(0.06f, 0.25f), new Vector2(0.2f, 0.31f));
+            Button nextPage = CreateButton(menuCard, ">", Dark, () => pager.SetPage(pager.Page + 1));
+            Place(nextPage.transform, new Vector2(0.8f, 0.25f), new Vector2(0.94f, 0.31f));
             Button music = CreateButton(menuCard, "MUSIC: ON", Dark, ToggleMusic);
             musicLabel = music.GetComponentInChildren<Text>();
             Place(music.transform, new Vector2(0.25f, 0.155f), new Vector2(0.75f, 0.235f));
             Place(CreateButton(menuCard, "RESUME", Accent, () => CloseOverlay(menuPanel)).transform, new Vector2(0.25f, 0.05f), new Vector2(0.75f, 0.13f));
+
+            // Vite: attesa, pubblicità con premio, invito
+            RectTransform livesCard;
+            livesPanel = CreateOverlay("LivesPanel", out livesCard, 1100);
+            livesTitle = AddHeader(livesCard, "LIVES");
+            livesBody = CreateText(livesCard, "", 50, Ink, FontStyle.Normal);
+            Place(livesBody.transform, new Vector2(0.08f, 0.6f), new Vector2(0.92f, 0.82f));
+            adButton = CreateButton(livesCard, "WATCH AD: +1 LIFE", Accent, WatchAdForLife);
+            Place(adButton.transform, new Vector2(0.12f, 0.43f), new Vector2(0.88f, 0.55f));
+            Place(CreateButton(livesCard, "INVITE A FRIEND", EggColor, InviteService.Share).transform, new Vector2(0.12f, 0.27f), new Vector2(0.88f, 0.39f));
+            playButton = CreateButton(livesCard, "CLOSE", Dark, CloseLives);
+            playLabel = playButton.GetComponentInChildren<Text>();
+            Place(playButton.transform, new Vector2(0.25f, 0.07f), new Vector2(0.75f, 0.19f));
 
             // Esito livello
             RectTransform resultCard;

@@ -31,7 +31,7 @@ public static class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 13;
+    const int BuilderVersion = 14;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -83,7 +83,7 @@ public static class GotchaProjectBuilder
                 BuildMazeLevel()),
             Define("Snowman", "snowman", "SNOWMAN",
                 "Give the snowman a happy face. Eyes and nose go on the head... and the smile? Draw it in the snow!",
-                BuildSnowmanLevel(carrotPrefab, coalPrefab)),
+                BuildSnowmanLevel(carrotPrefab, coalPrefab), "snowman_butt"),
             Define("Idle", "do_nothing", "BIG RED BUTTON",
                 "A hungry cat never sleeps. Is there anything to eat around here?",
                 BuildIdleLevel()),
@@ -151,7 +151,7 @@ public static class GotchaProjectBuilder
                 "It's scared of fingers. Corner it!",
                 BuildRunawayLevel()),
             Define("Plant", "thirsty_plant", "THIRSTY PLANT",
-                "That glass won't pour by itself. Turn the world around.",
+                "Pull the drop back, aim... and let go!",
                 BuildPlantLevel()),
             Define("Shell", "shell_game", "SHELL GAME",
                 "Keep your eyes on the box with the mouse.",
@@ -161,7 +161,7 @@ public static class GotchaProjectBuilder
                 BuildSkyWireLevel()),
             Define("Sunny", "sunny_day", "SUNNY DAY",
                 "Snowmen hate the sun. Could a cloud help?",
-                BuildSunnyLevel()),
+                BuildSunnyLevel(), "sun_melt"),
             Define("Rope", "cut_rope", "CUT THE ROPE",
                 "Cut one rope, wait for the swing, then cut the other.",
                 BuildRopeLevel()),
@@ -186,13 +186,14 @@ public static class GotchaProjectBuilder
         return File.Exists(VersionFile) && int.TryParse(File.ReadAllText(VersionFile).Trim(), out int v) ? v : 0;
     }
 
-    static LevelDefinition Define(string folder, string id, string title, string hint, GameObject prefab)
+    static LevelDefinition Define(string folder, string id, string title, string hint, GameObject prefab, string easterEgg = "")
     {
         LevelDefinition def = LoadOrCreate<LevelDefinition>(LevelDir + "/" + folder + "/" + folder + ".asset");
         def.levelId = id;
         def.title = title;
         def.hint = hint;
         def.prefab = prefab;
+        def.easterEggId = easterEgg;
         EditorUtility.SetDirty(def);
         return def;
     }
@@ -235,6 +236,7 @@ public static class GotchaProjectBuilder
         GameUI ui = uiGo.AddComponent<GameUI>();
         SetField(ui, "flow", flow);
         SetField(ui, "roundedSprite", sprites["ui_panel"]);
+        SetField(ui, "heartSprite", sprites["heart"]);
 
         EditorSceneManager.SaveScene(scene, ScenePath);
         EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
@@ -569,27 +571,25 @@ public static class GotchaProjectBuilder
     // ---------- Livello 3: pupazzo di neve ----------
 
     /// <summary>
-    /// Scioglimento completo del pupazzo (livelli 3 e 29): maschera che scende, fascia di neve bagnata larga quanto la
-    /// sagoma, gocce, vapore e pozzanghera ai piedi. La sagoma riga per riga viene calcolata qui dai disegni.
+    /// Scioglimento del pupazzo (livelli 3 e 29): la neve intera con lo shader Gotcha/SnowMelt (si affloscia, cola,
+    /// si allarga), gocce, vapore e pozzanghera ai piedi. Le parti di neve separate si nascondono quando parte.
     /// </summary>
-    static SnowmanMelter AddMelter(Transform snowman, SpriteRenderer[] bodies)
+    static SnowmanMelter AddMelter(Transform snowman, SpriteRenderer[] parts)
     {
         SnowmanMelter melter = snowman.gameObject.AddComponent<SnowmanMelter>();
         melter.snowman = snowman;
-        melter.masked = bodies;
-        melter.maskSprite = sprites["plain"];
-        const float y0 = -0.1f, step = 0.04f;
-        DoodleSprites.SnowProfile(y0, step, 125, out float[] left, out float[] right);
-        melter.profileY0 = y0;
-        melter.profileStep = step;
-        melter.profileLeft = left;
-        melter.profileRight = right;
-        melter.topY = DoodleSprites.SnowHeadCenterY + DoodleSprites.SnowHeadRadius + 0.08f;
-        melter.bottomY = -0.12f;
+        melter.parts = parts;
+        melter.bodyXMin = DoodleSprites.SnowBodyXMin;
+        melter.bodyXMax = DoodleSprites.SnowBodyXMax;
+        melter.bodyYMin = DoodleSprites.SnowBodyYMin;
+        melter.bodyYMax = DoodleSprites.SnowBodyYMax;
+        melter.topY = DoodleSprites.SnowHeadCenterY + DoodleSprites.SnowHeadRadius;
+        melter.seed = 1.7f;
 
-        SpriteRenderer front = Art(snowman, "MeltFront", "melt_front", 6, false).GetComponent<SpriteRenderer>();
-        front.gameObject.SetActive(false);
-        melter.front = front;
+        SpriteRenderer body = Art(snowman, "MeltingSnow", "sm_body", 3, true).GetComponent<SpriteRenderer>();
+        body.sharedMaterial = SnowMeltMaterial();
+        body.gameObject.SetActive(false);
+        melter.body = body;
 
         var puddle = new GameObject("Puddle").transform;
         puddle.SetParent(snowman, false);
@@ -602,11 +602,11 @@ public static class GotchaProjectBuilder
         dripsGo.transform.SetParent(snowman, false);
         SmokeEmitter drips = dripsGo.AddComponent<SmokeEmitter>();
         drips.puffSprite = sprites["sweat"];
-        drips.puffsPerSecond = 16f;
-        drips.life = 0.8f;
-        drips.riseSpeed = -2.4f;   // gocce che cadono
+        drips.puffsPerSecond = 14f;
+        drips.life = 0.7f;
+        drips.riseSpeed = -2.6f;   // gocce che cadono
         drips.spread = 1.0f;
-        drips.sideDrift = 0.2f;
+        drips.sideDrift = 0.25f;
         drips.startScale = 1.2f;
         drips.growth = -0.4f;
         drips.spinRange = 0f;
@@ -618,22 +618,44 @@ public static class GotchaProjectBuilder
         steamGo.transform.SetParent(snowman, false);
         SmokeEmitter steam = steamGo.AddComponent<SmokeEmitter>();
         steam.puffSprite = sprites["puff"];
-        steam.puffsPerSecond = 7f;
-        steam.life = 1.4f;
+        steam.puffsPerSecond = 6f;
+        steam.life = 1.5f;
         steam.riseSpeed = 0.9f;
         steam.spread = 0.6f;
         steam.startScale = 0.45f;
         steam.growth = 1.8f;
         steam.sideDrift = 0.35f;
-        steam.tint = new Color(1f, 1f, 1f, 0.55f);
+        steam.tint = new Color(1f, 1f, 1f, 0.5f);
         steam.sortingOrder = 8;
         melter.steam = steam;
         return melter;
     }
 
+    static Material SnowMeltMaterial()
+    {
+        string path = MaterialDir + "/SnowMelt.mat";
+        Material mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+        Shader shader = Shader.Find("Gotcha/SnowMelt");
+        if (shader == null) { Debug.LogError("[Gotcha] Shader Gotcha/SnowMelt non trovato."); shader = Shader.Find("Sprites/Default"); }
+        if (mat == null)
+        {
+            mat = new Material(shader);
+            AssetDatabase.CreateAsset(mat, path);
+        }
+        mat.shader = shader;
+        EditorUtility.SetDirty(mat);
+        return mat;
+    }
+
+    /// <summary>Urlo vero se c'è Assets/Audio/Scream.wav, altrimenti null (il livello lo sintetizza).</summary>
+    static AudioClip ScreamClip()
+    {
+        return AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Scream.wav");
+    }
+
     /// <summary>Pupazzo di neve in parti (base, busto, braccia, testa, cappello), piedi in <paramref name="pos"/>.</summary>
     static Transform SnowmanFigure(Transform parent, Vector2 pos, out Transform basePart, out Transform armLeft,
-        out Transform armRight, out Transform headPart, out Transform hatPart, out List<SpriteRenderer> bodies)
+        out Transform armRight, out Transform headPart, out Transform hatPart, out Transform scarf, out List<SpriteRenderer> bodies)
     {
         var snowman = new GameObject("Snowman").transform;
         snowman.SetParent(parent, false);
@@ -655,6 +677,7 @@ public static class GotchaProjectBuilder
         Art(armLeft, "Art", "sm_arm_l", 1, true, new Vector2(0.6f, -DoodleSprites.SnowShoulderY));
         Art(armRight, "Art", "sm_arm_r", 1, true, new Vector2(-0.5f, -DoodleSprites.SnowShoulderY));
         Art(hatPart, "Art", "sm_hat", 7, true, new Vector2(0, -DoodleSprites.SnowHatPivot));
+        scarf = Art(headPart, "Scarf", "sm_scarf", 5, true, new Vector2(0, -DoodleSprites.SnowHeadPivot));   // non è neve
         return snowman;
     }
 
@@ -666,7 +689,7 @@ public static class GotchaProjectBuilder
 
         // Pupazzo in parti, ognuna col pivot sul suo punto d'appoggio
         Transform snowman = SnowmanFigure(root.transform, new Vector2(0, -3.0f), out Transform basePart, out Transform armLeft,
-            out Transform armRight, out Transform headPart, out Transform hatPart, out List<SpriteRenderer> bodies);
+            out Transform armRight, out Transform headPart, out Transform hatPart, out Transform scarf, out List<SpriteRenderer> bodies);
         float headLocal = DoodleSprites.SnowHeadCenterY - DoodleSprites.SnowHeadPivot;   // centro della testa nel pivot della testa
         float headX = DoodleSprites.SnowHeadCenterX;
         Transform blushT = Art(headPart, "Blush", "blush", 5, true, new Vector2(headX - 0.06f, headLocal - 0.12f));
@@ -702,8 +725,9 @@ public static class GotchaProjectBuilder
         SpriteRenderer mouthO = Art(headPart, "MouthO", "mouth_o", 6, false, new Vector2(headX - 0.25f, headLocal - 0.45f)).GetComponent<SpriteRenderer>();
         mouthO.transform.localScale = Vector3.one * 1.3f;
         mouthO.gameObject.SetActive(false);
-        var melterBodies = new List<SpriteRenderer>(bodies) { blush };
-        SnowmanMelter melter = AddMelter(snowman, melterBodies.ToArray());
+        SnowmanMelter melter = AddMelter(snowman, bodies.ToArray());
+        AudioSource scream = root.AddComponent<AudioSource>();
+        scream.playOnAwake = false;
 
         SpeechBubble bubble = Bubble(root.transform, new Vector2(0.95f, 2.45f));
 
@@ -727,6 +751,10 @@ public static class GotchaProjectBuilder
         SetField(level, "bubble", bubble);
         SetField(level, "melter", melter);
         SetField(level, "mouthO", mouthO);
+        SetField(level, "scarf", scarf);
+        SetField(level, "scream", scream);
+        AudioClip screamWav = ScreamClip();
+        if (screamWav != null) SetField(level, "screamClip", screamWav);
         SetField(level, "smoke", smoke);
         SetField(level, "mouthPen", drawer);
         return SavePrefab(root, LevelDir + "/Snowman/Level_Snowman.prefab");
@@ -2141,10 +2169,11 @@ public static class GotchaProjectBuilder
 
         var robot = new GameObject("Robot").transform;
         robot.SetParent(root.transform, false);
-        robot.localPosition = new Vector3(0, -3.3f, 0);
+        robot.localPosition = new Vector3(-0.85f, -3.3f, 0);
         robot.localScale = Vector3.one * 1.3f;
         GameObject off = Art(robot, "Off", "robot_off", 5).gameObject;
         GameObject on = Art(robot, "On", "robot_on", 5).gameObject;
+        GameObject sad = Art(robot, "Sad", "robot_sad", 5).gameObject;
         BoxCollider2D body = robot.gameObject.AddComponent<BoxCollider2D>();
         body.size = new Vector2(2f, 2.9f);
         body.offset = new Vector2(0, 1.45f);
@@ -2162,9 +2191,41 @@ public static class GotchaProjectBuilder
         SpriteRenderer bar = Bar(fill, "Bar", new Vector2(0.25f, 0f), new Vector2(0.5f, 0.2f), new Color(1f, 0.25f, 0.25f), 5);
         GameObject bolt = Art(battery, "Bolt", "bolt", 7, true, new Vector2(0.62f, 0f)).gameObject;
 
-        SpeechBubble bubble = Bubble(root.transform, new Vector2(1.25f, -0.15f));
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(1.0f, -0.15f));
         bubble.transform.localScale = Vector3.one * 0.5f;
 
+        // niente caricatore? un pulsante fa comparire la dinamo a manovella
+        var skip = new GameObject("NoCharger");
+        skip.transform.SetParent(root.transform, false);
+        skip.transform.localPosition = new Vector3(1.55f, -4.0f, 0);
+        Transform skipArt = new GameObject("Visual").transform;
+        skipArt.SetParent(skip.transform, false);
+        Bar(skipArt, "Back", Vector2.zero, new Vector2(2.3f, 0.62f), new Color(0.17f, 0.75f, 0.71f), 20);
+        TextMesh skipText = Label(skipArt, Vector2.zero, 21, "NO CHARGER?", 0.045f);
+        skipText.color = Color.white;
+        skip.AddComponent<BoxCollider2D>().size = new Vector2(2.3f, 0.7f);
+        TapButton skipButton = skip.AddComponent<TapButton>();
+        skipButton.visual = skipArt;
+
+        var crank = new GameObject("Crank");
+        crank.transform.SetParent(root.transform, false);
+        crank.transform.localPosition = new Vector3(1.55f, -1.95f, 0);
+        Art(crank.transform, "Wheel", "crank_wheel", 6);
+        var arm = new GameObject("Arm").transform;
+        arm.SetParent(crank.transform, false);
+        Art(arm, "Art", "crank_arm", 7, false);
+        LineRenderer cable = Line(crank.transform, "Cable", 0.06f, new Color(0.17f, 0.13f, 0.2f), 4);
+        cable.useWorldSpace = false;
+        cable.positionCount = 3;
+        cable.SetPositions(new[] { new Vector3(0f, -1.05f, 0f), new Vector3(-0.9f, -1.45f, 0f), new Vector3(-1.75f, -0.4f, 0f) });
+        TextMesh crankText = Label(crank.transform, new Vector2(0, 1.1f), 21, "SPIN ME!", 0.05f);
+        crankText.color = Color.white;
+        crank.SetActive(false);
+
+        SetField(level, "skipButton", skipButton);
+        SetField(level, "crank", crank);
+        SetField(level, "crankArm", arm);
+        SetField(level, "robotSad", sad);
         SetField(level, "robotOff", off);
         SetField(level, "robotOn", on);
         SetField(level, "robot", robot);
@@ -2367,62 +2428,63 @@ public static class GotchaProjectBuilder
     {
         var root = new GameObject("Level_Plant");
         PlantLevel level = root.AddComponent<PlantLevel>();
-        TiltGravity tilt = root.AddComponent<TiltGravity>();
-        tilt.strength = 12f;
-        tilt.response = 1f;
-        tilt.smoothing = 0.1f;
-        tilt.deadZone = 0.02f;
         Art(root.transform, "Garden", "garden_bg", -20, false);
 
-        var bounds = new GameObject("Bounds");
-        bounds.transform.SetParent(root.transform, false);
-        bounds.AddComponent<EdgeCollider2D>().points = new[] { new Vector2(-2.85f, -3.45f), new Vector2(2.85f, -3.45f), new Vector2(2.85f, 3.6f), new Vector2(-2.85f, 3.6f), new Vector2(-2.85f, -3.45f) };
-
-        // mensola col bicchiere pieno di gocce
-        Bar(root.transform, "Shelf", new Vector2(-1.6f, -0.05f), new Vector2(1.7f, 0.14f), new Color(0.66f, 0.42f, 0.25f), 3);
-        var shelfCol = new GameObject("ShelfCollider");
-        shelfCol.transform.SetParent(root.transform, false);
-        shelfCol.transform.localPosition = new Vector3(-1.6f, -0.05f, 0);
-        shelfCol.AddComponent<BoxCollider2D>().size = new Vector2(1.7f, 0.14f);
-        var glass = new GameObject("Glass");
-        glass.transform.SetParent(root.transform, false);
-        glass.transform.localPosition = new Vector3(-1.6f, 0.77f, 0);
-        Art(glass.transform, "Art", "glass", 8);
-        EdgeCollider2D gc = glass.AddComponent<EdgeCollider2D>();
-        gc.points = new[] { new Vector2(-0.49f, 0.74f), new Vector2(-0.49f, -0.72f), new Vector2(0.49f, -0.72f), new Vector2(0.49f, 0.74f) };
-        gc.edgeRadius = 0.04f;
+        // fionda a sinistra: la goccia sta nella tasca tra i due rebbi
+        Vector2 sling = new Vector2(-1.9f, -2.75f);
+        Art(root.transform, "Slingshot", "slingshot", 6, true, sling);
+        var pocket = new GameObject("Pocket").transform;
+        pocket.SetParent(root.transform, false);
+        pocket.localPosition = sling + new Vector2(0f, 1.18f);
+        var back = new GameObject("BandBack").transform;
+        back.SetParent(root.transform, false);
+        back.localPosition = sling + new Vector2(-0.32f, 1.25f);
+        var front = new GameObject("BandFront").transform;
+        front.SetParent(root.transform, false);
+        front.localPosition = sling + new Vector2(0.32f, 1.25f);
+        LineRenderer bands = Line(root.transform, "Bands", 0.07f, new Color(0.55f, 0.2f, 0.18f), 9);
 
         var drops = new List<Rigidbody2D>();
         PhysicsMaterial2D water = WaterPhysics();
-        for (int row = 0; row < 7; row++)
-            for (int col = 0; col < 5; col++)
-            {
-                var d = new GameObject("Drop");
-                d.transform.SetParent(root.transform, false);
-                d.transform.localPosition = new Vector3(-1.6f - 0.34f + col * 0.17f + (row % 2) * 0.03f, 0.2f + row * 0.17f, 0);
-                Art(d.transform, "Art", "drop", 7, false);
-                d.AddComponent<CircleCollider2D>().radius = 0.08f;
-                Rigidbody2D rb = d.AddComponent<Rigidbody2D>();
-                rb.mass = 0.05f;
-                rb.sharedMaterial = water;
-                rb.interpolation = RigidbodyInterpolation2D.Interpolate;
-                rb.sleepMode = RigidbodySleepMode2D.NeverSleep;
-                drops.Add(rb);
-            }
+        for (int i = 0; i < 10; i++)
+        {
+            var d = new GameObject("Drop" + i);
+            d.transform.SetParent(root.transform, false);
+            d.transform.localPosition = pocket.localPosition;
+            d.transform.localScale = Vector3.one * 1.6f;
+            Art(d.transform, "Art", "drop", 8, false);
+            d.AddComponent<CircleCollider2D>().radius = 0.085f;
+            Rigidbody2D rb = d.AddComponent<Rigidbody2D>();
+            rb.mass = 0.1f;
+            rb.sharedMaterial = water;
+            rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+            rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+            rb.bodyType = RigidbodyType2D.Kinematic;
+            drops.Add(rb);
+        }
+        var dots = new List<Transform>();
+        for (int i = 0; i < 12; i++)
+        {
+            Transform dot = Art(root.transform, "Aim" + i, "drop", 7, false);
+            dot.localScale = Vector3.one * Mathf.Lerp(0.8f, 0.45f, i / 11f);
+            dot.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.75f);
+            dot.gameObject.SetActive(false);
+            dots.Add(dot);
+        }
 
-        // vaso con la piantina appassita, in basso a destra
+        // vaso con la piantina appassita, a destra
         var pot = new GameObject("Pot");
         pot.transform.SetParent(root.transform, false);
-        pot.transform.localPosition = new Vector3(1.55f, -2.3f, 0);
+        pot.transform.localPosition = new Vector3(1.6f, -2.55f, 0);
         Art(pot.transform, "Art", "pot", 6);
         EdgeCollider2D pc = pot.AddComponent<EdgeCollider2D>();
-        pc.points = new[] { new Vector2(-0.6f, 0.1f), new Vector2(-0.44f, -0.88f), new Vector2(0.44f, -0.88f), new Vector2(0.6f, 0.1f) };
+        pc.points = new[] { new Vector2(-0.66f, 0.06f), new Vector2(-0.44f, -0.9f), new Vector2(0.44f, -0.9f), new Vector2(0.66f, 0.06f) };
         pc.edgeRadius = 0.04f;
         var zone = new GameObject("WaterZone");
         zone.transform.SetParent(pot.transform, false);
         BoxCollider2D zc = zone.AddComponent<BoxCollider2D>();
         zc.isTrigger = true;
-        zc.size = new Vector2(1.0f, 0.5f);
+        zc.size = new Vector2(1.05f, 0.5f);
         zc.offset = new Vector2(0, -0.2f);
         var dry = new GameObject("PlantDry").transform;
         dry.SetParent(pot.transform, false);
@@ -2431,17 +2493,26 @@ public static class GotchaProjectBuilder
         GameObject bloom = Art(pot.transform, "PlantBloom", "plant_bloom", 5, true, new Vector2(0, 0.07f)).gameObject;
 
         SmokeEmitter sparkle = Sparks(pot.transform, "Sparkle", new Color(1f, 0.9f, 0.35f));
-        sparkle.transform.localPosition = new Vector3(0, 1.4f, 0);
-        TextMesh counter = Label(root.transform, new Vector2(1.55f, -3.85f), 30, "0 / 18", 0.07f);
-        SpeechBubble bubble = Bubble(root.transform, new Vector2(0.55f, -0.4f));
+        sparkle.transform.localPosition = new Vector3(0, 0.4f, 0);
+        SmokeEmitter splash = Sparks(root.transform, "Splash", new Color(0.4f, 0.75f, 1f));
+        TextMesh counter = Label(root.transform, new Vector2(1.6f, -3.95f), 30, "0 / 5", 0.08f);
+        TextMesh ammo = Label(root.transform, new Vector2(-1.75f, -3.95f), 30, "DROPS LEFT: 10", 0.05f);
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(0.75f, -0.75f));
         bubble.transform.localScale = Vector3.one * 0.5f;
 
         SetArray(level, "drops", drops.ToArray());
+        SetField(level, "pocket", pocket);
+        SetField(level, "bandBack", back);
+        SetField(level, "bandFront", front);
+        SetField(level, "bands", bands);
+        SetArray(level, "aimDots", dots.ToArray());
         SetField(level, "potZone", zc);
         SetField(level, "plantDry", dry);
         SetField(level, "plantBloom", bloom);
         SetField(level, "sparkle", sparkle);
+        SetField(level, "splash", splash);
         SetField(level, "counter", counter);
+        SetField(level, "ammo", ammo);
         SetField(level, "bubble", bubble);
         return SavePrefab(root, LevelDir + "/Plant/Level_Plant.prefab");
     }
@@ -2554,7 +2625,7 @@ public static class GotchaProjectBuilder
 
         // il pupazzo già fatto (stesso del livello 3), un po' più piccolo
         Transform snowman = SnowmanFigure(root.transform, new Vector2(-0.35f, -3.65f), out Transform basePart, out Transform armLeft,
-            out Transform armRight, out Transform headPart, out Transform hatPart, out List<SpriteRenderer> bodies);
+            out Transform armRight, out Transform headPart, out Transform hatPart, out Transform scarf, out List<SpriteRenderer> bodies);
         snowman.localScale = Vector3.one * 0.74f;
         float hp = DoodleSprites.SnowHeadPivot;
         Transform eyeL = Art(headPart, "EyeL", "coal", 8, true, new Vector2(-0.62f, 4.1f - hp));
@@ -2590,7 +2661,7 @@ public static class GotchaProjectBuilder
         drag.returnOnMiss = false;
 
         SpriteRenderer sky = Bar(root.transform, "Dusk", Vector2.zero, new Vector2(12f, 16f), new Color(0.1f, 0.1f, 0.3f, 0f), 15);
-        TextMesh countdown = Label(root.transform, new Vector2(0, 3.75f), 30, "", 0.06f);
+        TextMesh countdown = Label(root.transform, new Vector2(0, 3.3f), 30, "", 0.06f);
         SpeechBubble bubble = Bubble(root.transform, new Vector2(1.1f, 0.4f));
         bubble.transform.localScale = Vector3.one * 0.5f;
 
@@ -2599,7 +2670,7 @@ public static class GotchaProjectBuilder
         SetField(level, "sunbeam", beam);
         SetField(level, "skyTint", sky);
         SetField(level, "melter", melter);
-        SetArray(level, "looseParts", new Object[] { hatPart, armLeft, armRight, eyeL, eyeR, nose });
+        SetArray(level, "looseParts", new Object[] { hatPart, scarf, armLeft, armRight, eyeL, eyeR, nose });
         SetField(level, "mouthSmile", smile);
         SetField(level, "mouthO", mouthO);
         SetField(level, "sweat", sweat);

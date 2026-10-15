@@ -382,6 +382,12 @@ namespace Gotcha.EditorArt
         public static DoodleArt SnowBase()
         {
             var p = new DoodlePainter(-1.6f, -0.25f, 1.6f, 1.75f, 100) { Ink = 0.06f };
+            DrawSnowBase(p);
+            return new DoodleArt("sm_base", p);
+        }
+
+        static void DrawSnowBase(DoodlePainter p)
+        {
             Sdf mound = Sd.Union(Sd.Ellipse(0.0f, 0.08f, 1.3f, 0.2f), Sd.Circle(-1.0f, 0.14f, 0.2f), Sd.Circle(1.05f, 0.12f, 0.17f));
             Body(p, mound, Snow, SnowShade, SnowHatch, -0.05f, 0.08f);
             // gamba lontana (dietro), poi quella vicina
@@ -391,13 +397,19 @@ namespace Gotcha.EditorArt
             Sdf hips = Sd.Union(Sd.Ellipse(-0.02f, 1.18f, 0.8f, 0.5f), Sd.Ellipse(0.5f, 1.04f, 0.4f, 0.38f));
             SnowBody(p, hips, 0f, 1.15f, 0.8f, 11);
             p.Line(SnowShade, 0.04f, 0.88f, 0.9f, 0.78f, 0.84f);
-            return new DoodleArt("sm_base", p);
         }
 
         /// <summary>Busto con i bottoni spostati verso sinistra (il davanti), in 3/4.</summary>
         public static DoodleArt SnowMiddle()
         {
             var p = new DoodlePainter(-1.0f, 1.25f, 1.0f, 3.0f, 100) { Ink = 0.055f };
+            DrawSnowMiddle(p);
+            return new DoodleArt("sm_middle", p);
+        }
+
+        static void DrawSnowMiddle(DoodlePainter p)
+        {
+            p.Ink = 0.055f;
             Sdf torso = Sd.Union(Sd.Ellipse(-0.05f, 2.05f, 0.7f, 0.72f), Sd.Ellipse(-0.03f, 1.62f, 0.62f, 0.3f));
             SnowBody(p, torso, -0.05f, 2.05f, 0.72f, 23);
             foreach (var b in new[] { new[] { -0.38f, 2.45f }, new[] { -0.42f, 2.15f }, new[] { -0.4f, 1.85f } })
@@ -406,7 +418,6 @@ namespace Gotcha.EditorArt
                 p.Shape(btn, CoalColor, 0.03f);
                 p.Fill(Sd.Circle(b[0] - 0.02f, b[1] + 0.025f, 0.02f), Rgba.White.WithAlpha(0.6f));
             }
-            return new DoodleArt("sm_middle", p);
         }
 
         /// <summary>Un braccio di rametti con la muffola: side = -1 sinistro (vicino), +1 destro (lontano). Spalla in (x0, 2.45).</summary>
@@ -428,10 +439,25 @@ namespace Gotcha.EditorArt
             return new DoodleArt(side < 0 ? "sm_arm_l" : "sm_arm_r", p);
         }
 
-        /// <summary>Testa enorme (senza faccia) e sciarpa a maglia con la coda sul retro.</summary>
+        /// <summary>Testa enorme, senza faccia e senza sciarpa (la sciarpa è un disegno a parte: non è neve).</summary>
         public static DoodleArt SnowHead()
         {
             var p = new DoodlePainter(-1.25f, 1.9f, 1.25f, 4.78f, 100) { Ink = 0.06f };
+            DrawSnowHead(p);
+            return new DoodleArt("sm_head", p);
+        }
+
+        static void DrawSnowHead(DoodlePainter p)
+        {
+            p.Ink = 0.06f;
+            Sdf head = Sd.Circle(SnowHeadCenterX, SnowHeadCenterY, SnowHeadRadius);
+            SnowBody(p, head, SnowHeadCenterX, SnowHeadCenterY, SnowHeadRadius, 37);
+        }
+
+        /// <summary>Sciarpa a maglia con la coda sul retro (coordinate del pupazzo; nodo intorno al collo a y 2.82).</summary>
+        public static DoodleArt SnowScarf()
+        {
+            var p = new DoodlePainter(-0.85f, 1.8f, 0.8f, 3.05f, 100) { Ink = 0.06f };
             Sdf tail = Sd.Rotate(Sd.Box(0.5f, 2.38f, 0.14f, 0.42f, 0.07f), 0.5f, 2.38f, 10f);
             Body(p, tail, Scarf, Rgba.Hex("B92D2A"));
             p.Hatch(Sd.Grow(tail, -0.03f), ScarfStripe, 0.22f, 0.08f, 100f);
@@ -441,10 +467,6 @@ namespace Gotcha.EditorArt
                 float x = 0.4f + i * 0.075f;
                 p.Line(Rgba.Hex("B92D2A"), 0.03f, x + 0.08f, 1.98f, x + 0.07f, 1.9f);
             }
-
-            Sdf head = Sd.Circle(SnowHeadCenterX, SnowHeadCenterY, SnowHeadRadius);
-            SnowBody(p, head, SnowHeadCenterX, SnowHeadCenterY, SnowHeadRadius, 37);
-
             Sdf wrap = Sd.Rotate(Sd.Box(-0.05f, 2.82f, 0.7f, 0.16f, 0.14f), -0.05f, 2.82f, -5f);
             Body(p, wrap, Scarf, Rgba.Hex("B92D2A"));
             p.Hatch(Sd.Grow(wrap, -0.03f), ScarfStripe, 0.24f, 0.09f, 82f);
@@ -454,7 +476,22 @@ namespace Gotcha.EditorArt
                 p.Line(Rgba.Hex("8E1F1C", 0.6f), 0.014f, x - 0.03f, y + 0.04f, x, y, x + 0.03f, y + 0.04f);
             }
             p.Shape(wrap, Rgba.Clear);
-            return new DoodleArt("sm_head", p);
+            return new DoodleArt("sm_scarf", p);
+        }
+
+        /// <summary>
+        /// Tutta la neve del pupazzo in un solo disegno (base, busto, testa; niente sciarpa, braccia, cappello), con
+        /// margine intorno: è quella che si scioglie con lo shader Gotcha/SnowMelt (cola e si allarga verso terra).
+        /// </summary>
+        public const float SnowBodyXMin = -2.6f, SnowBodyXMax = 2.6f, SnowBodyYMin = -0.4f, SnowBodyYMax = 4.85f;
+
+        public static DoodleArt SnowBodyFull()
+        {
+            var p = new DoodlePainter(SnowBodyXMin, SnowBodyYMin, SnowBodyXMax, SnowBodyYMax, 100) { Ink = 0.06f };
+            DrawSnowBase(p);
+            DrawSnowMiddle(p);
+            DrawSnowHead(p);
+            return new DoodleArt("sm_body", p);
         }
 
         /// <summary>Cilindro inclinato con toppa e agrifoglio, appoggiato sulla testa grande.</summary>

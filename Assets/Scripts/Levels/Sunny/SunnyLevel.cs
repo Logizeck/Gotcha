@@ -18,7 +18,7 @@ namespace Gotcha.Levels
         [SerializeField] SpriteRenderer sunbeam;
         [SerializeField] SpriteRenderer skyTint;
         [SerializeField] SnowmanMelter melter;
-        [SerializeField] Transform[] looseParts;      // cappello, braccia, occhi, naso, bocca
+        [SerializeField] Transform[] looseParts;      // cappello, sciarpa, braccia, occhi, naso (non sono neve)
         [SerializeField] SpriteRenderer mouthSmile;
         [SerializeField] SpriteRenderer mouthO;
         [SerializeField] SmokeEmitter sweat;
@@ -38,10 +38,10 @@ namespace Gotcha.Levels
             timeLeft = sunsetAfter;
             if (mouthO != null) mouthO.gameObject.SetActive(false);
             if (skyTint != null) skyTint.color = new Color(0.1f, 0.1f, 0.3f, 0f);
-            foreach (Transform t in looseParts) melter.AddLoose(t);
+            foreach (Transform t in looseParts) melter.Attach(t);
+            if (mouthO != null) melter.Attach(mouthO.transform, true);
+            if (mouthSmile != null) melter.Attach(mouthSmile.transform, true);
             melter.Begin();
-            melter.AddMasked(mouthO);
-            if (mouthSmile != null) melter.AddMasked(mouthSmile);
             if (bubble != null) { bubble.Show("It's sooo hot!"); StartCoroutine(HideLater(2f)); }
             if (ClipRecorder.Instance != null) ClipRecorder.Instance.Begin();
         }

@@ -4,178 +4,202 @@ using UnityEngine;
 namespace Gotcha.Components
 {
     /// <summary>
-    /// Scioglimento del pupazzo di neve, riutilizzabile. Una maschera scende dall'alto: tutto ciò che sta sopra
-    /// la "linea di neve" sparisce davvero (niente pezzi deformati). Sulla linea scorre una fascia di neve bagnata
-    /// con le colature, larga esattamente quanto il pupazzo a quella quota; da lì gocciolano acqua e sale vapore,
-    /// sotto si allarga la pozzanghera. Gli oggetti attaccati (cappello, braccia, carota, occhi...) cadono quando
-    /// la linea li raggiunge e restano a galleggiare nella pozzanghera.
-    /// Progress va da 0 (intero) a 1 (solo pozzanghera); può avanzare a tempo o a piccoli passi (livello del sole).
+    /// Scioglimento del pupazzo di neve, riutilizzabile (livelli 3 e 29).
+    /// All'inizio le parti di neve separate vengono sostituite da un unico disegno (sm_body) con lo shader
+    /// Gotcha/SnowMelt: la neve si affloscia verso terra a colonne irregolari, cola, si allarga e diventa bagnata,
+    /// fino a restare una pozzanghera. Non è neve (e quindi non si scioglie) tutto ciò che è attaccato: sciarpa,
+    /// cappello, braccia, carota, carbone... Questi "seguaci" scendono insieme alla neve sotto di loro e, quando
+    /// arrivano giù, galleggiano nella pozzanghera. I "decalcomanie" (bocca, rossore) sbiadiscono.
+    /// La formula dell'abbassamento è la stessa dello shader.
     /// </summary>
     public class SnowmanMelter : MonoBehaviour
     {
-        [Tooltip("Radice del pupazzo, ai piedi (coordinate della sagoma).")]
+        [Tooltip("Radice del pupazzo, ai piedi.")]
         public Transform snowman;
-        public SpriteRenderer[] masked;
-        public Sprite maskSprite;
-        public SpriteRenderer front;
+        public SpriteRenderer[] parts;          // neve a pezzi (si nascondono quando parte lo scioglimento)
+        public SpriteRenderer body;             // neve intera con lo shader di scioglimento
+        public float bodyXMin = -2.6f, bodyXMax = 2.6f, bodyYMin = -0.4f, bodyYMax = 4.85f;
+        public float topY = 4.7f;
+        public float seed;
+        public Transform puddle;
+        public Vector3 puddleFullScale = new Vector3(1.2f, 1.1f, 1f);
         public SmokeEmitter drips;
         public SmokeEmitter steam;
-        public Transform puddle;
-        public Vector3 puddleFullScale = new Vector3(1.15f, 1.05f, 1f);
-        [Header("Sagoma (calcolata dal builder)")]
-        public float profileY0;
-        public float profileStep = 0.05f;
-        public float[] profileLeft;
-        public float[] profileRight;
-        public float topY = 4.8f;
-        public float bottomY = -0.05f;
-        public float waterY = 0.05f;                      // pelo dell'acqua nella pozzanghera (coordinate del pupazzo)
-        public Color meltTint = new Color(0.86f, 0.94f, 1f);
+        public float waterY = 0.06f;
 
         public float Progress { get; private set; }
-        public float LineY => Mathf.Lerp(topY, bottomY, Progress);
+        public bool Begun { get; private set; }
 
-        class Loose { public Transform t; public float y; public float spin; public bool floating; public Vector2 v; public float phase; }
-        readonly List<Loose> loose = new List<Loose>();
-        SpriteMask mask;
-        bool begun;
-        Color[] baseColors;
+        static readonly int MeltId = Shader.PropertyToID("_Melt");
+        static readonly int GroundId = Shader.PropertyToID("_Ground");
+        static readonly int SeedId = Shader.PropertyToID("_Seed");
 
-        /// <summary>Un oggetto che cade quando la linea di neve scende sotto la sua quota.</summary>
-        public void AddLoose(Transform t)
+        class Follower
+        {
+            public Transform t;
+            public Vector2 anchor;      // punto di neve a cui è attaccato (coordinate del pupazzo, prima dello scioglimento)
+            public Vector3 offset;      // differenza tra oggetto e punto di attacco
+            public bool decal;          // sbiadisce invece di cadere
+            public SpriteRenderer[] renderers;
+            public bool loose, floating;
+            public Vector2 v;
+            public float spin, phase, floatX;
+        }
+
+        readonly List<Follower> followers = new List<Follower>();
+        MaterialPropertyBlock block;
+
+        /// <summary>Oggetto non di neve attaccato al pupazzo: scende con la neve sotto <paramref name="anchorWorld"/> e poi galleggia.</summary>
+        public void Attach(Transform t, bool decal = false) { Attach(t, t.position, decal); }
+
+        public void Attach(Transform t, Vector3 anchorWorld, bool decal)
         {
             if (t == null) return;
-            foreach (Loose l in loose) if (l.t == t) return;
-            loose.Add(new Loose { t = t, y = snowman.InverseTransformPoint(t.position).y, spin = Random.Range(-260f, 260f), phase = Random.value * 6f });
+            foreach (Follower f in followers) if (f.t == t) return;
+            t.SetParent(snowman, true);
+            Vector2 a = snowman.InverseTransformPoint(anchorWorld);
+            followers.Add(new Follower
+            {
+                t = t, anchor = a, offset = t.localPosition - (Vector3)a, decal = decal,
+                renderers = t.GetComponentsInChildren<SpriteRenderer>(true),
+                spin = Random.Range(-200f, 200f), phase = Random.value * 6f
+            });
+            foreach (Draggable2D d in t.GetComponentsInChildren<Draggable2D>()) d.enabled = false;
         }
 
         public void Begin()
         {
-            if (begun) return;
-            begun = true;
-            var go = new GameObject("MeltMask");
-            go.transform.SetParent(snowman, false);
-            mask = go.AddComponent<SpriteMask>();
-            mask.sprite = maskSprite;
-            go.transform.localScale = new Vector3(10f, 12f, 1f);
-            baseColors = new Color[masked.Length];
-            for (int i = 0; i < masked.Length; i++)
-            {
-                if (masked[i] == null) continue;
-                masked[i].maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-                baseColors[i] = masked[i].color;
-            }
-            if (front != null) front.gameObject.SetActive(true);
+            if (Begun) return;
+            Begun = true;
+            block = new MaterialPropertyBlock();
+            foreach (SpriteRenderer r in parts) if (r != null) r.enabled = false;
+            if (body != null) body.gameObject.SetActive(true);
             if (drips != null) drips.Play();
             if (steam != null) steam.Play();
-            SetProgress(0f);
-        }
-
-        /// <summary>Aggiunge al gruppo mascherato un disegno comparso dopo (es. la bocca stupita).</summary>
-        public void AddMasked(SpriteRenderer r)
-        {
-            if (r == null) return;
-            r.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-            var list = new List<SpriteRenderer>(masked) { r };
-            masked = list.ToArray();
-            var cols = new List<Color>(baseColors ?? new Color[0]) { r.color };
-            baseColors = cols.ToArray();
+            Apply();
         }
 
         public void SetProgress(float p)
         {
-            if (!begun) Begin();
+            if (!Begun) Begin();
             Progress = Mathf.Clamp01(Mathf.Max(Progress, p));
-            float line = LineY;
-            if (mask != null) mask.transform.localPosition = new Vector3(0f, line - 6f, 0f);
+            Apply();
+        }
 
-            Width(line, out float l, out float r);
-            bool any = r - l > 0.05f && Progress < 1f;
-            if (front != null)
+        public void End()
+        {
+            if (drips != null) drips.Stop();
+            if (steam != null) steam.Stop();
+        }
+
+        // ---------- stessa formula dello shader ----------
+
+        float U(float x) { return (x - bodyXMin) / (bodyXMax - bodyXMin); }
+        float V(float y) { return (y - bodyYMin) / (bodyYMax - bodyYMin); }
+
+        float Noise(float u) { return 0.5f + 0.3f * Mathf.Sin(u * 19f + seed) + 0.2f * Mathf.Sin(u * 41f + 2f + seed * 0.7f); }
+
+        /// <summary>Quanta altezza resta alla colonna di neve in x (1 = intatta, 0 = sciolta).</summary>
+        public float Keep(float x)
+        {
+            float u = U(x), edge = Mathf.Abs(u - 0.5f) * 2f;
+            return Mathf.Clamp(1f - Progress * (1f + 0.18f * Noise(u) + 0.7f * Mathf.Pow(edge, 1.5f)), 0.0001f, 1f);
+        }
+
+        /// <summary>Dove si trova ora un punto di neve che prima dello scioglimento stava in <paramref name="p"/>.</summary>
+        public Vector2 Displace(Vector2 p)
+        {
+            float ground = 0f;
+            float h = Mathf.Max(0f, p.y - ground) * Keep(p.x);
+            float hv = h / (bodyYMax - bodyYMin);
+            float spread = 1f + Progress * 1.6f * Mathf.Exp(-hv * 9f);
+            return new Vector2(p.x * spread, ground + h);
+        }
+
+        void Apply()
+        {
+            if (body != null)
             {
-                front.gameObject.SetActive(any);
-                float wobble = 1f + Mathf.Sin(Time.time * 7f) * 0.04f;
-                front.transform.localPosition = new Vector3((l + r) * 0.5f, line, 0f);
-                front.transform.localScale = new Vector3(Mathf.Max(0.2f, r - l + 0.1f), wobble, 1f);
+                body.GetPropertyBlock(block);
+                block.SetFloat(MeltId, Progress);
+                block.SetFloat(GroundId, V(0f));
+                block.SetFloat(SeedId, seed);
+                body.SetPropertyBlock(block);
             }
+            float top = Displace(new Vector2(-0.1f, topY)).y;
+            bool any = top > 0.2f && Progress < 1f;
             if (drips != null)
             {
-                drips.transform.localPosition = new Vector3((l + r) * 0.5f, line - 0.25f, 0f);
-                drips.spread = Mathf.Max(0.1f, (r - l) * 0.45f);
+                drips.transform.localPosition = new Vector3(-0.1f, Mathf.Max(0.2f, top - 0.2f), 0f);
+                drips.spread = Mathf.Lerp(0.6f, 1.6f, Progress);
                 if (!any) drips.Stop();
             }
             if (steam != null)
             {
-                steam.transform.localPosition = new Vector3((l + r) * 0.5f, line + 0.1f, 0f);
-                steam.spread = Mathf.Max(0.1f, (r - l) * 0.35f);
+                steam.transform.localPosition = new Vector3(-0.1f, top, 0f);
+                steam.spread = Mathf.Lerp(0.5f, 1.4f, Progress);
                 if (!any) steam.Stop();
             }
             if (puddle != null)
             {
                 float k = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(Progress * 1.3f));
-                puddle.localScale = Vector3.Scale(puddleFullScale, new Vector3(Mathf.Lerp(0.25f, 1f, k), k, 1f));
+                puddle.localScale = Vector3.Scale(puddleFullScale, new Vector3(Mathf.Lerp(0.3f, 1f, k), k, 1f));
             }
-            // la neve si fa più azzurrina e bagnata man mano
-            for (int i = 0; i < masked.Length; i++)
-                if (masked[i] != null && baseColors != null && i < baseColors.Length)
-                    masked[i].color = Color.Lerp(baseColors[i], baseColors[i] * meltTint, Progress);
 
-            foreach (Loose o in loose)
-                if (!o.floating && o.v == Vector2.zero && o.t != null && line < o.y + 0.05f) Release(o);
+            foreach (Follower f in followers)
+            {
+                if (f.t == null || f.loose) continue;
+                Vector2 d = Displace(f.anchor);
+                if (f.decal)
+                {
+                    // la bocca e il rossore scendono con la neve e sbiadiscono man mano che la faccia si scioglie
+                    f.t.localPosition = (Vector3)d + f.offset * Mathf.Max(0.3f, Keep(f.anchor.x));
+                    float a = Mathf.Clamp01((Keep(f.anchor.x) - 0.25f) / 0.35f);
+                    foreach (SpriteRenderer r in f.renderers) { Color c = r.color; c.a = a; r.color = c; }
+                    continue;
+                }
+                f.t.localPosition = (Vector3)d + f.offset;
+                // arrivato giù (o la neve sotto non lo regge più): si stacca e cade nella pozzanghera
+                if (d.y < 0.45f || (Keep(f.anchor.x) < 0.12f)) Release(f);
+            }
         }
 
-        public void End()
+        void Release(Follower f)
         {
-            if (front != null) front.gameObject.SetActive(false);
-            if (drips != null) drips.Stop();
-            if (steam != null) steam.Stop();
-        }
-
-        void Release(Loose o)
-        {
-            o.t.SetParent(snowman, true);
-            float side = o.t.localPosition.x >= -0.05f ? 1f : -1f;
-            o.v = new Vector2(side * Random.Range(0.4f, 1.1f), Random.Range(0.5f, 1.6f));
-            foreach (Draggable2D d in o.t.GetComponentsInChildren<Draggable2D>()) d.enabled = false;
+            f.loose = true;
+            f.v = new Vector2((f.t.localPosition.x >= -0.1f ? 1f : -1f) * Random.Range(0.3f, 0.9f), Random.Range(0.6f, 1.4f));
         }
 
         void Update()
         {
-            foreach (Loose o in loose)
+            float reach = 1.9f * puddleFullScale.x;
+            foreach (Follower f in followers)
             {
-                if (o.t == null) continue;
-                if (o.floating)
+                if (f.t == null || !f.loose) continue;
+                if (f.floating)
                 {
-                    // galleggia nella pozzanghera, dondolando
-                    Vector3 p = o.t.localPosition;
-                    o.t.localPosition = new Vector3(p.x + Mathf.Sin(Time.time * 1.3f + o.phase) * 0.0015f, waterY + Mathf.Sin(Time.time * 2.2f + o.phase) * 0.03f, p.z);
-                    o.t.localRotation = Quaternion.Euler(0, 0, o.spin * 0.08f + Mathf.Sin(Time.time * 1.7f + o.phase) * 6f);
+                    // galleggia, dondolando sull'acqua
+                    float t = Time.time * 1.6f + f.phase;
+                    f.t.localPosition = new Vector3(f.floatX + Mathf.Sin(t * 0.7f) * 0.05f, waterY + Mathf.Sin(t * 1.4f) * 0.03f, f.t.localPosition.z);
+                    f.t.localRotation = Quaternion.Euler(0, 0, f.spin * 0.1f + Mathf.Sin(t) * 7f);
                     continue;
                 }
-                if (o.v == Vector2.zero) continue;
-                o.v.y -= 11f * Time.deltaTime;
-                o.t.localPosition += (Vector3)(o.v * Time.deltaTime);
-                o.t.Rotate(0, 0, o.spin * Time.deltaTime);
-                if (o.t.localPosition.y <= waterY && o.v.y < 0f)
+                f.v.y -= 11f * Time.deltaTime;
+                f.t.localPosition += (Vector3)(f.v * Time.deltaTime);
+                f.t.Rotate(0, 0, f.spin * Time.deltaTime);
+                if (f.t.localPosition.y <= waterY && f.v.y < 0f)
                 {
-                    o.floating = true;
-                    Vector3 p = o.t.localPosition;
-                    float reach = puddle != null ? 1.9f * puddleFullScale.x : 1.8f;
-                    o.t.localPosition = new Vector3(Mathf.Clamp(p.x, -reach, reach), waterY, p.z);
+                    f.floating = true;
+                    f.floatX = Mathf.Clamp(f.t.localPosition.x, -reach, reach);
                 }
             }
         }
 
-        void Width(float y, out float l, out float r)
+        /// <summary>Fa cadere subito un seguace (es. il cappello che salta via all'urlo).</summary>
+        public void Drop(Transform t, Vector2 velocity)
         {
-            l = r = 0f;
-            if (profileLeft == null || profileLeft.Length == 0) return;
-            float f = (y - profileY0) / profileStep;
-            int i = Mathf.Clamp(Mathf.FloorToInt(f), 0, profileLeft.Length - 1);
-            int j = Mathf.Min(i + 1, profileLeft.Length - 1);
-            float t = Mathf.Clamp01(f - i);
-            l = Mathf.Lerp(profileLeft[i], profileLeft[j], t);
-            r = Mathf.Lerp(profileRight[i], profileRight[j], t);
+            foreach (Follower f in followers)
+                if (f.t == t) { f.loose = true; f.v = velocity; return; }
         }
     }
 }

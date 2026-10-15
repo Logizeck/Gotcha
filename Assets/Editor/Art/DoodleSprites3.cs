@@ -10,7 +10,7 @@ namespace Gotcha.EditorArt
         // ---------- Livello 21: il robot scarico ----------
 
         /// <summary>Robottino (piedi in 0,0, testa a ~2.4). Spento: occhi a lineetta e antenna grigia; acceso: occhi luminosi.</summary>
-        static DoodleArt Robot(string name, bool on)
+        static DoodleArt Robot(string name, bool on, bool sad = false)
         {
             var p = new DoodlePainter(-1.1f, -0.1f, 1.1f, 2.95f, 120) { Ink = 0.05f };
             // gambe e piedi
@@ -46,7 +46,13 @@ namespace Gotcha.EditorArt
                         return Rgba.Lerp(Rgba.White, NeonCyan, Clamp(d * 1.4f));
                     });
                 }
-                p.Line(NeonCyan, 0.03f, -0.12f, 1.83f, 0f, 1.78f, 0.12f, 1.83f);   // sorriso
+                if (sad)
+                {
+                    p.Line(NeonCyan, 0.03f, -0.12f, 1.78f, 0f, 1.83f, 0.12f, 1.78f);   // bocca all'ingiù
+                    foreach (float s2 in new[] { -1f, 1f }) p.Line(Rgba.Hex("2A2C36"), 0.05f, s2 * 0.3f, 2.08f, s2 * 0.08f, 2.12f);   // palpebre tristi
+                    p.Fill(Sd.Ellipse(0.2f, 1.86f, 0.025f, 0.04f), Rgba.Hex("8FD8FF"));   // lacrimuccia
+                }
+                else p.Line(NeonCyan, 0.03f, -0.12f, 1.83f, 0f, 1.78f, 0.12f, 1.83f);   // sorriso
             }
             else
             {
@@ -63,6 +69,32 @@ namespace Gotcha.EditorArt
 
         public static DoodleArt RobotOff() { return Robot("robot_off", false); }
         public static DoodleArt RobotOn() { return Robot("robot_on", true); }
+        public static DoodleArt RobotSad() { return Robot("robot_sad", true, true); }
+
+        /// <summary>Dinamo a manovella (centro della ruota in 0,0, raggio 0.75; la manopola è un disegno a parte).</summary>
+        public static DoodleArt CrankWheel()
+        {
+            var p = new DoodlePainter(-0.95f, -1.35f, 0.95f, 0.9f, 120) { Ink = 0.05f };
+            Body(p, Sd.Box(0, -1.05f, 0.7f, 0.22f, 0.08f), Rgba.Hex("FFC93C"), Rgba.Hex("E39B1B"));   // base del generatore
+            p.Shape(Sd.Box(0, -0.6f, 0.12f, 0.3f, 0.03f), SteelDark, 0.035f);
+            p.Shape(Sd.Subtract(Sd.Circle(0, 0, 0.78f), Sd.Circle(0, 0, 0.6f)), Rgba.Hex("E23B3B"), 0.04f);
+            for (int i = 0; i < 6; i++)
+            {
+                double a = i * Math.PI / 3;
+                p.Line(SteelShade, 0.06f, 0, 0, (float)Math.Cos(a) * 0.62f, (float)Math.Sin(a) * 0.62f);
+            }
+            p.Shape(Sd.Circle(0, 0, 0.13f), Steel, 0.03f);
+            return new DoodleArt("crank_wheel", p);
+        }
+
+        /// <summary>Braccio della manovella con la manopola (perno in 0,0, manopola a x = 0.62).</summary>
+        public static DoodleArt CrankArm()
+        {
+            var p = new DoodlePainter(-0.15f, -0.2f, 0.85f, 0.2f, 140) { Ink = 0.04f };
+            p.Shape(Sd.Capsule(0, 0, 0.62f, 0, 0.06f), SteelDark, 0.03f);
+            Body(p, Sd.Circle(0.62f, 0, 0.15f), Rgba.Hex("2A2C36"), Rgba.Hex("111219"));
+            return new DoodleArt("crank_arm", p);
+        }
 
         /// <summary>Contorno della batteria (orizzontale, 0.6 x 0.3; il livello di carica è una barra a parte).</summary>
         public static DoodleArt BatteryFrame()
@@ -299,55 +331,6 @@ namespace Gotcha.EditorArt
 
         // ---------- Scioglimento del pupazzo (livelli 3 e 29) ----------
 
-        /// <summary>
-        /// Sagoma del pupazzo (base, busto, testa) riga per riga, in coordinate del pupazzo: per ogni quota y
-        /// i bordi sinistro e destro della neve. Serve alla fascia di neve bagnata che scende durante lo scioglimento.
-        /// </summary>
-        public static void SnowProfile(float y0, float step, int count, out float[] left, out float[] right)
-        {
-            left = new float[count];
-            right = new float[count];
-            for (int i = 0; i < count; i++) { left[i] = float.MaxValue; right[i] = float.MinValue; }
-            foreach (DoodlePainter p in new[] { SnowBase().Painter, SnowMiddle().Painter, SnowHead().Painter })
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    float y = y0 + i * step;
-                    int j = (int)Math.Floor((y - p.YMin) * p.Ppu);
-                    if (j < 0 || j >= p.Height) continue;
-                    for (int x = 0; x < p.Width; x++)
-                    {
-                        if (p.Pixels[j * p.Width + x].a < 0.5f) continue;
-                        float wx = p.XMin + (x + 0.5f) / p.Ppu;
-                        left[i] = Math.Min(left[i], wx);
-                        right[i] = Math.Max(right[i], wx);
-                    }
-                }
-            }
-            for (int i = 0; i < count; i++) if (left[i] > right[i]) { left[i] = 0f; right[i] = 0f; }
-        }
-
-        /// <summary>
-        /// Fronte dello scioglimento: neve bagnata e lucida con colature che pendono sotto (largo 1, centrato in 0,0;
-        /// si allarga in x quanto il pupazzo a quella quota).
-        /// </summary>
-        public static DoodleArt MeltFront()
-        {
-            var p = new DoodlePainter(-0.6f, -0.6f, 0.6f, 0.2f, 160) { Ink = 0.025f, Wobble = 0.006f };
-            Rgba slush = Rgba.Hex("E4F4FF"), wet = Rgba.Hex("A9D8F5");
-            Sdf band = Sd.Union(
-                Sd.Box(0, -0.02f, 0.5f, 0.09f, 0.08f),
-                Sd.Capsule(-0.36f, -0.05f, -0.36f, -0.34f, 0.045f), Sd.Circle(-0.36f, -0.36f, 0.06f),
-                Sd.Capsule(-0.12f, -0.05f, -0.12f, -0.22f, 0.04f), Sd.Circle(-0.12f, -0.24f, 0.05f),
-                Sd.Capsule(0.1f, -0.05f, 0.1f, -0.46f, 0.05f), Sd.Circle(0.1f, -0.48f, 0.065f),
-                Sd.Capsule(0.33f, -0.05f, 0.33f, -0.28f, 0.04f), Sd.Circle(0.33f, -0.3f, 0.055f));
-            p.FillFunc(band, (x, y) => Rgba.Lerp(slush, wet, Clamp((0.05f - y) / 0.5f)));
-            p.Fill(Sd.Box(-0.1f, 0.03f, 0.3f, 0.018f, 0.018f), Rgba.White.WithAlpha(0.9f));   // riflesso bagnato
-            foreach (float x in new[] { -0.37f, 0.09f, 0.32f }) p.Fill(Sd.Circle(x - 0.015f, -0.3f + (x > 0f ? -0.08f : 0f), 0.015f), Rgba.White.WithAlpha(0.85f));
-            p.Shape(band, Rgba.Clear);
-            return new DoodleArt("melt_front", p);
-        }
-
         /// <summary>Bocca stupita a "O" (centro 0,0).</summary>
         public static DoodleArt MouthO()
         {
@@ -428,6 +411,22 @@ namespace Gotcha.EditorArt
             var p = new DoodlePainter(-0.1f, -0.1f, 1.2f, 1.2f, 110) { Ink = 0.045f };
             PizzaTop(p, Sd.Box(0.6f, 0.6f, 0.6f, 0.6f));
             return new DoodleArt("pizza_slice", p);
+        }
+
+        // ---------- Livello 26: la fionda ----------
+
+        /// <summary>Fionda di legno a Y (base in 0,0; punte dei rebbi a (±0.32, 1.3)).</summary>
+        public static DoodleArt Slingshot()
+        {
+            var p = new DoodlePainter(-0.6f, -0.1f, 0.6f, 1.5f, 130) { Ink = 0.05f };
+            Rgba wood = Rgba.Hex("A0663A"), woodShade = Rgba.Hex("7A4A26");
+            Sdf fork = Sd.Union(
+                Sd.Capsule(0, 0.05f, 0, 0.75f, 0.09f),
+                Sd.Capsule(0, 0.72f, -0.32f, 1.3f, 0.075f),
+                Sd.Capsule(0, 0.72f, 0.32f, 1.3f, 0.075f));
+            Body(p, fork, wood, woodShade);
+            foreach (float s in new[] { -1f, 1f }) p.Shape(Sd.Box(s * 0.3f, 1.2f, 0.09f, 0.05f, 0.02f), Rgba.Hex("E23B3B"), 0.025f);   // legature
+            return new DoodleArt("slingshot", p);
         }
     }
 }

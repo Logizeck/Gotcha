@@ -13,7 +13,7 @@ namespace Gotcha.Components
         [Tooltip("Impedisce di trascinare l'oggetto fuori dallo schermo (margine in unità mondo; in alto c'è la barra).")]
         public bool clampToCamera = true;
         public float screenMargin = 0.25f;
-        public float topMargin = 1.1f;
+        public float topMargin = 1.45f;   // barra in alto + fila dei cuori
 
         public static Draggable2D Active { get; private set; }
 

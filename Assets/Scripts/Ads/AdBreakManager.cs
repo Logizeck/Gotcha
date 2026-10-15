@@ -7,6 +7,8 @@ namespace Gotcha.Ads
     {
         bool IsReady { get; }
         void Show(Action onClosed);
+        /// <summary>Pubblicità con premio: onDone(true) se è stata guardata fino in fondo.</summary>
+        void ShowRewarded(Action<bool> onDone);
     }
 
     /// <summary>Provider finto per Editor e test: nessuna pubblicità reale, chiude subito.</summary>
@@ -18,6 +20,12 @@ namespace Gotcha.Ads
         {
             Debug.Log("[Ads] Pausa pubblicitaria (simulata)");
             onClosed?.Invoke();
+        }
+
+        public void ShowRewarded(Action<bool> onDone)
+        {
+            Debug.Log("[Ads] Pubblicità con premio (simulata)");
+            onDone?.Invoke(true);
         }
     }
 
@@ -50,6 +58,17 @@ namespace Gotcha.Ads
         public void RegisterLevelResult(bool solved)
         {
             if (solved) LevelsSinceAd++;
+        }
+
+        /// <summary>Pubblicità con premio (es. una vita). Conta anche come pausa pubblicitaria: azzera i contatori.</summary>
+        public void ShowRewarded(Action<bool> onDone)
+        {
+            if (provider == null || !provider.IsReady) { onDone?.Invoke(false); return; }
+            provider.ShowRewarded(ok =>
+            {
+                if (ok) { LevelsSinceAd = 0; PlaySecondsSinceAd = 0f; }
+                onDone?.Invoke(ok);
+            });
         }
 
         public void TryShowBreak(Action proceed)

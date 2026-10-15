@@ -1,4 +1,4 @@
-# Gotcha! — v0.13 (trentuno livelli)
+# Gotcha! — v0.14 (vite, menu a pagine, nuovo scioglimento)
 
 La versione installata si legge nel MENU del gioco (accanto al conteggio degli Easter egg).
 
@@ -69,11 +69,13 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Occhi (carboni) e naso (carota), più grandi del normale, restano attaccati dove li lasci sulla testa;
   altrove cadono nella neve. Nessuna posizione è indicata: ogni occhio deve stare nella sua zona (ampia e
   invisibile) e il naso al centro; la bocca si disegna col dito e resta come un solco: deve essere un sorriso.
-- Easter egg `snowman_butt`: lascia la carota sul sedere. Resta piantata lì; il pupazzo arrossisce, trema,
-  grida "Oh noooo!": gli occhi (se li avevi messi) schizzano via in direzioni opposte e la bocca disegnata diventa
-  una "O" di stupore. Poi si scioglie DEL TUTTO dall'alto in basso (`Components/SnowmanMelter`): una maschera fa
-  sparire la neve, sul bordo scorre una fascia di neve bagnata con le colature larga quanto il pupazzo, gocciola,
-  fuma, e alla fine resta solo una pozzanghera con cappello, braccia e carota che galleggiano.
+- Easter egg `snowman_butt`: lascia la carota sul sedere. Resta piantata lì; il pupazzo arrossisce, trema e
+  URLA (voce femminile: `Assets/Audio/Scream.wav` se presente, altrimenti sintetizzata da `ScreamSynth`): gli occhi
+  schizzano via, la bocca disegnata diventa una "O", il cappello salta, le braccia si agitano nel panico.
+  Poi si scioglie davvero (`Components/SnowmanMelter` + shader `Shaders/SnowMelt.shader`): la neve si affloscia verso
+  terra a colonne irregolari, cola, diventa bagnata e lucida e si allarga in una pozzanghera. La sciarpa NON è neve
+  (disegno a parte): scende col collo e galleggia, come braccia, cappello e carote; alla fine gli occhi ricadono
+  dal cielo nella pozzanghera ("plop!").
 - La scena viene registrata e a fine livello compare **SHARE VIDEO**: crea un MP4 (salvato in Movies/Gotcha) e apre
   il menu di condivisione di Android. Solo su Android; nell'Editor i fotogrammi finiscono in `persistentDataPath/clip_frames`.
 - Zone, misure e punti d'appoggio sono regolabili dall'Inspector del prefab `Level_Snowman`.
@@ -163,6 +165,23 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Trascina la tanica sul razzo, alza il coperchio di sicurezza, tieni premuto il pulsante per tutto il
   conto alla rovescia (se lo lasci: ABORT!). Editor: barra spaziatrice per tenere premuto.
 
+## Vite
+- 5 cuori pulsanti sotto la barra in alto (toccandoli si apre il pannello delle vite). Ogni fallimento costa una
+  vita (gli Easter egg no: sono scoperte; si cambia con `easterEggCostsLife` su GameFlow).
+- Se ne ricarica una ogni 15 minuti; +1 guardando una pubblicità (simulata, 5 secondi); +1 per ogni amico che
+  accetta l'invito. A zero vite compare "OUT OF LIVES!" con attesa, pubblicità e invito.
+- Cambiare l'ora del telefono non serve: la ricarica usa il tempo dall'accensione (SystemClock.elapsedRealtime,
+  non modificabile) e il contatore dei riavvii; dopo un riavvio si accredita solo il tempo dall'accensione. I dati
+  sono firmati (HMAC): se vengono modificati a mano le vite ripartono da zero. Limite noto: disinstallare e
+  reinstallare (o cancellare i dati dell'app) riparte con le vite piene; per evitarlo serve un server.
+- Inviti: il pulsante condivide un link al Play Store con un codice personale. Il premio quando l'amico ACCETTA
+  richiede un server (es. Firebase + Play Install Referrer) che chiami `InviteService.OnFriendAccepted()`.
+
+## Menu
+- Livelli a pagine da 10 (due colonne), si scorrono con lo swipe o con le frecce; pallini della pagina.
+  Livelli bloccati in grigio, livello attuale in rosso, livelli con Easter egg in viola ("SECRET EGG" /
+  "EGG FOUND!"). L'Easter egg di un livello si indica con `easterEggId` nel LevelDefinition.
+
 ## Livelli col volume (8 e 19)
 - Serve SEMPRE almeno una pressione del tasto "volume -" durante il livello: un telefono già a volume zero non
   risolve il livello da solo. Il tasto si intercetta con `Plugins/Android/GotchaKeys.java` (anche quando il volume è
@@ -170,12 +189,15 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 
 ## Livelli 21-31
 - **21 Low Battery**: collega davvero il caricatore (se era già collegato: staccalo e riattaccalo). Editor: tasto C.
+  Senza caricatore: "NO CHARGER?" fa comparire una dinamo a manovella da girare col dito; il livello si supera
+  ma il robot si accende triste.
 - **22 Hot Soup**: soffia nel microfono per raffreddare la zuppa, POI trascinala al topolino. Editor: B.
 - **23 Frozen Key**: strofina il ghiaccio col dito, rimpicciolisci la chiave col pizzico, apri la porta.
 - **24 Campfire**: strofina il bastoncino avanti e indietro per la scintilla, poi soffia PIANO (forte la spegne).
   Editor: B soffio leggero, N soffio forte.
 - **25 Chicken Button**: premi 5 volte un pulsante con le gambe che scappa; contro i muri è più lento.
-- **26 Thirsty Plant**: inclina il telefono per versare 18 gocce nel vaso.
+- **26 Thirsty Plant**: fionda alla Angry Birds: tira indietro la goccia (lontano dal vaso), mira con la traiettoria
+  a puntini e rilascia. 10 gocce, ne bastano 5 nel vaso.
 - **27 Shell Game**: segui la scatola col topolino.
 - **28 Sky Wire** (taglio): "taglia il filo del colore del cielo"... fuori è notte: il filo giusto è il nero.
 - **29 Sunny Day**: il sole scioglie il pupazzo (stesso scioglimento dell'Easter egg); trascina la nuvola davanti al
