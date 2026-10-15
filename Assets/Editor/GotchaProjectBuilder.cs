@@ -31,7 +31,7 @@ public static class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 19;
+    const int BuilderVersion = 20;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -180,6 +180,21 @@ public static class GotchaProjectBuilder
             Define("Pancake", "pancake", "PANCAKE FLIP",
                 "A quick flick of the wrist... not too gentle, not too wild.",
                 BuildPancakeLevel()),
+            Define("WaspMaze", "sting_run", "STING RUN",
+                "Tilt to the star. The wasp can't fly through walls... use them.",
+                BuildWaspMazeLevel()),
+            Define("LampSafe", "secret_code", "SECRET CODE",
+                "Red light hides red ink. Blue light hides blue ink. Remember!",
+                BuildLampSafeLevel()),
+            Define("AppleCatch", "apple_catch", "APPLE CATCH",
+                "Shake the tree, tilt the basket. Five apples for a pie.",
+                BuildAppleCatchLevel()),
+            Define("MarbleRun", "marble_run", "MARBLE RUN",
+                "Draw up to three ramps, then press GO. Over the wall, into the cup!",
+                BuildMarbleRunLevel()),
+            Define("Copycat", "copycat", "COPYCAT",
+                "Watch the cat, listen, then play it back.",
+                BuildCopycatLevel()),
         };
 
         LevelCatalog catalog = LoadOrCreate<LevelCatalog>(LevelDir + "/LevelCatalog.asset");
@@ -3238,6 +3253,328 @@ public static class GotchaProjectBuilder
         SetField(level, "counter", counter);
         SetField(level, "bubble", bubble);
         return SavePrefab(root, LevelDir + "/Pancake/Level_Pancake.prefab");
+    }
+
+    // ---------- Livelli 36-40 ----------
+
+    static GameObject BuildWaspMazeLevel()
+    {
+        var root = new GameObject("Level_WaspMaze");
+        WaspMazeLevel level = root.AddComponent<WaspMazeLevel>();
+        TiltGravity tilt = root.AddComponent<TiltGravity>();
+        tilt.strength = 34f;
+        tilt.response = 0.5f;
+        AudioSource buzz = root.AddComponent<AudioSource>();
+        buzz.playOnAwake = false;
+        Art(root.transform, "Night", "maze_bg", -20, false);
+
+        var maze = new GameObject("Maze").transform;
+        maze.SetParent(root.transform, false);
+        maze.localPosition = new Vector3(0, -0.4f, 0);
+        Art(maze, "Neon", "maze_wasp", 5, false);
+        SegWalls(maze, DoodleSprites.WaspMaze);
+        MazeGoal(maze, new Vector2(-2.2f, 2.7f));
+        Rigidbody2D ball = MazeBall(maze, new Vector2(-1.0f, -3.0f));
+
+        // la vespa parte dall'angolo alle spalle della sfera
+        var wasp = new GameObject("Wasp").transform;
+        wasp.SetParent(maze, false);
+        wasp.localPosition = new Vector3(-2.3f, -2.25f, 0);
+        wasp.localScale = Vector3.one * 0.6f;
+        SpriteRenderer body = Art(wasp, "Body", "wasp_furious", 12).GetComponent<SpriteRenderer>();
+        foreach (var w in new[] { new { x = -0.02f, order = 11, rot = 15f }, new { x = 0.08f, order = 13, rot = -10f } })
+        {
+            Transform wing = Art(wasp, "Wing", "wasp_wing", w.order, false, new Vector2(w.x, 0.12f));
+            wing.localRotation = Quaternion.Euler(0, 0, w.rot);
+            wing.gameObject.AddComponent<WingFlap>();
+        }
+
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(1.5f, -4.45f));
+        bubble.transform.localScale = Vector3.one * 0.5f;
+
+        SetField(level, "ball", ball);
+        SetField(level, "wasp", wasp);
+        SetField(level, "waspBody", body);
+        SetField(level, "buzz", buzz);
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/WaspMaze/Level_WaspMaze.prefab");
+    }
+
+    static GameObject BuildLampSafeLevel()
+    {
+        var root = new GameObject("Level_LampSafe");
+        LampSafeLevel level = root.AddComponent<LampSafeLevel>();
+        SpriteRenderer wall = Art(root.transform, "Wall", "plain", -20, false).GetComponent<SpriteRenderer>();
+        wall.transform.localScale = new Vector3(12f, 16f, 1f);
+        SpriteRenderer floor = Art(root.transform, "Floor", "plain", -19, false, new Vector2(0, -5.0f)).GetComponent<SpriteRenderer>();
+        floor.transform.localScale = new Vector3(12f, 4.6f, 1f);
+        floor.color = new Color(0.09f, 0.07f, 0.1f);
+
+        GameObject red = Lamp(root.transform, "RedLamp", new Vector2(-1.35f, 2.9f), new Color(1f, 0.25f, 0.25f));
+        GameObject blue = Lamp(root.transform, "BlueLamp", new Vector2(1.35f, 2.9f), new Color(0.3f, 0.45f, 1f));
+
+        var digits = new List<TextMesh>();
+        for (int i = 0; i < 4; i++) digits.Add(Label(root.transform, new Vector2(-1.65f + i * 1.1f, 0.7f), 3, "0", 0.17f));
+
+        // cassaforte sotto le cifre
+        var safe = new GameObject("Safe").transform;
+        safe.SetParent(root.transform, false);
+        safe.localPosition = new Vector3(0, -1.55f, 0);
+        safe.localScale = Vector3.one * 0.7f;
+        GameObject closed = Art(safe, "Closed", "safe", 1).gameObject;
+        GameObject open = Art(safe, "Open", "safe_open", 1).gameObject;
+        BoxCollider2D safeArea = safe.gameObject.AddComponent<BoxCollider2D>();
+        safeArea.size = new Vector2(1.9f, 2.1f);
+        SmokeEmitter confetti = Emitter(root.transform, "Confetti", new Vector2(0, -1.2f), "confetti", 30f, 1.3f, 1.4f, 0.8f, 1.1f, new Color(1f, 0.85f, 0.35f), 45);
+
+        TapButton redSwitch = SwitchButton(root.transform, "RedSwitch", "big_button", new Vector2(-1.55f, -3.65f));
+        TapButton blueSwitch = SwitchButton(root.transform, "BlueSwitch", "blue_button", new Vector2(1.55f, -3.65f));
+
+        GameObject keypad = KeypadOverlay(root.transform, out BoxCollider2D panelCol, out TextMesh display, out TapButton[] keys);
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(0.9f, 2.2f));
+        bubble.transform.localScale = Vector3.one * 0.5f;
+
+        SetField(level, "redSwitch", redSwitch);
+        SetField(level, "blueSwitch", blueSwitch);
+        SetField(level, "redLight", red);
+        SetField(level, "blueLight", blue);
+        SetField(level, "wall", wall);
+        SetArray(level, "digits", digits.ToArray());
+        SetField(level, "safeArea", safeArea);
+        SetField(level, "safeClosed", closed);
+        SetField(level, "safeOpen", open);
+        SetField(level, "keypad", keypad);
+        SetField(level, "keypadPanel", panelCol);
+        SetArray(level, "keys", keys);
+        SetField(level, "display", display);
+        SetField(level, "confetti", confetti);
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/LampSafe/Level_LampSafe.prefab");
+    }
+
+    static TapButton SwitchButton(Transform parent, string name, string sprite, Vector2 pos)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        go.transform.localPosition = pos;
+        Transform art = Art(go.transform, "Art", sprite, 6);
+        go.AddComponent<BoxCollider2D>().size = new Vector2(1.8f, 1.1f);
+        TapButton b = go.AddComponent<TapButton>();
+        b.id = name;
+        b.visual = art;
+        return b;
+    }
+
+    /// <summary>Tastiera ingrandita della cassaforte (come al livello 18), inizialmente nascosta.</summary>
+    static GameObject KeypadOverlay(Transform parent, out BoxCollider2D panelCol, out TextMesh display, out TapButton[] keys)
+    {
+        var keypad = new GameObject("Keypad").transform;
+        keypad.SetParent(parent, false);
+        SpriteRenderer dim = Art(keypad, "Dim", "plain", 30, false).GetComponent<SpriteRenderer>();
+        dim.transform.localScale = new Vector3(12f, 16f, 1f);
+        dim.color = new Color(0f, 0f, 0f, 0.45f);
+        SpriteRenderer panel = Art(keypad, "Panel", "plain", 31, false, new Vector2(0, 0.95f)).GetComponent<SpriteRenderer>();
+        panel.transform.localScale = new Vector3(4.3f, 5.6f, 1f);
+        panel.color = new Color(0.55f, 0.58f, 0.66f);
+        panelCol = keypad.gameObject.AddComponent<BoxCollider2D>();
+        panelCol.size = new Vector2(4.3f, 5.6f);
+        panelCol.offset = new Vector2(0, 0.95f);
+        SpriteRenderer screen = Art(keypad, "Screen", "plain", 32, false, new Vector2(0, 3.05f)).GetComponent<SpriteRenderer>();
+        screen.transform.localScale = new Vector3(3.4f, 0.85f, 1f);
+        screen.color = new Color(0.06f, 0.23f, 0.16f);
+        display = Label(keypad, new Vector2(0, 3.05f), 33, "_ _ _ _", 0.13f);
+        var list = new List<TapButton>();
+        for (int n = 0; n <= 9; n++)
+        {
+            Vector2 pos = n == 0 ? new Vector2(0, -1.4f) : new Vector2(-1.2f + ((n - 1) % 3) * 1.2f, 1.95f - ((n - 1) / 3) * 1.12f);
+            var k = new GameObject("Key" + n);
+            k.transform.SetParent(keypad, false);
+            k.transform.localPosition = pos;
+            Transform art = Art(k.transform, "Art", "keypad_key", 33, false);
+            art.localScale = Vector3.one * 2.7f;
+            Label(art, new Vector2(0, 0.01f), 34, n.ToString(), 0.05f);
+            k.AddComponent<BoxCollider2D>().size = new Vector2(1.05f, 1.0f);
+            TapButton tb = k.AddComponent<TapButton>();
+            tb.id = n.ToString();
+            tb.visual = art;
+            list.Add(tb);
+        }
+        keypad.gameObject.SetActive(false);
+        keys = list.ToArray();
+        return keypad.gameObject;
+    }
+
+    static GameObject BuildAppleCatchLevel()
+    {
+        var root = new GameObject("Level_AppleCatch");
+        AppleCatchLevel level = root.AddComponent<AppleCatchLevel>();
+        Art(root.transform, "Garden", "garden_bg", -20, false);
+        var tree = new GameObject("Tree").transform;
+        tree.SetParent(root.transform, false);
+        tree.localPosition = new Vector3(0, 1.3f, 0);
+        Art(tree, "Art", "apple_tree", 2, false);
+        var apples = new List<Transform>();
+        foreach (Vector2 v in new[] { new Vector2(-1.6f, 1.1f), new Vector2(-0.9f, 1.85f), new Vector2(0f, 2.35f), new Vector2(0.9f, 1.9f), new Vector2(1.6f, 1.2f),
+                                      new Vector2(-1.15f, 0.55f), new Vector2(-0.4f, 1.25f), new Vector2(0.5f, 1.05f), new Vector2(1.2f, 0.5f), new Vector2(0.1f, 0.4f) })
+        {
+            var a = new GameObject("Apple").transform;
+            a.SetParent(root.transform, false);
+            a.localPosition = v;
+            a.localScale = Vector3.one * 0.3f;
+            a.localRotation = Quaternion.Euler(0, 0, Random.Range(-20f, 20f));
+            Art(a, "Art", "apple", 4, false);
+            apples.Add(a);
+        }
+        var basket = new GameObject("Basket").transform;
+        basket.SetParent(root.transform, false);
+        basket.localPosition = new Vector3(0, -3.3f, 0);
+        Art(basket, "Art", "basket", 6);
+        TextMesh counter = Label(root.transform, new Vector2(0, -4.4f), 30, "0 / 5", 0.1f);
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(1.7f, -1.5f));
+        bubble.transform.localScale = Vector3.one * 0.5f;
+
+        SetArray(level, "apples", apples.ToArray());
+        SetField(level, "tree", tree);
+        SetField(level, "basket", basket);
+        SetField(level, "counter", counter);
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/AppleCatch/Level_AppleCatch.prefab");
+    }
+
+    static GameObject BuildMarbleRunLevel()
+    {
+        var root = new GameObject("Level_MarbleRun");
+        MarbleRunLevel level = root.AddComponent<MarbleRunLevel>();
+        Art(root.transform, "Workshop", "workshop_bg", -20, false);
+        Color wood = new Color(0.66f, 0.42f, 0.25f);
+
+        // mensola di partenza in alto a sinistra
+        Bar(root.transform, "Ledge", new Vector2(-2.05f, 2.2f), new Vector2(1.4f, 0.16f), wood, 3);
+        var ledge = new GameObject("LedgeCollider");
+        ledge.transform.SetParent(root.transform, false);
+        ledge.transform.localPosition = new Vector3(-2.05f, 2.2f, 0);
+        ledge.AddComponent<BoxCollider2D>().size = new Vector2(1.4f, 0.16f);
+
+        // muretto in mezzo: la biglia deve passarci sopra
+        Bar(root.transform, "Wall", new Vector2(0.1f, -1.25f), new Vector2(0.28f, 4.3f), wood, 3);
+        var wallGo = new GameObject("WallCollider");
+        wallGo.transform.SetParent(root.transform, false);
+        wallGo.transform.localPosition = new Vector3(0.1f, -1.25f, 0);
+        wallGo.AddComponent<BoxCollider2D>().size = new Vector2(0.28f, 4.3f);
+
+        // tazza in basso a destra (pareti a U + zona di arrivo)
+        var cup = new GameObject("Cup").transform;
+        cup.SetParent(root.transform, false);
+        cup.localPosition = new Vector3(1.9f, -3.3f, 0);
+        cup.localScale = Vector3.one * 1.2f;
+        Art(cup, "Art", "cup", 6);
+        EdgeCollider2D cupWalls = cup.gameObject.AddComponent<EdgeCollider2D>();
+        cupWalls.points = new[] { new Vector2(-0.56f, 0.8f), new Vector2(-0.48f, 0.04f), new Vector2(0.48f, 0.04f), new Vector2(0.56f, 0.8f) };
+        cupWalls.edgeRadius = 0.04f;
+        var zoneGo = new GameObject("CupZone");
+        zoneGo.transform.SetParent(cup, false);
+        BoxCollider2D zone = zoneGo.AddComponent<BoxCollider2D>();
+        zone.isTrigger = true;
+        zone.size = new Vector2(0.9f, 0.7f);
+        zone.offset = new Vector2(0, 0.4f);
+
+        Rigidbody2D marble = MazeBall(root.transform, new Vector2(-2.45f, 2.48f));
+        marble.bodyType = RigidbodyType2D.Kinematic;
+
+        // area di disegno (sopra il pulsante GO)
+        var penGo = new GameObject("Pen");
+        penGo.transform.SetParent(root.transform, false);
+        BoxCollider2D area = penGo.AddComponent<BoxCollider2D>();
+        area.isTrigger = true;
+        area.size = new Vector2(5.8f, 6.4f);
+        area.offset = new Vector2(0, 0.2f);
+        StrokeDrawer pen = penGo.AddComponent<StrokeDrawer>();
+        pen.singleStroke = false;
+        pen.maxStrokes = 3;
+        pen.minLength = 0.3f;
+        pen.addCollider = true;
+        pen.colliderRadius = 0.07f;
+        pen.sortingOrder = 8;
+        pen.material = StrokeMaterial();
+        pen.layers = new[]
+        {
+            new StrokeDrawer.Layer { color = InkColor, width = 0.15f, offset = Vector2.zero },
+            new StrokeDrawer.Layer { color = new Color(1f, 0.6f, 0.3f), width = 0.07f, offset = Vector2.zero },
+        };
+
+        var goGo = new GameObject("Go");
+        goGo.transform.SetParent(root.transform, false);
+        goGo.transform.localPosition = new Vector3(-1.6f, -3.95f, 0);
+        Transform goArt = Art(goGo.transform, "Art", "big_button", 30);
+        goArt.localScale = Vector3.one * 0.8f;
+        TextMesh goLabel = Label(goGo.transform, new Vector2(0, 0.08f), 31, "GO", 0.09f);
+        goLabel.color = Color.white;
+        goGo.AddComponent<BoxCollider2D>().size = new Vector2(1.6f, 1.0f);
+        TapButton go = goGo.AddComponent<TapButton>();
+        go.id = "go";
+        go.visual = goArt;
+
+        SmokeEmitter confetti = Emitter(root.transform, "Confetti", new Vector2(1.9f, -2.4f), "confetti", 30f, 1.2f, 1.6f, 0.6f, 1.1f, new Color(1f, 0.85f, 0.35f), 45);
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(0.9f, 2.9f));
+        bubble.transform.localScale = Vector3.one * 0.5f;
+
+        SetField(level, "marble", marble);
+        SetField(level, "go", go);
+        SetField(level, "cupZone", zone);
+        SetField(level, "confetti", confetti);
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/MarbleRun/Level_MarbleRun.prefab");
+    }
+
+    static GameObject BuildCopycatLevel()
+    {
+        var root = new GameObject("Level_Copycat");
+        CopycatLevel level = root.AddComponent<CopycatLevel>();
+        Bar(root.transform, "Wall", new Vector2(0, 1f), new Vector2(12f, 14f), new Color(0.98f, 0.9f, 0.82f), -20);
+        var face = new GameObject("CatFace").transform;
+        face.SetParent(root.transform, false);
+        face.localPosition = new Vector3(0, 2.0f, 0);
+        face.localScale = Vector3.one * 0.55f;
+        Art(face, "Art", "cat_big_face", 2);
+        foreach (float x in new[] { -0.58f, 0.58f }) Art(face, "Pupil", "cat_pupil", 3, false, new Vector2(x, 0.1f));
+
+        TextMesh roundLabel = Label(root.transform, new Vector2(0, 0.45f), 30, "ROUND 1 / 3", 0.08f);
+        roundLabel.color = InkColor;
+        Color[] colors = { new Color(1f, 0.33f, 0.36f), new Color(0.36f, 0.82f, 0.42f), new Color(0.3f, 0.52f, 1f), new Color(1f, 0.83f, 0.25f) };
+        Vector2[] spots = { new Vector2(-0.82f, -0.85f), new Vector2(0.82f, -0.85f), new Vector2(-0.82f, -2.5f), new Vector2(0.82f, -2.5f) };
+        var pads = new List<TapButton>();
+        var arts = new List<SpriteRenderer>();
+        var glows = new List<SpriteRenderer>();
+        for (int i = 0; i < 4; i++)
+        {
+            var go = new GameObject("Pad" + i);
+            go.transform.SetParent(root.transform, false);
+            go.transform.localPosition = spots[i];
+            SpriteRenderer glow = Art(go.transform, "Glow", "glow", 4, false).GetComponent<SpriteRenderer>();
+            glow.transform.localScale = Vector3.one * 2.2f;
+            glow.color = colors[i];
+            glow.enabled = false;
+            Transform art = Art(go.transform, "Art", "pad", 5, false);
+            SpriteRenderer sr = art.GetComponent<SpriteRenderer>();
+            sr.color = colors[i];
+            go.AddComponent<BoxCollider2D>().size = new Vector2(1.45f, 1.45f);
+            TapButton b = go.AddComponent<TapButton>();
+            b.id = i.ToString();
+            b.visual = art;
+            pads.Add(b);
+            arts.Add(sr);
+            glows.Add(glow);
+        }
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(1.45f, 3.1f));
+        bubble.transform.localScale = Vector3.one * 0.5f;
+        bubble.catVoice = true;   // il gatto miagola quando parla
+
+        SetArray(level, "pads", pads.ToArray());
+        SetArray(level, "padArt", arts.ToArray());
+        SetArray(level, "padGlow", glows.ToArray());
+        SetField(level, "catBubble", bubble);
+        SetField(level, "roundLabel", roundLabel);
+        return SavePrefab(root, LevelDir + "/Copycat/Level_Copycat.prefab");
     }
 
     static TapButton BombButton(Transform parent, string name, string sprite, Vector2 pos, out Transform wireStart)

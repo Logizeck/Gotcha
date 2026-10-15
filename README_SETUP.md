@@ -240,6 +240,28 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
   appiccicata al soffitto, fuori dalla padella cade per terra. Editor: tasti 1/2/3 (piano/giusto/forte) e frecce.
   La forza del colpo si regola con `speedPerShake` e `idealSpeed` nel prefab.
 
+## Livelli 36-40
+- **36 Sting Run** (labirinto + inseguimento): si inclina come al livello 2. La vespa parte dall'angolo alle spalle
+  della sfera dopo 1.5 s e vola dritta verso di lei; i muri la fermano (ci scivola lungo), quindi conviene metterle
+  un muro in mezzo. Ogni 5 s si ferma un attimo a riprendere fiato. Se ti punge si riprova. Regolabili nel prefab:
+  `speed`, `startDelay`, `restEvery`, `restFor`, `stingDistance`.
+- **37 Secret Code** (luci rosse e blu): 4 cifre casuali, ognuna rossa o blu a caso (almeno una per colore). Con la
+  luce rossa si leggono solo le cifre blu, con la blu solo le rosse, al buio nessuna. I due interruttori si escludono
+  a vicenda: bisogna ricordare metà codice. Tocca la cassaforte per la tastiera; codice sbagliato = ERR e si ridigita.
+- **38 Apple Catch**: scuoti il telefono (Editor: S) e cadono 1-2 mele; il cesto segue l'inclinazione (Editor:
+  frecce). Ne servono 5 su 10: se ne cadono per terra troppe per arrivarci, si riprova.
+- **39 Marble Run** (disegno + fisica): fino a 3 rampe (la quarta cancella la più vecchia), poi GO. La biglia parte
+  dalla mensola, deve superare il muretto e restare mezzo secondo nella tazza. Se manca torna al via con le rampe
+  intatte: si corregge e si riprova senza perdere vite.
+- **40 Copycat** (memoria): il gatto suona una sequenza sui 4 tasti colorati (do, mi, sol, si); ripetila. Tre turni
+  da 3, 4 e 5 note; un tasto sbagliato e il gatto ride. Lunghezze in `roundLengths`.
+
+## Correzioni 0.20
+- **Bodyguard / Wake-up Call**: le barriere disegnate ora fermano sempre la vespa e il pulsante: il contatto è
+  calcolato geometricamente sui tratti (`Components/StrokeBarrier`), non più col cast fisico che a volte li
+  attraversava.
+- **Thirsty Plant**: il fiore non si allunga più; a livello completato fa due saltelli di felicità, stesse dimensioni.
+
 ## Icona dell'app
 - L'icona "G!" al neon è ridisegnata dal codice (`DoodleSprites.AppIcon`). Per usare il logo originale basta
   copiare il PNG (quadrato, 1024×1024) in `Assets/Art/Icon/AppIcon.png` e rilanciare il builder: ha la precedenza.

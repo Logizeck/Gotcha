@@ -151,7 +151,6 @@ namespace Gotcha.Levels
         {
             if (plantDry == null) return;
             float k = Mathf.Clamp01(absorbed / (float)needed);
-            plantDry.localScale = new Vector3(1f, 1f + k * 0.15f, 1f);
             plantDry.localRotation = Quaternion.Euler(0, 0, Mathf.Lerp(0f, 12f, k));   // si raddrizza un po'
         }
 
@@ -190,11 +189,19 @@ namespace Gotcha.Levels
             if (plantDry != null) plantDry.gameObject.SetActive(false);
             if (plantBloom != null)
             {
+                // il fiore sboccia e fa due saltelli di felicità (stesse dimensioni, si muove soltanto)
                 plantBloom.SetActive(true);
                 Transform t = plantBloom.transform;
-                Vector3 s = t.localScale;
-                for (float k = 0f; k < 1f; k += Time.deltaTime / 0.5f) { t.localScale = new Vector3(s.x, s.y * Mathf.SmoothStep(0.2f, 1f, k), s.z); yield return null; }
-                t.localScale = s;
+                Vector3 p = t.localPosition;
+                for (int hop = 0; hop < 2; hop++)
+                    for (float k = 0f; k < 1f; k += Time.deltaTime / 0.35f)
+                    {
+                        t.localPosition = p + Vector3.up * Mathf.Sin(k * Mathf.PI) * 0.25f;
+                        t.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(k * Mathf.PI * 2f) * 6f);
+                        yield return null;
+                    }
+                t.localPosition = p;
+                t.localRotation = Quaternion.identity;
             }
             if (sparkle != null) sparkle.Play();
             if (bubble != null) bubble.Show("Thank you!");

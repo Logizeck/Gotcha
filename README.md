@@ -38,5 +38,10 @@ Livelli attuali:
 33. **Blow It Up** — gonfia il palloncino fino alla sagoma tratteggiata, col fiato o con 10 colpi di pompa.
 34. **Cat Eyes** — muovi gli occhi del gatto inclinando il telefono e fissa il topolino per 3 secondi.
 35. **Pancake Flip** — lancia la frittella con un colpo di polso e riprendila nella padella, 3 volte.
+36. **Sting Run** — labirinto: porta la sfera alla stella prima che la vespa ti raggiunga (usa i muri).
+37. **Secret Code** — luce rossa e luce blu, mai insieme: leggi il codice a metà e ricordalo per aprire la cassaforte.
+38. **Apple Catch** — scuoti l'albero e raccogli 5 mele nel cesto inclinando il telefono.
+39. **Marble Run** — disegna le rampe e porta la biglia nella tazza, oltre il muretto.
+40. **Copycat** — ripeti le sequenze di luci e note del gatto (3, 4, 5 note).
 
 Istruzioni per aprire il progetto e creare l'APK: vedi [README_SETUP.md](README_SETUP.md).

@@ -98,17 +98,14 @@ namespace Gotcha.Levels
             Vector2 wiggle = new Vector2(-dir.y, dir.x) * Mathf.Sin(Time.time * 11f) * 0.35f;
             Vector2 step = (dir + wiggle).normalized * speed * Time.deltaTime;
 
-            // rimbalza sulle linee disegnate
-            foreach (RaycastHit2D hit in Physics2D.CircleCastAll(pos, waspRadius, step.normalized, step.magnitude))
+            // rimbalza sulle linee disegnate (geometria esatta: non può attraversarle né restarci dentro)
+            Vector2 next = pos + step;
+            if (pen != null && StrokeBarrier.Resolve(pen.transform, pos, ref next, waspRadius, pen.colliderRadius, out Vector2 normal))
             {
-                if (!(hit.collider is EdgeCollider2D) || pen == null || !hit.collider.transform.IsChildOf(pen.transform)) continue;
-                dir = Vector2.Reflect(dir, hit.normal).normalized;
-                pos = hit.distance > 0f ? hit.centroid + hit.normal * 0.03f : pos + hit.normal * 0.12f;
-                step = dir * 0.02f;
+                if (Vector2.Dot(dir, normal) < 0f) dir = Vector2.Reflect(dir, normal).normalized;
                 flash = 0.12f;
-                break;
             }
-            pos += step;
+            pos = next;
 
             // bordi dello schermo
             if (pos.x < boundsMin.x || pos.x > boundsMax.x) { dir.x = -dir.x; pos.x = Mathf.Clamp(pos.x, boundsMin.x, boundsMax.x); }

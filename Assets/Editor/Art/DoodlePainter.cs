@@ -360,6 +360,7 @@ namespace Gotcha.EditorArt
                 DoodleSprites.IngredientBowl(), DoodleSprites.Tongue(), DoodleSprites.Balloon(), DoodleSprites.BalloonOutline(),
                 DoodleSprites.Pump(), DoodleSprites.PumpHandle(), DoodleSprites.BalloonScrap(), DoodleSprites.CatBigFace(),
                 DoodleSprites.CatPupil(), DoodleSprites.MouseHole(), DoodleSprites.Pan(), DoodleSprites.PancakeCooked(), DoodleSprites.PancakeRaw(),
+                DoodleSprites.WaspMazeNeon(), DoodleSprites.AppleTree(), DoodleSprites.Basket(), DoodleSprites.Cup(), DoodleSprites.Pad(),
             };
         }
     }

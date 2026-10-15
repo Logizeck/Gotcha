@@ -101,9 +101,8 @@ namespace Gotcha.Levels
         bool Blocked(Vector2 pos, Vector2 step)
         {
             if (pen == null) return false;
-            foreach (RaycastHit2D h in Physics2D.CircleCastAll(pos, bodyRadius, step.normalized, step.magnitude + 0.02f))
-                if (h.collider is EdgeCollider2D && h.collider.transform.IsChildOf(pen.transform)) return true;
-            return false;
+            Vector2 next = pos + step;
+            return StrokeBarrier.Resolve(pen.transform, pos, ref next, bodyRadius, pen.colliderRadius, out _);
         }
 
         /// <summary>Prova qualche direzione libera; false se le staccionate lo chiudono da ogni parte.</summary>
