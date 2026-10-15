@@ -11,7 +11,7 @@ Grafica in stile cartone "doodle" generata da codice (nessuna immagine esterna d
 2. Alla prima apertura `Assets/Editor/GotchaProjectBuilder.cs` genera da solo: sprite doodle
    (`Assets/Art/Generated`), materiali, prefab riutilizzabili, prefab dei livelli, LevelDefinition, LevelCatalog,
    scena `Assets/Scenes/Main.unity` e impostazioni Android (verticale, ARM64 + ARMv7, IL2CPP).
-   Con Unity 6 imposta anche Active Input Handling = Both e chiede di riavviare.
+   Con Unity 6 imposta anche Active Input Handling = Input Manager (Old) ("Both" fa fallire la build Android) e chiede di riavviare.
    Si può rilanciare da **Gotcha > Build Scene and Levels** (ricrea scena, sprite e prefab generati).
    Quando un aggiornamento cambia grafica o livelli (`BuilderVersion` nel builder), all'apertura del progetto
    la rigenerazione parte da sola.

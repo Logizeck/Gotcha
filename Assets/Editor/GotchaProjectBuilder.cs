@@ -31,7 +31,7 @@ public static class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 21;
+    const int BuilderVersion = 22;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -3648,8 +3648,8 @@ public static class GotchaProjectBuilder
     }
 
     /// <summary>
-    /// Il gioco legge tocchi e sensori con il vecchio Input Manager. Unity 6 di default usa solo il nuovo
-    /// Input System: in quel caso si passa a "Both" (richiede il riavvio dell'Editor).
+    /// Il gioco legge tocchi e sensori con il vecchio Input Manager. Unity 6 di default usa il nuovo Input System
+    /// e "Both" non è ammesso nelle build Android: si imposta solo "Input Manager (Old)" (richiede il riavvio).
     /// </summary>
     static void EnsureLegacyInput()
     {
@@ -3657,13 +3657,14 @@ public static class GotchaProjectBuilder
         if (all == null || all.Length == 0) return;
         var so = new SerializedObject(all[0]);
         SerializedProperty p = so.FindProperty("activeInputHandler");
-        if (p == null || p.intValue != 1) return;   // 0 = Old, 1 = New, 2 = Both
+        if (p == null || p.intValue == 0) return;   // 0 = Old, 1 = New, 2 = Both
 
-        p.intValue = 2;
+        p.intValue = 0;
         so.ApplyModifiedPropertiesWithoutUndo();
         AssetDatabase.SaveAssets();
         if (EditorUtility.DisplayDialog("Gotcha!",
-                "Active Input Handling impostato su \"Both\": serve per tocchi e sensori. Unity deve riavviarsi.",
+                "Active Input Handling impostato su \"Input Manager (Old)\": serve per tocchi e sensori, e \"Both\" " +
+                "non è ammesso nelle build Android. Unity deve riavviarsi.",
                 "Riavvia ora", "Più tardi"))
             EditorApplication.OpenProject(Directory.GetCurrentDirectory());
     }
