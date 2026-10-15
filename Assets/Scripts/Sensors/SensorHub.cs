@@ -29,7 +29,13 @@ namespace Gotcha.Sensors
 
         float volumeCache = 1f;
         float volumeTimer;
+#if UNITY_ANDROID && !UNITY_EDITOR
+        int keysFrame = -1, keysCache;
+#else
+        int editorDownPresses;
+#endif
 #if UNITY_EDITOR
+        bool editorCharging;
         float editorVolume = 1f;   // nell'Editor il volume si simula coi tasti - e +
 #endif
 
@@ -48,6 +54,10 @@ namespace Gotcha.Sensors
         {
             // Il permesso del microfono si chiede una volta sola all'avvio del gioco, non a metà livello.
             RequestMicPermission();
+#if UNITY_ANDROID && !UNITY_EDITOR
+            try { using (var keys = new AndroidJavaClass("com.gotcha.game.GotchaKeys")) keys.CallStatic("install"); }
+            catch (System.Exception e) { Debug.LogWarning("[Gotcha] Tasti volume non intercettabili: " + e.Message); }
+#endif
         }
 
         /// <summary>Mostra la richiesta di Android per il microfono, se non è già stato concesso o chiesto.</summary>
@@ -69,6 +79,8 @@ namespace Gotcha.Sensors
             shake = Mathf.Max(delta * 10f, Mathf.Lerp(shake, 0f, 8f * Time.unscaledDeltaTime));
 
 #if UNITY_EDITOR
+            if (Input.GetKeyDown(KeyCode.Minus) || Input.GetKeyDown(KeyCode.KeypadMinus)) editorDownPresses++;
+            if (Input.GetKeyDown(KeyCode.C)) editorCharging = !editorCharging;
             if (Input.GetKey(KeyCode.Minus) || Input.GetKey(KeyCode.KeypadMinus)) editorVolume = Mathf.Max(0f, editorVolume - 0.6f * Time.unscaledDeltaTime);
             if (Input.GetKey(KeyCode.Equals) || Input.GetKey(KeyCode.KeypadPlus)) editorVolume = Mathf.Min(1f, editorVolume + 0.6f * Time.unscaledDeltaTime);
 #endif
@@ -108,11 +120,45 @@ namespace Gotcha.Sensors
             get { float b = SystemInfo.batteryLevel; return b < 0f ? 1f : b; }
         }
 
-        public bool IsCharging => SystemInfo.batteryStatus == BatteryStatus.Charging;
+        /// <summary>Telefono collegato al caricatore (in carica o già pieno). Nell'Editor si simula col tasto C.</summary>
+        public bool IsCharging
+        {
+            get
+            {
+#if UNITY_EDITOR
+                return editorCharging;
+#else
+                BatteryStatus s = SystemInfo.batteryStatus;
+                return s == BatteryStatus.Charging || s == BatteryStatus.Full;
+#endif
+            }
+        }
 
         // ---------- Volume di sistema ----------
 
         public float SystemVolume01 => volumeCache;
+
+        /// <summary>
+        /// Quante volte è stato premuto il tasto "volume -" da quando il gioco è aperto (anche quando il volume è già
+        /// al minimo e quindi il valore non cambia). Nell'Editor conta il tasto "-".
+        /// </summary>
+        public int VolumeDownPresses
+        {
+            get
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                if (Time.frameCount != keysFrame)
+                {
+                    keysFrame = Time.frameCount;
+                    try { using (var keys = new AndroidJavaClass("com.gotcha.game.GotchaKeys")) keysCache = keys.CallStatic<int>("volumeDownCount"); }
+                    catch { }
+                }
+                return keysCache;
+#else
+                return editorDownPresses;
+#endif
+            }
+        }
 
         float ReadSystemVolume()
         {

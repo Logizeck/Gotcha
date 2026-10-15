@@ -12,26 +12,26 @@ namespace Gotcha.Levels
     /// Per vincere ogni occhio deve stare nella sua zona (ampia, invisibile), il naso nella sua, e la bocca va
     /// disegnata col dito: un sorriso che resta come un solco nella neve.
     /// Il pupazzo è in posa di 3/4 (guarda a sinistra): il sedere sporge sul retro, a destra in basso.
-    /// Easter egg: lasciare la carota sul sedere → la carota resta piantata lì, il pupazzo arrossisce, fuma,
-    /// "Oh noooo!" e si scioglie lentamente dalla testa in giù, mentre la base resta a terra.
+    /// Easter egg: lasciare la carota sul sedere → la carota resta piantata lì, il pupazzo arrossisce, gli occhi
+    /// schizzano via, la bocca resta a "O", e si scioglie del tutto dall'alto in basso (SnowmanMelter) finché resta
+    /// solo una pozzanghera con cappello, braccia e carota che galleggiano. La scena viene registrata per condividerla.
     /// </summary>
     public class SnowmanLevel : LevelController
     {
         [Header("Parti del pupazzo (pivot sui punti di appoggio)")]
         [SerializeField] Transform snowman;      // radice ai piedi
         [SerializeField] Transform basePart;     // pivot y = 0
-        [SerializeField] Transform middlePart;   // pivot y = 1.95
         [SerializeField] Transform armLeft;      // braccia separate: cadono durante lo scioglimento
         [SerializeField] Transform armRight;
         [SerializeField] Transform headPart;     // pivot y = 3.42
         [SerializeField] Transform hatPart;      // pivot y = 4.55
         [SerializeField] SpriteRenderer[] bodyRenderers;
         [SerializeField] SpriteRenderer blush;
-        [SerializeField] Transform puddle;
         [SerializeField] SpeechBubble bubble;
         [SerializeField] SmokeEmitter smoke;
         [SerializeField] StrokeDrawer mouthPen;  // centrato sulla testa
-        [SerializeField] SmokeEmitter drips;     // gocce d'acqua durante lo scioglimento
+        [SerializeField] SnowmanMelter melter;   // scioglimento completo (maschera, colature, pozzanghera)
+        [SerializeField] SpriteRenderer mouthO;  // bocca stupita (nascosta finché non serve)
 
         [Header("Zone invisibili (coordinate del pupazzo, piedi in 0,0)")]
         [SerializeField] Vector2 headCenter = new Vector2(-0.1f, 3.7f);
@@ -43,12 +43,6 @@ namespace Gotcha.Levels
         [SerializeField] Vector2 buttCenter = new Vector2(0.86f, 1.02f);
         [SerializeField] float buttRadius = 0.5f;
         [SerializeField] Vector2 buttSurface = new Vector2(0.86f, 1.02f);       // dove si pianta la punta della carota
-
-        [Header("Punti d'appoggio delle parti (coordinate del pupazzo)")]
-        [SerializeField] float middlePivot = 1.5f;
-        [SerializeField] float shoulderY = 2.45f;
-        [SerializeField] float headPivot = 2.72f;
-        [SerializeField] float hatPivot = 4.62f;
 
         [Header("Easter egg")]
         [SerializeField] string eggId = "snowman_butt";
@@ -68,7 +62,7 @@ namespace Gotcha.Levels
             if (mouthPen != null) mouthPen.StrokeFinished += OnMouthDrawn;
 
             if (blush != null) blush.color = new Color(1f, 1f, 1f, 0f);
-            if (puddle != null) puddle.localScale = Vector3.zero;
+            if (mouthO != null) mouthO.gameObject.SetActive(false);
             if (bubble != null) bubble.Hide();
             // registra sempre gli ultimi secondi: se parte l'Easter egg, il video è pronto da condividere
             if (ClipRecorder.Instance != null) ClipRecorder.Instance.Begin();
@@ -199,8 +193,6 @@ namespace Gotcha.Levels
 
         // ---------- Easter egg: carota sul sedere ----------
 
-        bool armsFallen, hatFallen;
-
         IEnumerator MeltRoutine(Draggable2D carrot)
         {
             LockInput();
@@ -221,7 +213,7 @@ namespace Gotcha.Levels
                 snowman.localPosition = home + Vector3.up * Mathf.Sin(k * Mathf.PI) * 0.35f;
                 yield return null;
             }
-            for (float k = 0f; k < 1f; k += Time.deltaTime / 1.0f)
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.9f)
             {
                 SetTint(Color.Lerp(Color.white, BlushTint, k), k);
                 snowman.localPosition = home + (Vector3)(Random.insideUnitCircle * 0.03f);
@@ -230,101 +222,100 @@ namespace Gotcha.Levels
             snowman.localPosition = home;
             SetTint(BlushTint, 1f);
 
-            // 2. strilla, fuma e comincia a gocciolare
+            // 2. "Oh noooo!": gli occhi (se ci sono) schizzano via in direzioni opposte, la bocca resta a "O"
             if (bubble != null) bubble.Show("Oh noooo!");
             if (smoke != null) smoke.Play();
-            yield return new WaitForSeconds(0.7f);
-            if (drips != null) drips.Play();
+            ShootEyes();
+            SurprisedMouth();
+            yield return new WaitForSeconds(0.9f);
 
-            // 3. si scioglie lentamente dalla testa in giù: il cappello scivola via, le braccia cadono,
-            //    la base resta a terra e la pozzanghera si allarga
-            float sh = 1f, sm = 1f, sb = 1f;
-            yield return Melt(2.0f, k =>
+            // 3. si scioglie tutto, dall'alto in basso: cappello, naso, braccia e carota cadono nella pozzanghera
+            if (melter != null)
             {
-                sh = Mathf.Lerp(1f, 0.18f, k);
-                Pose(sb, sm, sh, 0.25f * k);
-                if (!hatFallen && k > 0.45f) { hatFallen = true; StartCoroutine(Tumble(hatPart, 1f, 1.1f, -95f)); }
-                if (!armsFallen && k > 0.8f) { armsFallen = true; DropArms(); }
-            });
-            yield return Melt(2.0f, k => { sm = Mathf.Lerp(1f, 0.22f, k); Pose(sb, sm, sh, 0.25f + 0.35f * k); });
-            if (bubble != null) bubble.Show("blub...");
-            yield return Melt(2.4f, k => { sb = Mathf.Lerp(1f, 0.42f, k); Pose(sb, sm, sh, 0.6f + 0.4f * k); });
-
-            if (drips != null) drips.Stop();
-            if (smoke != null) smoke.Stop();
-            yield return new WaitForSeconds(1.2f);
+                if (hatPart != null) melter.AddLoose(hatPart);
+                if (armLeft != null) melter.AddLoose(armLeft);
+                if (armRight != null) melter.AddLoose(armRight);
+                foreach (Draggable2D d in items)
+                    if (d != null && d.gameObject.activeSelf && (d.transform.IsChildOf(headPart) || d.transform.IsChildOf(basePart))) melter.AddLoose(d.transform);
+                melter.Begin();
+                if (smoke != null) smoke.Stop();
+                bool blub = false;
+                const float seconds = 6.5f;
+                for (float k = 0f; k < 1f; k += Time.deltaTime / seconds)
+                {
+                    // parte piano e accelera, come un vero scioglimento
+                    melter.SetProgress(k * k * 0.55f + k * 0.45f);
+                    if (!blub && k > 0.7f && bubble != null) { blub = true; bubble.Show("blub... blub..."); }
+                    yield return null;
+                }
+                melter.SetProgress(1f);
+                melter.End();
+            }
+            yield return new WaitForSeconds(1.4f);
             if (ClipRecorder.Instance != null) ClipRecorder.Instance.Stop();   // il video si può condividere
             FailWithEgg(eggId);
         }
 
-        void DropArms()
+        /// <summary>Gli occhi già messi schizzano fuori dalla testa, uno a sinistra e uno a destra, roteando.</summary>
+        void ShootEyes()
         {
-            if (armLeft != null) StartCoroutine(Tumble(armLeft, -1f, 0.25f, 75f));
-            if (armRight != null) StartCoroutine(Tumble(armRight, 1f, 0.25f, -80f));
+            var eyes = new List<Transform>();
+            foreach (Draggable2D d in items)
+                if (d != null && d.itemId == "eye" && d.transform.IsChildOf(headPart)) eyes.Add(d.transform);
+            if (eyes.Count == 0) return;
+            eyes.Sort((a, b) => a.position.x.CompareTo(b.position.x));
+            for (int i = 0; i < eyes.Count; i++)
+            {
+                float side = eyes.Count == 1 ? (Local(eyes[i].position).x < headCenter.x ? -1f : 1f) : (i == 0 ? -1f : 1f);
+                eyes[i].SetParent(transform, true);
+                StartCoroutine(Fly(eyes[i], new Vector2(side * Random.Range(7f, 9f), Random.Range(5f, 7f))));
+            }
         }
 
-        /// <summary>Un pezzo si stacca, vola un po' di lato ruotando e cade sulla neve con un rimbalzo.</summary>
-        IEnumerator Tumble(Transform t, float side, float jump, float spinTo)
+        IEnumerator Fly(Transform t, Vector2 v)
         {
-            if (t == null) yield break;
-            Vector3 v = new Vector3(side * Random.Range(0.8f, 1.3f), jump * 2.5f, 0f);
-            float startAngle = t.localEulerAngles.z;
-            float ground = 0.15f, time = 0f;
-            int bounces = 0;
-            while (bounces < 2)
+            float spin = Random.Range(600f, 900f) * Mathf.Sign(v.x);
+            Vector3 scale = t.localScale;
+            for (float time = 0f; time < 1.6f && t != null; time += Time.deltaTime)
             {
-                time += Time.deltaTime;
-                v.y -= 12f * Time.deltaTime;
-                t.localPosition += v * Time.deltaTime;
-                t.localRotation = Quaternion.Euler(0, 0, Mathf.LerpAngle(startAngle, spinTo, Mathf.Clamp01(time * 1.6f)));
-                if (t.localPosition.y <= ground && v.y < 0f)
-                {
-                    t.localPosition = new Vector3(t.localPosition.x, ground, t.localPosition.z);
-                    v = new Vector3(v.x * 0.4f, -v.y * 0.3f, 0f);
-                    bounces++;
-                }
+                v.y -= 9f * Time.deltaTime;
+                t.position += (Vector3)(v * Time.deltaTime);
+                t.Rotate(0, 0, -spin * Time.deltaTime);
+                t.localScale = scale * (1f + time * 0.6f);   // "boing!": si ingrandiscono come nei cartoni
                 yield return null;
             }
+            if (t != null) t.gameObject.SetActive(false);
         }
 
-        delegate void MeltStep(float k);
-
-        IEnumerator Melt(float seconds, MeltStep step)
+        /// <summary>Se la bocca era stata disegnata, il solco diventa una "O" di stupore nello stesso punto.</summary>
+        void SurprisedMouth()
         {
-            for (float k = 0f; k < 1f; k += Time.deltaTime / seconds)
+            if (mouthPen == null || !mouthPen.HasStroke || mouthO == null) return;
+            IReadOnlyList<Vector3> pts = mouthPen.LastStrokePoints;
+            Vector3 c = Vector3.zero;
+            if (pts != null && pts.Count > 0)
             {
-                step(k * k * (3f - 2f * k));
+                foreach (Vector3 p in pts) c += p;
+                c /= pts.Count;
+                c = mouthPen.transform.TransformPoint(c);
+            }
+            else c = mouthO.transform.position;
+            mouthPen.Clear();
+            mouthO.transform.position = new Vector3(c.x, c.y - 0.05f, mouthO.transform.position.z);
+            mouthO.gameObject.SetActive(true);
+            StartCoroutine(PopIn(mouthO.transform));
+            if (melter != null) melter.AddMasked(mouthO);
+        }
+
+        IEnumerator PopIn(Transform t)
+        {
+            Vector3 s = t.localScale;
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.2f)
+            {
+                t.localScale = s * (k < 0.7f ? k / 0.7f * 1.25f : Mathf.Lerp(1.25f, 1f, (k - 0.7f) / 0.3f));
                 yield return null;
             }
-            step(1f);
-        }
-
-        /// <summary>Mette in posa le parti: ognuna appoggiata su quella sotto, schiacciata del suo fattore.</summary>
-        void Pose(float sb, float sm, float sh, float overall)
-        {
-            Squash(basePart, 0f, sb);
-            float middleY = middlePivot * sb;
-            Squash(middlePart, middleY, sm);
-            if (!armsFallen)
-            {
-                float armY = middleY + (shoulderY - middlePivot) * sm;
-                if (armLeft != null) armLeft.localPosition = new Vector3(armLeft.localPosition.x, armY, 0f);
-                if (armRight != null) armRight.localPosition = new Vector3(armRight.localPosition.x, armY, 0f);
-            }
-            float headY = middleY + (headPivot - middlePivot) * sm;
-            Squash(headPart, headY, sh);
-            if (!hatFallen && hatPart != null) hatPart.localPosition = new Vector3(0f, headY + (hatPivot - headPivot) * sh, 0f);
-            if (drips != null) drips.transform.localPosition = new Vector3(0f, headY, 0f);
-
-            if (puddle != null) puddle.localScale = new Vector3(Mathf.Min(1.1f, overall * 1.2f), Mathf.Min(1f, overall * 1.1f), 1f);
-            SetTint(Color.Lerp(BlushTint, MeltTint, overall), 1f - Mathf.Clamp01(overall * 2.5f));
-        }
-
-        static void Squash(Transform t, float y, float s)
-        {
-            if (t == null) return;
-            t.localPosition = new Vector3(0f, y, 0f);
-            t.localScale = new Vector3(1f + (1f - s) * 0.35f, s, 1f);
+            t.localScale = s;
         }
 
         void SetTint(Color c, float blushAlpha)

@@ -1,4 +1,4 @@
-# Gotcha! — v0.12 (venti livelli)
+# Gotcha! — v0.13 (trentuno livelli)
 
 La versione installata si legge nel MENU del gioco (accanto al conteggio degli Easter egg).
 
@@ -69,12 +69,13 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Occhi (carboni) e naso (carota), più grandi del normale, restano attaccati dove li lasci sulla testa;
   altrove cadono nella neve. Nessuna posizione è indicata: ogni occhio deve stare nella sua zona (ampia e
   invisibile) e il naso al centro; la bocca si disegna col dito e resta come un solco: deve essere un sorriso.
-- Easter egg `snowman_butt`: lascia la carota sul sedere. Resta piantata lì; il pupazzo arrossisce, fuma,
-  dice "Oh noooo!" e comincia a gocciolare. La testa si scioglie, il cappello vola via rimbalzando, le braccia
-  cadono nella neve, poi si sciolgono busto e base ("blub..."), lasciando una pozzanghera.
-- La scena dello scioglimento viene registrata (ultimi ~14 s, 12 fps) e a fine livello compare il pulsante
-  **SHARE VIDEO**: crea un MP4 (salvato in Movies/Gotcha) e apre il menu di condivisione di Android
-  (WhatsApp, Instagram, TikTok...). Solo su Android; nell'Editor i fotogrammi finiscono in `persistentDataPath/clip_frames`.
+- Easter egg `snowman_butt`: lascia la carota sul sedere. Resta piantata lì; il pupazzo arrossisce, trema,
+  grida "Oh noooo!": gli occhi (se li avevi messi) schizzano via in direzioni opposte e la bocca disegnata diventa
+  una "O" di stupore. Poi si scioglie DEL TUTTO dall'alto in basso (`Components/SnowmanMelter`): una maschera fa
+  sparire la neve, sul bordo scorre una fascia di neve bagnata con le colature larga quanto il pupazzo, gocciola,
+  fuma, e alla fine resta solo una pozzanghera con cappello, braccia e carota che galleggiano.
+- La scena viene registrata e a fine livello compare **SHARE VIDEO**: crea un MP4 (salvato in Movies/Gotcha) e apre
+  il menu di condivisione di Android. Solo su Android; nell'Editor i fotogrammi finiscono in `persistentDataPath/clip_frames`.
 - Zone, misure e punti d'appoggio sono regolabili dall'Inspector del prefab `Level_Snowman`.
 
 ## Livello 4 — Big Red Button
@@ -161,6 +162,26 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 ## Livello 20 — Lift Off (azioni in sequenza)
 - Trascina la tanica sul razzo, alza il coperchio di sicurezza, tieni premuto il pulsante per tutto il
   conto alla rovescia (se lo lasci: ABORT!). Editor: barra spaziatrice per tenere premuto.
+
+## Livelli col volume (8 e 19)
+- Serve SEMPRE almeno una pressione del tasto "volume -" durante il livello: un telefono già a volume zero non
+  risolve il livello da solo. Il tasto si intercetta con `Plugins/Android/GotchaKeys.java` (anche quando il volume è
+  già al minimo e il valore non cambia); come riserva vale anche un calo del volume osservato. Editor: tasto "-".
+
+## Livelli 21-31
+- **21 Low Battery**: collega davvero il caricatore (se era già collegato: staccalo e riattaccalo). Editor: tasto C.
+- **22 Hot Soup**: soffia nel microfono per raffreddare la zuppa, POI trascinala al topolino. Editor: B.
+- **23 Frozen Key**: strofina il ghiaccio col dito, rimpicciolisci la chiave col pizzico, apri la porta.
+- **24 Campfire**: strofina il bastoncino avanti e indietro per la scintilla, poi soffia PIANO (forte la spegne).
+  Editor: B soffio leggero, N soffio forte.
+- **25 Chicken Button**: premi 5 volte un pulsante con le gambe che scappa; contro i muri è più lento.
+- **26 Thirsty Plant**: inclina il telefono per versare 18 gocce nel vaso.
+- **27 Shell Game**: segui la scatola col topolino.
+- **28 Sky Wire** (taglio): "taglia il filo del colore del cielo"... fuori è notte: il filo giusto è il nero.
+- **29 Sunny Day**: il sole scioglie il pupazzo (stesso scioglimento dell'Easter egg); trascina la nuvola davanti al
+  sole (il vento la sposta) fino al tramonto. Se si scioglie: Easter egg `sun_melt` con video da condividere.
+- **30 Cut the Rope** (taglio + tempismo): taglia una corda, aspetta l'oscillazione, taglia l'altra.
+- **31 Pizza Party** (taglio + trascinamento): due tagli dal centro, poi una fetta a ogni topolino.
 
 ## Icona dell'app
 - L'icona "G!" al neon è ridisegnata dal codice (`DoodleSprites.AppIcon`). Per usare il logo originale basta

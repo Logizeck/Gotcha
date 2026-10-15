@@ -8,7 +8,7 @@ namespace Gotcha.Levels
 {
     /// <summary>
     /// Livello 19 — a nanna. Il gatto ha sonno ma non riesce a dormire. Tre cose, in quest'ordine logico:
-    /// 1) spegni l'abat-jour (tocco);  2) abbassa a zero il volume del telefono (lo stereo si zittisce);
+    /// 1) spegni l'abat-jour (tocco);  2) abbassa a zero il volume del telefono col tasto "volume -" (anche se è già a zero va premuto);
     /// 3) poi non toccare più niente per 5 secondi. Un tocco lo sveglia ("Mrr?") e l'attesa riparte.
     /// Se riaccendi la luce o rialzi il volume si riparte da quel punto. (Editor: volume coi tasti - e +.)
     /// </summary>
@@ -28,6 +28,7 @@ namespace Gotcha.Levels
         [SerializeField] float sleepAfter = 5f;
 
         bool lightOn = true, done;
+        readonly VolumeDownWatch watch = new VolumeDownWatch();
         float still, darkNow;
         int lastState = -1;
 
@@ -41,6 +42,7 @@ namespace Gotcha.Levels
             }
             if (stereo != null) { stereo.loop = true; stereo.Play(); }
             if (zzz != null) zzz.Stop();
+            watch.Begin();
             if (bubble != null) { bubble.Show("Too bright... too loud..."); StartCoroutine(HideLater(2.2f)); }
             Apply();
         }
@@ -67,9 +69,9 @@ namespace Gotcha.Levels
         {
             if (done || IsFinished) return;
             float v = SensorHub.Instance != null ? SensorHub.Instance.SystemVolume01 : 1f;
-            bool quiet = v <= silentBelow;
-            if (stereo != null) stereo.volume = quiet ? 0f : 1f;
-            if (notes != null) { if (quiet) notes.Stop(); else notes.Play(); notes.puffsPerSecond = Mathf.Lerp(0.5f, 6f, v); }
+            bool quiet = watch.Tick(silentBelow);   // serve almeno una pressione di "volume -" durante il livello
+            if (stereo != null) stereo.volume = v <= silentBelow ? 0f : 1f;
+            if (notes != null) { if (quiet || v <= silentBelow) notes.Stop(); else notes.Play(); notes.puffsPerSecond = Mathf.Lerp(0.5f, 6f, v); }
 
             darkNow = Mathf.MoveTowards(darkNow, lightOn ? 0f : darkAlpha, Time.deltaTime * 2f);
             if (roomDark != null) roomDark.color = new Color(0.02f, 0.02f, 0.08f, darkNow);

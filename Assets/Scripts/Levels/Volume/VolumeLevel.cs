@@ -10,7 +10,8 @@ namespace Gotcha.Levels
     /// Livello 8 — il gatto arrabbiato. Lo stereo suona a tutto volume e il gatto è furioso. Si risolve abbassando
     /// al minimo il volume del telefono: man mano che scende il gatto passa da furioso ad arrabbiato, seccato,
     /// assonnato; a volume zero si addormenta. (Nell'Editor il volume si simula coi tasti - e +.)
-    /// Se il volume è già a zero all'inizio, bisogna prima alzarlo: la musica deve essere "sentita" almeno una volta.
+    /// Serve sempre almeno una pressione di "volume -" durante il livello (VolumeDownWatch): un telefono già a volume
+    /// zero non risolve il livello da solo; finché non premi il tasto il gatto resta arrabbiato.
     /// </summary>
     public class VolumeLevel : LevelController
     {
@@ -25,7 +26,8 @@ namespace Gotcha.Levels
         [SerializeField] float silentBelow = 0.01f;
         [SerializeField] float holdSeconds = 0.8f;
 
-        bool armed, done;
+        bool done;
+        readonly VolumeDownWatch watch = new VolumeDownWatch();
         float silentFor;
         int lastMood = -1;
 
@@ -37,6 +39,7 @@ namespace Gotcha.Levels
                 if (stereo != null && stereo.clip == null) stereo.clip = MusicPlayer.Instance.soundtrack;
             }
             if (stereo != null) { stereo.loop = true; stereo.Play(); }
+            watch.Begin();
             if (zzz != null) zzz.Stop();
             if (bubble != null) { bubble.Show("HISSS!"); StartCoroutine(HideLater(1.4f)); }
         }
@@ -50,7 +53,8 @@ namespace Gotcha.Levels
         {
             if (done || IsFinished) return;
             float v = SensorHub.Instance != null ? SensorHub.Instance.SystemVolume01 : 1f;
-            if (v > silentBelow) armed = true;
+            bool silenced = watch.Tick(silentBelow);
+            if (!watch.PressedSinceStart) v = Mathf.Max(v, 0.8f);   // senza il tasto il gatto non si calma
 
             int mood = v > 0.75f ? 0 : v > 0.45f ? 1 : v > 0.15f ? 2 : 3;
             if (mood != lastMood) SetMood(mood);
@@ -58,7 +62,7 @@ namespace Gotcha.Levels
             if (notes != null) notes.puffsPerSecond = Mathf.Lerp(0.5f, 6f, v);
             if (speakers != null) foreach (Pulse s in speakers) if (s != null) s.amount = Mathf.Lerp(0f, 0.08f, v);
 
-            silentFor = armed && v <= silentBelow ? silentFor + Time.deltaTime : 0f;
+            silentFor = silenced ? silentFor + Time.deltaTime : 0f;
             if (silentFor >= holdSeconds) StartCoroutine(FallAsleep());
         }
 

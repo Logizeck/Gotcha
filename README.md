@@ -23,5 +23,16 @@ Livelli attuali:
 18. **Hidden Safe** — scuoti, leggi il codice, apri la cassaforte e poi la porta.
 19. **Bedtime** — luce spenta, volume a zero, e nessun tocco.
 20. **Lift Off** — carburante, coperchio, conto alla rovescia.
+21. **Low Battery** — collega il caricatore.
+22. **Hot Soup** — soffia per raffreddare, poi servi.
+23. **Frozen Key** — strofina il ghiaccio, pizzica la chiave, apri.
+24. **Campfire** — strofina per la scintilla, soffia piano.
+25. **Chicken Button** — prendi il pulsante che scappa.
+26. **Thirsty Plant** — versa l'acqua inclinando il telefono.
+27. **Shell Game** — dov'è il topolino?
+28. **Sky Wire** — taglia il filo del colore del cielo.
+29. **Sunny Day** — proteggi il pupazzo con una nuvola.
+30. **Cut the Rope** — taglia al momento giusto.
+31. **Pizza Party** — taglia in quattro e servi.
 
 Istruzioni per aprire il progetto e creare l'APK: vedi [README_SETUP.md](README_SETUP.md).

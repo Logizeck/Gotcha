@@ -347,6 +347,13 @@ namespace Gotcha.EditorArt
                 DoodleSprites.Led(), DoodleSprites.Portrait(), DoodleSprites.PaintingBack(), DoodleSprites.Safe(),
                 DoodleSprites.SafeOpen(), DoodleSprites.KeypadKey(), DoodleSprites.BedsideLamp(), DoodleSprites.LaunchSite(),
                 DoodleSprites.Rocket(), DoodleSprites.FuelCan(), DoodleSprites.SafetyCover(),
+                DoodleSprites.RobotOff(), DoodleSprites.RobotOn(), DoodleSprites.BatteryFrame(), DoodleSprites.Bolt(),
+                DoodleSprites.SoupBowl(), DoodleSprites.Thermometer(), DoodleSprites.IceBlock(), DoodleSprites.CampSite(),
+                DoodleSprites.CampLogs(), DoodleSprites.FireStick(), DoodleSprites.ButtonFace(), DoodleSprites.ButtonLegs(),
+                DoodleSprites.Drop(), DoodleSprites.Pot(), DoodleSprites.PlantDry(), DoodleSprites.PlantBloom(),
+                DoodleSprites.Glass(), DoodleSprites.BoxCup(), DoodleSprites.StickyNote(), DoodleSprites.MeltFront(),
+                DoodleSprites.MouthO(), DoodleSprites.MouthSmile(), DoodleSprites.Sun(), DoodleSprites.Cloud(),
+                DoodleSprites.Pizza(), DoodleSprites.PizzaSlice(),
             };
         }
     }

@@ -31,7 +31,7 @@ public static class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 12;
+    const int BuilderVersion = 13;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -135,6 +135,39 @@ public static class GotchaProjectBuilder
             Define("Rocket", "lift_off", "LIFT OFF",
                 "Rockets need fuel. And launch buttons are always protected.",
                 BuildRocketLevel()),
+            Define("Battery", "low_battery", "LOW BATTERY",
+                "Robots run on electricity. So does your phone...",
+                BuildBatteryLevel()),
+            Define("Soup", "hot_soup", "HOT SOUP",
+                "Careful, it's boiling! How do you cool soup down?",
+                BuildSoupLevel()),
+            Define("FrozenKey", "frozen_key", "FROZEN KEY",
+                "Ice melts with a little friction. And that key looks huge...",
+                BuildFrozenKeyLevel(keyPrefab, doorPrefab)),
+            Define("Campfire", "campfire", "CAMPFIRE",
+                "Rub the stick to make a spark, then blow... gently!",
+                BuildCampfireLevel()),
+            Define("Runaway", "chicken_button", "CHICKEN BUTTON",
+                "It's scared of fingers. Corner it!",
+                BuildRunawayLevel()),
+            Define("Plant", "thirsty_plant", "THIRSTY PLANT",
+                "That glass won't pour by itself. Turn the world around.",
+                BuildPlantLevel()),
+            Define("Shell", "shell_game", "SHELL GAME",
+                "Keep your eyes on the box with the mouse.",
+                BuildShellLevel()),
+            Define("SkyWire", "sky_wire", "SKY WIRE",
+                "Read the note. Then look out of the window.",
+                BuildSkyWireLevel()),
+            Define("Sunny", "sunny_day", "SUNNY DAY",
+                "Snowmen hate the sun. Could a cloud help?",
+                BuildSunnyLevel()),
+            Define("Rope", "cut_rope", "CUT THE ROPE",
+                "Cut one rope, wait for the swing, then cut the other.",
+                BuildRopeLevel()),
+            Define("Pizza", "pizza_party", "PIZZA PARTY",
+                "Four friends, four slices. Cut right through the middle!",
+                BuildPizzaLevel()),
         };
 
         LevelCatalog catalog = LoadOrCreate<LevelCatalog>(LevelDir + "/LevelCatalog.asset");
@@ -535,25 +568,85 @@ public static class GotchaProjectBuilder
 
     // ---------- Livello 3: pupazzo di neve ----------
 
-    static GameObject BuildSnowmanLevel(GameObject carrotPrefab, GameObject coalPrefab)
+    /// <summary>
+    /// Scioglimento completo del pupazzo (livelli 3 e 29): maschera che scende, fascia di neve bagnata larga quanto la
+    /// sagoma, gocce, vapore e pozzanghera ai piedi. La sagoma riga per riga viene calcolata qui dai disegni.
+    /// </summary>
+    static SnowmanMelter AddMelter(Transform snowman, SpriteRenderer[] bodies)
     {
-        var root = new GameObject("Level_Snowman");
-        SnowmanLevel level = root.AddComponent<SnowmanLevel>();
-        Art(root.transform, "Landscape", "snow_bg", -20, false);
+        SnowmanMelter melter = snowman.gameObject.AddComponent<SnowmanMelter>();
+        melter.snowman = snowman;
+        melter.masked = bodies;
+        melter.maskSprite = sprites["plain"];
+        const float y0 = -0.1f, step = 0.04f;
+        DoodleSprites.SnowProfile(y0, step, 125, out float[] left, out float[] right);
+        melter.profileY0 = y0;
+        melter.profileStep = step;
+        melter.profileLeft = left;
+        melter.profileRight = right;
+        melter.topY = DoodleSprites.SnowHeadCenterY + DoodleSprites.SnowHeadRadius + 0.08f;
+        melter.bottomY = -0.12f;
 
-        // Pupazzo in parti, ognuna col pivot sul suo punto d'appoggio: si scioglie dalla testa in giù
+        SpriteRenderer front = Art(snowman, "MeltFront", "melt_front", 6, false).GetComponent<SpriteRenderer>();
+        front.gameObject.SetActive(false);
+        melter.front = front;
+
+        var puddle = new GameObject("Puddle").transform;
+        puddle.SetParent(snowman, false);
+        puddle.localPosition = new Vector3(0, 0.05f, 0);
+        puddle.localScale = Vector3.zero;
+        Art(puddle, "Art", "puddle", 0, true);
+        melter.puddle = puddle;
+
+        var dripsGo = new GameObject("Drips");
+        dripsGo.transform.SetParent(snowman, false);
+        SmokeEmitter drips = dripsGo.AddComponent<SmokeEmitter>();
+        drips.puffSprite = sprites["sweat"];
+        drips.puffsPerSecond = 16f;
+        drips.life = 0.8f;
+        drips.riseSpeed = -2.4f;   // gocce che cadono
+        drips.spread = 1.0f;
+        drips.sideDrift = 0.2f;
+        drips.startScale = 1.2f;
+        drips.growth = -0.4f;
+        drips.spinRange = 0f;
+        drips.tint = new Color(0.75f, 0.9f, 1f, 0.95f);
+        drips.sortingOrder = 9;
+        melter.drips = drips;
+
+        var steamGo = new GameObject("Steam");
+        steamGo.transform.SetParent(snowman, false);
+        SmokeEmitter steam = steamGo.AddComponent<SmokeEmitter>();
+        steam.puffSprite = sprites["puff"];
+        steam.puffsPerSecond = 7f;
+        steam.life = 1.4f;
+        steam.riseSpeed = 0.9f;
+        steam.spread = 0.6f;
+        steam.startScale = 0.45f;
+        steam.growth = 1.8f;
+        steam.sideDrift = 0.35f;
+        steam.tint = new Color(1f, 1f, 1f, 0.55f);
+        steam.sortingOrder = 8;
+        melter.steam = steam;
+        return melter;
+    }
+
+    /// <summary>Pupazzo di neve in parti (base, busto, braccia, testa, cappello), piedi in <paramref name="pos"/>.</summary>
+    static Transform SnowmanFigure(Transform parent, Vector2 pos, out Transform basePart, out Transform armLeft,
+        out Transform armRight, out Transform headPart, out Transform hatPart, out List<SpriteRenderer> bodies)
+    {
         var snowman = new GameObject("Snowman").transform;
-        snowman.SetParent(root.transform, false);
-        snowman.localPosition = new Vector3(0, -3.0f, 0);
-        Transform basePart = Part(snowman, "Base", 0f);
+        snowman.SetParent(parent, false);
+        snowman.localPosition = pos;
+        basePart = Part(snowman, "Base", 0f);
         Transform middlePart = Part(snowman, "Middle", DoodleSprites.SnowMiddlePivot);
-        Transform armLeft = Part(snowman, "ArmLeft", DoodleSprites.SnowShoulderY);
-        Transform armRight = Part(snowman, "ArmRight", DoodleSprites.SnowShoulderY);
+        armLeft = Part(snowman, "ArmLeft", DoodleSprites.SnowShoulderY);
+        armRight = Part(snowman, "ArmRight", DoodleSprites.SnowShoulderY);
         armLeft.localPosition = new Vector3(-0.6f, DoodleSprites.SnowShoulderY, 0);   // pivot sulla spalla: cadono ruotando
         armRight.localPosition = new Vector3(0.5f, DoodleSprites.SnowShoulderY, 0);
-        Transform headPart = Part(snowman, "Head", DoodleSprites.SnowHeadPivot);
-        Transform hatPart = Part(snowman, "Hat", DoodleSprites.SnowHatPivot);
-        var bodies = new List<SpriteRenderer>
+        headPart = Part(snowman, "Head", DoodleSprites.SnowHeadPivot);
+        hatPart = Part(snowman, "Hat", DoodleSprites.SnowHatPivot);
+        bodies = new List<SpriteRenderer>
         {
             Art(basePart, "Art", "sm_base", 2, true, Vector2.zero).GetComponent<SpriteRenderer>(),
             Art(middlePart, "Art", "sm_middle", 3, true, new Vector2(0, -DoodleSprites.SnowMiddlePivot)).GetComponent<SpriteRenderer>(),
@@ -562,6 +655,18 @@ public static class GotchaProjectBuilder
         Art(armLeft, "Art", "sm_arm_l", 1, true, new Vector2(0.6f, -DoodleSprites.SnowShoulderY));
         Art(armRight, "Art", "sm_arm_r", 1, true, new Vector2(-0.5f, -DoodleSprites.SnowShoulderY));
         Art(hatPart, "Art", "sm_hat", 7, true, new Vector2(0, -DoodleSprites.SnowHatPivot));
+        return snowman;
+    }
+
+    static GameObject BuildSnowmanLevel(GameObject carrotPrefab, GameObject coalPrefab)
+    {
+        var root = new GameObject("Level_Snowman");
+        SnowmanLevel level = root.AddComponent<SnowmanLevel>();
+        Art(root.transform, "Landscape", "snow_bg", -20, false);
+
+        // Pupazzo in parti, ognuna col pivot sul suo punto d'appoggio
+        Transform snowman = SnowmanFigure(root.transform, new Vector2(0, -3.0f), out Transform basePart, out Transform armLeft,
+            out Transform armRight, out Transform headPart, out Transform hatPart, out List<SpriteRenderer> bodies);
         float headLocal = DoodleSprites.SnowHeadCenterY - DoodleSprites.SnowHeadPivot;   // centro della testa nel pivot della testa
         float headX = DoodleSprites.SnowHeadCenterX;
         Transform blushT = Art(headPart, "Blush", "blush", 5, true, new Vector2(headX - 0.06f, headLocal - 0.12f));
@@ -593,10 +698,12 @@ public static class GotchaProjectBuilder
         smoke.puffSprite = sprites["puff"];
         smoke.spread = 0.55f;
 
-        var puddle = new GameObject("Puddle").transform;
-        puddle.SetParent(root.transform, false);
-        puddle.localPosition = new Vector3(0, -2.95f, 0);
-        Art(puddle, "Art", "puddle", 8);
+        // bocca stupita che prende il posto del solco quando parte l'Easter egg
+        SpriteRenderer mouthO = Art(headPart, "MouthO", "mouth_o", 6, false, new Vector2(headX - 0.25f, headLocal - 0.45f)).GetComponent<SpriteRenderer>();
+        mouthO.transform.localScale = Vector3.one * 1.3f;
+        mouthO.gameObject.SetActive(false);
+        var melterBodies = new List<SpriteRenderer>(bodies) { blush };
+        SnowmanMelter melter = AddMelter(snowman, melterBodies.ToArray());
 
         SpeechBubble bubble = Bubble(root.transform, new Vector2(0.95f, 2.45f));
 
@@ -611,37 +718,17 @@ public static class GotchaProjectBuilder
 
         SetField(level, "snowman", snowman);
         SetField(level, "basePart", basePart);
-        SetField(level, "middlePart", middlePart);
         SetField(level, "armLeft", armLeft);
         SetField(level, "armRight", armRight);
         SetField(level, "headPart", headPart);
         SetField(level, "hatPart", hatPart);
         SetArray(level, "bodyRenderers", bodies.ToArray());
         SetField(level, "blush", blush);
-        SetField(level, "puddle", puddle);
         SetField(level, "bubble", bubble);
-        var dripsGo = new GameObject("Drips");
-        dripsGo.transform.SetParent(snowman, false);
-        dripsGo.transform.localPosition = new Vector3(0, DoodleSprites.SnowHeadPivot, 0);
-        SmokeEmitter drips = dripsGo.AddComponent<SmokeEmitter>();
-        drips.puffSprite = sprites["sweat"];
-        drips.puffsPerSecond = 9f;
-        drips.life = 0.9f;
-        drips.riseSpeed = -1.8f;   // gocce che cadono
-        drips.spread = 1.0f;
-        drips.sideDrift = 0.3f;
-        drips.startScale = 1.1f;
-        drips.growth = -0.3f;
-        drips.spinRange = 0f;
-        drips.tint = new Color(0.8f, 0.93f, 1f, 0.95f);
-        drips.sortingOrder = 9;
-        SetField(level, "drips", drips);
+        SetField(level, "melter", melter);
+        SetField(level, "mouthO", mouthO);
         SetField(level, "smoke", smoke);
         SetField(level, "mouthPen", drawer);
-        SetFloat(level, "middlePivot", DoodleSprites.SnowMiddlePivot);
-        SetFloat(level, "shoulderY", DoodleSprites.SnowShoulderY);
-        SetFloat(level, "headPivot", DoodleSprites.SnowHeadPivot);
-        SetFloat(level, "hatPivot", DoodleSprites.SnowHatPivot);
         return SavePrefab(root, LevelDir + "/Snowman/Level_Snowman.prefab");
     }
 
@@ -2002,6 +2089,648 @@ public static class GotchaProjectBuilder
         SetField(level, "smoke", smoke);
         SetField(level, "bubble", bubble);
         return SavePrefab(root, LevelDir + "/Rocket/Level_Rocket.prefab");
+    }
+
+    // ---------- Livelli 21-31 ----------
+
+    static SmokeEmitter Emitter(Transform parent, string name, Vector2 pos, string sprite, float rate, float life, float rise, float spread, float scale, Color tint, int order = 40)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        go.transform.localPosition = pos;
+        SmokeEmitter e = go.AddComponent<SmokeEmitter>();
+        e.puffSprite = sprites[sprite];
+        e.puffsPerSecond = rate;
+        e.life = life;
+        e.riseSpeed = rise;
+        e.spread = spread;
+        e.startScale = scale;
+        e.tint = tint;
+        e.sortingOrder = order;
+        return e;
+    }
+
+    static SpriteRenderer Bar(Transform parent, string name, Vector2 pos, Vector2 size, Color color, int order)
+    {
+        SpriteRenderer sr = Art(parent, name, "plain", order, false, pos).GetComponent<SpriteRenderer>();
+        sr.transform.localScale = new Vector3(size.x, size.y, 1f);
+        sr.color = color;
+        return sr;
+    }
+
+    static LineRenderer Line(Transform parent, string name, float width, Color color, int order)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        LineRenderer lr = go.AddComponent<LineRenderer>();
+        lr.useWorldSpace = true;
+        lr.positionCount = 2;
+        lr.widthMultiplier = width;
+        lr.numCapVertices = 4;
+        lr.sharedMaterial = StrokeMaterial();
+        lr.startColor = lr.endColor = color;
+        lr.sortingOrder = order;
+        return lr;
+    }
+
+    static GameObject BuildBatteryLevel()
+    {
+        var root = new GameObject("Level_Battery");
+        BatteryLevel level = root.AddComponent<BatteryLevel>();
+        Art(root.transform, "Workshop", "workshop_bg", -20, false);
+
+        var robot = new GameObject("Robot").transform;
+        robot.SetParent(root.transform, false);
+        robot.localPosition = new Vector3(0, -3.3f, 0);
+        robot.localScale = Vector3.one * 1.3f;
+        GameObject off = Art(robot, "Off", "robot_off", 5).gameObject;
+        GameObject on = Art(robot, "On", "robot_on", 5).gameObject;
+        BoxCollider2D body = robot.gameObject.AddComponent<BoxCollider2D>();
+        body.size = new Vector2(2f, 2.9f);
+        body.offset = new Vector2(0, 1.45f);
+        SmokeEmitter notes = Emitter(robot, "Notes", new Vector2(0, 2.6f), "note", 5f, 1.6f, 0.8f, 1.2f, 0.9f, Color.white);
+
+        // indicatore della batteria, grande, sopra il robot
+        var battery = new GameObject("Battery").transform;
+        battery.SetParent(root.transform, false);
+        battery.localPosition = new Vector3(0, 1.5f, 0);
+        battery.localScale = Vector3.one * 2.6f;
+        SpriteRenderer frame = Art(battery, "Frame", "battery", 6, false).GetComponent<SpriteRenderer>();
+        var fill = new GameObject("Fill").transform;
+        fill.SetParent(battery, false);
+        fill.localPosition = new Vector3(-0.25f, 0, 0);
+        SpriteRenderer bar = Bar(fill, "Bar", new Vector2(0.25f, 0f), new Vector2(0.5f, 0.2f), new Color(1f, 0.25f, 0.25f), 5);
+        GameObject bolt = Art(battery, "Bolt", "bolt", 7, true, new Vector2(0.62f, 0f)).gameObject;
+
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(1.25f, -0.15f));
+        bubble.transform.localScale = Vector3.one * 0.5f;
+
+        SetField(level, "robotOff", off);
+        SetField(level, "robotOn", on);
+        SetField(level, "robot", robot);
+        SetField(level, "batteryFill", fill);
+        SetField(level, "batteryBar", bar);
+        SetField(level, "batteryFrame", frame);
+        SetField(level, "bolt", bolt);
+        SetField(level, "notes", notes);
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/Battery/Level_Battery.prefab");
+    }
+
+    static GameObject BuildSoupLevel()
+    {
+        var root = new GameObject("Level_Soup");
+        SoupLevel level = root.AddComponent<SoupLevel>();
+        Art(root.transform, "Kitchen", "kitchen_bg", -20, false);
+
+        var bowl = new GameObject("Bowl");
+        bowl.transform.SetParent(root.transform, false);
+        bowl.transform.localPosition = new Vector3(-1.3f, -1.72f, 0);
+        Art(bowl.transform, "Art", "soup", 8);
+        bowl.AddComponent<BoxCollider2D>().size = new Vector2(1.5f, 0.8f);
+        Draggable2D drag = bowl.AddComponent<Draggable2D>();
+        drag.itemId = "soup";
+        drag.returnOnMiss = false;
+        SmokeEmitter steam = Emitter(bowl.transform, "Steam", new Vector2(0, 0.25f), "puff", 9f, 1.4f, 0.9f, 0.45f, 0.45f, new Color(1f, 1f, 1f, 0.7f));
+        steam.growth = 1.6f;
+        steam.sideDrift = 0.3f;
+
+        // termometro: il mercurio scende soffiando
+        var thermo = new GameObject("Thermometer").transform;
+        thermo.SetParent(root.transform, false);
+        thermo.localPosition = new Vector3(-2.35f, -1.25f, 0);
+        thermo.localScale = Vector3.one * 1.2f;
+        Art(thermo, "Glass", "thermo", 7);
+        SpriteRenderer bulb = Art(thermo, "Bulb", "drop", 8, false).GetComponent<SpriteRenderer>();
+        bulb.transform.localScale = Vector3.one * 1.5f;
+        bulb.color = new Color(1f, 0.2f, 0.2f);
+        var mercury = new GameObject("Mercury").transform;
+        mercury.SetParent(thermo, false);
+        SpriteRenderer mbar = Bar(mercury, "Bar", new Vector2(0, 0.57f), new Vector2(0.08f, 1.14f), new Color(1f, 0.2f, 0.2f), 8);
+
+        var mouse = new GameObject("Mouse").transform;
+        mouse.SetParent(root.transform, false);
+        mouse.localPosition = new Vector3(1.7f, -1.5f, 0);
+        Art(mouse, "Art", "mouse", 4);
+        SmokeEmitter hearts = Emitter(mouse, "Hearts", new Vector2(0, 0.6f), "heart", 5f, 1.2f, 0.9f, 0.4f, 0.7f, Color.white);
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(1.75f, -0.15f));
+        bubble.transform.localScale = Vector3.one * 0.45f;
+
+        SetField(level, "bowl", drag);
+        SetField(level, "steam", steam);
+        SetField(level, "mercury", mercury);
+        SetField(level, "mercuryBar", mbar);
+        SetField(level, "mouse", mouse);
+        SetField(level, "hearts", hearts);
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/Soup/Level_Soup.prefab");
+    }
+
+    static GameObject BuildFrozenKeyLevel(GameObject keyPrefab, GameObject doorPrefab)
+    {
+        var root = new GameObject("Level_FrozenKey");
+        FrozenKeyLevel level = root.AddComponent<FrozenKeyLevel>();
+        Art(root.transform, "Room", "room_bg", -20, false);
+        GameObject door = Instance(doorPrefab, root.transform, new Vector2(0.9f, -0.9f));
+        door.name = "Door";
+
+        GameObject key = Instance(keyPrefab, root.transform, new Vector2(-0.6f, -2.95f));
+        key.transform.localScale = Vector3.one * 1.15f;   // troppo grande per la serratura: va rimpicciolita
+
+        var puddle = new GameObject("Puddle").transform;
+        puddle.SetParent(root.transform, false);
+        puddle.localPosition = new Vector3(-1.3f, -3.5f, 0);
+        Art(puddle, "Art", "puddle", 1);
+
+        var ice = new GameObject("Ice").transform;
+        ice.SetParent(root.transform, false);
+        ice.localPosition = new Vector3(-1.3f, -2.95f, 0);
+        SpriteRenderer iceArt = Art(ice, "Art", "ice_block", 25).GetComponent<SpriteRenderer>();
+        BoxCollider2D iceArea = ice.gameObject.AddComponent<BoxCollider2D>();
+        iceArea.size = new Vector2(2.1f, 1.4f);
+
+        SmokeEmitter drips = Emitter(root.transform, "Drips", new Vector2(-1.3f, -3.2f), "sweat", 10f, 0.6f, -1.6f, 0.8f, 1.1f, new Color(0.75f, 0.9f, 1f, 0.95f), 26);
+        drips.spinRange = 0f;
+        SmokeEmitter steam = Emitter(root.transform, "Steam", new Vector2(-1.3f, -2.4f), "puff", 6f, 1f, 0.8f, 0.7f, 0.35f, new Color(1f, 1f, 1f, 0.6f), 26);
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(-1.0f, -1.2f));
+        bubble.transform.localScale = Vector3.one * 0.5f;
+
+        SetField(level, "ice", ice);
+        SetField(level, "iceArt", iceArt);
+        SetField(level, "iceArea", iceArea);
+        SetField(level, "key", key.GetComponent<Draggable2D>());
+        SetField(level, "puddle", puddle);
+        SetField(level, "drips", drips);
+        SetField(level, "steam", steam);
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/FrozenKey/Level_FrozenKey.prefab");
+    }
+
+    static GameObject BuildCampfireLevel()
+    {
+        var root = new GameObject("Level_Campfire");
+        CampfireLevel level = root.AddComponent<CampfireLevel>();
+        Art(root.transform, "Camp", "camp_bg", -20, false);
+
+        SpriteRenderer glow = Art(root.transform, "Glow", "glow", -5, false, new Vector2(-0.2f, -2.3f)).GetComponent<SpriteRenderer>();
+        glow.transform.localScale = Vector3.one * 7f;
+        var logs = new GameObject("Logs");
+        logs.transform.SetParent(root.transform, false);
+        logs.transform.localPosition = new Vector3(-0.2f, -2.95f, 0);
+        Art(logs.transform, "Art", "logs", 5);
+        BoxCollider2D area = logs.AddComponent<BoxCollider2D>();
+        area.size = new Vector2(3.0f, 1.6f);
+        area.offset = new Vector2(0, 0.3f);
+
+        var flame = new GameObject("Flame").transform;
+        flame.SetParent(root.transform, false);
+        flame.localPosition = new Vector3(-0.2f, -2.85f, 0);
+        Art(flame, "Art", "flame", 6, false);
+        var stick = new GameObject("Stick").transform;
+        stick.SetParent(root.transform, false);
+        stick.localPosition = new Vector3(0.2f, -2.75f, 0);
+        Transform stickArt = Art(stick, "Art", "fire_stick", 7, false);
+        stickArt.localRotation = Quaternion.Euler(0, 0, -20f);
+
+        SmokeEmitter smoke = Emitter(root.transform, "Smoke", new Vector2(-0.2f, -2.6f), "puff", 8f, 1.4f, 0.8f, 0.4f, 0.4f, new Color(0.8f, 0.8f, 0.85f, 0.8f));
+        smoke.growth = 1.6f;
+        SmokeEmitter sparks = Sparks(root.transform, "Sparks", new Color(1f, 0.7f, 0.25f));
+
+        // un topolino che trema dal freddo
+        var mouse = new GameObject("Mouse").transform;
+        mouse.SetParent(root.transform, false);
+        mouse.localPosition = new Vector3(1.75f, -2.9f, 0);
+        mouse.localScale = Vector3.one * 0.85f;
+        Art(mouse, "Art", "mouse", 4);
+        mouse.gameObject.AddComponent<Tremble>();
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(1.3f, -1.15f));
+        bubble.transform.localScale = Vector3.one * 0.5f;
+
+        SetField(level, "logsArea", area);
+        SetField(level, "stick", stick);
+        SetField(level, "flame", flame);
+        SetField(level, "glow", glow);
+        SetField(level, "smoke", smoke);
+        SetField(level, "sparks", sparks);
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/Campfire/Level_Campfire.prefab");
+    }
+
+    static GameObject BuildRunawayLevel()
+    {
+        var root = new GameObject("Level_Runaway");
+        RunawayLevel level = root.AddComponent<RunawayLevel>();
+        Art(root.transform, "Workshop", "workshop_bg", -20, false);
+
+        var button = new GameObject("Button").transform;
+        button.SetParent(root.transform, false);
+        button.localPosition = new Vector3(0, -1.0f, 0);
+        var visual = new GameObject("Visual").transform;
+        visual.SetParent(button, false);
+        Art(visual, "Art", "big_button", 6);
+        Art(visual, "Face", "button_face", 7, true, new Vector2(0, 0.02f));
+        var legs = new GameObject("Legs").transform;
+        legs.SetParent(button, false);
+        legs.localPosition = new Vector3(0, -0.42f, 0);
+        Art(legs, "Art", "button_legs", 5, false);
+
+        TextMesh counter = Label(root.transform, new Vector2(0, 3.2f), 30, "0 / 5", 0.1f);
+        counter.color = Color.white;
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(0, 2.1f));
+        bubble.transform.localScale = Vector3.one * 0.5f;
+
+        SetField(level, "button", button);
+        SetField(level, "visual", visual);
+        SetField(level, "legs", legs);
+        SetField(level, "counter", counter);
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/Runaway/Level_Runaway.prefab");
+    }
+
+    static PhysicsMaterial2D WaterPhysics()
+    {
+        string path = LevelDir + "/Plant/Water.physicsMaterial2D";
+        EnsureFolder(LevelDir + "/Plant");
+        PhysicsMaterial2D mat = AssetDatabase.LoadAssetAtPath<PhysicsMaterial2D>(path);
+        if (mat == null)
+        {
+            mat = new PhysicsMaterial2D("Water");
+            AssetDatabase.CreateAsset(mat, path);
+        }
+        mat.friction = 0f;
+        mat.bounciness = 0.05f;
+        EditorUtility.SetDirty(mat);
+        return mat;
+    }
+
+    static GameObject BuildPlantLevel()
+    {
+        var root = new GameObject("Level_Plant");
+        PlantLevel level = root.AddComponent<PlantLevel>();
+        TiltGravity tilt = root.AddComponent<TiltGravity>();
+        tilt.strength = 12f;
+        tilt.response = 1f;
+        tilt.smoothing = 0.1f;
+        tilt.deadZone = 0.02f;
+        Art(root.transform, "Garden", "garden_bg", -20, false);
+
+        var bounds = new GameObject("Bounds");
+        bounds.transform.SetParent(root.transform, false);
+        bounds.AddComponent<EdgeCollider2D>().points = new[] { new Vector2(-2.85f, -3.45f), new Vector2(2.85f, -3.45f), new Vector2(2.85f, 3.6f), new Vector2(-2.85f, 3.6f), new Vector2(-2.85f, -3.45f) };
+
+        // mensola col bicchiere pieno di gocce
+        Bar(root.transform, "Shelf", new Vector2(-1.6f, -0.05f), new Vector2(1.7f, 0.14f), new Color(0.66f, 0.42f, 0.25f), 3);
+        var shelfCol = new GameObject("ShelfCollider");
+        shelfCol.transform.SetParent(root.transform, false);
+        shelfCol.transform.localPosition = new Vector3(-1.6f, -0.05f, 0);
+        shelfCol.AddComponent<BoxCollider2D>().size = new Vector2(1.7f, 0.14f);
+        var glass = new GameObject("Glass");
+        glass.transform.SetParent(root.transform, false);
+        glass.transform.localPosition = new Vector3(-1.6f, 0.77f, 0);
+        Art(glass.transform, "Art", "glass", 8);
+        EdgeCollider2D gc = glass.AddComponent<EdgeCollider2D>();
+        gc.points = new[] { new Vector2(-0.49f, 0.74f), new Vector2(-0.49f, -0.72f), new Vector2(0.49f, -0.72f), new Vector2(0.49f, 0.74f) };
+        gc.edgeRadius = 0.04f;
+
+        var drops = new List<Rigidbody2D>();
+        PhysicsMaterial2D water = WaterPhysics();
+        for (int row = 0; row < 7; row++)
+            for (int col = 0; col < 5; col++)
+            {
+                var d = new GameObject("Drop");
+                d.transform.SetParent(root.transform, false);
+                d.transform.localPosition = new Vector3(-1.6f - 0.34f + col * 0.17f + (row % 2) * 0.03f, 0.2f + row * 0.17f, 0);
+                Art(d.transform, "Art", "drop", 7, false);
+                d.AddComponent<CircleCollider2D>().radius = 0.08f;
+                Rigidbody2D rb = d.AddComponent<Rigidbody2D>();
+                rb.mass = 0.05f;
+                rb.sharedMaterial = water;
+                rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+                rb.sleepMode = RigidbodySleepMode2D.NeverSleep;
+                drops.Add(rb);
+            }
+
+        // vaso con la piantina appassita, in basso a destra
+        var pot = new GameObject("Pot");
+        pot.transform.SetParent(root.transform, false);
+        pot.transform.localPosition = new Vector3(1.55f, -2.3f, 0);
+        Art(pot.transform, "Art", "pot", 6);
+        EdgeCollider2D pc = pot.AddComponent<EdgeCollider2D>();
+        pc.points = new[] { new Vector2(-0.6f, 0.1f), new Vector2(-0.44f, -0.88f), new Vector2(0.44f, -0.88f), new Vector2(0.6f, 0.1f) };
+        pc.edgeRadius = 0.04f;
+        var zone = new GameObject("WaterZone");
+        zone.transform.SetParent(pot.transform, false);
+        BoxCollider2D zc = zone.AddComponent<BoxCollider2D>();
+        zc.isTrigger = true;
+        zc.size = new Vector2(1.0f, 0.5f);
+        zc.offset = new Vector2(0, -0.2f);
+        var dry = new GameObject("PlantDry").transform;
+        dry.SetParent(pot.transform, false);
+        dry.localPosition = new Vector3(0, 0.07f, 0);
+        Art(dry, "Art", "plant_dry", 5);
+        GameObject bloom = Art(pot.transform, "PlantBloom", "plant_bloom", 5, true, new Vector2(0, 0.07f)).gameObject;
+
+        SmokeEmitter sparkle = Sparks(pot.transform, "Sparkle", new Color(1f, 0.9f, 0.35f));
+        sparkle.transform.localPosition = new Vector3(0, 1.4f, 0);
+        TextMesh counter = Label(root.transform, new Vector2(1.55f, -3.85f), 30, "0 / 18", 0.07f);
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(0.55f, -0.4f));
+        bubble.transform.localScale = Vector3.one * 0.5f;
+
+        SetArray(level, "drops", drops.ToArray());
+        SetField(level, "potZone", zc);
+        SetField(level, "plantDry", dry);
+        SetField(level, "plantBloom", bloom);
+        SetField(level, "sparkle", sparkle);
+        SetField(level, "counter", counter);
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/Plant/Level_Plant.prefab");
+    }
+
+    static GameObject BuildShellLevel()
+    {
+        var root = new GameObject("Level_Shell");
+        ShellLevel level = root.AddComponent<ShellLevel>();
+        Art(root.transform, "Party", "party_bg", -20, false);
+
+        var mouse = new GameObject("Mouse").transform;
+        mouse.SetParent(root.transform, false);
+        mouse.localPosition = new Vector3(0, -2.2f + 0.6f * 0.65f, 0);
+        mouse.localScale = Vector3.one * 0.65f;
+        Art(mouse, "Art", "mouse", 4);
+        var boxes = new List<Transform>();
+        foreach (float x in new[] { -1.65f, 0f, 1.65f })
+        {
+            var b = new GameObject("Box").transform;
+            b.SetParent(root.transform, false);
+            b.localPosition = new Vector3(x, -2.2f, 0);
+            Art(b, "Art", "box_cup", 6);
+            BoxCollider2D c = b.gameObject.AddComponent<BoxCollider2D>();
+            c.size = new Vector2(1.45f, 1.3f);
+            c.offset = new Vector2(0, 0.55f);
+            boxes.Add(b);
+        }
+        SmokeEmitter hearts = Emitter(root.transform, "Hearts", Vector2.zero, "heart", 5f, 1.2f, 0.9f, 0.4f, 0.7f, Color.white);
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(0, 0.6f));
+        bubble.transform.localScale = Vector3.one * 0.55f;
+
+        SetArray(level, "boxes", boxes.ToArray());
+        SetField(level, "mouse", mouse);
+        SetField(level, "hearts", hearts);
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/Shell/Level_Shell.prefab");
+    }
+
+    static GameObject BuildSkyWireLevel()
+    {
+        var root = new GameObject("Level_SkyWire");
+        SkyWireLevel level = root.AddComponent<SkyWireLevel>();
+        Art(root.transform, "Room", "night_bg", -20, false);
+
+        var bomb = new GameObject("Bomb").transform;
+        bomb.SetParent(root.transform, false);
+        Transform dyn = Art(bomb, "Dynamite", "dynamite", 5, true, new Vector2(0, -3.0f));
+        dyn.localScale = Vector3.one * 0.9f;
+        Art(bomb, "Timer", "timer_box", 6, true, new Vector2(0, 0.6f));
+        TextMesh display = Label(bomb, new Vector2(0, 0.62f), 7, "00:15", 0.09f);
+
+        var cutters = new List<SwipeCutter>();
+        var tops = new List<Transform>();
+        var bottoms = new List<Transform>();
+        var topArt = new List<SpriteRenderer>();
+        var bottomArt = new List<SpriteRenderer>();
+        foreach (float x in new[] { -0.75f, 0f, 0.75f })
+        {
+            var top = new GameObject("WireTop").transform;
+            top.SetParent(bomb, false);
+            top.localPosition = new Vector3(x, 0.08f, 0);
+            topArt.Add(Bar(top, "Art", new Vector2(0, -0.52f), new Vector2(0.13f, 1.04f), Color.white, 4));
+            var bottom = new GameObject("WireBottom").transform;
+            bottom.SetParent(bomb, false);
+            bottom.localPosition = new Vector3(x, -2.05f, 0);
+            bottomArt.Add(Bar(bottom, "Art", new Vector2(0, 0.55f), new Vector2(0.13f, 1.1f), Color.white, 4));
+            tops.Add(top);
+            bottoms.Add(bottom);
+            var cut = new GameObject("Cutter");
+            cut.transform.SetParent(root.transform, false);
+            cut.transform.localPosition = new Vector3(x, -0.95f, 0);
+            SwipeCutter c = cut.AddComponent<SwipeCutter>();
+            c.radius = 0.3f;
+            c.minChord = 1.1f;
+            c.trailMaterial = StrokeMaterial();
+            cutters.Add(c);
+        }
+
+        var note = new GameObject("Note").transform;
+        note.SetParent(root.transform, false);
+        note.localPosition = new Vector3(-1.45f, 2.45f, 0);
+        note.localRotation = Quaternion.Euler(0, 0, 4f);
+        Art(note, "Art", "sticky_note", 3);
+        TextMesh noteText = Label(note, new Vector2(0, -0.05f), 4, "CUT THE WIRE\nTHE COLOR OF\nTHE SKY!", 0.036f);
+        noteText.lineSpacing = 0.85f;
+
+        GameObject boom = Art(root.transform, "Boom", "boom", 50, true, new Vector2(0, -1.4f)).gameObject;
+        SmokeEmitter sparks = Sparks(root.transform, "Sparks", new Color(1f, 0.85f, 0.3f));
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(-1.2f, 0.9f));
+        bubble.transform.localScale = Vector3.one * 0.5f;
+
+        SetArray(level, "cutters", cutters.ToArray());
+        SetArray(level, "tops", tops.ToArray());
+        SetArray(level, "bottoms", bottoms.ToArray());
+        SetArray(level, "topArt", topArt.ToArray());
+        SetArray(level, "bottomArt", bottomArt.ToArray());
+        SetField(level, "display", display);
+        SetField(level, "bomb", bomb.gameObject);
+        SetField(level, "boom", boom);
+        SetField(level, "sparks", sparks);
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/SkyWire/Level_SkyWire.prefab");
+    }
+
+    static GameObject BuildSunnyLevel()
+    {
+        var root = new GameObject("Level_Sunny");
+        SunnyLevel level = root.AddComponent<SunnyLevel>();
+        Art(root.transform, "Landscape", "snow_bg", -20, false);
+
+        // il pupazzo già fatto (stesso del livello 3), un po' più piccolo
+        Transform snowman = SnowmanFigure(root.transform, new Vector2(-0.35f, -3.65f), out Transform basePart, out Transform armLeft,
+            out Transform armRight, out Transform headPart, out Transform hatPart, out List<SpriteRenderer> bodies);
+        snowman.localScale = Vector3.one * 0.74f;
+        float hp = DoodleSprites.SnowHeadPivot;
+        Transform eyeL = Art(headPart, "EyeL", "coal", 8, true, new Vector2(-0.62f, 4.1f - hp));
+        Transform eyeR = Art(headPart, "EyeR", "coal", 8, true, new Vector2(0.22f, 4.1f - hp));
+        eyeL.localScale = eyeR.localScale = Vector3.one * 1.4f;
+        Transform nose = Art(headPart, "Nose", "carrot", 9, true, new Vector2(-0.45f, 3.62f - hp));
+        nose.localScale = Vector3.one * 1.3f;
+        SpriteRenderer smile = Art(headPart, "Smile", "mouth_smile", 8, false, new Vector2(-0.3f, 3.27f - hp)).GetComponent<SpriteRenderer>();
+        SpriteRenderer mouthO = Art(headPart, "MouthO", "mouth_o", 8, false, new Vector2(-0.3f, 3.22f - hp)).GetComponent<SpriteRenderer>();
+        mouthO.transform.localScale = Vector3.one * 1.4f;
+        SnowmanMelter melter = AddMelter(snowman, bodies.ToArray());
+        SmokeEmitter sweat = Emitter(headPart, "Sweat", new Vector2(-0.1f, 4.4f - hp), "sweat", 4f, 0.8f, -1.2f, 0.8f, 1.2f, new Color(0.75f, 0.9f, 1f), 12);
+
+        var sun = new GameObject("Sun").transform;
+        sun.SetParent(root.transform, false);
+        sun.localPosition = new Vector3(1.6f, 2.85f, 0);
+        Transform sunArt = Art(sun, "Art", "sun", 2);
+        sunArt.gameObject.AddComponent<Pulse>();
+        Vector2 head = new Vector2(-0.35f - 0.1f * 0.74f, -3.65f + 3.7f * 0.74f);
+        SpriteRenderer beam = Art(sun, "Beam", "light_cone", 9, false).GetComponent<SpriteRenderer>();
+        beam.color = new Color(1f, 0.85f, 0.4f, 0.35f);
+        Vector2 dir = head - (Vector2)sun.localPosition;
+        beam.transform.localRotation = Quaternion.FromToRotation(Vector3.down, dir);
+        beam.transform.localScale = new Vector3(0.45f, dir.magnitude / 5.2f, 1f);
+
+        var cloud = new GameObject("Cloud");
+        cloud.transform.SetParent(root.transform, false);
+        cloud.transform.localPosition = new Vector3(-1.7f, 2.4f, 0);
+        Art(cloud.transform, "Art", "cloud", 12);
+        cloud.AddComponent<BoxCollider2D>().size = new Vector2(2.5f, 1.4f);
+        Draggable2D drag = cloud.AddComponent<Draggable2D>();
+        drag.itemId = "cloud";
+        drag.returnOnMiss = false;
+
+        SpriteRenderer sky = Bar(root.transform, "Dusk", Vector2.zero, new Vector2(12f, 16f), new Color(0.1f, 0.1f, 0.3f, 0f), 15);
+        TextMesh countdown = Label(root.transform, new Vector2(0, 3.75f), 30, "", 0.06f);
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(1.1f, 0.4f));
+        bubble.transform.localScale = Vector3.one * 0.5f;
+
+        SetField(level, "sun", sun);
+        SetField(level, "cloud", drag);
+        SetField(level, "sunbeam", beam);
+        SetField(level, "skyTint", sky);
+        SetField(level, "melter", melter);
+        SetArray(level, "looseParts", new Object[] { hatPart, armLeft, armRight, eyeL, eyeR, nose });
+        SetField(level, "mouthSmile", smile);
+        SetField(level, "mouthO", mouthO);
+        SetField(level, "sweat", sweat);
+        SetField(level, "countdown", countdown);
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/Sunny/Level_Sunny.prefab");
+    }
+
+    static GameObject BuildRopeLevel()
+    {
+        var root = new GameObject("Level_Rope");
+        RopeLevel level = root.AddComponent<RopeLevel>();
+        Art(root.transform, "Kitchen", "kitchen_bg", -20, false);
+        var floor = new GameObject("Counter");
+        floor.transform.SetParent(root.transform, false);
+        floor.AddComponent<EdgeCollider2D>().points = new[] { new Vector2(-3f, -1.94f), new Vector2(3f, -1.94f) };
+
+        Vector2 start = new Vector2(-0.4f, 0.9f);
+        var cookieGo = new GameObject("Cookie");
+        cookieGo.transform.SetParent(root.transform, false);
+        cookieGo.transform.localPosition = start;
+        Art(cookieGo.transform, "Art", "cookie", 6);
+        cookieGo.AddComponent<CircleCollider2D>().radius = 0.22f;
+        Rigidbody2D cookie = cookieGo.AddComponent<Rigidbody2D>();
+        cookie.interpolation = RigidbodyInterpolation2D.Interpolate;
+        cookie.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        cookie.sharedMaterial = CookiePhysics();
+
+        var anchors = new List<Transform>();
+        var ropes = new List<LineRenderer>();
+        foreach (Vector2 a in new[] { new Vector2(-2.2f, 3.0f), new Vector2(1.1f, 3.3f) })
+        {
+            var pin = new GameObject("Pin").transform;
+            pin.SetParent(root.transform, false);
+            pin.localPosition = a;
+            SpriteRenderer head = Art(pin, "Art", "drop", 7, false).GetComponent<SpriteRenderer>();
+            head.color = new Color(0.55f, 0.58f, 0.66f);
+            head.transform.localScale = Vector3.one * 1.6f;
+            anchors.Add(pin);
+            DistanceJoint2D j = cookieGo.AddComponent<DistanceJoint2D>();
+            j.autoConfigureConnectedAnchor = false;
+            j.autoConfigureDistance = false;
+            j.connectedAnchor = a;
+            j.distance = Vector2.Distance(a, start);
+            j.maxDistanceOnly = true;
+            LineRenderer rope = Line(root.transform, "Rope", 0.05f, new Color(0.55f, 0.36f, 0.22f), 5);
+            rope.SetPosition(0, a);
+            rope.SetPosition(1, start);
+            ropes.Add(rope);
+        }
+
+        var mouse = new GameObject("Mouse").transform;
+        mouse.SetParent(root.transform, false);
+        mouse.localPosition = new Vector3(2.0f, -1.5f, 0);
+        Art(mouse, "Art", "mouse", 4);
+        SmokeEmitter hearts = Emitter(mouse, "Hearts", new Vector2(0, 0.6f), "heart", 5f, 1.2f, 0.9f, 0.4f, 0.7f, Color.white);
+        SmokeEmitter crumbs = Sparks(root.transform, "Crumbs", new Color(0.78f, 0.55f, 0.3f));
+        crumbs.riseSpeed = -0.5f;
+        LineRenderer trail = Line(root.transform, "Trail", 0.1f, new Color(1f, 1f, 1f, 0.9f), 50);
+        trail.positionCount = 0;
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(1.75f, -0.15f));
+        bubble.transform.localScale = Vector3.one * 0.45f;
+
+        SetField(level, "cookie", cookie);
+        SetArray(level, "anchors", anchors.ToArray());
+        SetArray(level, "ropes", ropes.ToArray());
+        SetField(level, "mouse", mouse);
+        SetField(level, "hearts", hearts);
+        SetField(level, "crumbs", crumbs);
+        SetField(level, "bubble", bubble);
+        SetField(level, "trail", trail);
+        return SavePrefab(root, LevelDir + "/Rope/Level_Rope.prefab");
+    }
+
+    static GameObject BuildPizzaLevel()
+    {
+        var root = new GameObject("Level_Pizza");
+        PizzaLevel level = root.AddComponent<PizzaLevel>();
+        Art(root.transform, "Party", "party_bg", -20, false);
+
+        var pizza = new GameObject("Pizza").transform;
+        pizza.SetParent(root.transform, false);
+        pizza.localPosition = new Vector3(0, -0.2f, 0);
+        GameObject whole = Art(pizza, "Whole", "pizza", 6).gameObject;
+        LineRenderer cutMark = Line(root.transform, "CutMark", 0.05f, new Color(0.45f, 0.18f, 0.12f), 7);
+
+        var slices = new List<Transform>();
+        float c = 4f * 1.1f / (3f * Mathf.PI) / Mathf.Sqrt(2f);   // baricentro dello spicchio, componenti x e y
+        for (int i = 0; i < 4; i++)
+        {
+            var s = new GameObject("Slice" + i);
+            s.transform.SetParent(root.transform, false);
+            Art(s.transform, "Art", "pizza_slice", 8 + i, false, new Vector2(-c, -c));
+            s.AddComponent<CircleCollider2D>().radius = 0.5f;
+            Draggable2D d = s.AddComponent<Draggable2D>();
+            d.itemId = "slice";
+            s.SetActive(false);   // compaiono dopo i tagli (e il punto di ritorno si fissa lì)
+            slices.Add(s.transform);
+        }
+
+        var plates = new List<DropSlot>();
+        foreach (Vector2 m in new[] { new Vector2(-2.0f, 2.0f), new Vector2(2.0f, 2.0f), new Vector2(-2.0f, -2.85f), new Vector2(2.0f, -2.85f) })
+        {
+            var mouse = new GameObject("Mouse").transform;
+            mouse.SetParent(root.transform, false);
+            mouse.localPosition = m;
+            mouse.localScale = Vector3.one * 0.8f;
+            Art(mouse, "Art", "mouse", 4);
+            var plate = new GameObject("Plate");
+            plate.transform.SetParent(root.transform, false);
+            plate.transform.localPosition = m + new Vector2(0, -0.35f);
+            plate.AddComponent<CircleCollider2D>().radius = 0.75f;
+            DropSlot slot = plate.AddComponent<DropSlot>();
+            slot.acceptedId = "slice";
+            plates.Add(slot);
+        }
+        SmokeEmitter hearts = Emitter(root.transform, "Hearts", new Vector2(0, 0.5f), "heart", 8f, 1.4f, 1f, 2.2f, 0.8f, Color.white);
+        LineRenderer trail = Line(root.transform, "Trail", 0.1f, new Color(1f, 1f, 1f, 0.9f), 50);
+        trail.positionCount = 0;
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(0, 1.85f));
+        bubble.transform.localScale = Vector3.one * 0.5f;
+
+        SetField(level, "pizza", pizza);
+        SetField(level, "whole", whole);
+        SetField(level, "cutMark", cutMark);
+        SetArray(level, "slices", slices.ToArray());
+        SetArray(level, "plates", plates.ToArray());
+        SetField(level, "hearts", hearts);
+        SetField(level, "bubble", bubble);
+        SetField(level, "trail", trail);
+        return SavePrefab(root, LevelDir + "/Pizza/Level_Pizza.prefab");
     }
 
     static TapButton BombButton(Transform parent, string name, string sprite, Vector2 pos, out Transform wireStart)
