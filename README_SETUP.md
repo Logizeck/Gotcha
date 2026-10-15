@@ -1,4 +1,4 @@
-# Gotcha! — v0.10 (dieci livelli, musica, pubblicità simulata)
+# Gotcha! — v0.11 (quindici livelli, video da condividere, icona)
 
 La versione installata si legge nel MENU del gioco (accanto al conteggio degli Easter egg).
 
@@ -70,7 +70,11 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
   altrove cadono nella neve. Nessuna posizione è indicata: ogni occhio deve stare nella sua zona (ampia e
   invisibile) e il naso al centro; la bocca si disegna col dito e resta come un solco: deve essere un sorriso.
 - Easter egg `snowman_butt`: lascia la carota sul sedere. Resta piantata lì; il pupazzo arrossisce, fuma,
-  dice "Oh noooo!" e si scioglie lentamente dalla testa in giù; la base resta a terra in una pozzanghera.
+  dice "Oh noooo!" e comincia a gocciolare. La testa si scioglie, il cappello vola via rimbalzando, le braccia
+  cadono nella neve, poi si sciolgono busto e base ("blub..."), lasciando una pozzanghera.
+- La scena dello scioglimento viene registrata (ultimi ~14 s, 12 fps) e a fine livello compare il pulsante
+  **SHARE VIDEO**: crea un MP4 (salvato in Movies/Gotcha) e apre il menu di condivisione di Android
+  (WhatsApp, Instagram, TikTok...). Solo su Android; nell'Editor i fotogrammi finiscono in `persistentDataPath/clip_frames`.
 - Zone, misure e punti d'appoggio sono regolabili dall'Inspector del prefab `Level_Snowman`.
 
 ## Livello 4 — Big Red Button
@@ -118,8 +122,33 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Con la paletta ogni tocco la fa calare sul punto toccato (colpo con "splat"); l'area colpibile è più ampia
   della vespa. Servono 10 colpi: a ogni colpo sbanda, lampeggia e accelera; al decimo cade a zampe all'aria.
 
+## Livello 11 — Art Theft
+- Porta chiusa, ma la chiave è appesa dentro il quadro: si stacca dal quadro, si rimpicciolisce/allarga col
+  pizzico (come nel livello 1) e si infila nella serratura.
+
+## Livello 12 — Bodyguard
+- Il gatto dorme e una vespa inferocita vuole pungerlo. Col dito si disegnano linee (massimo 3, la più vecchia
+  sparisce) su cui la vespa rimbalza. Resisti 10 secondi e la vespa se ne va.
+
+## Livello 13 — Lights On
+- Sul muro "YOU" in rosso e "WON" in blu, invisibili al buio. Il pulsante rosso accende la lampada rossa (si legge
+  solo WON), il blu quella blu (si legge solo YOU). Tenendoli premuti insieme (due dita) si legge YOU WON.
+  Nell'Editor: tasti R e B.
+
+## Livello 14 — Cookie Jar
+- Il topolino vuole il biscotto chiuso in un barattolo aperto solo in alto. La gravità segue il telefono:
+  bisogna capovolgerlo per far uscire il biscotto, poi farlo cadere dal topolino. Nell'Editor: frecce.
+
+## Livello 15 — Make a Wish
+- Torta con 5 candeline: si spengono soffiando davvero nel microfono (al primo avvio Android chiede il permesso).
+  Ogni soffio deciso ne spegne una; poi coriandoli. Nell'Editor: tieni premuto B.
+
+## Icona dell'app
+- L'icona "G!" al neon è ridisegnata dal codice (`DoodleSprites.AppIcon`). Per usare il logo originale basta
+  copiare il PNG (quadrato, 1024×1024) in `Assets/Art/Icon/AppIcon.png` e rilanciare il builder: ha la precedenza.
+
 ## Musica
-- Colonna sonora `Assets/Audio/Soundtrack.wav` in loop (importata compressa Vorbis). Si spegne/accende dal MENU
+- Colonna sonora `Assets/Audio/Soundtrack.wav` ("Dolce Pizzicato") in loop (importata compressa Vorbis). Si spegne/accende dal MENU
   (la scelta resta salvata). Durante la pubblicità la musica è in pausa.
 
 ## Regola pubblicità
@@ -131,4 +160,4 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
   Per passare ad AdMob basterà un nuovo `IAdProvider`.
 
 ## Non ancora fatto
-Effetti sonori, altri livelli, AdMob reale + consenso UMP, registrazione/condivisione video, icona dell'app.
+Effetti sonori, AdMob reale + consenso UMP, condivisione video su iOS.

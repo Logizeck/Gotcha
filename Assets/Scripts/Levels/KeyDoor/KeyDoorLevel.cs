@@ -1,3 +1,4 @@
+using UnityEngine;
 using Gotcha.Components;
 
 namespace Gotcha.Levels
@@ -9,17 +10,24 @@ namespace Gotcha.Levels
     public class KeyDoorLevel : LevelController
     {
         LockedDoor door;
+        Draggable2D key;
 
         public override void OnLevelStart()
         {
             door = GetComponentInChildren<LockedDoor>(true);
             if (door != null) door.Opened += OnDoorOpened;
+            // una chiave appesa storta (es. nel quadro) si raddrizza appena la prendi in mano
+            foreach (Draggable2D d in GetComponentsInChildren<Draggable2D>(true))
+                if (d.itemId == "key") { key = d; key.DragStarted += Straighten; }
         }
 
         void OnDestroy()
         {
             if (door != null) door.Opened -= OnDoorOpened;
+            if (key != null) key.DragStarted -= Straighten;
         }
+
+        static void Straighten(Draggable2D d) { d.transform.localRotation = Quaternion.identity; }
 
         void OnDoorOpened() { Win(); }
     }

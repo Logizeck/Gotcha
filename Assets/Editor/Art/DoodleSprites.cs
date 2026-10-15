@@ -409,25 +409,23 @@ namespace Gotcha.EditorArt
             return new DoodleArt("sm_middle", p);
         }
 
-        /// <summary>Braccia di rametti con le muffole (spalle a y = 2.45).</summary>
-        public static DoodleArt SnowArms()
+        /// <summary>Un braccio di rametti con la muffola: side = -1 sinistro (vicino), +1 destro (lontano). Spalla in (x0, 2.45).</summary>
+        public static DoodleArt SnowArm(int side)
         {
-            var p = new DoodlePainter(-2.15f, 2.15f, 1.95f, 3.45f, 100) { Ink = 0.05f };
-            for (int side = -1; side <= 1; side += 2)
-            {
-                float s = side, len = side < 0 ? 1f : 0.85f, x0 = side < 0 ? -0.6f : 0.5f, y0 = SnowShoulderY;
-                Sdf arm = Sd.Union(
-                    Sd.Polyline(0.045f, x0, y0, x0 + s * 0.6f * len, y0 + 0.32f, x0 + s * 1.05f * len, y0 + 0.5f),
-                    Sd.Polyline(0.032f, x0 + s * 0.6f * len, y0 + 0.32f, x0 + s * 0.68f * len, y0 + 0.65f),
-                    Sd.Polyline(0.028f, x0 + s * 0.32f * len, y0 + 0.16f, x0 + s * 0.28f * len, y0 - 0.02f));
-                p.Shape(arm, Twig, 0.035f);
-                float mx = x0 + s * 1.22f * len, my = y0 + 0.58f;
-                Sdf mitten = Sd.Union(Sd.Rotate(Sd.Ellipse(mx, my, 0.17f * len, 0.21f * len), mx, my, -s * 25f),
-                                      Sd.Rotate(Sd.Ellipse(mx - s * 0.17f * len, my + 0.12f * len, 0.06f, 0.1f), mx, my, s * 35f));
-                Body(p, mitten, Scarf, Rgba.Hex("B92D2A"), null, -s * 0.03f, 0.04f);
-                p.Shape(Sd.Rotate(Sd.Box(mx - s * 0.1f * len, my - 0.17f * len, 0.16f * len, 0.06f, 0.04f), mx, my, -s * 25f), ScarfStripe, 0.03f);
-            }
-            return new DoodleArt("sm_arms", p);
+            float s = side, len = side < 0 ? 1f : 0.85f, x0 = side < 0 ? -0.6f : 0.5f, y0 = SnowShoulderY;
+            var p = side < 0 ? new DoodlePainter(-2.15f, 2.15f, -0.4f, 3.45f, 100) : new DoodlePainter(0.3f, 2.15f, 1.95f, 3.45f, 100);
+            p.Ink = 0.05f;
+            Sdf arm = Sd.Union(
+                Sd.Polyline(0.045f, x0, y0, x0 + s * 0.6f * len, y0 + 0.32f, x0 + s * 1.05f * len, y0 + 0.5f),
+                Sd.Polyline(0.032f, x0 + s * 0.6f * len, y0 + 0.32f, x0 + s * 0.68f * len, y0 + 0.65f),
+                Sd.Polyline(0.028f, x0 + s * 0.32f * len, y0 + 0.16f, x0 + s * 0.28f * len, y0 - 0.02f));
+            p.Shape(arm, Twig, 0.035f);
+            float mx = x0 + s * 1.22f * len, my = y0 + 0.58f;
+            Sdf mitten = Sd.Union(Sd.Rotate(Sd.Ellipse(mx, my, 0.17f * len, 0.21f * len), mx, my, -s * 25f),
+                                  Sd.Rotate(Sd.Ellipse(mx - s * 0.17f * len, my + 0.12f * len, 0.06f, 0.1f), mx, my, s * 35f));
+            Body(p, mitten, Scarf, Rgba.Hex("B92D2A"), null, -s * 0.03f, 0.04f);
+            p.Shape(Sd.Rotate(Sd.Box(mx - s * 0.1f * len, my - 0.17f * len, 0.16f * len, 0.06f, 0.04f), mx, my, -s * 25f), ScarfStripe, 0.03f);
+            return new DoodleArt(side < 0 ? "sm_arm_l" : "sm_arm_r", p);
         }
 
         /// <summary>Testa enorme (senza faccia) e sciarpa a maglia con la coda sul retro.</summary>
@@ -1258,6 +1256,287 @@ namespace Gotcha.EditorArt
                 return Rgba.Hex("FF2A2A").WithAlpha(Clamp((d - 0.55f) / 0.45f) * 0.85f);
             });
             return new DoodleArt("sting_flash", p);
+        }
+
+        // ---------- Icona del gioco ----------
+
+        /// <summary>
+        /// Icona "G!" ricostruita dal logo: una G a labirinto fatta di barre smussate giallo/magenta con contorno ciano
+        /// al neon, un punto esclamativo e una pallina luminosa, su fondo blu notte. 1024×1024.
+        /// </summary>
+        public static DoodleArt AppIcon()
+        {
+            var p = new DoodlePainter(-1f, -1f, 1f, 1f, 512) { Wobble = 0f };
+            p.FillFunc(Sd.Box(0, 0, 1.1f, 1.1f), (x, y) =>
+            {
+                float d = (float)Math.Sqrt(x * x + y * y);
+                return Rgba.Lerp(Rgba.Hex("141B33"), Rgba.Hex("070A15"), Clamp(d / 1.3f));
+            });
+            const float h = 0.085f;   // metà spessore delle barre
+            // barre (assi orizzontali o verticali): la G a spirale quadrata e il punto esclamativo
+            var bars = new List<float[]>
+            {
+                new[] { 0.32f, 0.66f, -0.78f, 0.66f },   // sopra
+                new[] { -0.78f, 0.66f, -0.78f, -0.72f }, // sinistra
+                new[] { -0.78f, -0.72f, 0.4f, -0.72f },  // sotto
+                new[] { 0.4f, -0.72f, 0.4f, 0.02f },     // destra
+                new[] { 0.4f, 0.02f, -0.1f, 0.02f },     // traversa della G
+                new[] { -0.42f, 0.3f, -0.42f, -0.38f },  // spirale interna
+                new[] { -0.42f, -0.38f, 0.06f, -0.38f },
+                new[] { 0.78f, 0.66f, 0.78f, -0.22f },   // punto esclamativo
+                new[] { 0.78f, -0.6f, 0.78f, -0.6f },     // e il suo punto
+            };
+            Sdf union = (x, y) =>
+            {
+                float d = float.MaxValue;
+                foreach (float[] b in bars) d = Math.Min(d, BarSdf(b, x, y, h));
+                return d;
+            };
+            // alone e contorno al neon ciano
+            p.FillFunc(Sd.Box(0, 0, 1.1f, 1.1f), (x, y) =>
+            {
+                float d = union(x, y);
+                if (d < 0f) return Rgba.Clear;
+                float glow = (float)Math.Exp(-d * 18f) * 0.75f;
+                float line = Clamp(1f - Math.Abs(d - 0.04f) / 0.014f);
+                return Rgba.Lerp(NeonCyan.WithAlpha(glow), Rgba.Lerp(NeonCyan, Rgba.White, 0.4f), line);
+            });
+            // barre smussate: metà illuminata gialla, metà in ombra magenta
+            p.FillFunc(union, (x, y) =>
+            {
+                float best = float.MaxValue; float[] bar = null;
+                foreach (float[] b in bars) { float d = BarSdf(b, x, y, h); if (d < best) { best = d; bar = b; } }
+                bool horizontal = bar != null && Math.Abs(bar[1] - bar[3]) < 1e-4f;
+                bool lit;
+                if (bar == null) lit = true;
+                else if (horizontal) lit = y > bar[1];
+                else lit = x < bar[0];
+                float depth = Clamp(-best / h);
+                Rgba face = lit ? Rgba.Lerp(NeonYellow, NeonYellowDeep, depth * 0.6f) : Rgba.Lerp(NeonMagenta, NeonMagentaDeep, depth * 0.6f);
+                return Rgba.Lerp(Rgba.White, face, Clamp(depth * 3f + 0.2f));
+            });
+            // pallina luminosa
+            p.FillFunc(Sd.Circle(0.12f, 0.33f, 0.2f), (x, y) =>
+            {
+                float d = (float)Math.Sqrt((x - 0.12f) * (x - 0.12f) + (y - 0.33f) * (y - 0.33f));
+                return d < 0.07f ? Rgba.White : NeonCyan.WithAlpha((float)Math.Exp(-(d - 0.07f) * 25f));
+            });
+            return new DoodleArt("app_icon", p);
+        }
+
+        static float BarSdf(float[] b, float x, float y, float h)
+        {
+            float cx = (b[0] + b[2]) * 0.5f, cy = (b[1] + b[3]) * 0.5f;
+            float hx = Math.Abs(b[2] - b[0]) * 0.5f + h, hy = Math.Abs(b[3] - b[1]) * 0.5f + h;
+            float qx = Math.Abs(x - cx) - hx, qy = Math.Abs(y - cy) - hy;
+            return (float)Math.Sqrt(Math.Max(qx, 0f) * Math.Max(qx, 0f) + Math.Max(qy, 0f) * Math.Max(qy, 0f)) + Math.Min(Math.Max(qx, qy), 0f);
+        }
+
+        // ---------- Livello 11: la chiave nel quadro ----------
+
+        /// <summary>Quadro con la carta da parati dipinta e un chiodo: la chiave (oggetto vero) è appesa lì (centro 0,0).</summary>
+        public static DoodleArt KeyPainting()
+        {
+            var p = new DoodlePainter(-0.85f, -0.7f, 0.85f, 0.95f, 110) { Ink = 0.05f };
+            p.InkLine(0.025f, -0.45f, 0.6f, 0f, 0.88f, 0.45f, 0.6f);   // cordino
+            p.Shape(Sd.Circle(0, 0.88f, 0.04f), Rgba.Hex("B7BCC9"), 0.02f);
+            Sdf frame = Sd.Box(0, 0, 0.78f, 0.62f, 0.05f);
+            Body(p, frame, Gold, GoldShade);
+            Sdf canvas = Sd.Box(0, 0, 0.62f, 0.47f);
+            p.FillFunc(canvas, (x, y) => Rgba.Lerp(Rgba.Hex("FFF3D6"), Rgba.Hex("F2D7A6"), Clamp((0.4f - y) / 0.9f)));
+            p.Hatch(canvas, Rgba.Hex("E8C58A", 0.6f), 0.18f, 0.05f, 0f);
+            p.Shape(Sd.Circle(0, 0.3f, 0.035f), Rgba.Hex("8D93A6"), 0.02f);   // chiodo dipinto
+            p.Line(Rgba.Hex("C9A36A"), 0.02f, -0.58f, -0.42f, 0.58f, -0.42f);
+            p.Shape(canvas, Rgba.Clear, 0.035f);
+            return new DoodleArt("key_painting", p);
+        }
+
+        // ---------- Livello 13: le lampade ----------
+
+        /// <summary>Quadrato bianco pieno (si tinge e si scala: pareti, sfondi).</summary>
+        public static DoodleArt Plain()
+        {
+            var p = new DoodlePainter(-0.5f, -0.5f, 0.5f, 0.5f, 32) { Wobble = 0f };
+            p.Fill(Sd.Box(0, 0, 0.6f, 0.6f), Rgba.White, false);
+            return new DoodleArt("plain", p);
+        }
+
+        /// <summary>Lampada appesa: lampadina in (0,0), paralume sopra, filo fino in alto. Il colore lo dà la luce.</summary>
+        public static DoodleArt HangingLamp()
+        {
+            var p = new DoodlePainter(-0.6f, -0.25f, 0.6f, 2.6f, 100) { Ink = 0.05f };
+            p.InkLine(0.03f, 0, 0.45f, 0.02f, 2.6f);
+            Sdf shade = Sd.Polygon(-0.55f, 0.05f, 0.55f, 0.05f, 0.22f, 0.5f, -0.22f, 0.5f);
+            Body(p, shade, Rgba.Hex("4A4E5C"), Rgba.Hex("2E313B"));
+            p.Shape(Sd.Box(0, 0.05f, 0.56f, 0.03f), Rgba.Hex("8D93A6"), 0.025f);
+            p.Shape(Sd.Circle(0, -0.06f, 0.17f), Rgba.Hex("EDEFF5"), 0.035f);
+            return new DoodleArt("lamp", p);
+        }
+
+        /// <summary>Alone luminoso bianco (si tinge col colore della luce).</summary>
+        public static DoodleArt Glow()
+        {
+            var p = new DoodlePainter(-0.6f, -0.6f, 0.6f, 0.6f, 80) { Wobble = 0f };
+            p.FillFunc(Sd.Circle(0, 0, 0.6f), (x, y) =>
+                Rgba.White.WithAlpha((float)Math.Exp(-Math.Sqrt(x * x + y * y) * 6f)));
+            return new DoodleArt("glow", p);
+        }
+
+        /// <summary>Cono di luce morbido, dall'alto (0,0) verso il basso.</summary>
+        public static DoodleArt LightCone()
+        {
+            var p = new DoodlePainter(-2.6f, -5.2f, 2.6f, 0.1f, 40) { Wobble = 0f };
+            Sdf cone = Sd.Polygon(-0.25f, 0f, 0.25f, 0f, 2.5f, -5.2f, -2.5f, -5.2f);
+            p.FillFunc(cone, (x, y) =>
+            {
+                float edge = 1f - Clamp(Math.Abs(x) / (0.25f + 2.25f * (-y / 5.2f)));
+                return Rgba.White.WithAlpha(0.45f * Clamp(edge * 2f) * Clamp(1f + y / 6.5f));
+            });
+            return new DoodleArt("light_cone", p);
+        }
+
+        // ---------- Livello 14: il barattolo dei biscotti ----------
+
+        /// <summary>Barattolo di vetro aperto in alto: interno da x -0.5 a 0.5, fondo a y -0.6, bordo a y 0.6.</summary>
+        public static DoodleArt Jar()
+        {
+            var p = new DoodlePainter(-0.75f, -0.82f, 0.75f, 0.78f, 110) { Ink = 0.05f };
+            Sdf outer = Sd.Box(0, -0.06f, 0.62f, 0.74f, 0.2f);
+            Sdf inner = Sd.Union(Sd.Box(0, 0f, 0.5f, 0.6f, 0.12f), Sd.Box(0, 0.6f, 0.5f, 0.2f));
+            Sdf glass = Sd.Subtract(outer, inner);
+            p.Fill(inner, Rgba.Hex("DFF3FF", 0.25f));
+            Body(p, glass, Rgba.Hex("BFE6FF", 0.75f), Rgba.Hex("8FC9EE", 0.75f));
+            p.Fill(Sd.Capsule(-0.4f, 0.35f, -0.4f, -0.3f, 0.03f), Rgba.White.WithAlpha(0.8f));
+            Sdf label = Sd.Box(0, -0.25f, 0.36f, 0.16f, 0.04f);
+            p.Shape(label, Rgba.Hex("FFF3D6"), 0.03f);
+            p.Shape(Sd.Circle(-0.18f, -0.25f, 0.09f), Rgba.Hex("C98B55"), 0.02f);
+            p.Line(Ink.WithAlpha(0.7f), 0.02f, -0.04f, -0.22f, 0.26f, -0.22f);
+            p.Line(Ink.WithAlpha(0.7f), 0.02f, -0.04f, -0.29f, 0.18f, -0.29f);
+            return new DoodleArt("jar", p);
+        }
+
+        /// <summary>Biscotto con gocce di cioccolato (raggio 0.22).</summary>
+        public static DoodleArt Cookie()
+        {
+            var p = new DoodlePainter(-0.27f, -0.27f, 0.27f, 0.27f, 160) { Ink = 0.035f };
+            Body(p, Sd.Circle(0, 0, 0.22f), Rgba.Hex("D99A55"), Rgba.Hex("B8773A"), null, -0.03f, 0.04f);
+            foreach (var c in new[] { new[] { -0.08f, 0.07f }, new[] { 0.08f, 0.1f }, new[] { 0.02f, -0.06f }, new[] { -0.1f, -0.09f }, new[] { 0.12f, -0.05f } })
+                p.Fill(Sd.Circle(c[0], c[1], 0.035f), Rgba.Hex("4A2A1A"));
+            return new DoodleArt("cookie", p);
+        }
+
+        /// <summary>Topolino seduto che guarda in su, affamato (centro 0,0, appoggiato a y -0.5).</summary>
+        public static DoodleArt Mouse()
+        {
+            var p = new DoodlePainter(-0.75f, -0.6f, 0.75f, 0.9f, 120) { Ink = 0.045f };
+            p.Shape(Sd.Polyline(0.03f, 0.35f, -0.4f, 0.6f, -0.35f, 0.68f, -0.15f, 0.6f, 0.0f), Rgba.Hex("FF9BB0"), 0.025f);   // coda
+            Sdf body = Sd.Ellipse(0.05f, -0.15f, 0.38f, 0.36f);
+            Body(p, body, Rgba.Hex("A7AEBF"), Rgba.Hex("858CA0"));
+            p.Fill(Sd.Ellipse(-0.02f, -0.2f, 0.2f, 0.22f), Rgba.Hex("D6DAE6"));
+            foreach (float x in new[] { -0.38f, 0.22f })
+            {
+                Sdf ear = Sd.Circle(x, 0.55f, 0.2f);
+                p.Shape(ear, Rgba.Hex("A7AEBF"));
+                p.Fill(Sd.Circle(x, 0.55f, 0.12f), Rgba.Hex("FFB3C4"));
+            }
+            Sdf head = Sd.Ellipse(-0.08f, 0.3f, 0.3f, 0.26f);
+            Body(p, head, Rgba.Hex("A7AEBF"), Rgba.Hex("858CA0"), null, -0.03f, 0.04f);
+            foreach (float x in new[] { -0.2f, 0.02f })
+            {
+                p.Shape(Sd.Ellipse(x, 0.36f, 0.07f, 0.08f), Rgba.White, 0.02f);
+                p.Fill(Sd.Circle(x - 0.01f, 0.39f, 0.035f), Ink);   // guarda in su
+            }
+            p.Shape(Sd.Circle(-0.3f, 0.2f, 0.04f), Rgba.Hex("FF8FA3"), 0.02f);
+            foreach (float dy in new[] { 0f, 0.05f }) p.InkLine(0.012f, -0.3f, 0.2f + dy, -0.55f, 0.24f + dy * 2f);
+            p.InkLine(0.02f, -0.22f, 0.13f, -0.17f, 0.1f, -0.12f, 0.13f);
+            foreach (float x in new[] { -0.15f, 0.2f }) p.Shape(Sd.Ellipse(x, -0.5f, 0.11f, 0.06f), Rgba.Hex("FFB3C4"), 0.025f);
+            return new DoodleArt("mouse", p);
+        }
+
+        // ---------- Livello 15: la torta di compleanno ----------
+
+        /// <summary>Festa: parete pastello, festoni, palloncini e tavolo (coordinate del livello; tavolo sotto y = -2.2).</summary>
+        public static DoodleArt PartyRoom()
+        {
+            var p = new DoodlePainter(-4.5f, -7f, 4.5f, 7f, 50) { Ink = 0.06f };
+            Sdf wall = Sd.Box(0, 2.5f, 5f, 4.8f);
+            p.Fill(wall, Rgba.Hex("FFE3EC"), false);
+            p.Hatch(wall, Rgba.Hex("FFD1DF"), 0.7f, 0.25f, 45f);
+            // festoni
+            p.InkLine(0.03f, -4.5f, 3.3f, -2f, 2.8f, 0f, 3.1f, 2f, 2.8f, 4.5f, 3.3f);
+            Rgba[] flags = { Rgba.Hex("FF5C8A"), Rgba.Hex("FFD25A"), Rgba.Hex("6EC6FF"), Rgba.Hex("7ED36B"), Rgba.Hex("B9A3FF") };
+            for (int i = 0; i < 12; i++)
+            {
+                float x = -4.1f + i * 0.72f;
+                float y = 3.3f - 0.5f * (float)Math.Sin((x + 4.5f) / 9f * Math.PI * 2f) * 0.5f - 0.25f;
+                p.Shape(Sd.Polygon(x - 0.22f, y + 0.12f, x + 0.22f, y + 0.12f, x, y - 0.35f), flags[i % flags.Length], 0.035f);
+            }
+            // palloncini
+            foreach (var b in new[] { new[] { -2.2f, 1.6f, 0f }, new[] { 2.3f, 1.9f, 2f }, new[] { 1.7f, 1.3f, 3f } })
+            {
+                Rgba c = flags[(int)b[2]];
+                p.InkLine(0.02f, b[0], b[1] - 0.45f, b[0] + 0.1f, b[1] - 1.1f, b[0] - 0.05f, b[1] - 1.7f);
+                Body(p, Sd.Ellipse(b[0], b[1], 0.35f, 0.43f), c, Rgba.Lerp(c, Ink, 0.2f));
+                p.Fill(Sd.Rotate(Sd.Ellipse(b[0] - 0.12f, b[1] + 0.15f, 0.06f, 0.12f), b[0] - 0.12f, b[1] + 0.15f, 25f), Rgba.White.WithAlpha(0.7f));
+            }
+            // tavolo con tovaglia
+            Sdf table = Sd.Box(0, -4.6f, 5f, 2.4f);
+            p.Fill(table, Rgba.Hex("FFFFFF"), false);
+            p.Hatch(table, Rgba.Hex("FF8FA3", 0.5f), 0.4f, 0.18f, 0f);
+            p.Hatch(table, Rgba.Hex("FF8FA3", 0.5f), 0.4f, 0.18f, 90f);
+            p.Shape(Sd.Box(0, -2.2f, 5f, 0.06f), Rgba.Hex("FF8FA3"));
+            return new DoodleArt("party_bg", p);
+        }
+
+        /// <summary>Torta a due piani con glassa colante sul piatto. Il piano superiore finisce a y = 0.62 (centro 0,0).</summary>
+        public static DoodleArt Cake()
+        {
+            var p = new DoodlePainter(-1.45f, -0.95f, 1.45f, 0.75f, 100) { Ink = 0.055f };
+            Body(p, Sd.Ellipse(0, -0.78f, 1.35f, 0.14f), Rgba.Hex("E9ECF5"), Rgba.Hex("C3C8D6"));   // piatto
+            Sdf lower = Sd.Box(0, -0.4f, 1.1f, 0.38f, 0.12f), upper = Sd.Box(0, 0.25f, 0.78f, 0.36f, 0.12f);
+            Body(p, lower, Rgba.Hex("F6C28B"), Rgba.Hex("D99A55"));
+            Body(p, upper, Rgba.Hex("F6C28B"), Rgba.Hex("D99A55"));
+            // glassa con gocce
+            foreach (var t in new[] { new { y = -0.08f, w = 1.1f }, new { y = 0.56f, w = 0.78f } })
+            {
+                var drips = new List<Sdf> { Sd.Box(0, t.y, t.w, 0.09f, 0.08f) };
+                for (float x = -t.w + 0.15f; x < t.w; x += 0.3f) drips.Add(Sd.Capsule(x, t.y, x, t.y - 0.12f - 0.08f * (float)Math.Abs(Math.Sin(x * 7)), 0.06f));
+                p.Shape(Sd.Union(drips.ToArray()), Rgba.Hex("FF8FB8"), 0.04f);
+            }
+            foreach (var c in new[] { new[] { -0.7f, -0.45f }, new[] { -0.2f, -0.55f }, new[] { 0.35f, -0.42f }, new[] { 0.8f, -0.5f }, new[] { -0.4f, 0.15f }, new[] { 0.3f, 0.2f } })
+                p.Fill(Sd.Capsule(c[0], c[1], c[0] + 0.06f, c[1] + 0.03f, 0.022f), new[] { Rgba.Hex("6EC6FF"), Rgba.Hex("FFD25A"), Rgba.Hex("7ED36B") }[(int)((c[0] + 1) * 3) % 3]);
+            return new DoodleArt("cake", p);
+        }
+
+        /// <summary>Candelina a righe (base in 0,0, alta 0.5).</summary>
+        public static DoodleArt Candle()
+        {
+            var p = new DoodlePainter(-0.1f, -0.03f, 0.1f, 0.6f, 160) { Ink = 0.03f };
+            Sdf c = Sd.Box(0, 0.25f, 0.05f, 0.25f, 0.02f);
+            p.Fill(c, Rgba.White);
+            p.Hatch(c, Rgba.Hex("FF5C8A"), 0.12f, 0.04f, 60f);
+            p.Shape(c, Rgba.Clear);
+            p.InkLine(0.015f, 0, 0.5f, 0.01f, 0.57f);
+            return new DoodleArt("candle", p);
+        }
+
+        /// <summary>Fiammella (base in 0,0).</summary>
+        public static DoodleArt Flame()
+        {
+            var p = new DoodlePainter(-0.13f, -0.06f, 0.13f, 0.3f, 200) { Ink = 0.02f, Wobble = 0.004f };
+            p.FillFunc(Sd.Circle(0, 0.09f, 0.13f), (x, y) => Rgba.Hex("FFE36B").WithAlpha((float)Math.Exp(-Math.Sqrt(x * x + (y - 0.09f) * (y - 0.09f)) * 14f) * 0.6f));
+            Sdf outer = Sd.Union(Sd.Circle(0, 0.06f, 0.06f), Sd.Polygon(-0.055f, 0.08f, 0.055f, 0.08f, 0, 0.26f));
+            p.Shape(outer, Rgba.Hex("FF9F2E"));
+            p.Fill(Sd.Union(Sd.Circle(0, 0.05f, 0.03f), Sd.Polygon(-0.028f, 0.06f, 0.028f, 0.06f, 0, 0.16f)), Rgba.Hex("FFF27A"));
+            return new DoodleArt("flame", p);
+        }
+
+        /// <summary>Coriandolo (si tinge).</summary>
+        public static DoodleArt Confetti()
+        {
+            var p = new DoodlePainter(-0.08f, -0.05f, 0.08f, 0.05f, 160) { Ink = 0.015f };
+            p.Shape(Sd.Box(0, 0, 0.06f, 0.03f, 0.01f), Rgba.White);
+            return new DoodleArt("confetti", p);
         }
     }
 }

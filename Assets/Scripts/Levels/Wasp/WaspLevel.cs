@@ -292,7 +292,7 @@ namespace Gotcha.Levels
         }
 
         /// <summary>Ronzio: onda a dente di sega modulata, generata da codice.</summary>
-        static AudioClip BuzzClip()
+        public static AudioClip BuzzClip()
         {
             const int rate = 22050;
             int n = rate;   // un secondo in loop

@@ -15,7 +15,7 @@ namespace Gotcha.UI
     public class GameUI : MonoBehaviour
     {
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.10";
+        public const string Version = "0.11";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
@@ -32,7 +32,8 @@ namespace Gotcha.UI
 
         Text titleText;
         GameObject hintPanel, menuPanel, resultPanel, completedPanel;
-        Text hintBody, menuEggs, resultTitle, resultBody, resultButton, musicLabel;
+        Text hintBody, menuEggs, resultTitle, resultBody, resultButton, musicLabel, shareLabel;
+        Button shareButton;
         RectTransform levelList;
 
         void Awake()
@@ -98,7 +99,24 @@ namespace Gotcha.UI
             else if (!string.IsNullOrEmpty(eggId)) resultBody.text = "You found a secret!\nEaster eggs: " + SaveData.EasterEggCount;
             else resultBody.text = "Not quite. Try again.";
             resultButton.text = solved ? "NEXT" : "RETRY";
+            // video da condividere (es. il pupazzo che si scioglie)
+            bool clip = !string.IsNullOrEmpty(eggId) && ClipRecorder.Instance != null && ClipRecorder.Instance.HasClip;
+            shareButton.gameObject.SetActive(clip);
+            shareLabel.text = "SHARE VIDEO";
+            shareButton.interactable = true;
             resultPanel.SetActive(true);
+        }
+
+        void ShareClip()
+        {
+            if (ClipRecorder.Instance == null || ClipRecorder.Instance.IsSharing) return;
+            shareButton.interactable = false;
+            shareLabel.text = "PREPARING...";
+            ClipRecorder.Instance.Share("I just melted a snowman in Gotcha! Can you beat it? #GotchaGame", ok =>
+            {
+                shareLabel.text = ok ? "SHARE AGAIN" : "SHARE FAILED";
+                shareButton.interactable = true;
+            });
         }
 
         void OnGameCompleted()
@@ -230,7 +248,11 @@ namespace Gotcha.UI
             resultTitle.fontSize = 90;
             resultTitle.color = Accent;
             resultBody = CreateText(resultCard, "", 52, Ink, FontStyle.Normal);
-            Place(resultBody.transform, new Vector2(0.08f, 0.3f), new Vector2(0.92f, 0.7f));
+            Place(resultBody.transform, new Vector2(0.08f, 0.44f), new Vector2(0.92f, 0.72f));
+            shareButton = CreateButton(resultCard, "SHARE VIDEO", Dark, ShareClip);
+            shareLabel = shareButton.GetComponentInChildren<Text>();
+            Place(shareButton.transform, new Vector2(0.15f, 0.27f), new Vector2(0.85f, 0.41f));
+            shareButton.gameObject.SetActive(false);
             Button next = CreateButton(resultCard, "", Accent, () =>
             {
                 resultPanel.SetActive(false);

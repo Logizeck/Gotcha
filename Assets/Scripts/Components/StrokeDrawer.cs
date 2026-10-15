@@ -29,6 +29,11 @@ namespace Gotcha.Components
         public Color color = new Color(0.17f, 0.13f, 0.2f);
         public float minLength = 0.3f;
         public bool singleStroke = true;
+        [Tooltip("Se singleStroke è falso: quanti tratti restano al massimo (0 = nessun limite); i più vecchi spariscono.")]
+        public int maxStrokes = 0;
+        [Tooltip("Ogni tratto diventa anche una barriera fisica (EdgeCollider2D con lo spessore indicato).")]
+        public bool addCollider;
+        public float colliderRadius = 0.06f;
         public int sortingOrder = 30;
         [Tooltip("Facoltativo: se vuoto si usa lo shader degli sprite.")]
         public Material material;
@@ -157,6 +162,22 @@ namespace Gotcha.Components
             {
                 foreach (GameObject s in strokes) if (s != null) Destroy(s);
                 strokes.Clear();
+            }
+            else if (maxStrokes > 0)
+            {
+                while (strokes.Count >= maxStrokes)
+                {
+                    if (strokes[0] != null) Destroy(strokes[0]);
+                    strokes.RemoveAt(0);
+                }
+            }
+            if (addCollider)
+            {
+                EdgeCollider2D edge = drawing.AddComponent<EdgeCollider2D>();
+                var pts = new Vector2[points.Count];
+                for (int i = 0; i < pts.Length; i++) pts[i] = points[i];
+                edge.points = pts;
+                edge.edgeRadius = colliderRadius;
             }
             strokes.Add(drawing);
             drawing = null;

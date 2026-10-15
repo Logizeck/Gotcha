@@ -323,7 +323,7 @@ namespace Gotcha.EditorArt
                 DoodleSprites.Panel(), DoodleSprites.Key(), DoodleSprites.DoorFrame(), DoodleSprites.DoorPanel(),
                 DoodleSprites.Keyhole(), DoodleSprites.RoomBackdrop(), DoodleSprites.MazeBackdrop(),
                 DoodleSprites.MazeNeon(), DoodleSprites.ChromeBall(), DoodleSprites.BallShadow(), DoodleSprites.Goal(),
-                DoodleSprites.SnowBackdrop(), DoodleSprites.SnowBase(), DoodleSprites.SnowMiddle(), DoodleSprites.SnowArms(), DoodleSprites.SnowHead(),
+                DoodleSprites.SnowBackdrop(), DoodleSprites.SnowBase(), DoodleSprites.SnowMiddle(), DoodleSprites.SnowArm(-1), DoodleSprites.SnowArm(1), DoodleSprites.SnowHead(),
                 DoodleSprites.SnowHat(), DoodleSprites.Blush(), DoodleSprites.Puddle(),
                 DoodleSprites.Carrot(), DoodleSprites.Coal(), DoodleSprites.Puff(), DoodleSprites.Bubble(),
                 DoodleSprites.NightRoom(), DoodleSprites.SleepingCat(), DoodleSprites.CatEyesOpen(), DoodleSprites.Alert(),
@@ -338,7 +338,10 @@ namespace Gotcha.EditorArt
                 DoodleSprites.CatFace(0), DoodleSprites.CatFace(1), DoodleSprites.CatFace(2), DoodleSprites.CatFace(3),
                 DoodleSprites.AngerMark(), DoodleSprites.HiFi(), DoodleSprites.Speaker(), DoodleSprites.Note(),
                 DoodleSprites.Wasp(), DoodleSprites.WaspWing(), DoodleSprites.WaspDead(), DoodleSprites.Garden(),
-                DoodleSprites.Swatter(), DoodleSprites.StingFlash(),
+                DoodleSprites.Swatter(), DoodleSprites.StingFlash(), DoodleSprites.AppIcon(),
+                DoodleSprites.KeyPainting(), DoodleSprites.Plain(), DoodleSprites.HangingLamp(), DoodleSprites.Glow(), DoodleSprites.LightCone(),
+                DoodleSprites.Jar(), DoodleSprites.Cookie(), DoodleSprites.Mouse(), DoodleSprites.PartyRoom(), DoodleSprites.Cake(),
+                DoodleSprites.Candle(), DoodleSprites.Flame(), DoodleSprites.Confetti(),
             };
         }
     }

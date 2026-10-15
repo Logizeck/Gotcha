@@ -9,7 +9,7 @@ Shader "Gotcha/ChromeBall"
         [PerRendererData] _MainTex ("Sprite", 2D) = "white" {}
         _ReflectionTex ("Reflection", 2D) = "black" {}
         _Reflectivity ("Reflectivity", Range(0, 2)) = 1.3
-        _Studio ("Studio light", Range(0, 1)) = 0.5
+        _Studio ("Studio light", Range(0, 1)) = 0.62
         _Radius ("Sphere radius in UV", Range(0.1, 0.5)) = 0.463
     }
 
@@ -73,7 +73,7 @@ Shader "Gotcha/ChromeBall"
                 // 2. vista dall'alto: il centro della biglia riflette il soffitto (studio luminoso), i bordi radenti
                 //    riflettono ciò che sta attorno sul piano (pareti al neon, fondo)
                 float sky = saturate(n.y * 0.5 + 0.5);
-                float3 studio = lerp(float3(0.30, 0.33, 0.38), float3(0.86, 0.89, 0.93), sky);
+                float3 studio = lerp(float3(0.48, 0.51, 0.56), float3(0.97, 0.98, 1.0), sky);
 
                 // softbox riflesso: macchia di luce allungata e morbida in alto a sinistra
                 float2 q = p - float2(-0.3, 0.38);
@@ -85,6 +85,7 @@ Shader "Gotcha/ChromeBall"
                 float wEnv = smoothstep(0.2, 0.92, r);
                 float3 col = lerp(studio * _Studio * 2.0, env * _Reflectivity, wEnv) + env * 0.25 * (1.0 - wEnv);
                 col += softbox * 0.9;
+                col += 0.1;   // acciaio più chiaro: un po' di luce ambiente anche dove riflette il fondo scuro
 
                 // 4. luci speculari nette (lampada principale e riflesso secondario in basso a destra)
                 float3 L1 = normalize(float3(-0.42, 0.5, 0.76));
@@ -93,7 +94,7 @@ Shader "Gotcha/ChromeBall"
                 col += pow(saturate(dot(n, L2)), 120.0) * 0.35;
 
                 // 5. bordo di contatto scuro e leggera tinta fredda dell'acciaio
-                col *= lerp(1.0, 0.45, smoothstep(0.88, 1.0, r));
+                col *= lerp(1.0, 0.65, smoothstep(0.9, 1.0, r));
                 col *= float3(0.97, 0.99, 1.03);
 
                 return fixed4(saturate(col), baseCol.a);

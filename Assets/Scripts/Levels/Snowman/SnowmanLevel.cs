@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Gotcha.Components;
+using Gotcha.Core;
 
 namespace Gotcha.Levels
 {
@@ -20,7 +21,8 @@ namespace Gotcha.Levels
         [SerializeField] Transform snowman;      // radice ai piedi
         [SerializeField] Transform basePart;     // pivot y = 0
         [SerializeField] Transform middlePart;   // pivot y = 1.95
-        [SerializeField] Transform armsPart;     // pivot alle spalle, y = 2.85
+        [SerializeField] Transform armLeft;      // braccia separate: cadono durante lo scioglimento
+        [SerializeField] Transform armRight;
         [SerializeField] Transform headPart;     // pivot y = 3.42
         [SerializeField] Transform hatPart;      // pivot y = 4.55
         [SerializeField] SpriteRenderer[] bodyRenderers;
@@ -29,6 +31,7 @@ namespace Gotcha.Levels
         [SerializeField] SpeechBubble bubble;
         [SerializeField] SmokeEmitter smoke;
         [SerializeField] StrokeDrawer mouthPen;  // centrato sulla testa
+        [SerializeField] SmokeEmitter drips;     // gocce d'acqua durante lo scioglimento
 
         [Header("Zone invisibili (coordinate del pupazzo, piedi in 0,0)")]
         [SerializeField] Vector2 headCenter = new Vector2(-0.1f, 3.7f);
@@ -67,10 +70,13 @@ namespace Gotcha.Levels
             if (blush != null) blush.color = new Color(1f, 1f, 1f, 0f);
             if (puddle != null) puddle.localScale = Vector3.zero;
             if (bubble != null) bubble.Hide();
+            // registra sempre gli ultimi secondi: se parte l'Easter egg, il video è pronto da condividere
+            if (ClipRecorder.Instance != null) ClipRecorder.Instance.Begin();
         }
 
         void OnDestroy()
         {
+            if (ClipRecorder.Instance != null && ClipRecorder.Instance.IsCapturing) ClipRecorder.Instance.Discard();
             if (items != null) foreach (Draggable2D d in items) if (d != null) d.Dropped -= OnItemDropped;
             if (mouthPen != null) mouthPen.StrokeFinished -= OnMouthDrawn;
         }
@@ -177,6 +183,7 @@ namespace Gotcha.Levels
         IEnumerator WinRoutine()
         {
             LockInput();
+            if (ClipRecorder.Instance != null) ClipRecorder.Instance.Discard();
             if (bubble != null) bubble.Show("Yay!");
             Vector3 start = snowman.localPosition;
             for (int hop = 0; hop < 2; hop++)
@@ -192,6 +199,8 @@ namespace Gotcha.Levels
 
         // ---------- Easter egg: carota sul sedere ----------
 
+        bool armsFallen, hatFallen;
+
         IEnumerator MeltRoutine(Draggable2D carrot)
         {
             LockInput();
@@ -205,28 +214,77 @@ namespace Gotcha.Levels
             for (float k = 0f; k < 1f; k += Time.deltaTime / 0.15f) { t.position = Vector3.Lerp(from, target, k); yield return null; }
             t.position = target;
 
-            // 1. arrossisce
-            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.9f)
+            // 1. sobbalzo e rossore, tremando dall'imbarazzo
+            Vector3 home = snowman.localPosition;
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.25f)
             {
-                SetTint(Color.Lerp(Color.white, BlushTint, k), k);
+                snowman.localPosition = home + Vector3.up * Mathf.Sin(k * Mathf.PI) * 0.35f;
                 yield return null;
             }
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 1.0f)
+            {
+                SetTint(Color.Lerp(Color.white, BlushTint, k), k);
+                snowman.localPosition = home + (Vector3)(Random.insideUnitCircle * 0.03f);
+                yield return null;
+            }
+            snowman.localPosition = home;
             SetTint(BlushTint, 1f);
 
-            // 2. fuma e strilla
+            // 2. strilla, fuma e comincia a gocciolare
             if (bubble != null) bubble.Show("Oh noooo!");
             if (smoke != null) smoke.Play();
-            yield return new WaitForSeconds(0.9f);
+            yield return new WaitForSeconds(0.7f);
+            if (drips != null) drips.Play();
 
-            // 3. si scioglie lentamente dalla testa in giù; la base resta a terra
+            // 3. si scioglie lentamente dalla testa in giù: il cappello scivola via, le braccia cadono,
+            //    la base resta a terra e la pozzanghera si allarga
             float sh = 1f, sm = 1f, sb = 1f;
-            yield return Melt(1.8f, k => { sh = Mathf.Lerp(1f, 0.18f, k); Pose(sb, sm, sh, 0.25f * k); });
-            yield return Melt(1.8f, k => { sm = Mathf.Lerp(1f, 0.22f, k); Pose(sb, sm, sh, 0.25f + 0.35f * k); });
-            yield return Melt(2.2f, k => { sb = Mathf.Lerp(1f, 0.42f, k); Pose(sb, sm, sh, 0.6f + 0.4f * k); });
+            yield return Melt(2.0f, k =>
+            {
+                sh = Mathf.Lerp(1f, 0.18f, k);
+                Pose(sb, sm, sh, 0.25f * k);
+                if (!hatFallen && k > 0.45f) { hatFallen = true; StartCoroutine(Tumble(hatPart, 1f, 1.1f, -95f)); }
+                if (!armsFallen && k > 0.8f) { armsFallen = true; DropArms(); }
+            });
+            yield return Melt(2.0f, k => { sm = Mathf.Lerp(1f, 0.22f, k); Pose(sb, sm, sh, 0.25f + 0.35f * k); });
+            if (bubble != null) bubble.Show("blub...");
+            yield return Melt(2.4f, k => { sb = Mathf.Lerp(1f, 0.42f, k); Pose(sb, sm, sh, 0.6f + 0.4f * k); });
 
+            if (drips != null) drips.Stop();
             if (smoke != null) smoke.Stop();
-            yield return new WaitForSeconds(1.0f);
+            yield return new WaitForSeconds(1.2f);
+            if (ClipRecorder.Instance != null) ClipRecorder.Instance.Stop();   // il video si può condividere
             FailWithEgg(eggId);
+        }
+
+        void DropArms()
+        {
+            if (armLeft != null) StartCoroutine(Tumble(armLeft, -1f, 0.25f, 75f));
+            if (armRight != null) StartCoroutine(Tumble(armRight, 1f, 0.25f, -80f));
+        }
+
+        /// <summary>Un pezzo si stacca, vola un po' di lato ruotando e cade sulla neve con un rimbalzo.</summary>
+        IEnumerator Tumble(Transform t, float side, float jump, float spinTo)
+        {
+            if (t == null) yield break;
+            Vector3 v = new Vector3(side * Random.Range(0.8f, 1.3f), jump * 2.5f, 0f);
+            float startAngle = t.localEulerAngles.z;
+            float ground = 0.15f, time = 0f;
+            int bounces = 0;
+            while (bounces < 2)
+            {
+                time += Time.deltaTime;
+                v.y -= 12f * Time.deltaTime;
+                t.localPosition += v * Time.deltaTime;
+                t.localRotation = Quaternion.Euler(0, 0, Mathf.LerpAngle(startAngle, spinTo, Mathf.Clamp01(time * 1.6f)));
+                if (t.localPosition.y <= ground && v.y < 0f)
+                {
+                    t.localPosition = new Vector3(t.localPosition.x, ground, t.localPosition.z);
+                    v = new Vector3(v.x * 0.4f, -v.y * 0.3f, 0f);
+                    bounces++;
+                }
+                yield return null;
+            }
         }
 
         delegate void MeltStep(float k);
@@ -247,12 +305,18 @@ namespace Gotcha.Levels
             Squash(basePart, 0f, sb);
             float middleY = middlePivot * sb;
             Squash(middlePart, middleY, sm);
-            if (armsPart != null) armsPart.localPosition = new Vector3(0f, middleY + (shoulderY - middlePivot) * sm, 0f);
+            if (!armsFallen)
+            {
+                float armY = middleY + (shoulderY - middlePivot) * sm;
+                if (armLeft != null) armLeft.localPosition = new Vector3(armLeft.localPosition.x, armY, 0f);
+                if (armRight != null) armRight.localPosition = new Vector3(armRight.localPosition.x, armY, 0f);
+            }
             float headY = middleY + (headPivot - middlePivot) * sm;
             Squash(headPart, headY, sh);
-            if (hatPart != null) hatPart.localPosition = new Vector3(0f, headY + (hatPivot - headPivot) * sh, 0f);
+            if (!hatFallen && hatPart != null) hatPart.localPosition = new Vector3(0f, headY + (hatPivot - headPivot) * sh, 0f);
+            if (drips != null) drips.transform.localPosition = new Vector3(0f, headY, 0f);
 
-            if (puddle != null) puddle.localScale = Vector3.one * Mathf.Min(1f, overall * 1.1f);
+            if (puddle != null) puddle.localScale = new Vector3(Mathf.Min(1.1f, overall * 1.2f), Mathf.Min(1f, overall * 1.1f), 1f);
             SetTint(Color.Lerp(BlushTint, MeltTint, overall), 1f - Mathf.Clamp01(overall * 2.5f));
         }
 

@@ -13,5 +13,10 @@ Livelli attuali:
 8. **Shhh!** — abbassa il volume del telefono per calmare il gatto.
 9. **Hold On** — tieni premuti due pulsanti insieme per 5 secondi.
 10. **Buzz Off** — colpisci la vespa furiosa 10 volte.
+11. **Art Theft** — la chiave della porta è appesa dentro il quadro.
+12. **Bodyguard** — disegna linee col dito per difendere il gatto dalla vespa.
+13. **Lights On** — accendi le due lampade insieme per leggere il messaggio sul muro.
+14. **Cookie Jar** — capovolgi il telefono per far uscire il biscotto dal barattolo.
+15. **Make a Wish** — spegni le candeline soffiando nel microfono.
 
 Istruzioni per aprire il progetto e creare l'APK: vedi [README_SETUP.md](README_SETUP.md).

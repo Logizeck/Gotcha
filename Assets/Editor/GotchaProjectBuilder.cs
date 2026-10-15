@@ -31,7 +31,7 @@ public static class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 10;
+    const int BuilderVersion = 11;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -105,6 +105,21 @@ public static class GotchaProjectBuilder
             Define("Wasp", "angry_wasp", "BUZZ OFF",
                 "Bare hands won't do. Is there something in the grass you could swat it with?",
                 BuildWaspLevel()),
+            Define("ArtTheft", "art_theft", "ART THEFT",
+                "Locked again? Look around... art can be very practical.",
+                BuildKeyPaintingLevel(keyPrefab, doorPrefab)),
+            Define("Defend", "defend_cat", "BODYGUARD",
+                "Draw walls with your finger. The wasp hates walls.",
+                BuildDefendLevel()),
+            Define("Lamps", "you_won", "LIGHTS ON",
+                "Red ink under red light is hard to read... what if both lights were on?",
+                BuildLampsLevel()),
+            Define("Cookie", "cookie_jar", "COOKIE JAR",
+                "That cookie won't come out by itself. Maybe turn the world upside down?",
+                BuildCookieLevel()),
+            Define("Birthday", "birthday", "MAKE A WISH",
+                "Candles don't like wind. Your phone has a microphone...",
+                BuildBirthdayLevel()),
         };
 
         LevelCatalog catalog = LoadOrCreate<LevelCatalog>(LevelDir + "/LevelCatalog.asset");
@@ -152,6 +167,9 @@ public static class GotchaProjectBuilder
         camGo.AddComponent<CameraFit>();
 
         new GameObject("SensorHub").AddComponent<SensorHub>();
+
+        ClipRecorder recorder = new GameObject("ClipRecorder").AddComponent<ClipRecorder>();
+        recorder.watermark = sprites["app_icon"].texture;   // il logo nell'angolo dei video condivisi
 
         var musicGo = new GameObject("Music", typeof(AudioSource));
         MusicPlayer music = musicGo.AddComponent<MusicPlayer>();
@@ -382,7 +400,8 @@ public static class GotchaProjectBuilder
             AssetDatabase.CreateAsset(mat, path);
         }
         mat.shader = shader;
-        if (mat.HasProperty("_Reflectivity")) mat.SetFloat("_Reflectivity", 0.8f);
+        if (mat.HasProperty("_Reflectivity")) mat.SetFloat("_Reflectivity", 1.3f);
+        if (mat.HasProperty("_Studio")) mat.SetFloat("_Studio", 0.62f);
         if (mat.HasProperty("_Radius")) mat.SetFloat("_Radius", 0.463f);   // raggio 0.5 su uno sprite di 1.08 unità
         EditorUtility.SetDirty(mat);
         return mat;
@@ -489,7 +508,10 @@ public static class GotchaProjectBuilder
         snowman.localPosition = new Vector3(0, -3.0f, 0);
         Transform basePart = Part(snowman, "Base", 0f);
         Transform middlePart = Part(snowman, "Middle", DoodleSprites.SnowMiddlePivot);
-        Transform armsPart = Part(snowman, "Arms", DoodleSprites.SnowShoulderY);
+        Transform armLeft = Part(snowman, "ArmLeft", DoodleSprites.SnowShoulderY);
+        Transform armRight = Part(snowman, "ArmRight", DoodleSprites.SnowShoulderY);
+        armLeft.localPosition = new Vector3(-0.6f, DoodleSprites.SnowShoulderY, 0);   // pivot sulla spalla: cadono ruotando
+        armRight.localPosition = new Vector3(0.5f, DoodleSprites.SnowShoulderY, 0);
         Transform headPart = Part(snowman, "Head", DoodleSprites.SnowHeadPivot);
         Transform hatPart = Part(snowman, "Hat", DoodleSprites.SnowHatPivot);
         var bodies = new List<SpriteRenderer>
@@ -498,7 +520,8 @@ public static class GotchaProjectBuilder
             Art(middlePart, "Art", "sm_middle", 3, true, new Vector2(0, -DoodleSprites.SnowMiddlePivot)).GetComponent<SpriteRenderer>(),
             Art(headPart, "Art", "sm_head", 4, true, new Vector2(0, -DoodleSprites.SnowHeadPivot)).GetComponent<SpriteRenderer>(),
         };
-        Art(armsPart, "Art", "sm_arms", 1, true, new Vector2(0, -DoodleSprites.SnowShoulderY));
+        Art(armLeft, "Art", "sm_arm_l", 1, true, new Vector2(0.6f, -DoodleSprites.SnowShoulderY));
+        Art(armRight, "Art", "sm_arm_r", 1, true, new Vector2(-0.5f, -DoodleSprites.SnowShoulderY));
         Art(hatPart, "Art", "sm_hat", 7, true, new Vector2(0, -DoodleSprites.SnowHatPivot));
         float headLocal = DoodleSprites.SnowHeadCenterY - DoodleSprites.SnowHeadPivot;   // centro della testa nel pivot della testa
         float headX = DoodleSprites.SnowHeadCenterX;
@@ -550,13 +573,30 @@ public static class GotchaProjectBuilder
         SetField(level, "snowman", snowman);
         SetField(level, "basePart", basePart);
         SetField(level, "middlePart", middlePart);
-        SetField(level, "armsPart", armsPart);
+        SetField(level, "armLeft", armLeft);
+        SetField(level, "armRight", armRight);
         SetField(level, "headPart", headPart);
         SetField(level, "hatPart", hatPart);
         SetArray(level, "bodyRenderers", bodies.ToArray());
         SetField(level, "blush", blush);
         SetField(level, "puddle", puddle);
         SetField(level, "bubble", bubble);
+        var dripsGo = new GameObject("Drips");
+        dripsGo.transform.SetParent(snowman, false);
+        dripsGo.transform.localPosition = new Vector3(0, DoodleSprites.SnowHeadPivot, 0);
+        SmokeEmitter drips = dripsGo.AddComponent<SmokeEmitter>();
+        drips.puffSprite = sprites["sweat"];
+        drips.puffsPerSecond = 9f;
+        drips.life = 0.9f;
+        drips.riseSpeed = -1.8f;   // gocce che cadono
+        drips.spread = 1.0f;
+        drips.sideDrift = 0.3f;
+        drips.startScale = 1.1f;
+        drips.growth = -0.3f;
+        drips.spinRange = 0f;
+        drips.tint = new Color(0.8f, 0.93f, 1f, 0.95f);
+        drips.sortingOrder = 9;
+        SetField(level, "drips", drips);
         SetField(level, "smoke", smoke);
         SetField(level, "mouthPen", drawer);
         SetFloat(level, "middlePivot", DoodleSprites.SnowMiddlePivot);
@@ -1132,6 +1172,297 @@ public static class GotchaProjectBuilder
         return SavePrefab(root, LevelDir + "/Wasp/Level_Wasp.prefab");
     }
 
+    // ---------- Livello 11: la chiave nel quadro ----------
+
+    static GameObject BuildKeyPaintingLevel(GameObject keyPrefab, GameObject doorPrefab)
+    {
+        var root = new GameObject("Level_ArtTheft");
+        root.AddComponent<KeyDoorLevel>();
+        Art(root.transform, "Room", "room_bg", -20, false);
+        GameObject door = Instance(doorPrefab, root.transform, new Vector2(0.45f, -0.75f));
+        door.name = "Door";
+        Art(root.transform, "Painting", "key_painting", 2, true, new Vector2(-1.7f, 2.25f));
+        // la chiave è appesa al chiodo del quadro, piccola e a testa in su
+        GameObject key = Instance(keyPrefab, root.transform, new Vector2(-1.7f, 2.12f));
+        key.transform.localScale = Vector3.one * 0.45f;
+        key.transform.localRotation = Quaternion.Euler(0, 0, -90f);
+        return SavePrefab(root, LevelDir + "/ArtTheft/Level_ArtTheft.prefab");
+    }
+
+    // ---------- Livello 12: proteggi il gatto dalla vespa ----------
+
+    static GameObject BuildDefendLevel()
+    {
+        var root = new GameObject("Level_Defend");
+        DefendLevel level = root.AddComponent<DefendLevel>();
+        AudioSource buzz = root.AddComponent<AudioSource>();
+        buzz.playOnAwake = false;
+        Art(root.transform, "Room", "night_bg", -20, false);
+
+        var cat = new GameObject("Cat").transform;
+        cat.SetParent(root.transform, false);
+        cat.localPosition = new Vector3(0.3f, -2.75f, 0);
+        cat.localScale = Vector3.one * 1.2f;
+        Transform catArt = Art(cat, "Art", "cat", 2);
+        Pulse breathe = catArt.gameObject.AddComponent<Pulse>();
+        breathe.amount = 0.025f;
+        breathe.speed = 2.2f;
+        GameObject eyes = Art(cat, "EyesOpen", "cat_eyes", 3, false).gameObject;
+        GameObject alert = Art(cat, "Alert", "alert", 4, true, new Vector2(-0.7f, 1.05f)).gameObject;
+        var zzzGo = new GameObject("Zzz");
+        zzzGo.transform.SetParent(cat, false);
+        zzzGo.transform.localPosition = new Vector3(-0.35f, 0.75f, 0);
+        SmokeEmitter zzz = zzzGo.AddComponent<SmokeEmitter>();
+        zzz.puffSprite = sprites["zzz"];
+        zzz.puffsPerSecond = 1.3f;
+        zzz.life = 2.2f;
+        zzz.riseSpeed = 0.45f;
+        zzz.startScale = 0.7f;
+        zzz.spread = 0.1f;
+        zzz.spinRange = 12f;
+        zzz.growth = 0.9f;
+        zzz.sideDrift = 0.15f;
+        zzz.tint = Color.white;
+
+        var wasp = new GameObject("Wasp").transform;
+        wasp.SetParent(root.transform, false);
+        wasp.localPosition = new Vector3(-1.2f, 2.8f, 0);
+        SpriteRenderer body = Art(wasp, "Body", "wasp", 12).GetComponent<SpriteRenderer>();
+        foreach (var w in new[] { new { x = -0.02f, order = 11, rot = 15f }, new { x = 0.08f, order = 13, rot = -10f } })
+        {
+            Transform wing = Art(wasp, "Wing", "wasp_wing", w.order, false, new Vector2(w.x, 0.12f));
+            wing.localRotation = Quaternion.Euler(0, 0, w.rot);
+            wing.gameObject.AddComponent<WingFlap>();
+        }
+
+        // area dove si disegnano le barriere (tutto lo schermo di gioco)
+        var penGo = new GameObject("Pen");
+        penGo.transform.SetParent(root.transform, false);
+        BoxCollider2D area = penGo.AddComponent<BoxCollider2D>();
+        area.isTrigger = true;
+        area.size = new Vector2(6f, 7.4f);
+        area.offset = new Vector2(0, -0.2f);
+        StrokeDrawer pen = penGo.AddComponent<StrokeDrawer>();
+        pen.singleStroke = false;
+        pen.maxStrokes = 3;
+        pen.minLength = 0.3f;
+        pen.addCollider = true;
+        pen.colliderRadius = 0.07f;
+        pen.sortingOrder = 8;
+        pen.material = StrokeMaterial();
+        pen.layers = new[]
+        {
+            new StrokeDrawer.Layer { color = InkColor, width = 0.15f, offset = Vector2.zero },
+            new StrokeDrawer.Layer { color = new Color(1f, 0.85f, 0.25f), width = 0.07f, offset = Vector2.zero },
+        };
+
+        TextMesh countdown = Label(root.transform, new Vector2(0, 3.3f), 30, "10", 0.11f);
+        countdown.color = new Color(1f, 0.93f, 0.75f);
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(0.9f, -0.9f));
+        bubble.transform.localScale = Vector3.one * 0.55f;
+
+        SetField(level, "wasp", wasp);
+        SetField(level, "waspBody", body);
+        SetField(level, "cat", cat);
+        SetField(level, "catEyesOpen", eyes);
+        SetField(level, "catAlert", alert);
+        SetField(level, "zzz", zzz);
+        SetField(level, "pen", pen);
+        SetField(level, "countdown", countdown);
+        SetField(level, "bubble", bubble);
+        SetField(level, "buzz", buzz);
+        return SavePrefab(root, LevelDir + "/Defend/Level_Defend.prefab");
+    }
+
+    // ---------- Livello 13: le due lampade ----------
+
+    static GameObject BuildLampsLevel()
+    {
+        var root = new GameObject("Level_Lamps");
+        LampsLevel level = root.AddComponent<LampsLevel>();
+        SpriteRenderer wall = Art(root.transform, "Wall", "plain", -20, false).GetComponent<SpriteRenderer>();
+        wall.transform.localScale = new Vector3(12f, 16f, 1f);
+        SpriteRenderer floor = Art(root.transform, "Floor", "plain", -19, false, new Vector2(0, -5.0f)).GetComponent<SpriteRenderer>();
+        floor.transform.localScale = new Vector3(12f, 4.6f, 1f);
+        floor.color = new Color(0.09f, 0.07f, 0.1f);
+
+        GameObject red = Lamp(root.transform, "RedLamp", new Vector2(-1.35f, 2.9f), new Color(1f, 0.25f, 0.25f));
+        GameObject blue = Lamp(root.transform, "BlueLamp", new Vector2(1.35f, 2.9f), new Color(0.3f, 0.45f, 1f));
+
+        TextMesh you = Label(root.transform, new Vector2(0, 0.95f), 3, "YOU", 0.16f);
+        TextMesh won = Label(root.transform, new Vector2(0, -0.55f), 3, "WON", 0.16f);
+
+        Transform redButton = HoldButton(root.transform, "RedButton", "big_button", new Vector2(-1.4f, -3.4f), out Collider2D redCol);
+        Transform blueButton = HoldButton(root.transform, "BlueButton", "blue_button", new Vector2(1.4f, -3.4f), out Collider2D blueCol);
+
+        SetField(level, "redButton", redCol);
+        SetField(level, "blueButton", blueCol);
+        SetField(level, "redVisual", redButton);
+        SetField(level, "blueVisual", blueButton);
+        SetField(level, "wall", wall);
+        SetField(level, "you", you);
+        SetField(level, "won", won);
+        SetField(level, "redLight", red);
+        SetField(level, "blueLight", blue);
+        return SavePrefab(root, LevelDir + "/Lamps/Level_Lamps.prefab");
+    }
+
+    /// <summary>Lampada appesa con la sua luce (cono + alone) che si accende e spegne; restituisce la luce.</summary>
+    static GameObject Lamp(Transform parent, string name, Vector2 bulb, Color color)
+    {
+        var lamp = new GameObject(name).transform;
+        lamp.SetParent(parent, false);
+        lamp.localPosition = bulb;
+        Art(lamp, "Art", "lamp", 6);
+        var light = new GameObject("Light");
+        light.transform.SetParent(lamp, false);
+        SpriteRenderer cone = Art(light.transform, "Cone", "light_cone", 5, false).GetComponent<SpriteRenderer>();
+        // sopra le scritte: schiarisce muro e inchiostro allo stesso modo, così la parola "invisibile" resta invisibile
+        cone.color = new Color(1f, 1f, 1f, 0.35f);
+        SpriteRenderer glow = Art(light.transform, "Glow", "glow", 7, false, new Vector2(0, -0.06f)).GetComponent<SpriteRenderer>();
+        glow.color = color;
+        glow.transform.localScale = Vector3.one * 1.3f;
+        light.SetActive(false);
+        return light;
+    }
+
+    // ---------- Livello 14: il biscotto nel barattolo ----------
+
+    static GameObject BuildCookieLevel()
+    {
+        var root = new GameObject("Level_Cookie");
+        CookieLevel level = root.AddComponent<CookieLevel>();
+        TiltGravity tilt = root.AddComponent<TiltGravity>();
+        tilt.strength = 22f;
+        tilt.response = 0.6f;
+        Art(root.transform, "Kitchen", "kitchen_bg", -20, false);
+
+        // bordi della stanza (il biscotto non esce dallo schermo); il piano di lavoro è a y = -2
+        var bounds = new GameObject("Bounds");
+        bounds.transform.SetParent(root.transform, false);
+        EdgeCollider2D edge = bounds.AddComponent<EdgeCollider2D>();
+        edge.points = new[] { new Vector2(-2.8f, -1.94f), new Vector2(2.8f, -1.94f), new Vector2(2.8f, 3.6f), new Vector2(-2.8f, 3.6f), new Vector2(-2.8f, -1.94f) };
+
+        // mensola e barattolo aperto in alto
+        var shelf = new GameObject("Shelf");
+        shelf.transform.SetParent(root.transform, false);
+        shelf.transform.localPosition = new Vector3(-1.45f, -0.78f, 0);
+        SpriteRenderer plank = Art(shelf.transform, "Art", "plain", 3, false).GetComponent<SpriteRenderer>();
+        plank.transform.localScale = new Vector3(1.9f, 0.16f, 1f);
+        plank.color = new Color(0.66f, 0.42f, 0.25f);
+        shelf.AddComponent<BoxCollider2D>().size = new Vector2(1.9f, 0.16f);
+
+        var jar = new GameObject("Jar");
+        jar.transform.SetParent(root.transform, false);
+        jar.transform.localPosition = new Vector3(-1.45f, 0.0f, 0);
+        Art(jar.transform, "Art", "jar", 6);
+        EdgeCollider2D glass = jar.AddComponent<EdgeCollider2D>();
+        glass.points = new[] { new Vector2(-0.56f, 0.62f), new Vector2(-0.56f, -0.66f), new Vector2(0.56f, -0.66f), new Vector2(0.56f, 0.62f) };
+        glass.edgeRadius = 0.06f;
+
+        var cookieGo = new GameObject("Cookie");
+        cookieGo.transform.SetParent(root.transform, false);
+        cookieGo.transform.localPosition = new Vector3(-1.45f, -0.3f, 0);
+        Art(cookieGo.transform, "Art", "cookie", 5);
+        cookieGo.AddComponent<CircleCollider2D>().radius = 0.22f;
+        Rigidbody2D cookie = cookieGo.AddComponent<Rigidbody2D>();
+        cookie.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        cookie.interpolation = RigidbodyInterpolation2D.Interpolate;
+        cookie.sleepMode = RigidbodySleepMode2D.NeverSleep;
+        cookie.sharedMaterial = BallPhysics();
+
+        var mouse = new GameObject("Mouse").transform;
+        mouse.SetParent(root.transform, false);
+        mouse.localPosition = new Vector3(1.7f, -1.5f, 0);
+        Art(mouse, "Art", "mouse", 4);
+        var heartsGo = new GameObject("Hearts");
+        heartsGo.transform.SetParent(mouse, false);
+        heartsGo.transform.localPosition = new Vector3(0, 0.6f, 0);
+        SmokeEmitter hearts = heartsGo.AddComponent<SmokeEmitter>();
+        hearts.puffSprite = sprites["heart"];
+        hearts.puffsPerSecond = 5f;
+        hearts.life = 1.2f;
+        hearts.riseSpeed = 0.9f;
+        hearts.startScale = 0.7f;
+        hearts.spread = 0.4f;
+        hearts.spinRange = 30f;
+        hearts.growth = 0.4f;
+        hearts.tint = Color.white;
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(1.75f, -0.15f));
+        bubble.transform.localScale = Vector3.one * 0.45f;
+
+        SetField(level, "cookie", cookie);
+        SetField(level, "mouse", mouse);
+        SetField(level, "hearts", hearts);
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/Cookie/Level_Cookie.prefab");
+    }
+
+    // ---------- Livello 15: spegni le candeline soffiando ----------
+
+    static GameObject BuildBirthdayLevel()
+    {
+        var root = new GameObject("Level_Birthday");
+        BirthdayLevel level = root.AddComponent<BirthdayLevel>();
+        Art(root.transform, "Party", "party_bg", -20, false);
+
+        var cake = new GameObject("Cake").transform;
+        cake.SetParent(root.transform, false);
+        cake.localPosition = new Vector3(0, -1.4f, 0);
+        Art(cake, "Art", "cake", 3);
+        var flames = new List<Transform>();
+        foreach (float x in new[] { -0.56f, -0.28f, 0f, 0.28f, 0.56f })
+        {
+            Art(cake, "Candle", "candle", 4, true, new Vector2(x, 0.6f));
+            var flame = new GameObject("Flame").transform;
+            flame.SetParent(cake, false);
+            flame.localPosition = new Vector3(x, 1.18f, 0);
+            Art(flame, "Art", "flame", 5, false);
+            flames.Add(flame);
+        }
+
+        var smokeGo = new GameObject("Smoke");
+        smokeGo.transform.SetParent(root.transform, false);
+        SmokeEmitter smoke = smokeGo.AddComponent<SmokeEmitter>();
+        smoke.puffSprite = sprites["puff"];
+        smoke.puffsPerSecond = 16f;
+        smoke.life = 1.2f;
+        smoke.riseSpeed = 0.8f;
+        smoke.spread = 0.05f;
+        smoke.startScale = 0.3f;
+        smoke.sideDrift = 0.1f;
+        smoke.tint = new Color(0.75f, 0.75f, 0.8f, 0.85f);
+
+        var confetti = new List<SmokeEmitter>();
+        foreach (Color c in new[] { new Color(1f, 0.36f, 0.54f), new Color(1f, 0.82f, 0.35f), new Color(0.43f, 0.78f, 1f), new Color(0.5f, 0.83f, 0.42f) })
+        {
+            var go = new GameObject("Confetti");
+            go.transform.SetParent(root.transform, false);
+            go.transform.localPosition = new Vector3(0, 3.6f, 0);
+            SmokeEmitter e = go.AddComponent<SmokeEmitter>();
+            e.puffSprite = sprites["confetti"];
+            e.puffsPerSecond = 22f;
+            e.life = 2.4f;
+            e.riseSpeed = -1.6f;
+            e.spread = 2.8f;
+            e.sideDrift = 0.6f;
+            e.startScale = 1.4f;
+            e.growth = 0f;
+            e.spinRange = 300f;
+            e.tint = c;
+            e.sortingOrder = 50;
+            confetti.Add(e);
+        }
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(0.6f, 1.4f));
+        bubble.transform.localScale = Vector3.one * 0.6f;
+
+        SetArray(level, "flames", flames.ToArray());
+        SetField(level, "smoke", smoke);
+        SetArray(level, "confetti", confetti.ToArray());
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/Birthday/Level_Birthday.prefab");
+    }
+
     static TapButton BombButton(Transform parent, string name, string sprite, Vector2 pos, out Transform wireStart)
     {
         var go = new GameObject(name);
@@ -1181,8 +1512,15 @@ public static class GotchaProjectBuilder
 
     // ---------- Impostazioni Android ----------
 
+    const string CustomIconPath = "Assets/Art/Icon/AppIcon.png";
+
     static void ConfigurePlayer()
     {
+        // Icona: se c'è il logo originale in Assets/Art/Icon/AppIcon.png si usa quello, altrimenti la versione disegnata
+        Texture2D icon = AssetDatabase.LoadAssetAtPath<Texture2D>(CustomIconPath);
+        if (icon == null && sprites.TryGetValue("app_icon", out Sprite drawn)) icon = drawn.texture;
+        if (icon != null) PlayerSettings.SetIconsForTargetGroup(BuildTargetGroup.Unknown, new[] { icon });
+
         PlayerSettings.productName = "Gotcha!";
         PlayerSettings.companyName = "Gotcha";
         PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "com.gotcha.game");
