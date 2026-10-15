@@ -41,7 +41,7 @@ namespace Gotcha.Levels
             if (pumpHandle != null) handleHome = pumpHandle.localPosition;
             if (pump != null) pump.Pressed += OnPump;
             if (boom != null) boom.SetActive(false);
-            if (SensorHub.Instance != null) SensorHub.Instance.EnableMic();
+            if (SensorHub.Instance != null) SensorHub.Instance.UseMic(this);
             sfx = gameObject.AddComponent<AudioSource>();
             Apply();
             if (bubble != null) { bubble.Show("Up to the dotted line!"); StartCoroutine(HideLater(2f)); }
@@ -50,7 +50,7 @@ namespace Gotcha.Levels
         void OnDestroy()
         {
             if (pump != null) pump.Pressed -= OnPump;
-            if (SensorHub.Instance != null) SensorHub.Instance.DisableMic();
+            if (SensorHub.Instance != null) SensorHub.Instance.ReleaseMic(this);
         }
 
         void OnPump(TapButton b)

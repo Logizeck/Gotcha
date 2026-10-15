@@ -36,7 +36,7 @@ namespace Gotcha.Levels
         public override void OnLevelStart()
         {
             cam = Camera.main;
-            if (SensorHub.Instance != null) SensorHub.Instance.EnableMic();
+            if (SensorHub.Instance != null) SensorHub.Instance.UseMic(this);
             if (stick != null) stickHome = stick.position;
             flame.gameObject.SetActive(false);
             if (glow != null) glow.color = new Color(1f, 0.6f, 0.2f, 0f);
@@ -45,7 +45,7 @@ namespace Gotcha.Levels
             if (bubble != null) { bubble.Show("Brrr... so cold!"); StartCoroutine(HideLater(1.8f)); }
         }
 
-        void OnDestroy() { if (SensorHub.Instance != null) SensorHub.Instance.DisableMic(); }
+        void OnDestroy() { if (SensorHub.Instance != null) SensorHub.Instance.ReleaseMic(this); }
 
         void Update()
         {

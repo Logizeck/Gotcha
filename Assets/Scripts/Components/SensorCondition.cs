@@ -28,18 +28,18 @@ namespace Gotcha.Components
         void OnEnable()
         {
             armed = !armOnlyAfterUnmet;
-            if (channel == SensorChannel.MicLevel && SensorHub.Instance != null) SensorHub.Instance.EnableMic();
+            if (channel == SensorChannel.MicLevel && SensorHub.Instance != null) SensorHub.Instance.UseMic(this);
         }
 
         void OnDisable()
         {
-            if (channel == SensorChannel.MicLevel && SensorHub.Instance != null) SensorHub.Instance.DisableMic();
+            if (channel == SensorChannel.MicLevel && SensorHub.Instance != null) SensorHub.Instance.ReleaseMic(this);
         }
 
         void Update()
         {
             if (done || SensorHub.Instance == null) return;
-            if (channel == SensorChannel.MicLevel) SensorHub.Instance.EnableMic();
+            if (channel == SensorChannel.MicLevel) SensorHub.Instance.UseMic(this);
 
             float v = SensorHub.Instance.Read(channel);
             bool ok = comparison == Comparison.Above ? v > threshold : v < threshold;

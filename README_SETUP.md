@@ -199,6 +199,7 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
   evolve in un robot da battaglia giapponese (V dorata, spada laser) che ringrazia "ARIGATO, MASTER!". Il livello è
   superato E l'Easter egg viene contato; la scena è registrata e si può condividere (SHARE VIDEO).
 - **22 Hot Soup**: soffia nel microfono per raffreddare la zuppa, POI trascinala al topolino. Editor: B.
+  Senza microfono si può anche fare vento col dito, sventolando sul vapore sopra la scodella.
   Easter egg `hot_soup`: se gliela dai bollente, il topo diventa rosso, fuma, prende fuoco e resta lo scheletrino
   con le X al posto degli occhi e la linguaccia (video da condividere).
 - **23 Frozen Key**: strofina il ghiaccio col dito, rimpicciolisci la chiave col pizzico, apri la porta.
@@ -242,7 +243,8 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Colonna sonora `Assets/Audio/Soundtrack.wav` ("Dolce Pizzicato") in loop. I livelli possono abbassarla solo
   finché esistono (`MusicPlayer.Duck/Unduck`): non può più restare muta per errore. Se la musica è accesa ma il
   telefono è a volume zero, il menu lo scrive ("MUSIC: ON (PHONE VOLUME 0)").
-- Il permesso del microfono viene chiesto all'avvio del gioco. (importata compressa Vorbis). Si spegne/accende dal MENU
+- Il permesso del microfono viene chiesto all'avvio del gioco. Il microfono è condiviso (`SensorHub.UseMic/ReleaseMic`):
+  resta acceso finché un livello lo usa, parte appena arriva il permesso e riparte se Android lo ferma. (importata compressa Vorbis). Si spegne/accende dal MENU
   (la scelta resta salvata). Durante la pubblicità la musica è in pausa.
 
 ## Regola pubblicità

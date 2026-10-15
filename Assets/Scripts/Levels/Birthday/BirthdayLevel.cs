@@ -27,13 +27,13 @@ namespace Gotcha.Levels
         {
             lit = flames.Length;
             if (bubble != null) bubble.Hide();
-            if (SensorHub.Instance != null) SensorHub.Instance.EnableMic();
+            if (SensorHub.Instance != null) SensorHub.Instance.UseMic(this);
             if (confetti != null) foreach (SmokeEmitter c in confetti) if (c != null) c.Stop();
         }
 
         void OnDestroy()
         {
-            if (SensorHub.Instance != null) SensorHub.Instance.DisableMic();
+            if (SensorHub.Instance != null) SensorHub.Instance.ReleaseMic(this);
         }
 
         void Update()
@@ -42,7 +42,7 @@ namespace Gotcha.Levels
             float level = 0f;
             if (SensorHub.Instance != null)
             {
-                SensorHub.Instance.EnableMic();   // idempotente: aspetta il permesso
+                SensorHub.Instance.UseMic(this);
                 level = SensorHub.Instance.MicLevel01;
             }
 #if UNITY_EDITOR

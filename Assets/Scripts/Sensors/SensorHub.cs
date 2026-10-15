@@ -84,6 +84,9 @@ namespace Gotcha.Sensors
             if (Input.GetKey(KeyCode.Minus) || Input.GetKey(KeyCode.KeypadMinus)) editorVolume = Mathf.Max(0f, editorVolume - 0.6f * Time.unscaledDeltaTime);
             if (Input.GetKey(KeyCode.Equals) || Input.GetKey(KeyCode.KeypadPlus)) editorVolume = Mathf.Min(1f, editorVolume + 0.6f * Time.unscaledDeltaTime);
 #endif
+            micPoll -= Time.unscaledDeltaTime;
+            if (micPoll <= 0f) { micPoll = 0.3f; UpdateMic(); }
+
             volumeTimer -= Time.unscaledDeltaTime;
             if (volumeTimer <= 0f)
             {
@@ -184,15 +187,45 @@ namespace Gotcha.Sensors
 
         // ---------- Microfono ----------
 
-        /// <summary>Idempotente: può essere richiamato ogni frame finché il permesso non arriva.</summary>
-        public void EnableMic()
+        // Il microfono è condiviso: ogni livello che lo usa si "iscrive" con UseMic(this) e si cancella con
+        // ReleaseMic(this). Resta acceso finché c'è almeno un iscritto ancora vivo (chi viene distrutto decade da
+        // solo), parte appena arriva il permesso e riparte se Android lo ferma (es. app in background).
+        // Così il livello nuovo non perde il microfono quando quello vecchio viene distrutto subito dopo.
+        readonly System.Collections.Generic.List<Object> micUsers = new System.Collections.Generic.List<Object>();
+        float micPoll;
+
+        public void UseMic(Object owner)
         {
-            if (micClip != null) return;
+            if (owner == null || micUsers.Contains(owner)) return;
+            micUsers.Add(owner);
+            micPermissionAsked = false;   // un livello col microfono: se il permesso manca, lo si richiede
+            UpdateMic();
+        }
+
+        public void ReleaseMic(Object owner)
+        {
+            micUsers.Remove(owner);
+            UpdateMic();
+        }
+
+        /// <summary>True se il microfono sta registrando davvero.</summary>
+        public bool MicActive => micClip != null;
+
+        void UpdateMic()
+        {
+            micUsers.RemoveAll(o => o == null);
+            if (micUsers.Count == 0) { StopMic(); return; }
+            if (micClip != null && !Microphone.IsRecording(null)) micClip = null;   // fermato dal sistema: si riparte
+            if (micClip == null) StartMic();
+        }
+
+        void StartMic()
+        {
 #if UNITY_ANDROID && !UNITY_EDITOR
             string perm = UnityEngine.Android.Permission.Microphone;
             if (!UnityEngine.Android.Permission.HasUserAuthorizedPermission(perm))
             {
-                RequestMicPermission();   // di norma già chiesto all'avvio: qui non ricompare
+                RequestMicPermission();   // di norma già chiesto all'avvio; si riprova finché non arriva
                 return;
             }
 #endif
@@ -200,7 +233,7 @@ namespace Gotcha.Sensors
             micClip = Microphone.Start(null, true, 1, MicRate);
         }
 
-        public void DisableMic()
+        void StopMic()
         {
             if (micClip == null) return;
             Microphone.End(null);
@@ -240,6 +273,6 @@ namespace Gotcha.Sensors
             }
         }
 
-        void OnDestroy() { if (Instance == this) DisableMic(); }
+        void OnDestroy() { if (Instance == this) StopMic(); }
     }
 }

@@ -34,12 +34,18 @@ namespace Gotcha.Levels
         [SerializeField] string eggId = "hot_soup";
 
         float temp = 1f;
+        [SerializeField] float fanDistance = 14f;    // quanto "sventolare" col dito per raffreddarla del tutto
+        bool fanning, fanHint;
+        Vector2 lastFan;
+        float quietFor;
+        Camera cam;
         Vector3 bowlHome;
         bool done, busy;
 
         public override void OnLevelStart()
         {
-            if (SensorHub.Instance != null) SensorHub.Instance.EnableMic();
+            cam = Camera.main;
+            if (SensorHub.Instance != null) SensorHub.Instance.UseMic(this);
             bowlHome = bowl.transform.position;
             bowl.Dropped += OnDropped;
             if (steam != null) steam.Play();
@@ -56,7 +62,7 @@ namespace Gotcha.Levels
         {
             if (bowl != null) bowl.Dropped -= OnDropped;
             if (ClipRecorder.Instance != null && ClipRecorder.Instance.IsCapturing) ClipRecorder.Instance.Discard();
-            if (SensorHub.Instance != null) SensorHub.Instance.DisableMic();
+            if (SensorHub.Instance != null) SensorHub.Instance.ReleaseMic(this);
         }
 
         void Update()
@@ -67,6 +73,20 @@ namespace Gotcha.Levels
             if (Input.GetKey(KeyCode.B)) level = 1f;
 #endif
             if (level > blowThreshold) temp = Mathf.Max(0f, temp - Time.deltaTime / blowSeconds);
+
+            // senza microfono (permesso negato, telefono senza mic...) si può anche fare vento col dito sul vapore
+            if (Draggable2D.Active == null && PointerInput.TryGetPrimary(out Vector2 sp, out bool began, out bool ended) && !ended)
+            {
+                Vector2 w = PointerInput.ToWorld(cam, sp);
+                Vector2 b = bowl.transform.position;
+                bool overSteam = Mathf.Abs(w.x - b.x) < 1.1f && w.y > b.y + 0.45f && w.y < b.y + 2.3f;
+                if (overSteam && fanning && !began) temp = Mathf.Max(0f, temp - Vector2.Distance(w, lastFan) / fanDistance);
+                fanning = overSteam;
+                lastFan = w;
+            }
+            else fanning = false;
+            quietFor = level > 0.02f ? 0f : quietFor + Time.deltaTime;
+            if (!fanHint && quietFor > 7f && temp > cool && bubble != null) { fanHint = true; bubble.Show("No breath? Fan it with your finger!"); StartCoroutine(HideLater(2.2f)); }
             if (steam != null)
             {
                 steam.puffsPerSecond = Mathf.Lerp(0.5f, 9f, temp);
