@@ -31,7 +31,7 @@ public static class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 24;
+    const int BuilderVersion = 25;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -197,6 +197,7 @@ public static class GotchaProjectBuilder
                 BuildCopycatLevel()),
         };
         levels.AddRange(VariantLevels());   // 41-60: dopo i livelli originali, i cui prefab servono da base
+        levels.AddRange(VariantLevels2());  // 61-100
 
         LevelCatalog catalog = LoadOrCreate<LevelCatalog>(LevelDir + "/LevelCatalog.asset");
         catalog.levels = levels;
@@ -3611,11 +3612,11 @@ public static class GotchaProjectBuilder
                 "Same old tilt... the star is right in the middle.",
                 BuildMaze2Level()),
             Define("Pancake2", "pancake_tower", "PANCAKE TOWER",
-                "Five flips this time. Steady wrist!",
+                "Four flips this time. Steady wrist!",
                 Variant("Pancake", "Pancake2", go =>
                 {
-                    Tune(Level(go), "flipsNeeded", 5);
-                    Ref<TextMesh>(Level(go), "counter").text = "0 / 5";
+                    Tune(Level(go), "flipsNeeded", 4);
+                    Ref<TextMesh>(Level(go), "counter").text = "0 / 4";
                 })),
             Define("Shell2", "shell_shock", "SHELL SHOCK",
                 "Faster hands, more swaps. Watch the tail!",
@@ -3753,24 +3754,9 @@ public static class GotchaProjectBuilder
         };
     }
 
-    /// <summary>Tabellone 2: labirinto a griglia senza trappole, stella al centro.</summary>
     static GameObject BuildMaze2Level()
     {
-        var root = new GameObject("Level_Maze2");
-        MazeLevel level = root.AddComponent<MazeLevel>();
-        TiltGravity tilt = root.AddComponent<TiltGravity>();
-        tilt.strength = 34f;
-        tilt.response = 0.5f;
-        Art(root.transform, "Night", "maze_bg", -20, false);
-        var maze = new GameObject("Maze").transform;
-        maze.SetParent(root.transform, false);
-        maze.localPosition = new Vector3(0, -0.4f, 0);
-        Art(maze, "Neon", "maze_2", 5, false);
-        SegWalls(maze, DoodleSprites.Maze2);
-        MazeGoal(maze, Vector2.zero);
-        Rigidbody2D ball = MazeBall(maze, new Vector2(-2.2f, -3.0f));
-        SetField(level, "ball", ball);
-        return SavePrefab(root, LevelDir + "/Maze2/Level_Maze2.prefab");
+        return BuildGridMaze("Maze2", "maze_2", DoodleSprites.Maze2, new Vector2(-2.2f, -3.0f), Vector2.zero);
     }
 
     /// <summary>Copia un livello già costruito e ne cambia qualche parametro (stessa meccanica, nuova sfida).</summary>
@@ -3809,6 +3795,202 @@ public static class GotchaProjectBuilder
                 break;
         }
         so.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    // ---------- Livelli 61-100: terza ondata di varianti ----------
+
+    static List<LevelDefinition> VariantLevels2()
+    {
+        Vector2 Cell(int c, int r) => new Vector2(-2.2f + c * 1.1f, -3.0f + r);
+        LevelDefinition Trap(string n, string id, string title, string hint, DoodleSprites.MazeSeg[] segs, float[] pits, float[] lasers) =>
+            Define(n, id, title, hint, BuildTrapMazeLevel(n, "maze_" + n.ToLowerInvariant(), segs, pits, lasers, Cell(4, 6)));
+        LevelDefinition Dark(string n, string id, string title, string hint, DoodleSprites.MazeSeg[] segs, DoodleSprites.MazeSeg gate, float[] spots) =>
+            Define(n, id, title, hint, BuildDarkMazeLevel(n, "maze_" + n.ToLowerInvariant(), segs, gate, new Vector2(spots[0], spots[1]), new Vector2(spots[2], spots[3])));
+        LevelDefinition Sting(string n, string id, string title, string hint, DoodleSprites.MazeSeg[] segs, Vector2 goal, Vector2 wasp, float speed) =>
+            Define(n, id, title, hint, BuildWaspMazeLevel(n, "maze_" + n.ToLowerInvariant(), segs, goal, Cell(0, 0), wasp, speed));
+        LevelDefinition Tilt(string n, string id, string title, string hint, DoodleSprites.MazeSeg[] segs, Vector2 ball, Vector2 goal) =>
+            Define(n, id, title, hint, BuildGridMaze(n, "maze_" + n.ToLowerInvariant(), segs, ball, goal));
+
+        return new List<LevelDefinition>
+        {
+            Tilt("Maze3", "corner_star", "CORNER STAR", "All the way to the top right corner.", DoodleSprites.Maze3, Cell(0, 0), Cell(4, 6)),
+            Define("Idle2", "long_nap", "LONG NAP",
+                "Feed the cat... then let it sleep a LOT longer. Don't touch, don't move.",
+                Variant("Idle", "Idle2", go => go.GetComponentInChildren<IdleTimer>(true).seconds = 10f)),
+            Define("Bomb2", "short_fuse", "SHORT FUSE",
+                "Same bomb, half the time. Think fast!",
+                Variant("Bomb", "Bomb2", go => Tune(Level(go), "seconds", 6f))),
+            Define("Copycat3", "copycat_maestro", "COPYCAT MAESTRO",
+                "Five, six, seven notes. Hum along!",
+                Variant("Copycat", "Copycat3", go =>
+                {
+                    Tune(Level(go), "roundLengths", new[] { 5, 6, 7 });
+                    Tune(Level(go), "noteSeconds", 0.3f);
+                })),
+            Trap("TrapMaze3", "trap_maze_3", "TRAP MAZE 3", "Two lasers this time. Patience pays.", DoodleSprites.TrapMaze3, DoodleSprites.TrapMaze3Pits, DoodleSprites.TrapMaze3Lasers),
+            Define("Hold2", "hold_tight", "HOLD TIGHT",
+                "Both buttons, twice as long.",
+                Variant("Hold", "Hold2", go => Tune(Level(go), "seconds", 9f))),
+            Define("Cookie3", "sticky_cookie", "STICKY COOKIE",
+                "This cookie is gooey: it barely rolls. Tilt harder!",
+                Variant("Cookie", "Cookie3", go =>
+                {
+                    Tune(Level(go), "rollingDrag", 2.6f);
+                    Tune(Level(go), "airDrag", 0.6f);
+                })),
+            Define("Morse2", "fast_beeps", "FAST BEEPS",
+                "The radio speaks faster now. Listen again if you need.",
+                Variant("Morse", "Morse2", go =>
+                {
+                    Tune(Level(go), "dotSeconds", 0.09f);
+                    Tune(Level(go), "dashSeconds", 0.3f);
+                    Tune(Level(go), "gapSeconds", 0.1f);
+                })),
+            Dark("DarkMaze3", "pitch_black", "PITCH BLACK", "The key hides in a dead end. Then find the gate.", DoodleSprites.DarkMaze3, DoodleSprites.DarkMaze3Gate, DoodleSprites.DarkMaze3Spots),
+            Define("Shell3", "shell_storm", "SHELL STORM",
+                "Twenty swaps, lightning fast.",
+                Variant("Shell", "Shell3", go =>
+                {
+                    Tune(Level(go), "swaps", 20);
+                    Tune(Level(go), "firstSwap", 0.36f);
+                    Tune(Level(go), "lastSwap", 0.15f);
+                })),
+            Define("Volume2", "total_silence", "TOTAL SILENCE",
+                "The neighbour wants REAL silence. Keep it at zero for a while.",
+                Variant("Volume", "Volume2", go => Tune(Level(go), "holdSeconds", 3f))),
+            Define("Defend3", "bodyguard_3", "BODYGUARD 3",
+                "Furious wasp, fifteen seconds. Three walls.",
+                Variant("Defend", "Defend3", go =>
+                {
+                    Tune(Level(go), "speed", 4.1f);
+                    Tune(Level(go), "survive", 15f);
+                })),
+            Sting("WaspMaze3", "wasp_hall", "WASP HALL", "It starts in the middle. Go around!", DoodleSprites.WaspMaze3, Cell(4, 6), Cell(2, 3), 2.0f),
+            Define("Bedtime2", "deep_sleep", "DEEP SLEEP",
+                "Dark, quiet... and wait twice as long.",
+                Variant("Bedtime", "Bedtime2", go => Tune(Level(go), "sleepAfter", 10f))),
+            Define("LampSafe3", "master_code", "MASTER CODE",
+                "Six digits. Maybe write them down?",
+                BuildLampSafeLevel("LampSafe3", 6)),
+            Define("Plant3", "thirsty_tree", "THIRSTY TREE",
+                "Up on the shelf, and it needs six drops.",
+                Variant("Plant2", "Plant3", go =>
+                {
+                    Tune(Level(go), "needed", 6);
+                    Ref<TextMesh>(Level(go), "counter").text = "0 / 6";
+                })),
+            Tilt("Maze4", "centre_spiral", "SPIRAL", "The star waits in the middle again.", DoodleSprites.Maze4, Cell(0, 0), Cell(2, 3)),
+            Define("Safe2", "heavy_safe", "HEAVY SAFE",
+                "The painting is stuck harder. Shake it longer!",
+                Variant("Safe", "Safe2", go => Tune(Level(go), "shakeNeeded", 1.8f))),
+            Define("Soup2", "scalding_soup", "SCALDING SOUP",
+                "Even hotter soup. Blow longer!",
+                Variant("Soup", "Soup2", go =>
+                {
+                    Tune(Level(go), "blowSeconds", 4f);
+                    Tune(Level(go), "fanDistance", 22f);
+                }), "hot_soup"),
+            Define("Balloon3", "giant_balloon", "GIANT BALLOON",
+                "Twenty pumps, four seconds of nerves.",
+                Variant("Balloon", "Balloon3", go =>
+                {
+                    Tune(Level(go), "pumpsNeeded", 20);
+                    Tune(Level(go), "waitSeconds", 4f);
+                })),
+            Trap("TrapMaze4", "trap_maze_4", "TRAP MAZE 4", "Longer road, more holes.", DoodleSprites.TrapMaze4, DoodleSprites.TrapMaze4Pits, DoodleSprites.TrapMaze4Lasers),
+            Define("SkyWire2", "quick_wire", "QUICK WIRE",
+                "Seven seconds. What colour is the sky right now?",
+                Variant("SkyWire", "SkyWire2", go => Tune(Level(go), "seconds", 7f))),
+            Define("Wasp3", "wasp_king", "WASP KING",
+                "The biggest, fastest wasp yet. Twenty hits!",
+                Variant("Wasp", "Wasp3", go =>
+                {
+                    Tune(Level(go), "hitsNeeded", 20);
+                    Tune(Level(go), "baseSpeed", 3.0f);
+                })),
+            Define("CatEyes3", "staring_contest", "STARING CONTEST",
+                "Tiny mouse, six seconds. Don't blink!",
+                Variant("CatEyes2", "CatEyes3", go => Tune(Level(go), "holdSeconds", 6f))),
+            Define("Sunny2", "heat_wave", "HEAT WAVE",
+                "Hotter sun, stronger wind, longer day.",
+                Variant("Sunny", "Sunny2", go =>
+                {
+                    Tune(Level(go), "heatSeconds", 5.5f);
+                    Tune(Level(go), "sunsetAfter", 18f);
+                    Tune(Level(go), "wind", 0.45f);
+                }), "sun_melt"),
+            Dark("DarkMaze4", "blackout", "BLACKOUT", "The exit is at the top, in the middle.", DoodleSprites.DarkMaze4, DoodleSprites.DarkMaze4Gate, DoodleSprites.DarkMaze4Spots),
+            Define("Runaway3", "alarm_marathon", "ALARM MARATHON",
+                "A sprinter button. Corner it!",
+                Variant("Runaway", "Runaway3", go =>
+                {
+                    Tune(Level(go), "speed", 3.5f);
+                    Tune(Level(go), "scareRadius", 1.6f);
+                })),
+            Define("Pizza2", "precise_pizza", "PRECISE PIZZA",
+                "The mice are picky: cut EXACTLY through the middle.",
+                Variant("Pizza", "Pizza2", go => Tune(Level(go), "centerTolerance", 0.2f))),
+            Define("FrozenKey3", "glacier", "GLACIER",
+                "Ice like a glacier. Rub until your finger is warm!",
+                Variant("FrozenKey", "FrozenKey3", go => Tune(Level(go), "rubNeeded", 45f))),
+            Tilt("Maze5", "upside_down", "UPSIDE DOWN", "Start on the right, finish top left.", DoodleSprites.Maze5, Cell(4, 0), Cell(0, 6)),
+            Define("Battery2", "long_crank", "LONG CRANK",
+                "A thirstier robot. Real charger... or a long crank.",
+                Variant("Battery", "Battery2", go =>
+                {
+                    Tune(Level(go), "turnsNeeded", 10f);
+                    Tune(Level(go), "chargeSeconds", 4f);
+                }), "mecha_robot"),
+            Define("AppleCatch3", "apple_storm", "APPLE STORM",
+                "Eight apples out of ten. Don't drop many!",
+                Variant("AppleCatch", "AppleCatch3", go =>
+                {
+                    Tune(Level(go), "needed", 8);
+                    Tune(Level(go), "gravity", 12f);
+                })),
+            Define("Birthday3", "windy_wish", "WINDY WISH",
+                "Seven candles, stubborn flames. Blow harder and longer.",
+                Variant("Birthday2", "Birthday3", go =>
+                {
+                    Tune(Level(go), "blowPerCandle", 0.32f);
+                    Tune(Level(go), "blowThreshold", 0.38f);
+                })),
+            Sting("WaspMaze4", "wasp_corner", "WASP CORNER", "The star is top left. The wasp is on the right.", DoodleSprites.WaspMaze4, Cell(0, 6), Cell(4, 4), 2.1f),
+            Define("MarbleRun3", "tiny_push", "TINY PUSH",
+                "A weak push only: build a smoother track.",
+                Variant("MarbleRun", "MarbleRun3", go => Tune(Level(go), "maxPush", 3.8f))),
+            Define("Campfire3", "storm_fire", "STORM FIRE",
+                "Soaked wood. Rub forever, blow like a feather.",
+                Variant("Campfire", "Campfire3", go =>
+                {
+                    Tune(Level(go), "strokesNeeded", 22);
+                    Tune(Level(go), "strongAbove", 0.5f);
+                })),
+            Trap("TrapMaze5", "trap_maze_5", "TRAP MAZE 5", "The longest trap maze. Slow and steady.", DoodleSprites.TrapMaze5, DoodleSprites.TrapMaze5Pits, DoodleSprites.TrapMaze5Lasers),
+            Dark("DarkMaze5", "lights_out", "LIGHTS OUT", "The exit is on the right side this time.", DoodleSprites.DarkMaze5, DoodleSprites.DarkMaze5Gate, DoodleSprites.DarkMaze5Spots),
+            Tilt("Maze6", "grand_maze", "GRAND MAZE", "The longest road of all.", DoodleSprites.Maze6, Cell(0, 0), Cell(4, 6)),
+            Sting("WaspMaze5", "wasp_finale", "WASP FINALE", "The last chase. The wasp guards the left side.", DoodleSprites.WaspMaze5, Cell(4, 6), Cell(0, 5), 2.2f),
+        };
+    }
+
+    /// <summary>Labirinto a griglia senza trappole (MazeLevel): partenza e stella in due celle qualsiasi.</summary>
+    static GameObject BuildGridMaze(string folder, string neon, DoodleSprites.MazeSeg[] segs, Vector2 ballAt, Vector2 goalAt)
+    {
+        var root = new GameObject("Level_" + folder);
+        MazeLevel level = root.AddComponent<MazeLevel>();
+        TiltGravity tilt = root.AddComponent<TiltGravity>();
+        tilt.strength = 34f;
+        tilt.response = 0.5f;
+        Art(root.transform, "Night", "maze_bg", -20, false);
+        var maze = new GameObject("Maze").transform;
+        maze.SetParent(root.transform, false);
+        maze.localPosition = new Vector3(0, -0.4f, 0);
+        Art(maze, "Neon", neon, 5, false);
+        SegWalls(maze, segs);
+        MazeGoal(maze, goalAt);
+        Rigidbody2D ball = MazeBall(maze, ballAt);
+        SetField(level, "ball", ball);
+        return SavePrefab(root, LevelDir + "/" + folder + "/Level_" + folder + ".prefab");
     }
 
     static TapButton BombButton(Transform parent, string name, string sprite, Vector2 pos, out Transform wireStart)

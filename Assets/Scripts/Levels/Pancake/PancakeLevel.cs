@@ -29,7 +29,9 @@ namespace Gotcha.Levels
         [SerializeField] float speedPerShake = 0.4f;
         [SerializeField] float shakeTrigger = 8f;
         [SerializeField] float panRange = 1.8f;
-        [SerializeField] float catchRadius = 0.75f;
+        [SerializeField] float catchRadius = 0.95f;
+        [SerializeField] float flipTolerance = 68f;   // gradi di tolleranza attorno al mezzo giro (più alto = più facile)
+        [SerializeField] float drift = 0.6f;          // deriva laterale massima del lancio
 
         enum State { Resting, Charging, Flying, Over }
         State state = State.Resting;
@@ -86,7 +88,7 @@ namespace Gotcha.Levels
             vy = Mathf.Clamp(strength * speedPerShake, 2.5f, 16f);
             float flight = 2f * vy / gravity;
             spin = 180f * (vy / idealSpeed) / flight;              // gradi al secondo: mezzo giro col lancio ideale
-            vx = Random.Range(-0.9f, 0.9f) / flight;                // un po' di deriva: va ripresa con la padella
+            vx = Random.Range(-drift, drift) / flight;                // un po' di deriva: va ripresa con la padella
             if (steam != null) steam.Stop();
         }
 
@@ -106,8 +108,8 @@ namespace Gotcha.Levels
         void Land()
         {
             float a = Mathf.Repeat(pancake.eulerAngles.z, 360f);
-            bool flipped = Mathf.Abs(Mathf.DeltaAngle(a, 180f)) < 50f;
-            bool flat = flipped || Mathf.Abs(Mathf.DeltaAngle(a, 0f)) < 50f;
+            bool flipped = Mathf.Abs(Mathf.DeltaAngle(a, 180f)) < flipTolerance;
+            bool flat = flipped || Mathf.Abs(Mathf.DeltaAngle(a, 0f)) < flipTolerance;
             pancake.rotation = Quaternion.identity;
             pancake.position = new Vector3(pancake.position.x, panY, pancake.position.z);
             state = State.Resting;

@@ -266,6 +266,12 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Livelli 61-100 e Pancake più facile (0.23)
+- 61-100: altri 13 labirinti a griglia (`DoodleSprites7.cs`, percorso verificato) e 27 varianti con parametri più
+  severi (`VariantLevels2`). Gli Easter egg delle varianti (zuppa, sole, robot) sono gli stessi dell'originale.
+- Pancake Flip più facile: tolleranza del mezzo giro da 50° a 68° (`flipTolerance`), padella più larga
+  (`catchRadius` 0.95), lancio meno storto (`drift` 0.6). Pancake Tower: 4 giri invece di 5.
+
 ## Livelli 41-60 (varianti)
 Costruiti dal builder copiando il prefab del livello originale e cambiandone i parametri (`Variant(...)` in
 `GotchaProjectBuilder.VariantLevels`), oppure con labirinti nuovi (`DoodleSprites6.cs`: griglia 5x7 generata una
