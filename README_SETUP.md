@@ -1,4 +1,4 @@
-# Gotcha! — v0.14 (vite, menu a pagine, nuovo scioglimento)
+# Gotcha! — v0.15 (miagolii, nuovo ordine dei livelli)
 
 La versione installata si legge nel MENU del gioco (accanto al conteggio degli Easter egg).
 
@@ -63,7 +63,56 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
   con softbox), ai bordi le pareti al neon che ha intorno (camera di riflesso), fresnel, due luci speculari,
   bordo di contatto scuro. Sotto c'è un'ombra morbida.
 
-## Livello 3 — Snowman
+## Livello 3 — Big Red Button
+- Il gatto è sveglio e miagola: ha fame. Bisogna prendere il pesce dal quadro e darglielo.
+- Dopo aver mangiato si addormenta: a quel punto vince chi aspetta 5 secondi senza toccare lo schermo e senza
+  muovere il telefono. Ogni tocco o scossone lo sveglia e fa ripartire l'attesa.
+  Il pulsantone rosso "PRESS ME" è solo un'esca.
+
+## Livello 4 — Slice It!
+- Taglia la mela col dito: il gesto deve entrare nella mela e uscire dall'altra parte (un taglio deciso).
+  La mela si divide in due metà orientate come il taglio, che cadono sul tagliere con qualche goccia di succo.
+
+## Livello 5 — Beep Beep
+- La radio suona a caso uno di cinque segnali: `...` (tre brevi), `---` (tre lunghi), `.--`, `-.-`, `.-.`.
+  Bisogna premere il tasto col disegno corrispondente. Toccando la radio il segnale si riascolta.
+- Tasto sbagliato: ronzio, tutto trema e GOTCHA! (si riprova con un nuovo segnale a caso).
+- La spia della radio si accende insieme ai toni (si gioca anche col telefono silenzioso); la musica si abbassa
+  mentre suonano i segnali. Toni generati da codice (sinusoide 760 Hz).
+
+## Livello 6 — Tick Tock
+- Pulsante blu e pulsante rosso, due cavi gialli intrecciati a treccia: si scambiano di lato più volte con incroci
+  netti (quasi perpendicolari) ma non corrono mai uno sopra l'altro per più di ~4 mm (ogni disposizione casuale
+  viene controllata e scartata se i cavi si sovrappongono troppo). Uno finisce libero (fili di rame sfilacciati,
+  all'altezza del timer), l'altro entra nel timer della dinamite. Il timer parte da 10 secondi.
+- Accanto al timer un tizio in camicia guarda il giocatore in preda al panico: trema e suda sempre di più man mano
+  che il tempo scende; se la bomba viene disinnescata tira un sospiro di sollievo.
+- Il pulsante collegato al timer lo ferma ("Phew!"). Quello sbagliato o il tempo scaduto: BOOM! e GOTCHA!
+  Ogni tentativo ridisegna i cavi e sceglie a caso quale pulsante è quello giusto.
+
+## Livello 7 — Shhh!
+- Lo stereo suona a tutto volume e il gatto (lo stesso del livello 4) è furioso: soffia, fuma dalle orecchie.
+- Si risolve abbassando al minimo il volume del telefono: man mano che scende il gatto passa da furioso ad
+  arrabbiato, seccato, assonnato; a volume zero si addormenta. Nell'Editor il volume si simula coi tasti - e +.
+- Se il volume è già a zero all'inizio bisogna prima alzarlo (la musica deve essere "sentita" almeno una volta).
+
+## Livello 8 — Hold On
+- Due pulsanti collegati a un timer da 5 secondi. Il conto alla rovescia parte solo se entrambi sono premuti
+  insieme (due dita; i cavi si illuminano). Se uno viene rilasciato prima della fine il timer torna a 5.
+  Nell'Editor il secondo dito si simula tenendo premuta la barra spaziatrice.
+
+## Livello 9 — Buzz Off
+- Una vespa furiosa svolazza a zig-zag e ogni pochi secondi si lancia contro lo schermo per pungere chi guarda:
+  diventa enorme, bagliore rosso ai bordi, "OUCH!" e schermo che trema.
+- Nell'erba c'è una paletta acchiappamosche: va raccolta con un tocco. A mani nude la vespa se la ride ("Ha-ha!").
+- Con la paletta ogni tocco la fa calare sul punto toccato (colpo con "splat"); l'area colpibile è più ampia
+  della vespa. Servono 10 colpi: a ogni colpo sbanda, lampeggia e accelera; al decimo cade a zampe all'aria.
+
+## Livello 10 — Art Theft
+- La chiave non è appesa: è dipinta nella natura morta sul tavolo, tra frutta, brocca e candela. Toccandola si
+  "stacca" dalla tela e diventa vera (nel quadro resta la sua impronta chiara); poi va nella serratura.
+
+## Livello 11 — Snowman
 - Pupazzo dalle sembianze umane (gambe tozze, fianchi, busto) con una testa enorme e buffa, in posa di 3/4
   (guarda a sinistra). Il sedere è solo accennato dalla curva dei fianchi sul retro.
 - Occhi (carboni) e naso (carota), più grandi del normale, restano attaccati dove li lasci sulla testa;
@@ -79,55 +128,6 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - La scena viene registrata e a fine livello compare **SHARE VIDEO**: crea un MP4 (salvato in Movies/Gotcha) e apre
   il menu di condivisione di Android. Solo su Android; nell'Editor i fotogrammi finiscono in `persistentDataPath/clip_frames`.
 - Zone, misure e punti d'appoggio sono regolabili dall'Inspector del prefab `Level_Snowman`.
-
-## Livello 4 — Big Red Button
-- Il gatto è sveglio e miagola: ha fame. Bisogna prendere il pesce dal quadro e darglielo.
-- Dopo aver mangiato si addormenta: a quel punto vince chi aspetta 5 secondi senza toccare lo schermo e senza
-  muovere il telefono. Ogni tocco o scossone lo sveglia e fa ripartire l'attesa.
-  Il pulsantone rosso "PRESS ME" è solo un'esca.
-
-## Livello 5 — Slice It!
-- Taglia la mela col dito: il gesto deve entrare nella mela e uscire dall'altra parte (un taglio deciso).
-  La mela si divide in due metà orientate come il taglio, che cadono sul tagliere con qualche goccia di succo.
-
-## Livello 6 — Beep Beep
-- La radio suona a caso uno di cinque segnali: `...` (tre brevi), `---` (tre lunghi), `.--`, `-.-`, `.-.`.
-  Bisogna premere il tasto col disegno corrispondente. Toccando la radio il segnale si riascolta.
-- Tasto sbagliato: ronzio, tutto trema e GOTCHA! (si riprova con un nuovo segnale a caso).
-- La spia della radio si accende insieme ai toni (si gioca anche col telefono silenzioso); la musica si abbassa
-  mentre suonano i segnali. Toni generati da codice (sinusoide 760 Hz).
-
-## Livello 7 — Tick Tock
-- Pulsante blu e pulsante rosso, due cavi gialli intrecciati a treccia: si scambiano di lato più volte con incroci
-  netti (quasi perpendicolari) ma non corrono mai uno sopra l'altro per più di ~4 mm (ogni disposizione casuale
-  viene controllata e scartata se i cavi si sovrappongono troppo). Uno finisce libero (fili di rame sfilacciati,
-  all'altezza del timer), l'altro entra nel timer della dinamite. Il timer parte da 10 secondi.
-- Accanto al timer un tizio in camicia guarda il giocatore in preda al panico: trema e suda sempre di più man mano
-  che il tempo scende; se la bomba viene disinnescata tira un sospiro di sollievo.
-- Il pulsante collegato al timer lo ferma ("Phew!"). Quello sbagliato o il tempo scaduto: BOOM! e GOTCHA!
-  Ogni tentativo ridisegna i cavi e sceglie a caso quale pulsante è quello giusto.
-
-## Livello 8 — Shhh!
-- Lo stereo suona a tutto volume e il gatto (lo stesso del livello 4) è furioso: soffia, fuma dalle orecchie.
-- Si risolve abbassando al minimo il volume del telefono: man mano che scende il gatto passa da furioso ad
-  arrabbiato, seccato, assonnato; a volume zero si addormenta. Nell'Editor il volume si simula coi tasti - e +.
-- Se il volume è già a zero all'inizio bisogna prima alzarlo (la musica deve essere "sentita" almeno una volta).
-
-## Livello 9 — Hold On
-- Due pulsanti collegati a un timer da 5 secondi. Il conto alla rovescia parte solo se entrambi sono premuti
-  insieme (due dita; i cavi si illuminano). Se uno viene rilasciato prima della fine il timer torna a 5.
-  Nell'Editor il secondo dito si simula tenendo premuta la barra spaziatrice.
-
-## Livello 10 — Buzz Off
-- Una vespa furiosa svolazza a zig-zag e ogni pochi secondi si lancia contro lo schermo per pungere chi guarda:
-  diventa enorme, bagliore rosso ai bordi, "OUCH!" e schermo che trema.
-- Nell'erba c'è una paletta acchiappamosche: va raccolta con un tocco. A mani nude la vespa se la ride ("Ha-ha!").
-- Con la paletta ogni tocco la fa calare sul punto toccato (colpo con "splat"); l'area colpibile è più ampia
-  della vespa. Servono 10 colpi: a ogni colpo sbanda, lampeggia e accelera; al decimo cade a zampe all'aria.
-
-## Livello 11 — Art Theft
-- Porta chiusa, ma la chiave è appesa dentro il quadro: si stacca dal quadro, si rimpicciolisce/allarga col
-  pizzico (come nel livello 1) e si infila nella serratura.
 
 ## Livello 12 — Bodyguard
 - Il gatto dorme e una vespa inferocita vuole pungerlo. Col dito si disegnano linee (massimo 3, la più vecchia
@@ -165,6 +165,10 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Trascina la tanica sul razzo, alza il coperchio di sicurezza, tieni premuto il pulsante per tutto il
   conto alla rovescia (se lo lasci: ABORT!). Editor: barra spaziatrice per tenere premuto.
 
+## Gatti che miagolano
+- Quando un gatto "parla" (livelli 3, 7, 12, 19) si sente il verso, sintetizzato da `Components/CatVoice`: miagolio,
+  soffio ("HISSS!"), fusa ("Purrr..."), trillo ("Mrr?"), sbadiglio ("Yaaawn..."). Si attiva con `catVoice` sul fumetto.
+
 ## Vite
 - 5 cuori pulsanti sotto la barra in alto (toccandoli si apre il pannello delle vite). Ogni fallimento costa una
   vita (gli Easter egg no: sono scoperte; si cambia con `easterEggCostsLife` su GameFlow).
@@ -182,7 +186,7 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
   Livelli bloccati in grigio, livello attuale in rosso, livelli con Easter egg in viola ("SECRET EGG" /
   "EGG FOUND!"). L'Easter egg di un livello si indica con `easterEggId` nel LevelDefinition.
 
-## Livelli col volume (8 e 19)
+## Livelli col volume (7 e 19)
 - Serve SEMPRE almeno una pressione del tasto "volume -" durante il livello: un telefono già a volume zero non
   risolve il livello da solo. Il tasto si intercetta con `Plugins/Android/GotchaKeys.java` (anche quando il volume è
   già al minimo e il valore non cambia); come riserva vale anche un calo del volume osservato. Editor: tasto "-".
@@ -195,7 +199,9 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - **23 Frozen Key**: strofina il ghiaccio col dito, rimpicciolisci la chiave col pizzico, apri la porta.
 - **24 Campfire**: strofina il bastoncino avanti e indietro per la scintilla, poi soffia PIANO (forte la spegne).
   Editor: B soffio leggero, N soffio forte.
-- **25 Chicken Button**: premi 5 volte un pulsante con le gambe che scappa; contro i muri è più lento.
+- **25 Wake-up Call**: la sveglia suona (bip sintetizzati) e il suo pulsante OFF è scappato con le gambette.
+  Disegna col dito fino a 4 staccionate per chiuderlo in un angolo (ci sbatte contro), poi premilo: torna sulla
+  sveglia e finalmente silenzio.
 - **26 Thirsty Plant**: fionda alla Angry Birds: tira indietro la goccia (lontano dal vaso), mira con la traiettoria
   a puntini e rilascia. 10 gocce, ne bastano 5 nel vaso.
 - **27 Shell Game**: segui la scatola col topolino.

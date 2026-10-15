@@ -428,5 +428,119 @@ namespace Gotcha.EditorArt
             foreach (float s in new[] { -1f, 1f }) p.Shape(Sd.Box(s * 0.3f, 1.2f, 0.09f, 0.05f, 0.02f), Rgba.Hex("E23B3B"), 0.025f);   // legature
             return new DoodleArt("slingshot", p);
         }
+
+        // ---------- Livello 10: la chiave è dipinta nel quadro ----------
+
+        /// <summary>Sagoma della chiave (come Key()) scalata, con la punta in (ox, oy) rivolta a destra.</summary>
+        static Sdf KeyShape(float k, float ox, float oy)
+        {
+            Sdf bow = Sd.Subtract(Sd.Circle(ox - 0.95f * k, oy, 0.32f * k), Sd.Circle(ox - 0.95f * k, oy, 0.12f * k));
+            return Sd.Union(bow,
+                Sd.Box(ox - 0.64f * k, oy, 0.05f * k, 0.13f * k, 0.03f * k),
+                Sd.Box(ox - 0.33f * k, oy, 0.33f * k, 0.075f * k, 0.07f * k),
+                Sd.Box(ox - 0.12f * k, oy - 0.13f * k, 0.05f * k, 0.08f * k, 0.02f * k),
+                Sd.Box(ox - 0.3f * k, oy - 0.12f * k, 0.05f * k, 0.065f * k, 0.02f * k));
+        }
+
+        /// <summary>Punta della chiave dipinta nella natura morta (coordinate del quadro) e sua scala.</summary>
+        public const float StillLifeKeyX = 0.62f, StillLifeKeyY = -0.42f, StillLifeKeyScale = 0.45f;
+
+        /// <summary>
+        /// Natura morta in cornice dorata (centro 0,0): tovaglia, fruttiera, brocca, candela... e una chiave sul tavolo,
+        /// dipinta con le stesse pennellate di tutto il resto. Senza chiave resta solo l'impronta più chiara.
+        /// </summary>
+        static DoodleArt StillLife(string name, bool withKey)
+        {
+            var p = new DoodlePainter(-1.2f, -0.98f, 1.2f, 1.25f, 120) { Ink = 0.045f };
+            p.InkLine(0.025f, -0.6f, 0.86f, 0f, 1.18f, 0.6f, 0.86f);
+            p.Shape(Sd.Circle(0, 1.18f, 0.045f), Steel, 0.02f);
+            Body(p, Sd.Box(0, 0, 1.1f, 0.86f, 0.06f), Gold, GoldShade);
+            Sdf canvas = Sd.Box(0, 0, 0.93f, 0.69f);
+            // fondo scuro e caldo da quadro antico, con pennellate
+            p.FillFunc(canvas, (x, y) =>
+            {
+                float n = Noise.Value(x * 6f, y * 6f) * 0.08f;
+                return Rgba.Lerp(Rgba.Hex("5A3A2E"), Rgba.Hex("2E1F1C"), Clamp((y + 0.2f) / 0.9f + n));
+            });
+            p.Hatch(canvas, Rgba.Hex("6B4A3A", 0.35f), 0.09f, 0.03f, 35f);
+            // tavolo con tovaglia
+            Sdf table = Sd.Intersect(canvas, Sd.Box(0, -0.5f, 1f, 0.22f));
+            p.FillFunc(table, (x, y) => Rgba.Lerp(Rgba.Hex("D9C8A6"), Rgba.Hex("B79E74"), Clamp((-0.3f - y) / 0.4f + Noise.Value(x * 9f, y * 9f) * 0.15f)));
+            p.Line(Rgba.Hex("A88B60", 0.8f), 0.015f, -0.93f, -0.3f, 0.93f, -0.3f);
+            // brocca
+            Body(p, Sd.Union(Sd.Ellipse(-0.6f, -0.08f, 0.2f, 0.25f), Sd.Box(-0.6f, 0.2f, 0.08f, 0.09f, 0.03f)), Rgba.Hex("4F7CA8"), Rgba.Hex("35587D"));
+            p.Shape(Sd.Subtract(Sd.Ellipse(-0.36f, -0.02f, 0.09f, 0.13f), Sd.Ellipse(-0.36f, -0.02f, 0.05f, 0.08f)), Rgba.Hex("35587D"), 0.02f);
+            // candela
+            p.Shape(Sd.Box(0.62f, -0.06f, 0.05f, 0.2f, 0.01f), Rgba.Hex("F2E6C9"), 0.02f);
+            p.Shape(Sd.Ellipse(0.62f, 0.2f, 0.035f, 0.06f), Rgba.Hex("FFC93C"), 0.015f);
+            p.FillFunc(Sd.Circle(0.62f, 0.2f, 0.22f), (x, y) =>
+                Rgba.Hex("FFD27A").WithAlpha(0.35f * Clamp(1f - (float)Math.Sqrt((x - 0.62f) * (x - 0.62f) + (y - 0.2f) * (y - 0.2f)) / 0.22f)));
+            // fruttiera con mele, pera e uva
+            foreach (float[] f in new[] { new[] { -0.13f, -0.08f, 0.13f }, new[] { 0.12f, -0.07f, 0.12f }, new[] { 0f, 0.07f, 0.12f } })
+                Body(p, Sd.Circle(f[0], f[1], f[2]), Rgba.Hex("C9483C"), Rgba.Hex("8E2A24"));
+            Body(p, Sd.Union(Sd.Circle(0.25f, 0.02f, 0.09f), Sd.Circle(0.27f, 0.13f, 0.06f)), Rgba.Hex("B8B04A"), Rgba.Hex("857F2C"));
+            for (int i = 0; i < 6; i++) p.Shape(Sd.Circle(-0.26f + (i % 3) * 0.07f, 0.05f - (i / 3) * 0.07f, 0.045f), Rgba.Hex("6B3E7A"), 0.012f);
+            Body(p, Sd.Intersect(Sd.Ellipse(0, -0.2f, 0.38f, 0.16f), Sd.Box(0, -0.28f, 0.4f, 0.1f)), Rgba.Hex("C9A36A"), Rgba.Hex("9C7A45"));
+            // la chiave, dipinta come tutto il resto (ombra sul tavolo compresa)
+            Sdf key = KeyShape(StillLifeKeyScale, StillLifeKeyX, StillLifeKeyY);
+            if (withKey)
+            {
+                p.Fill(Sd.Offset(key, 0.02f, -0.025f), Rgba.Hex("8F7550", 0.6f));
+                p.FillFunc(key, (x, y) => Rgba.Lerp(Rgba.Hex("D6A84A"), Rgba.Hex("9C7430"), Clamp((StillLifeKeyY + 0.1f - y) / 0.2f + Noise.Value(x * 14f, y * 14f) * 0.2f)));
+                p.Line(Rgba.Hex("F0D58A", 0.8f), 0.012f, StillLifeKeyX - 0.25f, StillLifeKeyY + 0.015f, StillLifeKeyX - 0.06f, StillLifeKeyY + 0.015f);
+                p.Shape(key, Rgba.Clear, 0.012f);
+            }
+            else
+            {
+                p.Fill(key, Rgba.Hex("E8DCC0"));   // dove c'era la chiave la tela è rimasta chiara
+                p.Shape(key, Rgba.Clear, 0.008f);
+            }
+            p.Shape(canvas, Rgba.Clear, 0.035f);
+            return new DoodleArt(name, p);
+        }
+
+        public static DoodleArt StillLifeWithKey() { return StillLife("still_life", true); }
+        public static DoodleArt StillLifeEmpty() { return StillLife("still_life_empty", false); }
+
+        // ---------- Livello 25: la sveglia e il suo pulsante fuggitivo ----------
+
+        /// <summary>Sveglia a campane (piedini in 0,0; in cima, a y 1.45, il buco dove stava il pulsante).</summary>
+        public static DoodleArt AlarmClock()
+        {
+            var p = new DoodlePainter(-1.0f, -0.08f, 1.0f, 1.62f, 120) { Ink = 0.05f };
+            foreach (float s in new[] { -1f, 1f })
+            {
+                p.InkLine(0.05f, s * 0.35f, 0.25f, s * 0.5f, 0f);                                     // piedini
+                Body(p, Sd.Intersect(Sd.Circle(s * 0.5f, 1.12f, 0.3f), Sd.Box(s * 0.5f, 1.27f, 0.32f, 0.17f)), Gold, GoldShade);   // campane
+                p.InkLine(0.04f, s * 0.12f, 1.25f, s * 0.42f, 1.1f);
+            }
+            p.Shape(Sd.Box(0, 1.37f, 0.06f, 0.09f, 0.02f), SteelDark, 0.03f);   // perno vuoto del pulsante
+            Sdf body = Sd.Circle(0, 0.72f, 0.58f);
+            Body(p, body, Rgba.Hex("FF4D5E"), Rgba.Hex("D12F43"));
+            p.Shape(Sd.Circle(0, 0.72f, 0.45f), Rgba.Hex("FFF8E8"), 0.04f);
+            for (int i = 0; i < 12; i++)
+            {
+                double a = i * Math.PI / 6;
+                float c = (float)Math.Cos(a), sn = (float)Math.Sin(a);
+                p.InkLine(i % 3 == 0 ? 0.03f : 0.015f, c * 0.36f, 0.72f + sn * 0.36f, c * 0.41f, 0.72f + sn * 0.41f);
+            }
+            p.InkLine(0.04f, 0, 0.72f, 0, 1.0f);
+            p.InkLine(0.03f, 0, 0.72f, 0.2f, 0.62f);
+            p.Shape(Sd.Circle(0, 0.72f, 0.04f), Ink);
+            return new DoodleArt("alarm_clock", p);
+        }
+
+        /// <summary>Onde del suono (righe curve ai lati, centro 0,0): "drin drin".</summary>
+        public static DoodleArt RingWaves()
+        {
+            var p = new DoodlePainter(-1.3f, -0.5f, 1.3f, 0.5f, 120) { Ink = 0.0f, Wobble = 0f };
+            foreach (float s in new[] { -1f, 1f })
+                for (int i = 0; i < 3; i++)
+                {
+                    float x = s * (0.75f + i * 0.17f), r = 0.18f + i * 0.08f;
+                    p.Line(Ink, 0.04f, x - s * 0.06f, r, x, 0, x - s * 0.06f, -r);
+                }
+            return new DoodleArt("ring_waves", p);
+        }
     }
 }

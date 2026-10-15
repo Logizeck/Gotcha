@@ -6,7 +6,7 @@ using Gotcha.Components;
 namespace Gotcha.Levels
 {
     /// <summary>
-    /// Livello 7 — disinnesca la bomba. Due pulsanti (blu e rosso) e due cavi gialli aggrovigliati in modo casuale:
+    /// Livello 6 — disinnesca la bomba. Due pulsanti (blu e rosso) e due cavi gialli aggrovigliati in modo casuale:
     /// un cavo finisce libero, l'altro arriva al timer della dinamite. Il timer parte da 10 secondi.
     /// Premere il pulsante collegato al timer lo ferma; quello sbagliato (o il tempo scaduto) fa esplodere tutto.
     /// </summary>

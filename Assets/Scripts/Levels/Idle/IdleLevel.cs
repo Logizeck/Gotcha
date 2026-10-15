@@ -5,7 +5,7 @@ using Gotcha.Components;
 namespace Gotcha.Levels
 {
     /// <summary>
-    /// Livello 4 — il gatto affamato. All'inizio il gatto è sveglio e miagola: ha fame. La soluzione è prendere
+    /// Livello 3 — il gatto affamato. All'inizio il gatto è sveglio e miagola: ha fame. La soluzione è prendere
     /// il pesce dal quadro e darglielo; dopo aver mangiato si addormenta, e a quel punto bisogna lasciarlo dormire
     /// per 5 secondi senza toccare lo schermo né muovere il telefono. Il pulsantone rosso "PRESS ME" è un'esca:
     /// toccarlo (o toccare qualsiasi cosa) lo sveglia.

@@ -7,7 +7,7 @@ using Gotcha.Sensors;
 namespace Gotcha.Levels
 {
     /// <summary>
-    /// Livello 8 — il gatto arrabbiato. Lo stereo suona a tutto volume e il gatto è furioso. Si risolve abbassando
+    /// Livello 7 — il gatto arrabbiato. Lo stereo suona a tutto volume e il gatto è furioso. Si risolve abbassando
     /// al minimo il volume del telefono: man mano che scende il gatto passa da furioso ad arrabbiato, seccato,
     /// assonnato; a volume zero si addormenta. (Nell'Editor il volume si simula coi tasti - e +.)
     /// Serve sempre almeno una pressione di "volume -" durante il livello (VolumeDownWatch): un telefono già a volume

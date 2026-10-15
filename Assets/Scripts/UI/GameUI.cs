@@ -16,7 +16,7 @@ namespace Gotcha.UI
     public class GameUI : MonoBehaviour
     {
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.14";
+        public const string Version = "0.15";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli

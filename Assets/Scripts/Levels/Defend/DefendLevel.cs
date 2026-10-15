@@ -51,7 +51,7 @@ namespace Gotcha.Levels
             {
                 bubbleHome = bubble.transform.position;
                 bubble.transform.position = wasp.position + new Vector3(1.5f, -0.75f, 0f);   // la vespa minaccia
-                bubble.Show("BZZZ!!");
+                bubble.Show("BZZZ!!", true);   // parla la vespa, non il gatto
             }
             if (buzz != null)
             {

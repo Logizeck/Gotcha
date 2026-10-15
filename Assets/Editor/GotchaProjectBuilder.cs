@@ -31,7 +31,7 @@ public static class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 14;
+    const int BuilderVersion = 15;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -81,9 +81,6 @@ public static class GotchaProjectBuilder
             Define("Maze", "tilt_maze", "TILT MAZE",
                 "No buttons here: the phone itself moves the ball. Reach the glowing star.",
                 BuildMazeLevel()),
-            Define("Snowman", "snowman", "SNOWMAN",
-                "Give the snowman a happy face. Eyes and nose go on the head... and the smile? Draw it in the snow!",
-                BuildSnowmanLevel(carrotPrefab, coalPrefab), "snowman_butt"),
             Define("Idle", "do_nothing", "BIG RED BUTTON",
                 "A hungry cat never sleeps. Is there anything to eat around here?",
                 BuildIdleLevel()),
@@ -106,8 +103,11 @@ public static class GotchaProjectBuilder
                 "Bare hands won't do. Is there something in the grass you could swat it with?",
                 BuildWaspLevel()),
             Define("ArtTheft", "art_theft", "ART THEFT",
-                "Locked again? Look around... art can be very practical.",
+                "Locked again? Some paintings are more realistic than they look.",
                 BuildKeyPaintingLevel(keyPrefab, doorPrefab)),
+            Define("Snowman", "snowman", "SNOWMAN",
+                "Give the snowman a happy face. Eyes and nose go on the head... and the smile? Draw it in the snow!",
+                BuildSnowmanLevel(carrotPrefab, coalPrefab), "snowman_butt"),
             Define("Defend", "defend_cat", "BODYGUARD",
                 "Draw walls with your finger. The wasp hates walls.",
                 BuildDefendLevel()),
@@ -147,8 +147,8 @@ public static class GotchaProjectBuilder
             Define("Campfire", "campfire", "CAMPFIRE",
                 "Rub the stick to make a spark, then blow... gently!",
                 BuildCampfireLevel()),
-            Define("Runaway", "chicken_button", "CHICKEN BUTTON",
-                "It's scared of fingers. Corner it!",
+            Define("Runaway", "alarm_clock", "WAKE-UP CALL",
+                "The OFF button ran away! Draw fences to corner it, then press it.",
                 BuildRunawayLevel()),
             Define("Plant", "thirsty_plant", "THIRSTY PLANT",
                 "Pull the drop back, aim... and let go!",
@@ -868,6 +868,7 @@ public static class GotchaProjectBuilder
         Art(fishGo.transform, "Art", "fish", 5);
 
         SpeechBubble meow = Bubble(root.transform, new Vector2(-0.1f, 0.3f));
+        meow.catVoice = true;   // il gatto miagola quando parla
         meow.transform.localScale = Vector3.one * 0.55f;
 
         // Il pulsantone: un'esca, toccarlo sveglia il gatto
@@ -1191,6 +1192,7 @@ public static class GotchaProjectBuilder
         zzz.tint = Color.white;
 
         SpeechBubble bubble = Bubble(root.transform, new Vector2(0.4f, -0.55f));
+        bubble.catVoice = true;   // il gatto miagola quando parla
         bubble.transform.localScale = Vector3.one * 0.55f;
 
         SetField(level, "stereo", stereo);
@@ -1332,19 +1334,27 @@ public static class GotchaProjectBuilder
     static GameObject BuildKeyPaintingLevel(GameObject keyPrefab, GameObject doorPrefab)
     {
         var root = new GameObject("Level_ArtTheft");
-        root.AddComponent<KeyDoorLevel>();
+        KeyDoorLevel level = root.AddComponent<KeyDoorLevel>();
         Art(root.transform, "Room", "room_bg", -20, false);
-        GameObject door = Instance(doorPrefab, root.transform, new Vector2(0.45f, -0.75f));
+        GameObject door = Instance(doorPrefab, root.transform, new Vector2(0.75f, -0.85f));
         door.name = "Door";
-        Art(root.transform, "Painting", "key_painting", 2, true, new Vector2(-1.7f, 2.25f));
-        // la chiave è appesa al chiodo del quadro, piccola e a testa in su
-        GameObject key = Instance(keyPrefab, root.transform, new Vector2(-1.7f, 2.12f));
-        key.transform.localScale = Vector3.one * 0.45f;
-        key.transform.localRotation = Quaternion.Euler(0, 0, -90f);
+        // natura morta: la chiave è dipinta sul tavolo, tra la frutta e la candela
+        Vector2 at = new Vector2(-1.45f, 2.35f);
+        const float size = 1.05f;   // copre anche il quadretto disegnato nello sfondo
+        var frame = new GameObject("Painting").transform;
+        frame.SetParent(root.transform, false);
+        frame.localPosition = at;
+        frame.localScale = Vector3.one * size;
+        SpriteRenderer painting = Art(frame, "Art", "still_life", 2).GetComponent<SpriteRenderer>();
+        GameObject key = Instance(keyPrefab, root.transform, at + new Vector2(DoodleSprites.StillLifeKeyX, DoodleSprites.StillLifeKeyY) * size);
+        key.transform.localScale = Vector3.one * DoodleSprites.StillLifeKeyScale * size;
+        foreach (SpriteRenderer r in key.GetComponentsInChildren<SpriteRenderer>(true)) r.enabled = false;   // è solo dipinta... finché non la tocchi
+        SmokeEmitter sparkle = Sparks(root.transform, "Sparkle", new Color(1f, 0.85f, 0.35f));
+        SetField(level, "painting", painting);
+        SetField(level, "paintingWithoutKey", sprites["still_life_empty"]);
+        SetField(level, "sparkle", sparkle);
         return SavePrefab(root, LevelDir + "/ArtTheft/Level_ArtTheft.prefab");
     }
-
-    // ---------- Livello 12: proteggi il gatto dalla vespa ----------
 
     static GameObject BuildDefendLevel()
     {
@@ -1416,6 +1426,7 @@ public static class GotchaProjectBuilder
         TextMesh countdown = Label(root.transform, new Vector2(0, 3.3f), 30, "10", 0.11f);
         countdown.color = new Color(1f, 0.93f, 0.75f);
         SpeechBubble bubble = Bubble(root.transform, new Vector2(0.9f, -0.9f));
+        bubble.catVoice = true;   // il gatto miagola quando parla
         bubble.transform.localScale = Vector3.one * 0.55f;
 
         SetField(level, "wasp", wasp);
@@ -2013,6 +2024,7 @@ public static class GotchaProjectBuilder
         dark.color = new Color(0.02f, 0.02f, 0.08f, 0f);
 
         SpeechBubble bubble = Bubble(root.transform, new Vector2(0.3f, -0.9f));
+        bubble.catVoice = true;   // il gatto miagola quando parla
         bubble.transform.localScale = Vector3.one * 0.55f;
 
         SetField(level, "lampSwitch", lampSwitch);
@@ -2381,29 +2393,71 @@ public static class GotchaProjectBuilder
     {
         var root = new GameObject("Level_Runaway");
         RunawayLevel level = root.AddComponent<RunawayLevel>();
-        Art(root.transform, "Workshop", "workshop_bg", -20, false);
+        AudioSource alarm = root.AddComponent<AudioSource>();
+        alarm.playOnAwake = false;
+        Art(root.transform, "Room", "room_bg", -20, false);
 
+        // sveglia sul comodino
+        Bar(root.transform, "Nightstand", new Vector2(1.55f, -2.45f), new Vector2(1.5f, 1.2f), new Color(0.62f, 0.42f, 0.28f), 1);
+        var clock = new GameObject("AlarmClock").transform;
+        clock.SetParent(root.transform, false);
+        clock.localPosition = new Vector3(1.55f, -1.85f, 0);
+        clock.localScale = Vector3.one * 0.9f;
+        Art(clock, "Art", "alarm_clock", 4);
+        GameObject waves = Art(clock, "Waves", "ring_waves", 4, true, new Vector2(0, 1.1f)).gameObject;
+        waves.AddComponent<Pulse>();
+        var socket = new GameObject("Socket").transform;
+        socket.SetParent(clock, false);
+        socket.localPosition = new Vector3(0, 1.62f, 0);
+
+        // il pulsante OFF scappato, con le gambette
         var button = new GameObject("Button").transform;
         button.SetParent(root.transform, false);
-        button.localPosition = new Vector3(0, -1.0f, 0);
+        button.localPosition = new Vector3(0.3f, -2.9f, 0);
+        button.localScale = Vector3.one * 0.6f;
         var visual = new GameObject("Visual").transform;
         visual.SetParent(button, false);
         Art(visual, "Art", "big_button", 6);
         Art(visual, "Face", "button_face", 7, true, new Vector2(0, 0.02f));
+        TextMesh off = Label(visual, new Vector2(0, -0.2f), 7, "OFF", 0.07f);
+        off.color = Color.white;
         var legs = new GameObject("Legs").transform;
         legs.SetParent(button, false);
         legs.localPosition = new Vector3(0, -0.42f, 0);
         Art(legs, "Art", "button_legs", 5, false);
 
-        TextMesh counter = Label(root.transform, new Vector2(0, 3.2f), 30, "0 / 5", 0.1f);
-        counter.color = Color.white;
-        SpeechBubble bubble = Bubble(root.transform, new Vector2(0, 2.1f));
-        bubble.transform.localScale = Vector3.one * 0.5f;
+        // staccionate disegnate col dito
+        var penGo = new GameObject("Fences");
+        penGo.transform.SetParent(root.transform, false);
+        BoxCollider2D area = penGo.AddComponent<BoxCollider2D>();
+        area.isTrigger = true;
+        area.size = new Vector2(6f, 7.2f);
+        area.offset = new Vector2(0, -0.6f);
+        StrokeDrawer pen = penGo.AddComponent<StrokeDrawer>();
+        pen.singleStroke = false;
+        pen.maxStrokes = 4;
+        pen.minLength = 0.4f;
+        pen.addCollider = true;
+        pen.colliderRadius = 0.07f;
+        pen.sortingOrder = 8;
+        pen.material = StrokeMaterial();
+        pen.layers = new[]
+        {
+            new StrokeDrawer.Layer { color = InkColor, width = 0.16f, offset = Vector2.zero },
+            new StrokeDrawer.Layer { color = new Color(0.95f, 0.75f, 0.45f), width = 0.08f, offset = Vector2.zero },
+        };
+
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(0.15f, 0.2f));
+        bubble.transform.localScale = Vector3.one * 0.55f;
 
         SetField(level, "button", button);
         SetField(level, "visual", visual);
         SetField(level, "legs", legs);
-        SetField(level, "counter", counter);
+        SetField(level, "pen", pen);
+        SetField(level, "clock", clock);
+        SetField(level, "clockSocket", socket);
+        SetField(level, "waves", waves);
+        SetField(level, "alarm", alarm);
         SetField(level, "bubble", bubble);
         return SavePrefab(root, LevelDir + "/Runaway/Level_Runaway.prefab");
     }

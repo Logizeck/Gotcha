@@ -6,7 +6,7 @@ using Gotcha.Core;
 namespace Gotcha.Levels
 {
     /// <summary>
-    /// Livello 6 — ascolta e rispondi. La radio suona a caso uno di questi segnali:
+    /// Livello 5 — ascolta e rispondi. La radio suona a caso uno di questi segnali:
     /// "..." (tre brevi), "---" (tre lunghi), ".--", "-.-", ".-.". Bisogna premere il tasto col disegno giusto.
     /// Toccando la radio il segnale si riascolta. Tasto sbagliato = GOTCHA! (si riprova con un nuovo segnale).
     /// La spia della radio si accende insieme ai toni, così si gioca anche col telefono silenzioso.

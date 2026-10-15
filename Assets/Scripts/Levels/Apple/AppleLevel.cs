@@ -5,7 +5,7 @@ using Gotcha.Components;
 namespace Gotcha.Levels
 {
     /// <summary>
-    /// Livello 5 — taglia la mela col dito. Un taglio deciso che attraversa la mela la divide in due metà
+    /// Livello 4 — taglia la mela col dito. Un taglio deciso che attraversa la mela la divide in due metà
     /// (orientate come il taglio) che si separano e cadono sul tagliere, con qualche goccia di succo.
     /// </summary>
     public class AppleLevel : LevelController

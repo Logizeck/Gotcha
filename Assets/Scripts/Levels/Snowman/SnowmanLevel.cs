@@ -7,7 +7,7 @@ using Gotcha.Core;
 namespace Gotcha.Levels
 {
     /// <summary>
-    /// Livello 3 — pupazzo di neve.
+    /// Livello 11 — pupazzo di neve.
     /// Occhi (2 carboni) e naso (carota) si attaccano dove li lasci sulla testa: nessuna posizione è indicata.
     /// Per vincere ogni occhio deve stare nella sua zona (ampia, invisibile), il naso nella sua, e la bocca va
     /// disegnata col dito: un sorriso che resta come un solco nella neve.

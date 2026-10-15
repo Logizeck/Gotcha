@@ -9,8 +9,14 @@ namespace Gotcha.Levels
     /// </summary>
     public class KeyDoorLevel : LevelController
     {
+        [Header("Livello 10: chiave dipinta nel quadro (facoltativo)")]
+        [SerializeField] SpriteRenderer painting;
+        [SerializeField] Sprite paintingWithoutKey;
+        [SerializeField] SmokeEmitter sparkle;
+
         LockedDoor door;
         Draggable2D key;
+        bool pulledOut;
 
         public override void OnLevelStart()
         {
@@ -27,7 +33,24 @@ namespace Gotcha.Levels
             if (key != null) key.DragStarted -= Straighten;
         }
 
-        static void Straighten(Draggable2D d) { d.transform.localRotation = Quaternion.identity; }
+        void Straighten(Draggable2D d)
+        {
+            d.transform.localRotation = Quaternion.identity;
+            if (pulledOut || painting == null) return;
+            // la chiave era solo "dipinta": al primo tocco si stacca dalla tela e diventa vera
+            pulledOut = true;
+            foreach (SpriteRenderer r in d.GetComponentsInChildren<SpriteRenderer>(true)) r.enabled = true;
+            if (paintingWithoutKey != null) painting.sprite = paintingWithoutKey;
+            if (sparkle != null) StartCoroutine(Pop(d.transform.position));
+        }
+
+        System.Collections.IEnumerator Pop(Vector3 at)
+        {
+            sparkle.transform.position = at;
+            sparkle.Play();
+            yield return new WaitForSeconds(0.2f);
+            sparkle.Stop();
+        }
 
         void OnDoorOpened() { Win(); }
     }

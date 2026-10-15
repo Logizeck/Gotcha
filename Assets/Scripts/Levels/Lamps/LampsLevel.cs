@@ -77,7 +77,7 @@ namespace Gotcha.Levels
             if (red && blue) { w = WallBoth; y = InkRed; n = InkBlue; }
             else if (red) { w = WallRed; y = WallRed; n = InkDark; }      // "YOU" rosso sparisce, "WON" si legge
             else if (blue) { w = WallBlue; y = InkDark; n = WallBlue; }   // "WON" blu sparisce, "YOU" si legge
-            else { w = WallOff; y = WallOff * 1.15f; n = WallOff * 1.15f; }
+            else { w = WallOff; y = WallOff; n = WallOff; }   // al buio la scritta non si vede affatto
             if (wall != null) wall.color = w;
             if (you != null) you.color = y;
             if (won != null) won.color = n;

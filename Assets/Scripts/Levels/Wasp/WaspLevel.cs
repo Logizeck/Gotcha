@@ -6,7 +6,7 @@ using Gotcha.Core;
 namespace Gotcha.Levels
 {
     /// <summary>
-    /// Livello 10 — la vespa furiosa. Una vespa svolazza e ogni tanto si lancia contro lo schermo per pungere chi
+    /// Livello 9 — la vespa furiosa. Una vespa svolazza e ogni tanto si lancia contro lo schermo per pungere chi
     /// guarda (bagliore rosso e "OUCH!"). Nell'erba c'è una paletta: va raccolta con un tocco, poi ogni tocco la fa
     /// calare sul punto toccato. Servono 10 colpi; al decimo la vespa cade a terra a zampe all'aria, stecchita.
     /// Senza paletta i tocchi sulla vespa non le fanno niente (e lei se la ride).

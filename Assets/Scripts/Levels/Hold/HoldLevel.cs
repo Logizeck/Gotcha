@@ -5,7 +5,7 @@ using Gotcha.Core;
 namespace Gotcha.Levels
 {
     /// <summary>
-    /// Livello 9 — tienili premuti insieme. Due pulsanti collegati a un timer: il conto alla rovescia da 5 secondi
+    /// Livello 8 — tienili premuti insieme. Due pulsanti collegati a un timer: il conto alla rovescia da 5 secondi
     /// parte solo mentre entrambi sono premuti contemporaneamente (due dita). Se uno viene rilasciato prima della fine,
     /// il timer torna a 5. Nell'Editor il secondo dito si simula tenendo premuta la barra spaziatrice.
     /// </summary>

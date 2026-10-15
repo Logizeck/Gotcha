@@ -9,6 +9,10 @@ namespace Gotcha.Components
         public TextMesh text;
         public float maxTextWidth = 2.4f;
         public float popSeconds = 0.25f;
+        [Tooltip("Fumetto di un gatto: quando parla si sente il verso (miagolio, soffio, fusa...).")]
+        public bool catVoice;
+
+        static AudioSource voice;   // sorgente unica e persistente: il fumetto si nasconde ma il verso non si interrompe
 
         Vector3 baseScale = Vector3.one;
         Vector3 textBaseScale = Vector3.one;
@@ -22,9 +26,22 @@ namespace Gotcha.Components
             if (text != null) textBaseScale = text.transform.localScale;
         }
 
-        public void Show(string message)
+        /// <summary>Mostra il fumetto. Con <paramref name="silent"/> il gatto non fa il verso (es. parla la vespa).</summary>
+        public void Show(string message, bool silent = false)
         {
             Init();
+            if (catVoice && !silent && !string.IsNullOrEmpty(message))
+            {
+                if (voice == null)
+                {
+                    var go = new GameObject("CatVoice");
+                    DontDestroyOnLoad(go);
+                    voice = go.AddComponent<AudioSource>();
+                    voice.playOnAwake = false;
+                }
+                voice.pitch = Random.Range(0.93f, 1.08f);
+                voice.PlayOneShot(CatVoice.For(message), 0.9f);
+            }
             gameObject.SetActive(true);
             StopAllCoroutines();
             StartCoroutine(ShowRoutine(message));

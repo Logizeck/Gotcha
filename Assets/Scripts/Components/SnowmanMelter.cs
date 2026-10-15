@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Gotcha.Components
 {
     /// <summary>
-    /// Scioglimento del pupazzo di neve, riutilizzabile (livelli 3 e 29).
+    /// Scioglimento del pupazzo di neve, riutilizzabile (livelli 11 e 29).
     /// All'inizio le parti di neve separate vengono sostituite da un unico disegno (sm_body) con lo shader
     /// Gotcha/SnowMelt: la neve si affloscia verso terra a colonne irregolari, cola, si allarga e diventa bagnata,
     /// fino a restare una pozzanghera. Non è neve (e quindi non si scioglie) tutto ciò che è attaccato: sciarpa,

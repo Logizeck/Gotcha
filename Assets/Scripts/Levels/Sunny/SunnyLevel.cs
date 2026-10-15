@@ -7,7 +7,7 @@ namespace Gotcha.Levels
 {
     /// <summary>
     /// Livello 29 — giornata di sole. Il sole picchia sul pupazzo di neve, che comincia a sciogliersi davvero
-    /// (stesso scioglimento dell'Easter egg del livello 3). Trascina la nuvola davanti al sole per fargli ombra;
+    /// (stesso scioglimento dell'Easter egg del livello 11). Trascina la nuvola davanti al sole per fargli ombra;
     /// il vento però la sposta piano piano. Resisti fino al tramonto. Se si scioglie del tutto: Easter egg e
     /// video da condividere.
     /// </summary>
