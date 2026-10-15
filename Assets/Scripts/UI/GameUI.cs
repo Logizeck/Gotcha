@@ -14,6 +14,9 @@ namespace Gotcha.UI
     /// </summary>
     public class GameUI : MonoBehaviour
     {
+        /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
+        public const string Version = "0.10";
+
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
 
@@ -119,7 +122,7 @@ namespace Gotcha.UI
         {
             if (resultPanel.activeSelf || completedPanel.activeSelf) return;
             RebuildLevelList();
-            menuEggs.text = "Easter eggs found: " + SaveData.EasterEggCount;
+            menuEggs.text = "Easter eggs found: " + SaveData.EasterEggCount + "   ·   v" + Version;
             RefreshMusicLabel();
             hintPanel.SetActive(false);
             menuPanel.SetActive(true);

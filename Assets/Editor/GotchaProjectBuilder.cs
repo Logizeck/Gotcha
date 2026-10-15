@@ -31,7 +31,7 @@ public static class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 9;
+    const int BuilderVersion = 10;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -103,7 +103,7 @@ public static class GotchaProjectBuilder
                 "One finger is not enough. Keep both pressed until the timer runs out.",
                 BuildHoldLevel()),
             Define("Wasp", "angry_wasp", "BUZZ OFF",
-                "Tap that wasp. Again. And again. Ten times should do it.",
+                "Bare hands won't do. Is there something in the grass you could swat it with?",
                 BuildWaspLevel()),
         };
 
@@ -266,7 +266,6 @@ public static class GotchaProjectBuilder
     // ---------- Livello 2: labirinto a inclinazione ----------
 
     const float WallT = 0.16f;        // spessore delle pareti (= diametro dei tubi al neon)
-    const float WallMargin = 0.15f;   // alone attorno al tubo, nello sprite
 
     static GameObject BuildMazeLevel()
     {
@@ -282,14 +281,19 @@ public static class GotchaProjectBuilder
         maze.localPosition = new Vector3(0, -0.4f, 0);
 
         // Recinto esterno: la sfera non può uscire dallo schermo
-        Rect(maze, "Arena", 2.8f, 3.5f, null, "tube_cyan");
-        // Anelli dall'esterno all'interno, ognuno con un varco su un lato diverso
-        Rect(maze, "Ring1", 2.1f, 2.1f, "top", "tube_magenta");
-        Rect(maze, "Ring2", 1.4f, 1.4f, "bottom", "tube_yellow");
-        Rect(maze, "Ring3", 0.7f, 0.7f, "top", "tube_cyan");
-        // Sbarramenti nei corridoi: obbligano a fare il giro lungo
-        HWall(maze, "Block1", 1.4f, 2.1f, 0f, "tube_magenta");
-        HWall(maze, "Block2", -1.4f, -0.7f, 0f, "tube_yellow");
+        // Grafica: tutte le pareti in un unico disegno al neon (curve e tratti dritti identici)
+        Art(maze, "Neon", "maze_neon", 5, false);
+        // Fisica: pareti invisibili che ricalcano esattamente il disegno
+        for (int i = 0; i < DoodleSprites.MazeRings.Length; i++)
+        {
+            DoodleSprites.MazeRing ring = DoodleSprites.MazeRings[i];
+            Rect(maze, "Ring" + i, ring.hx, ring.hy, ring.gap > 0 ? "top" : ring.gap < 0 ? "bottom" : null);
+        }
+        for (int i = 0; i < DoodleSprites.MazeBlocks.Length; i++)
+        {
+            DoodleSprites.MazeBlock b = DoodleSprites.MazeBlocks[i];
+            HWall(maze, "Block" + i, b.x1, b.x2, b.y);
+        }
 
         // Stella luminosa al centro
         var goal = new GameObject("Goal");
@@ -412,72 +416,61 @@ public static class GotchaProjectBuilder
         return mat;
     }
 
-    /// <summary>
-    /// Rettangolo di tubi con gli angoli arrotondati (quarti di cerchio al neon di raggio NeonCornerRadius)
-    /// e un varco opzionale al centro di un lato.
-    /// </summary>
-    static void Rect(Transform parent, string name, float hx, float hy, string gapSide, string tube)
+    /// <summary>Pareti fisiche di un anello: tratti dritti a capsula e angoli a quarto di cerchio, varco opzionale.</summary>
+    static void Rect(Transform parent, string name, float hx, float hy, string gapSide)
     {
-        const float gap = 0.35f;   // metà larghezza del varco
-        float r = DoodleSprites.NeonCornerRadius;
+        float gap = DoodleSprites.MazeGapHalf, r = DoodleSprites.MazeCornerRadius;
         var g = new GameObject(name).transform;
         g.SetParent(parent, false);
 
-        if (gapSide == "top") { HWall(g, "TopL", -hx + r, -gap, hy, tube); HWall(g, "TopR", gap, hx - r, hy, tube); }
-        else HWall(g, "Top", -hx + r, hx - r, hy, tube);
-        if (gapSide == "bottom") { HWall(g, "BottomL", -hx + r, -gap, -hy, tube); HWall(g, "BottomR", gap, hx - r, -hy, tube); }
-        else HWall(g, "Bottom", -hx + r, hx - r, -hy, tube);
-        VWall(g, "Left", -hx, -hy + r, hy - r, tube);
-        VWall(g, "Right", hx, -hy + r, hy - r, tube);
+        if (gapSide == "top") { HWall(g, "TopL", -hx + r, -gap, hy); HWall(g, "TopR", gap, hx - r, hy); }
+        else HWall(g, "Top", -hx + r, hx - r, hy);
+        if (gapSide == "bottom") { HWall(g, "BottomL", -hx + r, -gap, -hy); HWall(g, "BottomR", gap, hx - r, -hy); }
+        else HWall(g, "Bottom", -hx + r, hx - r, -hy);
+        VWall(g, "Left", -hx, -hy + r, hy - r);
+        VWall(g, "Right", hx, -hy + r, hy - r);
 
-        string arc = tube.Replace("tube_", "arc_");
-        Corner(g, "CornerTR", new Vector2(hx - r, hy - r), 0f, arc);
-        Corner(g, "CornerTL", new Vector2(-hx + r, hy - r), 90f, arc);
-        Corner(g, "CornerBL", new Vector2(-hx + r, -hy + r), 180f, arc);
-        Corner(g, "CornerBR", new Vector2(hx - r, -hy + r), 270f, arc);
+        Corner(g, "CornerTR", new Vector2(hx - r, hy - r), 0f);
+        Corner(g, "CornerTL", new Vector2(-hx + r, hy - r), 90f);
+        Corner(g, "CornerBL", new Vector2(-hx + r, -hy + r), 180f);
+        Corner(g, "CornerBR", new Vector2(hx - r, -hy + r), 270f);
     }
 
-    /// <summary>Curva al neon: quarto di cerchio centrato in center, ruotato di angle gradi; collider a bordo arrotondato.</summary>
-    static void Corner(Transform parent, string name, Vector2 center, float angle, string arc)
+    /// <summary>Angolo fisico: arco di raggio MazeCornerRadius con bordo arrotondato (spessore del tubo).</summary>
+    static void Corner(Transform parent, string name, Vector2 center, float angle)
     {
         var go = new GameObject(name);
         go.transform.SetParent(parent, false);
         go.transform.localPosition = center;
         go.transform.localRotation = Quaternion.Euler(0, 0, angle);
-        Art(go.transform, "Art", arc, 5, false);
         EdgeCollider2D edge = go.AddComponent<EdgeCollider2D>();
         var pts = new Vector2[9];
         for (int i = 0; i < pts.Length; i++)
         {
             float a = i / (float)(pts.Length - 1) * Mathf.PI * 0.5f;
-            pts[i] = new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * DoodleSprites.NeonCornerRadius;
+            pts[i] = new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * DoodleSprites.MazeCornerRadius;
         }
         edge.points = pts;
         edge.edgeRadius = WallT * 0.5f;
     }
 
-    static void HWall(Transform parent, string name, float x1, float x2, float y, string tube)
+    static void HWall(Transform parent, string name, float x1, float x2, float y)
     {
-        Wall(parent, name, new Vector2((x1 + x2) / 2f, y), new Vector2(x2 - x1 + WallT, WallT), tube);
+        Wall(parent, name, new Vector2((x1 + x2) / 2f, y), new Vector2(x2 - x1 + WallT, WallT));
     }
 
-    static void VWall(Transform parent, string name, float x, float y1, float y2, string tube)
+    static void VWall(Transform parent, string name, float x, float y1, float y2)
     {
-        Wall(parent, name, new Vector2(x, (y1 + y2) / 2f), new Vector2(WallT, y2 - y1 + WallT), tube);
+        Wall(parent, name, new Vector2(x, (y1 + y2) / 2f), new Vector2(WallT, y2 - y1 + WallT));
     }
 
-    /// <summary>Tubo al neon: sprite 9-slice allungato (estremità tonde), collider a capsula grande quanto il tubo.</summary>
-    static void Wall(Transform parent, string name, Vector2 pos, Vector2 core, string tube)
+    /// <summary>Tratto dritto fisico: collider a capsula grande quanto il tubo disegnato.</summary>
+    static void Wall(Transform parent, string name, Vector2 pos, Vector2 core)
     {
         var go = new GameObject(name);
         go.transform.SetParent(parent, false);
         go.transform.localPosition = pos;
-        SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = sprites[tube];
-        sr.drawMode = SpriteDrawMode.Sliced;
-        sr.size = core + Vector2.one * (2f * WallMargin);
-        sr.sortingOrder = 5;
-        CapsuleCollider2D col = go.AddComponent<CapsuleCollider2D>();   // tondo anche per la fisica: la biglia scivola sugli spigoli
+        CapsuleCollider2D col = go.AddComponent<CapsuleCollider2D>();
         col.size = core;
         col.direction = core.x >= core.y ? CapsuleDirection2D.Horizontal : CapsuleDirection2D.Vertical;
     }
@@ -871,8 +864,8 @@ public static class GotchaProjectBuilder
         smoke.tint = new Color(0.45f, 0.45f, 0.5f, 0.95f);
         smoke.sortingOrder = 72;
 
-        SpeechBubble bubble = Bubble(root.transform, new Vector2(1.0f, 3.1f));
-        bubble.transform.localScale = Vector3.one * 0.7f;
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(-1.1f, 3.25f));
+        bubble.transform.localScale = Vector3.one * 0.6f;
 
         SetField(level, "blueButton", blue);
         SetField(level, "redButton", red);
@@ -890,8 +883,8 @@ public static class GotchaProjectBuilder
         // Il tizio nel panico che guarda il giocatore, trema e suda
         var guy = new GameObject("Guy");
         guy.transform.SetParent(root.transform, false);
-        guy.transform.localPosition = new Vector3(-1.95f, 2.5f, 0);
-        guy.transform.localScale = Vector3.one * 0.9f;
+        guy.transform.localPosition = new Vector3(1.95f, 2.3f, 0);   // accanto al timer, ben visibile
+        guy.transform.localScale = Vector3.one * 1.05f;
         Tremble tremble = guy.AddComponent<Tremble>();
         GameObject panic = Art(guy.transform, "Panic", "guy_panic", 8).gameObject;
         GameObject relieved = Art(guy.transform, "Relieved", "guy_relieved", 8).gameObject;
@@ -1114,11 +1107,28 @@ public static class GotchaProjectBuilder
         GameObject dead = Art(wasp, "Dead", "wasp_dead", 10).gameObject;
         dead.SetActive(false);
 
+        // Paletta nell'erba: pivot sull'impugnatura, rete 1.9 più in là lungo "su"
+        var swatter = new GameObject("Swatter").transform;
+        swatter.SetParent(root.transform, false);
+        swatter.localPosition = new Vector3(-1.6f, -3.5f, 0);
+        swatter.localRotation = Quaternion.Euler(0, 0, -80f);
+        Art(swatter, "Art", "swatter", 30, true, new Vector2(0, 1.9f));
+
+        // Puntura: bagliore rosso ai bordi dello schermo + fumetto
+        SpriteRenderer flash = Art(root.transform, "StingFlash", "sting_flash", 80, false).GetComponent<SpriteRenderer>();
+        flash.transform.localScale = new Vector3(4.5f, 7.5f, 1f);
+        flash.color = new Color(1f, 1f, 1f, 0f);
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(0.9f, 2.9f));
+        bubble.transform.localScale = Vector3.one * 0.6f;
+
         SetField(level, "wasp", wasp);
         SetField(level, "alive", alive.gameObject);
         SetField(level, "dead", dead);
         SetField(level, "body", body);
         SetField(level, "buzz", buzz);
+        SetField(level, "swatter", swatter);
+        SetField(level, "stingFlash", flash);
+        SetField(level, "bubble", bubble);
         return SavePrefab(root, LevelDir + "/Wasp/Level_Wasp.prefab");
     }
 

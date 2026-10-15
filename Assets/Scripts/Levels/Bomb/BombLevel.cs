@@ -42,15 +42,17 @@ namespace Gotcha.Levels
         public override void OnLevelStart()
         {
             redIsConnected = Random.value < 0.5f;
-            Vector3 looseEnd = new Vector3(Random.value < 0.5f ? -1.9f : 1.9f, Random.Range(-0.3f, 1.3f), 0f);   // alto quanto il timer: non si capisce dalla lunghezza
-            Vector3 toTimer = timerTerminal.position;
+            Vector3 looseEnd = new Vector3(Random.value < 0.5f ? -1.9f : 1.9f, Random.Range(-0.6f, 0.8f), 0f);   // alto quanto il timer: non si capisce dalla lunghezza
             Transform connected = redIsConnected ? redStart : blueStart;
             Transform loose = redIsConnected ? blueStart : redStart;
 
-            // i due cavi si incrociano: uno va a destra-sinistra-destra, l'altro il contrario
-            float s = Random.value < 0.5f ? 1f : -1f;
-            DrawWire("WireToTimer", Tangle(connected.position, toTimer, s));
-            List<Vector3> free = Tangle(loose.position, looseEnd, -s);
+            List<Vector3> toTimer = null, free = null;
+            for (int attempt = 0; attempt < 60; attempt++)
+            {
+                Braid(connected.position, timerTerminal.position, loose.position, looseEnd, out toTimer, out free);
+                if (Readable(toTimer, free)) break;
+            }
+            DrawWire("WireToTimer", toTimer);
             DrawWire("WireLoose", free);
             if (wireEnd != null)
             {
@@ -141,47 +143,93 @@ namespace Gotcha.Levels
 
         // ---------- Cavi ----------
 
-        /// <summary>
-        /// Percorso molto aggrovigliato da a verso b: ondeggia da un lato all'altro (side = ±1) con ampiezze casuali
-        /// e fa uno o due riccioli su se stesso, così i due cavi si incrociano più volte e sono difficili da seguire.
-        /// </summary>
-        static List<Vector3> Tangle(Vector3 a, Vector3 b, float side)
-        {
-            var ctrl = new List<Vector3> { a };
-            const int bends = 7;
-            int loopA = Random.Range(1, bends + 1), loopB = Random.Range(1, bends + 1);
-            for (int i = 1; i <= bends; i++)
-            {
-                float t = i / (float)(bends + 1);
-                Vector3 p = Vector3.Lerp(a, b, t);
-                p.x = side * (i % 2 == 0 ? -1f : 1f) * Random.Range(0.4f, 2.1f);
-                p.y += Random.Range(-0.3f, 0.3f);
-                ctrl.Add(p);
-                if (i == loopA || i == loopB)   // ricciolo
-                {
-                    float r = Random.Range(0.2f, 0.32f), dir = Random.value < 0.5f ? 1f : -1f;
-                    for (int k = 1; k <= 5; k++)
-                    {
-                        float ang = dir * k * Mathf.PI * 2f / 6f;
-                        ctrl.Add(p + new Vector3(Mathf.Sin(ang) * r, (1f - Mathf.Cos(ang)) * r, 0f));
-                    }
-                }
-            }
-            ctrl.Add(b);
+        // ---------- Cavi a treccia ----------
 
+        const float OverlapDistance = 0.13f;   // centri più vicini di così = cavi visivamente sovrapposti
+        const float MaxOverlapRun = 0.4f;      // tratto massimo sovrapposto ammesso (≈ 4-5 mm su un telefono)
+
+        /// <summary>
+        /// Due cavi a treccia attorno a una linea centrale comune: nel mezzo si scambiano di lato più volte con
+        /// incroci netti (quasi perpendicolari), agli estremi si raccordano ai pulsanti e alle destinazioni.
+        /// Così sono attorcigliati ma non corrono mai uno sopra l'altro.
+        /// </summary>
+        static void Braid(Vector3 a0, Vector3 a1, Vector3 b0, Vector3 b1, out List<Vector3> a, out List<Vector3> b)
+        {
+            float turns = Random.Range(2.2f, 3.0f);
+            float width = 1.45f / turns * Random.Range(0.85f, 1f);   // larghezza e giri legati: incroci a ~60-90°
+            float phase = Random.Range(0f, Mathf.PI * 2f);
+            float wob = Random.Range(0f, Mathf.PI * 2f);
+            Vector3 c0 = (a0 + b0) * 0.5f, c1 = (a1 + b1) * 0.5f;
+            a = Strand(a0, a1, c0, c1, width, turns, phase, wob, 1f);
+            b = Strand(b0, b1, c0, c1, width, turns, phase, wob, -1f);
+        }
+
+        static List<Vector3> Strand(Vector3 from, Vector3 to, Vector3 c0, Vector3 c1, float width, float turns, float phase, float wob, float sign)
+        {
             var pts = new List<Vector3>();
-            for (int i = 0; i < ctrl.Count - 1; i++)
+            const int n = 160;
+            for (int i = 0; i <= n; i++)
             {
-                Vector3 p0 = ctrl[Mathf.Max(0, i - 1)], p1 = ctrl[i], p2 = ctrl[i + 1], p3 = ctrl[Mathf.Min(ctrl.Count - 1, i + 2)];
-                for (int j = 0; j < 10; j++)
-                {
-                    float t = j / 10f, t2 = t * t, t3 = t2 * t;
-                    pts.Add(0.5f * (2f * p1 + (-p0 + p2) * t + (2f * p0 - 5f * p1 + 4f * p2 - p3) * t2 + (-p0 + 3f * p1 - 3f * p2 + p3) * t3));
-                }
+                float t = i / (float)n;
+                Vector3 straight = Vector3.Lerp(from, to, t);
+                Vector3 braid = Vector3.Lerp(c0, c1, t);
+                braid.x += sign * width * Mathf.Sin(2f * Mathf.PI * turns * t + phase);
+                braid.y += 0.05f * Mathf.Sin(2f * Mathf.PI * 1.7f * t + wob);
+                float m = Smooth(t / 0.2f) * Smooth((1f - t) / 0.2f);   // 0 agli attacchi, 1 nella treccia
+                Vector3 p = Vector3.Lerp(straight, braid, m);
+                p.x = Mathf.Clamp(p.x, -2.5f, 2.5f);
+                pts.Add(p);
             }
-            pts.Add(b);
             return pts;
         }
+
+        static float Smooth(float x) { x = Mathf.Clamp01(x); return x * x * (3f - 2f * x); }
+
+        /// <summary>
+        /// Leggibile = si incrociano almeno 3 volte ma non restano mai sovrapposti per più di MaxOverlapRun
+        /// (né tra loro né per tratti lunghi su se stessi).
+        /// </summary>
+        static bool Readable(List<Vector3> a, List<Vector3> b)
+        {
+            float run = 0f;
+            for (int i = 1; i < a.Count; i++)
+            {
+                float d = DistanceToPolyline(a[i], b);
+                run = d < OverlapDistance ? run + Vector3.Distance(a[i - 1], a[i]) : 0f;
+                if (run > MaxOverlapRun) return false;
+            }
+            return Crossings(a, b) >= 3;
+        }
+
+        static float DistanceToPolyline(Vector3 p, List<Vector3> line)
+        {
+            float best = float.MaxValue;
+            for (int i = 1; i < line.Count; i++)
+            {
+                Vector3 s0 = line[i - 1], s1 = line[i], d = s1 - s0;
+                float t = Mathf.Clamp01(Vector3.Dot(p - s0, d) / Mathf.Max(1e-6f, d.sqrMagnitude));
+                best = Mathf.Min(best, Vector3.Distance(p, s0 + d * t));
+            }
+            return best;
+        }
+
+        static int Crossings(List<Vector3> a, List<Vector3> b)
+        {
+            int count = 0;
+            for (int i = 1; i < a.Count; i++)
+                for (int j = 1; j < b.Count; j++)
+                    if (SegmentsCross(a[i - 1], a[i], b[j - 1], b[j])) count++;
+            return count;
+        }
+
+        static bool SegmentsCross(Vector3 p1, Vector3 p2, Vector3 q1, Vector3 q2)
+        {
+            float d1 = Cross(q2 - q1, p1 - q1), d2 = Cross(q2 - q1, p2 - q1);
+            float d3 = Cross(p2 - p1, q1 - p1), d4 = Cross(p2 - p1, q2 - p1);
+            return d1 * d2 < 0f && d3 * d4 < 0f;
+        }
+
+        static float Cross(Vector3 u, Vector3 v) { return u.x * v.y - u.y * v.x; }
 
         void DrawWire(string name, List<Vector3> pts)
         {

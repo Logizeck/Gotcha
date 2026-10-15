@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Gotcha.EditorArt
 {
@@ -179,28 +180,80 @@ namespace Gotcha.EditorArt
             return new DoodleArt("maze_bg", p);
         }
 
-        /// <summary>
-        /// Tubo al neon (9-slice): estremità arrotondate, nucleo quasi bianco, corpo colorato e alone diffuso.
-        /// Allungato dal 9-slice diventa una capsula; dove due tubi si incontrano gli alone si sommano come nel neon vero.
-        /// Raggio del tubo 0.08, alone fino a 0.23 dal centro.
-        /// </summary>
-        public static DoodleArt NeonTube(string name, Rgba color)
+        // Disposizione del labirinto (coordinate locali del labirinto): anelli con varco e sbarramenti.
+        // La usano sia il disegno delle pareti (MazeNeon) sia il builder per i collider: restano sempre allineati.
+        public struct MazeRing { public float hx, hy; public int gap; public Rgba color; }   // gap: 1 sopra, -1 sotto, 0 nessuno
+        public struct MazeBlock { public float x1, x2, y; public Rgba color; }
+        public const float MazeGapHalf = 0.35f, MazeTubeRadius = 0.08f, MazeCornerRadius = 0.24f;
+
+        public static readonly MazeRing[] MazeRings =
         {
-            const float radius = 0.08f, half = 0.23f;
-            var p = new DoodlePainter(-half, -half, half, half, 300) { Wobble = 0f };
-            Sdf tube = Sd.Box(0, 0, radius, radius, radius);   // un cerchio: il 9-slice lo allunga in capsula
-            p.FillFunc(Sd.Box(0, 0, half, half), (x, y) =>
+            new MazeRing { hx = 2.8f, hy = 3.5f, gap = 0, color = NeonCyan },
+            new MazeRing { hx = 2.1f, hy = 2.1f, gap = 1, color = NeonMagenta },
+            new MazeRing { hx = 1.4f, hy = 1.4f, gap = -1, color = NeonYellow },
+            new MazeRing { hx = 0.7f, hy = 0.7f, gap = 1, color = NeonCyan },
+        };
+
+        public static readonly MazeBlock[] MazeBlocks =
+        {
+            new MazeBlock { x1 = 1.4f, x2 = 2.1f, y = 0f, color = NeonMagenta },
+            new MazeBlock { x1 = -1.4f, x2 = -0.7f, y = 0f, color = NeonYellow },
+        };
+
+        /// <summary>Distanza dalla linea centrale di un anello (rettangolo con angoli tondi, varco con estremità tonde).</summary>
+        static float RingPathDistance(MazeRing r, float x, float y)
+        {
+            float qx = Math.Abs(x) - r.hx + MazeCornerRadius, qy = Math.Abs(y) - r.hy + MazeCornerRadius;
+            float box = (float)Math.Sqrt(Math.Max(qx, 0f) * Math.Max(qx, 0f) + Math.Max(qy, 0f) * Math.Max(qy, 0f))
+                        + Math.Min(Math.Max(qx, qy), 0f) - MazeCornerRadius;
+            float d = Math.Abs(box);
+            if (r.gap != 0 && Math.Abs(x) < MazeGapHalf && y * r.gap > r.hy - 0.6f)
             {
-                float d = Math.Max(0f, tube(x, y));
-                return color.WithAlpha((float)Math.Exp(-d * 20f) * 0.6f);
-            });
-            p.FillFunc(tube, (x, y) =>
+                float dx = Math.Abs(x) - MazeGapHalf, dy = Math.Abs(y) - r.hy;
+                d = (float)Math.Sqrt(dx * dx + dy * dy);   // il varco termina con due estremità tonde
+            }
+            return d;
+        }
+
+        static float BlockDistance(MazeBlock b, float x, float y)
+        {
+            float cx = Math.Max(b.x1, Math.Min(b.x2, x));
+            return (float)Math.Sqrt((x - cx) * (x - cx) + (y - b.y) * (y - b.y));
+        }
+
+        /// <summary>
+        /// Tutte le pareti del labirinto in un unico disegno al neon: tratti dritti, curve e varchi hanno esattamente
+        /// lo stesso tubo (nucleo quasi bianco, corpo colorato, alone), senza giunture.
+        /// </summary>
+        public static DoodleArt MazeNeon()
+        {
+            const float glowReach = 0.17f;
+            var p = new DoodlePainter(-3.05f, -3.75f, 3.05f, 3.75f, 150) { Wobble = 0f };
+            var tubes = new List<Func<float, float, float>>();
+            var colors = new List<Rgba>();
+            foreach (MazeRing r in MazeRings) { MazeRing rr = r; tubes.Add((x, y) => RingPathDistance(rr, x, y)); colors.Add(r.color); }
+            foreach (MazeBlock b in MazeBlocks) { MazeBlock bb = b; tubes.Add((x, y) => BlockDistance(bb, x, y)); colors.Add(b.color); }
+            Sdf all = Sd.Box(0, 0, 3.1f, 3.8f);
+            for (int i = 0; i < tubes.Count; i++)   // prima tutti gli aloni
             {
-                float t = Clamp(-tube(x, y) / radius);            // 0 sul bordo del tubo, 1 al centro
-                Rgba c = Rgba.Lerp(Rgba.Lerp(color, Rgba.White, 0.15f), Rgba.White, Clamp((t - 0.45f) / 0.45f));
-                return Rgba.Lerp(Rgba.Lerp(color, Ink, 0.15f), c, Clamp(t * 4f));
-            });
-            return new DoodleArt(name, p, 68);   // bordo = metà sprite meno 2 px centrali da stirare
+                var dist = tubes[i]; Rgba c = colors[i];
+                p.FillFunc(all, (x, y) =>
+                {
+                    float d = dist(x, y) - MazeTubeRadius;
+                    return d > glowReach ? Rgba.Clear : c.WithAlpha((float)Math.Exp(-Math.Max(0f, d) * 20f) * 0.6f);
+                });
+            }
+            for (int i = 0; i < tubes.Count; i++)   // poi i tubi
+            {
+                var dist = tubes[i]; Rgba c = colors[i];
+                p.FillFunc((x, y) => dist(x, y) - MazeTubeRadius, (x, y) =>
+                {
+                    float t = Clamp(1f - dist(x, y) / MazeTubeRadius);   // 0 sul bordo, 1 al centro
+                    Rgba core = Rgba.Lerp(Rgba.Lerp(c, Rgba.White, 0.15f), Rgba.White, Clamp((t - 0.45f) / 0.45f));
+                    return Rgba.Lerp(Rgba.Lerp(c, Ink, 0.15f), core, Clamp(t * 4f));
+                });
+            }
+            return new DoodleArt("maze_neon", p);
         }
 
         /// <summary>
@@ -920,34 +973,6 @@ namespace Gotcha.EditorArt
             return new DoodleArt("boom", p);
         }
 
-        // ---------- Livello 2: curve al neon per gli angoli ----------
-
-        public const float NeonCornerRadius = 0.24f;
-
-        /// <summary>
-        /// Quarto di cerchio al neon per gli angoli arrotondati: centro della curva in (0,0), raggio NeonCornerRadius,
-        /// da (R,0) a (0,R). Si ruota di 90° per gli altri angoli.
-        /// </summary>
-        public static DoodleArt NeonArc(string name, Rgba color)
-        {
-            const float tubeR = 0.08f, glow = 0.15f, R = NeonCornerRadius;
-            var p = new DoodlePainter(-tubeR - glow, -tubeR - glow, R + tubeR + glow, R + tubeR + glow, 300) { Wobble = 0f };
-            Sdf ring = (x, y) => Math.Abs((float)Math.Sqrt(x * x + y * y) - R) - tubeR;
-            Sdf quadrant = (x, y) => Math.Max(ring(x, y), Math.Max(-x, -y));
-            p.FillFunc((x, y) => Math.Max(-x, -y), (x, y) =>
-            {
-                float d = Math.Max(0f, ring(x, y));
-                return color.WithAlpha((float)Math.Exp(-d * 20f) * 0.6f);
-            });
-            p.FillFunc(quadrant, (x, y) =>
-            {
-                float t = Clamp(-ring(x, y) / tubeR);
-                Rgba c = Rgba.Lerp(Rgba.Lerp(color, Rgba.White, 0.15f), Rgba.White, Clamp((t - 0.45f) / 0.45f));
-                return Rgba.Lerp(Rgba.Lerp(color, Ink, 0.15f), c, Clamp(t * 4f));
-            });
-            return new DoodleArt(name, p);
-        }
-
         // ---------- Livello 7: il tizio nel panico ----------
 
         static readonly Rgba Skin = Rgba.Hex("FFD3A8"), SkinShade = Rgba.Hex("E8AE7E");
@@ -1205,6 +1230,34 @@ namespace Gotcha.EditorArt
                 p.Shape(Sd.Circle(x, y + 0.5f, 0.07f), Rgba.Hex("FFD25A"), 0.025f);
             }
             return new DoodleArt("garden_bg", p);
+        }
+
+        /// <summary>Paletta acchiappamosche: centro della rete in (0,0), manico verso il basso fino a y = -1.9.</summary>
+        public static DoodleArt Swatter()
+        {
+            var p = new DoodlePainter(-0.55f, -2.05f, 0.55f, 0.52f, 120) { Ink = 0.045f };
+            Sdf handle = Sd.Capsule(0, -0.38f, 0, -1.85f, 0.06f);
+            Body(p, handle, Rgba.Hex("E23B3B"), Rgba.Hex("B22A2A"), null, -0.02f, 0.02f);
+            p.Shape(Sd.Capsule(0, -1.6f, 0, -1.9f, 0.08f), Rgba.Hex("3A3540"), 0.035f);   // impugnatura
+            Sdf head = Sd.Box(0, 0, 0.46f, 0.42f, 0.14f);
+            p.Fill(head, Rgba.Hex("6FD36B", 0.9f));
+            p.Hatch(Sd.Grow(head, -0.04f), Rgba.Hex("3E9A35"), 0.09f, 0.02f, 0f);
+            p.Hatch(Sd.Grow(head, -0.04f), Rgba.Hex("3E9A35"), 0.09f, 0.02f, 90f);
+            p.Shape(head, Rgba.Clear, 0.06f);
+            p.Shape(Sd.Polygon(-0.12f, -0.42f, 0.12f, -0.42f, 0.06f, -0.5f, -0.06f, -0.5f), Rgba.Hex("6FD36B"), 0.03f);
+            return new DoodleArt("swatter", p);
+        }
+
+        /// <summary>Bagliore rosso ai bordi dello schermo (la puntura): trasparente al centro.</summary>
+        public static DoodleArt StingFlash()
+        {
+            var p = new DoodlePainter(-1f, -1f, 1f, 1f, 64) { Wobble = 0f };
+            p.FillFunc(Sd.Box(0, 0, 1.1f, 1.1f), (x, y) =>
+            {
+                float d = Math.Max(Math.Abs(x), Math.Abs(y));
+                return Rgba.Hex("FF2A2A").WithAlpha(Clamp((d - 0.55f) / 0.45f) * 0.85f);
+            });
+            return new DoodleArt("sting_flash", p);
         }
     }
 }
