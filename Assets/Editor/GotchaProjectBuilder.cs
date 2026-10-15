@@ -31,7 +31,7 @@ public static class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 20;
+    const int BuilderVersion = 21;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -2659,8 +2659,7 @@ public static class GotchaProjectBuilder
         }
         var tail = new GameObject("Tail").transform;
         tail.SetParent(root.transform, false);
-        tail.localScale = Vector3.one * 1.5f;
-        Art(tail, "Art", "mouse_tail", 7, false);
+        Art(tail, "Art", "mouse_tail", 5, false);   // dietro la scatola: si vede solo la parte che esce dal bordo in basso
         SmokeEmitter hearts = Emitter(root.transform, "Hearts", Vector2.zero, "heart", 5f, 1.2f, 0.9f, 0.4f, 0.7f, Color.white);
         SpeechBubble bubble = Bubble(root.transform, new Vector2(0, 0.6f));
         bubble.transform.localScale = Vector3.one * 0.55f;

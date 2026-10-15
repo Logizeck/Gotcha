@@ -15,7 +15,7 @@ namespace Gotcha.Levels
         [SerializeField] Transform[] boxes;
         [SerializeField] Transform mouse;
         [SerializeField] Transform tail;             // spunta da sotto la scatola che nasconde il topolino
-        [SerializeField] Vector2 tailSpot = new Vector2(0.55f, 0.06f);
+        [SerializeField] Vector2 tailSpot = new Vector2(0.15f, 0f);
         [SerializeField] Vector2 tailEvery = new Vector2(3f, 7f);
         [SerializeField] SmokeEmitter hearts;
         [SerializeField] SpeechBubble bubble;
@@ -36,7 +36,7 @@ namespace Gotcha.Levels
             baseY = boxes[0].localPosition.y;
             hiding = 1;
             if (hearts != null) hearts.Stop();
-            if (tail != null) { tailSize = tail.localScale.y; tail.localScale = new Vector3(0f, tailSize, 1f); }
+            if (tail != null) { tailSize = tail.localScale.y; tail.localScale = new Vector3(tailSize, 0f, 1f); }
             StartCoroutine(Play());
             StartCoroutine(TailPeeks());
         }
@@ -84,11 +84,11 @@ namespace Gotcha.Levels
                 yield return new WaitForSeconds(Random.Range(tailEvery.x, tailEvery.y));
                 if (done || tail == null || mouse.gameObject.activeSelf) continue;
                 // la codina scivola fuori, si agita un attimo e rientra
-                for (float k = 0f; k < 1f; k += Time.deltaTime / 0.25f) { tail.localScale = new Vector3(k * tailSize, tailSize, 1f); yield return null; }
-                for (float k = 0f; k < 0.7f; k += Time.deltaTime) { tail.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(k * 25f) * 12f); yield return null; }
+                for (float k = 0f; k < 1f; k += Time.deltaTime / 0.25f) { tail.localScale = new Vector3(tailSize, k * tailSize, 1f); yield return null; }
+                for (float k = 0f; k < 0.7f; k += Time.deltaTime) { tail.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(k * 25f) * 5f); yield return null; }
                 tail.localRotation = Quaternion.identity;
-                for (float k = 1f; k > 0f; k -= Time.deltaTime / 0.2f) { tail.localScale = new Vector3(k * tailSize, tailSize, 1f); yield return null; }
-                tail.localScale = new Vector3(0f, tailSize, 1f);
+                for (float k = 1f; k > 0f; k -= Time.deltaTime / 0.2f) { tail.localScale = new Vector3(tailSize, k * tailSize, 1f); yield return null; }
+                tail.localScale = new Vector3(tailSize, 0f, 1f);
             }
         }
 
@@ -138,7 +138,7 @@ namespace Gotcha.Levels
         {
             done = true;
             if (bubble != null) bubble.Hide();
-            if (tail != null) tail.localScale = new Vector3(0f, tailSize, 1f);
+            if (tail != null) tail.localScale = new Vector3(tailSize, 0f, 1f);
             mouse.SetParent(transform, true);   // la scatola si alza, il topolino resta a terra
             mouse.gameObject.SetActive(true);
             yield return Lift(new[] { boxes[i] }, true);

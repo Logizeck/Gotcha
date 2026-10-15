@@ -215,7 +215,7 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - **26 Thirsty Plant**: fionda alla Angry Birds: tira indietro la goccia (lontano dal vaso), mira con la traiettoria
   a puntini e rilascia. 10 gocce, ne bastano 5 nel vaso.
 - **27 Shell Game**: segui la scatola col topolino. Il topolino è nascosto davvero (si muove con la sua scatola);
-  ogni 3-7 secondi (a caso) gli scappa la codina da sotto.
+  ogni 3-7 secondi (a caso) la codina (sottile e nera) sbuca da sotto il bordo della scatola e penzola giù dal tavolo.
 - **28 Sky Wire** (taglio): fili rosso, verde e nero. "Taglia il filo del colore del cielo"... fuori è notte:
   il filo giusto è il nero.
 - **29 Sunny Day**: il sole scalda il pupazzo (suda, arrossisce, si affloscia appena); trascina la nuvola davanti al

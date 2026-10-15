@@ -679,8 +679,9 @@ namespace Gotcha.EditorArt
         /// <summary>Codina rosa del topo che spunta da sotto la scatola (attaccatura in 0,0, si allunga a destra).</summary>
         public static DoodleArt MouseTail()
         {
-            var p = new DoodlePainter(-0.1f, -0.14f, 0.95f, 0.48f, 160) { Ink = 0.03f };
-            p.Shape(Sd.Polyline(0.055f, 0f, 0.02f, 0.3f, 0.03f, 0.55f, 0.1f, 0.72f, 0.24f, 0.76f, 0.36f, 0.68f, 0.4f, 0.62f, 0.33f), Rgba.Hex("F06A8C"));
+            // codina sottile e nera: esce da sotto la scatola (origine = bordo inferiore) e penzola giù dal bordo del tavolo
+            var p = new DoodlePainter(-0.08f, -0.68f, 0.3f, 0.1f, 200) { Ink = 0.03f };
+            p.InkLine(0.022f, 0f, 0.06f, 0.06f, -0.06f, 0.1f, -0.18f, 0.07f, -0.32f, 0.12f, -0.45f, 0.08f, -0.56f, 0.0f, -0.6f, -0.03f, -0.54f);
             return new DoodleArt("mouse_tail", p);
         }
 
