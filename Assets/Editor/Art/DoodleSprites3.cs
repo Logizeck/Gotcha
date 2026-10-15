@@ -621,5 +621,79 @@ namespace Gotcha.EditorArt
             float px = ax + dx * t - x, py = ay + dy * t - y;
             return (float)Math.Sqrt(px * px + py * py);
         }
+
+        // ---------- Easter egg di Hot Soup: il topo carbonizzato ----------
+
+        /// <summary>
+        /// Scheletrino del topo (stesso ingombro di mouse): teschio con le orecchie di cartilagine, due piccole X
+        /// al posto degli occhi, lingua di fuori, costole, coda di vertebre. Qualche fumo nero lo aggiunge il livello.
+        /// </summary>
+        public static DoodleArt MouseSkeleton()
+        {
+            var p = new DoodlePainter(-0.75f, -0.6f, 0.75f, 0.9f, 120) { Ink = 0.04f };
+            Rgba bone = Rgba.Hex("F4EEDC"), boneShade = Rgba.Hex("D3C9AE");
+            // coda di vertebre
+            for (int i = 0; i < 6; i++)
+            {
+                float t = i / 5f;
+                float x = 0.35f + t * 0.33f, y = -0.4f + (float)Math.Sin(t * 2.4f) * 0.25f + t * 0.15f;
+                p.Shape(Sd.Circle(x, y, 0.035f - t * 0.01f), bone, 0.015f);
+            }
+            // colonna e costole
+            p.Shape(Sd.Capsule(0.05f, -0.45f, -0.02f, 0.1f, 0.04f), bone, 0.02f);
+            for (int i = 0; i < 4; i++)
+            {
+                float y = -0.05f - i * 0.1f, w = 0.22f - Math.Abs(i - 1.5f) * 0.03f;
+                p.Shape(Sd.Polyline(0.022f, 0.02f - w, y - 0.03f, 0.02f, y + 0.01f, 0.02f + w, y - 0.03f), bone, 0.015f);
+            }
+            // bacino e zampette
+            p.Shape(Sd.Ellipse(0.05f, -0.42f, 0.14f, 0.06f), bone, 0.02f);
+            foreach (float x in new[] { -0.15f, 0.2f })
+            {
+                p.Shape(Sd.Capsule(x * 0.6f, -0.42f, x, -0.5f, 0.025f), bone, 0.015f);
+                p.Shape(Sd.Ellipse(x, -0.52f, 0.08f, 0.03f), bone, 0.015f);
+            }
+            // orecchie (cartilagine bruciacchiata)
+            foreach (float x in new[] { -0.38f, 0.22f })
+            {
+                p.Shape(Sd.Circle(x, 0.55f, 0.19f), Rgba.Hex("6B5E5A"));
+                p.Fill(Sd.Circle(x, 0.55f, 0.1f), Rgba.Hex("4A403D"));
+            }
+            // teschio
+            Sdf skull = Sd.Union(Sd.Ellipse(-0.08f, 0.32f, 0.29f, 0.25f), Sd.Ellipse(-0.3f, 0.2f, 0.12f, 0.08f));
+            Body(p, skull, bone, boneShade, null, -0.03f, 0.04f);
+            foreach (float x in new[] { -0.2f, 0.02f })
+            {
+                p.Fill(Sd.Ellipse(x, 0.36f, 0.075f, 0.08f), Rgba.Hex("2A2C36"));   // orbite
+                p.InkLine(0.022f, x - 0.035f, 0.32f, x + 0.035f, 0.4f);           // X piccole
+                p.Line(Rgba.White, 0.018f, x - 0.035f, 0.32f, x + 0.035f, 0.4f);
+                p.Line(Rgba.White, 0.018f, x - 0.035f, 0.4f, x + 0.035f, 0.32f);
+            }
+            p.Fill(Sd.Polygon(-0.33f, 0.21f, -0.29f, 0.21f, -0.31f, 0.17f), Rgba.Hex("2A2C36"));   // naso
+            for (int i = 0; i < 4; i++) p.InkLine(0.012f, -0.3f + i * 0.05f, 0.12f, -0.3f + i * 0.05f, 0.08f);   // dentini
+            p.Shape(Sd.Union(Sd.Box(-0.2f, 0.04f, 0.04f, 0.07f, 0.035f), Sd.Circle(-0.2f, -0.03f, 0.045f)), Rgba.Hex("FF8FA3"), 0.018f);   // linguaccia
+            p.Line(Rgba.Hex("D9627A"), 0.01f, -0.2f, 0.07f, -0.2f, -0.02f);
+            return new DoodleArt("mouse_skeleton", p);
+        }
+
+        /// <summary>Codina rosa del topo che spunta da sotto la scatola (attaccatura in 0,0, si allunga a destra).</summary>
+        public static DoodleArt MouseTail()
+        {
+            var p = new DoodlePainter(-0.1f, -0.14f, 0.95f, 0.48f, 160) { Ink = 0.03f };
+            p.Shape(Sd.Polyline(0.055f, 0f, 0.02f, 0.3f, 0.03f, 0.55f, 0.1f, 0.72f, 0.24f, 0.76f, 0.36f, 0.68f, 0.4f, 0.62f, 0.33f), Rgba.Hex("F06A8C"));
+            return new DoodleArt("mouse_tail", p);
+        }
+
+        /// <summary>Luna crescente con la faccina assonnata e serena (centro 0,0).</summary>
+        public static DoodleArt Moon()
+        {
+            var p = new DoodlePainter(-0.75f, -0.75f, 0.75f, 0.75f, 120) { Ink = 0.045f };
+            p.FillFunc(Sd.Circle(0, 0, 0.75f), (x, y) => Rgba.Hex("FFF6C9").WithAlpha(0.35f * Clamp(1f - (float)Math.Sqrt(x * x + y * y) / 0.75f)));
+            Sdf moon = Sd.Subtract(Sd.Circle(0, 0, 0.5f), Sd.Circle(0.26f, 0.12f, 0.42f));
+            Body(p, moon, Rgba.Hex("FFF3B0"), Rgba.Hex("F2D27A"));
+            p.InkLine(0.025f, -0.36f, 0.08f, -0.27f, 0.05f);   // occhio chiuso
+            p.InkLine(0.02f, -0.36f, -0.12f, -0.3f, -0.17f, -0.24f, -0.15f);
+            return new DoodleArt("moon", p);
+        }
     }
 }

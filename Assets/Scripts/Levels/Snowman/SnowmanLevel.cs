@@ -21,20 +21,13 @@ namespace Gotcha.Levels
         [Header("Parti del pupazzo (pivot sui punti di appoggio)")]
         [SerializeField] Transform snowman;      // radice ai piedi
         [SerializeField] Transform basePart;     // pivot y = 0
-        [SerializeField] Transform armLeft;      // braccia separate: cadono durante lo scioglimento
-        [SerializeField] Transform armRight;
         [SerializeField] Transform headPart;     // pivot y = 3.42
-        [SerializeField] Transform hatPart;      // pivot y = 4.55
         [SerializeField] SpriteRenderer[] bodyRenderers;
         [SerializeField] SpriteRenderer blush;
         [SerializeField] SpeechBubble bubble;
-        [SerializeField] SmokeEmitter smoke;
         [SerializeField] StrokeDrawer mouthPen;  // centrato sulla testa
-        [SerializeField] SnowmanMelter melter;   // scioglimento completo (maschera, colature, pozzanghera)
+        [SerializeField] SnowmanMeltdown meltdown;   // urlo + scioglimento (uguale al livello 29)
         [SerializeField] SpriteRenderer mouthO;  // bocca stupita (nascosta finché non serve)
-        [SerializeField] Transform scarf;        // la sciarpa non è neve: non si scioglie, scivola giù e galleggia
-        [SerializeField] AudioSource scream;
-        [SerializeField] AudioClip screamClip;   // Assets/Audio/Scream.wav se c'è, altrimenti sintetizzato
 
         [Header("Zone invisibili (coordinate del pupazzo, piedi in 0,0)")]
         [SerializeField] Vector2 headCenter = new Vector2(-0.1f, 3.7f);
@@ -225,118 +218,23 @@ namespace Gotcha.Levels
             snowman.localPosition = home;
             SetTint(BlushTint, 1f);
 
-            // 2. URLO: gli occhi (se ci sono) schizzano via, la bocca resta a "O", il cappello salta, le braccia si agitano
-            if (scream != null) { if (screamClip == null) screamClip = ScreamSynth.Create(); scream.PlayOneShot(screamClip); }
-            if (bubble != null) bubble.Show("AAAAAAH!!");
-            if (smoke != null) smoke.Play();
-            var eyes = ShootEyes();
+            // 2. URLO, occhi che schizzano, cappello che salta, braccia nel panico... e poi lo scioglimento vero
+            var eyes = new List<Transform>();
+            var attached = new List<Transform>();
+            foreach (Draggable2D d in items)
+            {
+                if (d == null || !d.gameObject.activeSelf) continue;
+                if (d.itemId == "eye" && d.transform.IsChildOf(headPart)) eyes.Add(d.transform);
+                else if (d.transform.IsChildOf(headPart) || d.transform.IsChildOf(basePart)) attached.Add(d.transform);
+            }
             SurprisedMouth();
-            if (melter != null)
+            if (meltdown != null)
             {
-                Transform hat = hatPart;
-                melter.Attach(hat);
-                melter.Drop(hat, new Vector2(1.4f, 6.5f));   // il cappello salta via per lo spavento
-                if (scarf != null) melter.Attach(scarf, snowman.TransformPoint(new Vector2(-0.05f, 2.82f)), false);
-                if (armLeft != null) melter.Attach(armLeft);
-                if (armRight != null) melter.Attach(armRight);
-                foreach (Draggable2D d in items)
-                    if (d != null && d.gameObject.activeSelf && !eyes.Contains(d.transform) && (d.transform.IsChildOf(headPart) || d.transform.IsChildOf(basePart))) melter.Attach(d.transform);
-                if (mouthO != null && mouthO.gameObject.activeSelf) melter.Attach(mouthO.transform, true);
-                if (blush != null) melter.Attach(blush.transform, true);
+                if (mouthO == null || !mouthO.gameObject.activeSelf) meltdown.mouthO = null;   // niente bocca disegnata: niente "O"
+                yield return meltdown.Play(eyes, attached);
             }
-            StartCoroutine(Flail());
-            Vector3 home2 = snowman.localPosition;
-            for (float k = 0f; k < 1.4f; k += Time.deltaTime)
-            {
-                snowman.localPosition = home2 + (Vector3)(Random.insideUnitCircle * 0.05f);   // trema tutto
-                yield return null;
-            }
-            snowman.localPosition = home2;
-            if (smoke != null) smoke.Stop();
-
-            // 3. si scioglie davvero: la neve si affloscia, cola e si allarga; sciarpa, braccia e carote scendono
-            //    con lei e alla fine galleggiano nella pozzanghera
-            if (melter != null)
-            {
-                melter.Begin();
-                if (melter.body != null) melter.body.color = BlushTint;
-                bool said = false, blub = false;
-                const float seconds = 7f;
-                for (float k = 0f; k < 1f; k += Time.deltaTime / seconds)
-                {
-                    float p = k * k * 0.5f + k * 0.5f;   // piano all'inizio, poi sempre più veloce
-                    melter.SetProgress(p);
-                    if (melter.body != null) melter.body.color = Color.Lerp(BlushTint, Color.white, Mathf.Clamp01(p * 3f));
-                    if (!said && p > 0.2f && bubble != null) { said = true; bubble.Show("I'm meltiiiing!"); }
-                    if (!blub && p > 0.72f && bubble != null) { blub = true; bubble.Show("blub..."); }
-                    yield return null;
-                }
-                melter.SetProgress(1f);
-                melter.End();
-                if (bubble != null) bubble.Hide();
-                // 4. gli occhi, che erano volati via, ricadono nella pozzanghera: plop, plop
-                foreach (Transform eye in eyes)
-                {
-                    if (eye == null) continue;
-                    eye.gameObject.SetActive(true);
-                    eye.localScale = new Vector3(1.4f, 1.4f, 1f);
-                    eye.position = snowman.TransformPoint(new Vector2(eye == eyes[0] ? -0.7f : 0.6f, 9f));
-                    melter.Attach(eye);
-                    melter.Drop(eye, Vector2.zero);
-                    yield return new WaitForSeconds(0.35f);
-                    if (bubble != null) bubble.Show("plop!");
-                }
-            }
-            yield return new WaitForSeconds(1.6f);
             if (ClipRecorder.Instance != null) ClipRecorder.Instance.Stop();   // il video si può condividere
             FailWithEgg(eggId);
-        }
-
-        /// <summary>Braccia che si agitano in preda al panico; poi, mentre affonda, salutano disperate.</summary>
-        IEnumerator Flail()
-        {
-            float t = 0f;
-            while (melter == null || melter.Progress < 0.62f)
-            {
-                t += Time.deltaTime;
-                bool panic = melter == null || !melter.Begun;
-                float speed = panic ? 22f : 9f, amp = panic ? 38f : 25f;
-                if (armLeft != null) armLeft.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(t * speed) * amp - (panic ? 0f : 15f));
-                if (armRight != null) armRight.localRotation = Quaternion.Euler(0, 0, -Mathf.Sin(t * speed + 1.3f) * amp + (panic ? 0f : 15f));
-                yield return null;
-            }
-        }
-
-        /// <summary>Gli occhi già messi schizzano fuori dalla testa, uno a sinistra e uno a destra, roteando.</summary>
-        List<Transform> ShootEyes()
-        {
-            var eyes = new List<Transform>();
-            foreach (Draggable2D d in items)
-                if (d != null && d.itemId == "eye" && d.transform.IsChildOf(headPart)) eyes.Add(d.transform);
-            if (eyes.Count == 0) return eyes;
-            eyes.Sort((a, b) => a.position.x.CompareTo(b.position.x));
-            for (int i = 0; i < eyes.Count; i++)
-            {
-                float side = eyes.Count == 1 ? (Local(eyes[i].position).x < headCenter.x ? -1f : 1f) : (i == 0 ? -1f : 1f);
-                eyes[i].SetParent(transform, true);
-                StartCoroutine(Fly(eyes[i], new Vector2(side * Random.Range(7f, 9f), Random.Range(5f, 7f))));
-            }
-            return eyes;
-        }
-
-        IEnumerator Fly(Transform t, Vector2 v)
-        {
-            float spin = Random.Range(600f, 900f) * Mathf.Sign(v.x);
-            Vector3 scale = t.localScale;
-            for (float time = 0f; time < 1.6f && t != null; time += Time.deltaTime)
-            {
-                v.y -= 9f * Time.deltaTime;
-                t.position += (Vector3)(v * Time.deltaTime);
-                t.Rotate(0, 0, -spin * Time.deltaTime);
-                t.localScale = scale * (1f + time * 0.6f);   // "boing!": si ingrandiscono come nei cartoni
-                yield return null;
-            }
-            if (t != null) t.gameObject.SetActive(false);
         }
 
         /// <summary>Se la bocca era stata disegnata, il solco diventa una "O" di stupore nello stesso punto.</summary>

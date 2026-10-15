@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using Gotcha.Components;
+using Gotcha.Core;
 using Gotcha.Sensors;
 
 namespace Gotcha.Levels
@@ -8,7 +9,8 @@ namespace Gotcha.Levels
     /// <summary>
     /// Livello 22 — zuppa bollente. Il topolino ha fame, ma la zuppa scotta (il termometro è al massimo).
     /// Prima si soffia nel microfono per raffreddarla (il vapore cala), POI si trascina la scodella al topolino.
-    /// Se gliela dai ancora calda: "HOT HOT HOT!" e la scodella torna indietro. (Editor: tasto B per soffiare.)
+    /// Easter egg `hot_soup`: se gliela dai ancora bollente, il topo diventa rosso, fuma, prende fuoco e resta
+    /// solo lo scheletrino con le X al posto degli occhi e la linguaccia. (Editor: tasto B per soffiare.)
     /// </summary>
     public class SoupLevel : LevelController
     {
@@ -23,6 +25,13 @@ namespace Gotcha.Levels
         [SerializeField] float blowThreshold = 0.25f;
         [SerializeField] float feedRadius = 1.1f;
         [SerializeField] float cool = 0.15f;
+        [Header("Easter egg: zuppa bollente")]
+        [SerializeField] SpriteRenderer mouseArt;
+        [SerializeField] GameObject skeleton;
+        [SerializeField] SmokeEmitter fire;
+        [SerializeField] SmokeEmitter blackSmoke;
+        [SerializeField] SpriteRenderer burnGlow;
+        [SerializeField] string eggId = "hot_soup";
 
         float temp = 1f;
         Vector3 bowlHome;
@@ -36,11 +45,17 @@ namespace Gotcha.Levels
             if (steam != null) steam.Play();
             if (hearts != null) hearts.Stop();
             if (bubble != null) { bubble.Show("Soup! Soup!"); StartCoroutine(HideLater(1.5f)); }
+            if (skeleton != null) skeleton.SetActive(false);
+            if (fire != null) fire.Stop();
+            if (blackSmoke != null) blackSmoke.Stop();
+            if (burnGlow != null) burnGlow.color = new Color(1f, 0.5f, 0.1f, 0f);
+            if (ClipRecorder.Instance != null) ClipRecorder.Instance.Begin();
         }
 
         void OnDestroy()
         {
             if (bowl != null) bowl.Dropped -= OnDropped;
+            if (ClipRecorder.Instance != null && ClipRecorder.Instance.IsCapturing) ClipRecorder.Instance.Discard();
             if (SensorHub.Instance != null) SensorHub.Instance.DisableMic();
         }
 
@@ -65,7 +80,7 @@ namespace Gotcha.Levels
         {
             if (done || busy) return;
             if (Vector2.Distance(d.transform.position, mouse.position) > feedRadius) { StartCoroutine(SlideHome()); return; }
-            if (temp > cool) StartCoroutine(TooHot());
+            if (temp > cool) StartCoroutine(Burnt());
             else StartCoroutine(Eat());
         }
 
@@ -79,27 +94,55 @@ namespace Gotcha.Levels
             busy = false;
         }
 
-        IEnumerator TooHot()
+        /// <summary>Zuppa bollente: il topo la beve d'un fiato... e si carbonizza.</summary>
+        IEnumerator Burnt()
         {
-            busy = true;
-            if (bubble != null) bubble.Show("HOT HOT HOT!");
+            done = true;
+            bowl.enabled = false;
+            if (bubble != null) bubble.Show("Slurp!");
+            yield return new WaitForSeconds(0.5f);
+            // diventa rosso fuoco e trema, fumo dalle orecchie
             Vector3 m = mouse.localPosition;
-            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.45f)
+            if (bubble != null) bubble.Show("HOT HOT HOT!!!");
+            if (steam != null) { steam.transform.position = mouse.position + Vector3.up * 0.7f; steam.puffsPerSecond = 14f; steam.Play(); }
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 1.1f)
             {
-                mouse.localPosition = m + Vector3.up * Mathf.Sin(k * Mathf.PI) * 0.8f;
+                if (mouseArt != null) mouseArt.color = Color.Lerp(Color.white, new Color(1f, 0.35f, 0.3f), k);
+                mouse.localPosition = m + (Vector3)(Random.insideUnitCircle * 0.05f * k) + Vector3.up * Mathf.Abs(Mathf.Sin(k * 20f)) * 0.15f;
+                if (burnGlow != null) burnGlow.color = new Color(1f, 0.5f, 0.1f, k * 0.6f);
                 yield return null;
             }
+            // FWOOSH: fiammata
+            if (fire != null) fire.Play();
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.6f)
+            {
+                if (burnGlow != null) { burnGlow.color = new Color(1f, 0.55f, 0.15f, 0.6f + 0.4f * Mathf.Sin(k * Mathf.PI)); burnGlow.transform.localScale = Vector3.one * (4f + k * 3f); }
+                yield return null;
+            }
+            // resta lo scheletrino
+            if (mouseArt != null) mouseArt.gameObject.SetActive(false);
+            if (skeleton != null) skeleton.SetActive(true);
             mouse.localPosition = m;
-            busy = false;
-            yield return SlideHome();
-            yield return new WaitForSeconds(0.6f);
-            if (bubble != null && !done) bubble.Hide();
+            if (fire != null) fire.Stop();
+            if (steam != null) steam.Stop();
+            if (blackSmoke != null) blackSmoke.Play();
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.5f)
+            {
+                if (burnGlow != null) burnGlow.color = new Color(1f, 0.5f, 0.1f, (1f - k) * 0.8f);
+                yield return null;
+            }
+            if (bubble != null) bubble.Show("...a bit hot.");
+            yield return new WaitForSeconds(1.8f);
+            if (blackSmoke != null) blackSmoke.Stop();
+            if (ClipRecorder.Instance != null) ClipRecorder.Instance.Stop();
+            FailWithEgg(eggId);
         }
 
         IEnumerator Eat()
         {
             done = true;
             bowl.enabled = false;
+            if (ClipRecorder.Instance != null) ClipRecorder.Instance.Discard();
             if (hearts != null) hearts.Play();
             if (bubble != null) bubble.Show("Slurp! Yum!");
             yield return new WaitForSeconds(1.6f);

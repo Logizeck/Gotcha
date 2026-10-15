@@ -5,9 +5,9 @@ using Gotcha.Components;
 namespace Gotcha.Levels
 {
     /// <summary>
-    /// Livello 28 — "taglia il filo del colore del cielo". Tre fili (rosso, blu, nero, in ordine casuale) collegano
+    /// Livello 28 — "taglia il filo del colore del cielo". Tre fili (rosso, verde, nero, in ordine casuale) collegano
     /// la dinamite al timer. Si tagliano col dito (swipe). Il trucco: fuori dalla finestra è notte, quindi il filo
-    /// giusto è il NERO, non il blu. Un taglio sbagliato, o il tempo che scade: BOOM.
+    /// giusto è il NERO (di giorno sarebbe azzurro, ma un filo azzurro non c'è). Un taglio sbagliato, o il tempo che scade: BOOM.
     /// </summary>
     public class SkyWireLevel : LevelController
     {
@@ -23,7 +23,7 @@ namespace Gotcha.Levels
         [SerializeField] SpeechBubble bubble;
         [SerializeField] float seconds = 15f;
 
-        static readonly Color[] WireColors = { new Color(0.9f, 0.2f, 0.22f), new Color(0.22f, 0.45f, 1f), new Color(0.13f, 0.11f, 0.15f) };
+        static readonly Color[] WireColors = { new Color(0.9f, 0.2f, 0.22f), new Color(0.25f, 0.78f, 0.3f), new Color(0.13f, 0.11f, 0.15f) };   // rosso, verde, nero
         const int Black = 2;
 
         int[] colorAt = new int[3];

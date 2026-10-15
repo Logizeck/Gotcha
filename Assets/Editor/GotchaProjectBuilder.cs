@@ -31,7 +31,7 @@ public static class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 16;
+    const int BuilderVersion = 17;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -140,7 +140,7 @@ public static class GotchaProjectBuilder
                 BuildBatteryLevel(), "mecha_robot"),
             Define("Soup", "hot_soup", "HOT SOUP",
                 "Careful, it's boiling! How do you cool soup down?",
-                BuildSoupLevel()),
+                BuildSoupLevel(), "hot_soup"),
             Define("FrozenKey", "frozen_key", "FROZEN KEY",
                 "Ice melts with a little friction. And that key looks huge...",
                 BuildFrozenKeyLevel(keyPrefab, doorPrefab)),
@@ -631,6 +631,28 @@ public static class GotchaProjectBuilder
         return melter;
     }
 
+    /// <summary>La "tragedia" del pupazzo (urlo, occhi, cappello, braccia, scioglimento), uguale nei livelli 11 e 29.</summary>
+    static SnowmanMeltdown AddMeltdown(GameObject root, Transform snowman, SnowmanMelter melter, Transform hat, Transform armLeft,
+        Transform armRight, Transform scarf, SpriteRenderer mouthO, SpriteRenderer blush, SpeechBubble bubble, SmokeEmitter smoke)
+    {
+        SnowmanMeltdown m = root.AddComponent<SnowmanMeltdown>();
+        m.snowman = snowman;
+        m.melter = melter;
+        m.hat = hat;
+        m.armLeft = armLeft;
+        m.armRight = armRight;
+        m.scarf = scarf;
+        m.mouthO = mouthO;
+        m.blush = blush;
+        m.bubble = bubble;
+        m.smoke = smoke;
+        AudioSource scream = root.AddComponent<AudioSource>();
+        scream.playOnAwake = false;
+        m.screamSource = scream;
+        m.screamClip = ScreamClip();   // null: il gioco lo sintetizza
+        return m;
+    }
+
     static Material SnowMeltMaterial()
     {
         string path = MaterialDir + "/SnowMelt.mat";
@@ -726,8 +748,6 @@ public static class GotchaProjectBuilder
         mouthO.transform.localScale = Vector3.one * 1.3f;
         mouthO.gameObject.SetActive(false);
         SnowmanMelter melter = AddMelter(snowman, bodies.ToArray());
-        AudioSource scream = root.AddComponent<AudioSource>();
-        scream.playOnAwake = false;
 
         SpeechBubble bubble = Bubble(root.transform, new Vector2(0.95f, 2.45f));
 
@@ -742,20 +762,12 @@ public static class GotchaProjectBuilder
 
         SetField(level, "snowman", snowman);
         SetField(level, "basePart", basePart);
-        SetField(level, "armLeft", armLeft);
-        SetField(level, "armRight", armRight);
         SetField(level, "headPart", headPart);
-        SetField(level, "hatPart", hatPart);
         SetArray(level, "bodyRenderers", bodies.ToArray());
         SetField(level, "blush", blush);
         SetField(level, "bubble", bubble);
-        SetField(level, "melter", melter);
+        SetField(level, "meltdown", AddMeltdown(root, snowman, melter, hatPart, armLeft, armRight, scarf, mouthO, blush, bubble, smoke));
         SetField(level, "mouthO", mouthO);
-        SetField(level, "scarf", scarf);
-        SetField(level, "scream", scream);
-        AudioClip screamWav = ScreamClip();
-        if (screamWav != null) SetField(level, "screamClip", screamWav);
-        SetField(level, "smoke", smoke);
         SetField(level, "mouthPen", drawer);
         return SavePrefab(root, LevelDir + "/Snowman/Level_Snowman.prefab");
     }
@@ -2295,7 +2307,15 @@ public static class GotchaProjectBuilder
         var mouse = new GameObject("Mouse").transform;
         mouse.SetParent(root.transform, false);
         mouse.localPosition = new Vector3(1.7f, -1.5f, 0);
-        Art(mouse, "Art", "mouse", 4);
+        SpriteRenderer mouseArt = Art(mouse, "Art", "mouse", 4).GetComponent<SpriteRenderer>();
+        GameObject skeleton = Art(mouse, "Skeleton", "mouse_skeleton", 4).gameObject;   // Easter egg: zuppa bollente
+        SpriteRenderer burnGlow = Art(mouse, "BurnGlow", "glow", 3, false, new Vector2(0, 0.15f)).GetComponent<SpriteRenderer>();
+        burnGlow.transform.localScale = Vector3.one * 4f;
+        SmokeEmitter fire = Emitter(mouse, "Fire", new Vector2(0, -0.1f), "flame", 26f, 0.7f, 1.6f, 0.45f, 2.6f, Color.white, 45);
+        fire.growth = -0.3f;
+        fire.spinRange = 15f;
+        SmokeEmitter blackSmoke = Emitter(mouse, "BlackSmoke", new Vector2(0, 0.5f), "puff", 6f, 1.8f, 0.7f, 0.3f, 0.5f, new Color(0.22f, 0.2f, 0.24f, 0.85f), 46);
+        blackSmoke.growth = 1.8f;
         SmokeEmitter hearts = Emitter(mouse, "Hearts", new Vector2(0, 0.6f), "heart", 5f, 1.2f, 0.9f, 0.4f, 0.7f, Color.white);
         SpeechBubble bubble = Bubble(root.transform, new Vector2(1.75f, -0.15f));
         bubble.transform.localScale = Vector3.one * 0.45f;
@@ -2305,6 +2325,11 @@ public static class GotchaProjectBuilder
         SetField(level, "mercury", mercury);
         SetField(level, "mercuryBar", mbar);
         SetField(level, "mouse", mouse);
+        SetField(level, "mouseArt", mouseArt);
+        SetField(level, "skeleton", skeleton);
+        SetField(level, "fire", fire);
+        SetField(level, "blackSmoke", blackSmoke);
+        SetField(level, "burnGlow", burnGlow);
         SetField(level, "hearts", hearts);
         SetField(level, "bubble", bubble);
         return SavePrefab(root, LevelDir + "/Soup/Level_Soup.prefab");
@@ -2605,12 +2630,17 @@ public static class GotchaProjectBuilder
             c.offset = new Vector2(0, 0.55f);
             boxes.Add(b);
         }
+        var tail = new GameObject("Tail").transform;
+        tail.SetParent(root.transform, false);
+        tail.localScale = Vector3.one * 1.5f;
+        Art(tail, "Art", "mouse_tail", 7, false);
         SmokeEmitter hearts = Emitter(root.transform, "Hearts", Vector2.zero, "heart", 5f, 1.2f, 0.9f, 0.4f, 0.7f, Color.white);
         SpeechBubble bubble = Bubble(root.transform, new Vector2(0, 0.6f));
         bubble.transform.localScale = Vector3.one * 0.55f;
 
         SetArray(level, "boxes", boxes.ToArray());
         SetField(level, "mouse", mouse);
+        SetField(level, "tail", tail);
         SetField(level, "hearts", hearts);
         SetField(level, "bubble", bubble);
         return SavePrefab(root, LevelDir + "/Shell/Level_Shell.prefab");
@@ -2703,11 +2733,18 @@ public static class GotchaProjectBuilder
         mouthO.transform.localScale = Vector3.one * 1.4f;
         SnowmanMelter melter = AddMelter(snowman, bodies.ToArray());
         SmokeEmitter sweat = Emitter(headPart, "Sweat", new Vector2(-0.1f, 4.4f - hp), "sweat", 4f, 0.8f, -1.2f, 0.8f, 1.2f, new Color(0.75f, 0.9f, 1f), 12);
+        SmokeEmitter smoke = Emitter(headPart, "Smoke", new Vector2(-0.1f, 3.9f - hp), "puff", 7f, 1.6f, 0.9f, 0.55f, 0.6f, new Color(0.85f, 0.86f, 0.9f, 0.95f));
 
+        // terra innevata in primo piano: sole e luna passano DIETRO le colline
+        Art(root.transform, "Foreground", "snow_fg", -1, false);
         var sun = new GameObject("Sun").transform;
         sun.SetParent(root.transform, false);
         sun.localPosition = new Vector3(1.6f, 2.85f, 0);
-        Transform sunArt = Art(sun, "Art", "sun", 2);
+        Transform sunArt = Art(sun, "Art", "sun", -2);
+        var moon = new GameObject("Moon").transform;
+        moon.SetParent(root.transform, false);
+        moon.localPosition = new Vector3(-0.4f, 2.9f, 0);
+        Art(moon, "Art", "moon", -2);
         sunArt.gameObject.AddComponent<Pulse>();
         Vector2 head = new Vector2(-0.35f - 0.1f * 0.74f, -3.65f + 3.7f * 0.74f);
         SpriteRenderer beam = Art(sun, "Beam", "light_cone", 9, false).GetComponent<SpriteRenderer>();
@@ -2725,7 +2762,7 @@ public static class GotchaProjectBuilder
         drag.itemId = "cloud";
         drag.returnOnMiss = false;
 
-        SpriteRenderer sky = Bar(root.transform, "Dusk", Vector2.zero, new Vector2(12f, 16f), new Color(0.1f, 0.1f, 0.3f, 0f), 15);
+        SpriteRenderer sky = Bar(root.transform, "Dusk", Vector2.zero, new Vector2(12f, 16f), new Color(0.1f, 0.1f, 0.3f, 0f), 15);   // tramonto, poi notte
         TextMesh countdown = Label(root.transform, new Vector2(0, 3.3f), 30, "", 0.06f);
         SpeechBubble bubble = Bubble(root.transform, new Vector2(1.1f, 0.4f));
         bubble.transform.localScale = Vector3.one * 0.5f;
@@ -2735,7 +2772,10 @@ public static class GotchaProjectBuilder
         SetField(level, "sunbeam", beam);
         SetField(level, "skyTint", sky);
         SetField(level, "melter", melter);
-        SetArray(level, "looseParts", new Object[] { hatPart, scarf, armLeft, armRight, eyeL, eyeR, nose });
+        SetField(level, "moon", moon);
+        SetField(level, "meltdown", AddMeltdown(root, snowman, melter, hatPart, armLeft, armRight, scarf, mouthO, null, bubble, smoke));
+        SetArray(level, "eyes", new Object[] { eyeL, eyeR });
+        SetArray(level, "attached", new Object[] { nose });
         SetField(level, "mouthSmile", smile);
         SetField(level, "mouthO", mouthO);
         SetField(level, "sweat", sweat);

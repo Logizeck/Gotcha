@@ -195,6 +195,9 @@ namespace Gotcha.Components
             }
         }
 
+        /// <summary>Smette di seguire la neve (es. gli occhi che schizzano via): lo muove qualcun altro.</summary>
+        public void Detach(Transform t) { followers.RemoveAll(f => f.t == t); }
+
         /// <summary>Fa cadere subito un seguace (es. il cappello che salta via all'urlo).</summary>
         public void Drop(Transform t, Vector2 velocity)
         {

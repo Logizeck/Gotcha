@@ -313,18 +313,9 @@ namespace Gotcha.EditorArt
         // ---------- Pupazzo di neve ----------
 
         /// <summary>Paesaggio innevato (coordinate del livello; neve sotto y = -3).</summary>
-        public static DoodleArt SnowBackdrop()
+        /// <summary>Abete e neve a terra con le gobbe (usati dallo sfondo e dal primo piano del livello del sole).</summary>
+        static void DrawSnowGround(DoodlePainter p)
         {
-            var p = new DoodlePainter(-4.5f, -7f, 4.5f, 7f, 50) { Ink = 0.06f };
-            p.FillFunc(Sd.Box(0, 0, 4.6f, 7.1f), (x, y) =>
-                Rgba.Lerp(Rgba.Hex("E9F7FF"), Rgba.Hex("8FD0FF"), Math.Min(1f, Math.Max(0f, (y + 2f) / 7f))));
-            // nuvole
-            foreach (var c in new[] { new[] { -2.0f, 3.1f }, new[] { 2.1f, 2.4f } })
-            {
-                Sdf cloud = Sd.Union(Sd.Circle(c[0] - 0.4f, c[1], 0.32f), Sd.Circle(c[0], c[1] + 0.15f, 0.42f),
-                                     Sd.Circle(c[0] + 0.45f, c[1] - 0.02f, 0.3f), Sd.Box(c[0], c[1] - 0.15f, 0.7f, 0.17f, 0.15f));
-                Body(p, cloud, Rgba.White, Rgba.Hex("DCEBFA"));
-            }
             // abete
             Sdf trunk = Sd.Box(2.45f, -2.75f, 0.12f, 0.3f, 0.03f);
             Body(p, trunk, Rgba.Hex("8A5A3B"), Rgba.Hex("6B4129"));
@@ -339,6 +330,29 @@ namespace Gotcha.EditorArt
             Sdf ground = Sd.Union(Sd.Box(0, -5.2f, 4.7f, 2.2f), Sd.Circle(-2.6f, -3.6f, 1.0f), Sd.Circle(0.4f, -3.9f, 1.2f),
                                   Sd.Circle(3.3f, -3.4f, 0.9f), Sd.Circle(-4.4f, -3.3f, 0.8f));
             Body(p, ground, Snow, SnowShade, SnowHatch, -0.1f, 0.12f);
+        }
+
+        /// <summary>Solo terra innevata e abete, cielo trasparente: davanti al sole e alla luna che tramontano/sorgono.</summary>
+        public static DoodleArt SnowForeground()
+        {
+            var p = new DoodlePainter(-4.5f, -7f, 4.5f, 7f, 50) { Ink = 0.06f };
+            DrawSnowGround(p);
+            return new DoodleArt("snow_fg", p);
+        }
+
+        public static DoodleArt SnowBackdrop()
+        {
+            var p = new DoodlePainter(-4.5f, -7f, 4.5f, 7f, 50) { Ink = 0.06f };
+            p.FillFunc(Sd.Box(0, 0, 4.6f, 7.1f), (x, y) =>
+                Rgba.Lerp(Rgba.Hex("E9F7FF"), Rgba.Hex("8FD0FF"), Math.Min(1f, Math.Max(0f, (y + 2f) / 7f))));
+            // nuvole
+            foreach (var c in new[] { new[] { -2.0f, 3.1f }, new[] { 2.1f, 2.4f } })
+            {
+                Sdf cloud = Sd.Union(Sd.Circle(c[0] - 0.4f, c[1], 0.32f), Sd.Circle(c[0], c[1] + 0.15f, 0.42f),
+                                     Sd.Circle(c[0] + 0.45f, c[1] - 0.02f, 0.3f), Sd.Box(c[0], c[1] - 0.15f, 0.7f, 0.17f, 0.15f));
+                Body(p, cloud, Rgba.White, Rgba.Hex("DCEBFA"));
+            }
+            DrawSnowGround(p);
             // fiocchi
             var rnd = new Random(7);
             for (int i = 0; i < 26; i++)

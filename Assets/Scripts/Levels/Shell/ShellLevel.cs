@@ -7,12 +7,16 @@ namespace Gotcha.Levels
 {
     /// <summary>
     /// Livello 27 — il gioco delle tre scatole. Il topolino si nasconde sotto la scatola di mezzo, poi le scatole
-    /// si scambiano di posto sempre più veloci. Tocca la scatola giusta: se la sbagli, si riprova.
+    /// si scambiano di posto sempre più veloci. Il topolino resta ben nascosto (si muove con la sua scatola) ma ogni
+    /// 3-7 secondi gli sfugge la codina da sotto. Tocca la scatola giusta: se la sbagli, si riprova.
     /// </summary>
     public class ShellLevel : LevelController
     {
         [SerializeField] Transform[] boxes;
         [SerializeField] Transform mouse;
+        [SerializeField] Transform tail;             // spunta da sotto la scatola che nasconde il topolino
+        [SerializeField] Vector2 tailSpot = new Vector2(0.55f, 0.06f);
+        [SerializeField] Vector2 tailEvery = new Vector2(3f, 7f);
         [SerializeField] SmokeEmitter hearts;
         [SerializeField] SpeechBubble bubble;
         [SerializeField] int swaps = 9;
@@ -22,6 +26,7 @@ namespace Gotcha.Levels
 
         int hiding;          // indice della scatola che nasconde il topolino
         bool picking, done;
+        float tailSize = 1f;
         Camera cam;
         float baseY;
 
@@ -31,7 +36,9 @@ namespace Gotcha.Levels
             baseY = boxes[0].localPosition.y;
             hiding = 1;
             if (hearts != null) hearts.Stop();
+            if (tail != null) { tailSize = tail.localScale.y; tail.localScale = new Vector3(0f, tailSize, 1f); }
             StartCoroutine(Play());
+            StartCoroutine(TailPeeks());
         }
 
         IEnumerator Play()
@@ -42,6 +49,8 @@ namespace Gotcha.Levels
             if (bubble != null) bubble.Show("Find me!");
             yield return new WaitForSeconds(1.3f);
             yield return Lift(boxes, false);
+            mouse.gameObject.SetActive(false);   // ora è nascosto davvero
+            FollowBox();
             if (bubble != null) bubble.Hide();
             yield return new WaitForSeconds(0.4f);
             for (int i = 0; i < swaps; i++)
@@ -60,6 +69,29 @@ namespace Gotcha.Levels
             mouse.localPosition = new Vector3(b.localPosition.x, baseY, mouse.localPosition.z);
         }
 
+        /// <summary>Topolino e codina stanno sotto la scatola che lo nasconde e si muovono con lei.</summary>
+        void FollowBox()
+        {
+            Transform b = boxes[hiding];
+            mouse.SetParent(b, true);
+            if (tail != null) { tail.SetParent(b, false); tail.localPosition = tailSpot; }
+        }
+
+        IEnumerator TailPeeks()
+        {
+            while (!done)
+            {
+                yield return new WaitForSeconds(Random.Range(tailEvery.x, tailEvery.y));
+                if (done || tail == null || mouse.gameObject.activeSelf) continue;
+                // la codina scivola fuori, si agita un attimo e rientra
+                for (float k = 0f; k < 1f; k += Time.deltaTime / 0.25f) { tail.localScale = new Vector3(k * tailSize, tailSize, 1f); yield return null; }
+                for (float k = 0f; k < 0.7f; k += Time.deltaTime) { tail.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(k * 25f) * 12f); yield return null; }
+                tail.localRotation = Quaternion.identity;
+                for (float k = 1f; k > 0f; k -= Time.deltaTime / 0.2f) { tail.localScale = new Vector3(k * tailSize, tailSize, 1f); yield return null; }
+                tail.localScale = new Vector3(0f, tailSize, 1f);
+            }
+        }
+
         IEnumerator Swap(int a, int b, float seconds)
         {
             Transform ta = boxes[a], tb = boxes[b];
@@ -76,7 +108,7 @@ namespace Gotcha.Levels
             // le scatole hanno cambiato posto: l'indice segue la scatola, non la posizione
             Transform tmp = boxes[a]; boxes[a] = boxes[b]; boxes[b] = tmp;
             if (hiding == a) hiding = b; else if (hiding == b) hiding = a;
-            PlaceMouse();
+            FollowBox();   // il topolino è figlio della sua scatola: si è spostato con lei
         }
 
         IEnumerator Lift(Transform[] which, bool up)
@@ -106,6 +138,9 @@ namespace Gotcha.Levels
         {
             done = true;
             if (bubble != null) bubble.Hide();
+            if (tail != null) tail.localScale = new Vector3(0f, tailSize, 1f);
+            mouse.SetParent(transform, true);   // la scatola si alza, il topolino resta a terra
+            mouse.gameObject.SetActive(true);
             yield return Lift(new[] { boxes[i] }, true);
             if (i == hiding)
             {

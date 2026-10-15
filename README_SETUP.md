@@ -1,4 +1,4 @@
-# Gotcha! — v0.16 (Easter egg del robot)
+# Gotcha! — v0.17 (topo bruciato, coda, tramonto)
 
 La versione installata si legge nel MENU del gioco (accanto al conteggio degli Easter egg).
 
@@ -199,6 +199,8 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
   evolve in un robot da battaglia giapponese (V dorata, spada laser) che ringrazia "ARIGATO, MASTER!". Il livello è
   superato E l'Easter egg viene contato; la scena è registrata e si può condividere (SHARE VIDEO).
 - **22 Hot Soup**: soffia nel microfono per raffreddare la zuppa, POI trascinala al topolino. Editor: B.
+  Easter egg `hot_soup`: se gliela dai bollente, il topo diventa rosso, fuma, prende fuoco e resta lo scheletrino
+  con le X al posto degli occhi e la linguaccia (video da condividere).
 - **23 Frozen Key**: strofina il ghiaccio col dito, rimpicciolisci la chiave col pizzico, apri la porta.
 - **24 Campfire**: strofina il bastoncino avanti e indietro per la scintilla, poi soffia PIANO (forte la spegne).
   Editor: B soffio leggero, N soffio forte.
@@ -207,10 +209,13 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
   sveglia e finalmente silenzio.
 - **26 Thirsty Plant**: fionda alla Angry Birds: tira indietro la goccia (lontano dal vaso), mira con la traiettoria
   a puntini e rilascia. 10 gocce, ne bastano 5 nel vaso.
-- **27 Shell Game**: segui la scatola col topolino.
-- **28 Sky Wire** (taglio): "taglia il filo del colore del cielo"... fuori è notte: il filo giusto è il nero.
-- **29 Sunny Day**: il sole scioglie il pupazzo (stesso scioglimento dell'Easter egg); trascina la nuvola davanti al
-  sole (il vento la sposta) fino al tramonto. Se si scioglie: Easter egg `sun_melt` con video da condividere.
+- **27 Shell Game**: segui la scatola col topolino. Il topolino è nascosto davvero (si muove con la sua scatola);
+  ogni 3-7 secondi (a caso) gli scappa la codina da sotto.
+- **28 Sky Wire** (taglio): fili rosso, verde e nero. "Taglia il filo del colore del cielo"... fuori è notte:
+  il filo giusto è il nero.
+- **29 Sunny Day**: il sole scalda il pupazzo (suda, arrossisce, si affloscia appena); trascina la nuvola davanti al
+  sole (il vento la sposta) fino al tramonto: il sole scende DIETRO le colline e sorge la luna. Se il caldo arriva al
+  limite parte la stessa tragedia dell'Easter egg del livello 11 (`Components/SnowmanMeltdown`): Easter egg `sun_melt`.
 - **30 Cut the Rope** (taglio + tempismo): taglia una corda, aspetta l'oscillazione, taglia l'altra.
 - **31 Pizza Party** (taglio + trascinamento): due tagli dal centro, poi una fetta a ogni topolino.
 
