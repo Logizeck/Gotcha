@@ -250,7 +250,9 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
   a vicenda: bisogna ricordare metà codice. Tocca la cassaforte per la tastiera; codice sbagliato = ERR e si ridigita.
 - **38 Apple Catch**: scuoti il telefono (Editor: S) e cadono 1-2 mele; il cesto segue l'inclinazione (Editor:
   frecce). Ne servono 5 su 10: se ne cadono per terra troppe per arrivarci, si riprova.
-- **39 Marble Run** (disegno + fisica): fino a 3 rampe (la quarta cancella la più vecchia), poi GO. La biglia parte
+- **39 Marble Run** (disegno + fisica): fino a 3 rampe (la quarta cancella la più vecchia), poi GO: più a lungo
+  lo tieni premuto, più forte è la spinta (la barra arancione si riempie in 1.2 s; `minPush`, `maxPush`,
+  `chargeSeconds` nel prefab). Se la biglia si ferma fuori dalla tazza torna al via dopo 1.2 s. La biglia parte
   dalla mensola, deve superare il muretto e restare mezzo secondo nella tazza. Se manca torna al via con le rampe
   intatte: si corregge e si riprova senza perdere vite.
 - **40 Copycat** (memoria): il gatto suona una sequenza sui 4 tasti colorati (do, mi, sol, si); ripetila. Tre turni

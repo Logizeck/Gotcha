@@ -31,7 +31,7 @@ public static class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 22;
+    const int BuilderVersion = 23;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -190,7 +190,7 @@ public static class GotchaProjectBuilder
                 "Shake the tree, tilt the basket. Five apples for a pie.",
                 BuildAppleCatchLevel()),
             Define("MarbleRun", "marble_run", "MARBLE RUN",
-                "Draw up to three ramps, then press GO. Over the wall, into the cup!",
+                "Draw up to three ramps. Hold GO longer for a stronger push!",
                 BuildMarbleRunLevel()),
             Define("Copycat", "copycat", "COPYCAT",
                 "Watch the cat, listen, then play it back.",
@@ -3508,17 +3508,23 @@ public static class GotchaProjectBuilder
         goArt.localScale = Vector3.one * 0.8f;
         TextMesh goLabel = Label(goGo.transform, new Vector2(0, 0.08f), 31, "GO", 0.09f);
         goLabel.color = Color.white;
-        goGo.AddComponent<BoxCollider2D>().size = new Vector2(1.6f, 1.0f);
-        TapButton go = goGo.AddComponent<TapButton>();
-        go.id = "go";
-        go.visual = goArt;
+        BoxCollider2D goCol = goGo.AddComponent<BoxCollider2D>();
+        goCol.size = new Vector2(1.6f, 1.0f);
+        // barra della spinta: si riempie tenendo premuto GO
+        Bar(root.transform, "PowerBack", new Vector2(0.75f, -3.95f), new Vector2(2.7f, 0.32f), InkColor, 30);
+        var power = new GameObject("Power").transform;
+        power.SetParent(root.transform, false);
+        power.localPosition = new Vector3(-0.55f, -3.95f, 0);
+        Bar(power, "Fill", new Vector2(1.3f, 0f), new Vector2(2.6f, 0.22f), new Color(1f, 0.6f, 0.3f), 31);
 
         SmokeEmitter confetti = Emitter(root.transform, "Confetti", new Vector2(1.9f, -2.4f), "confetti", 30f, 1.2f, 1.6f, 0.6f, 1.1f, new Color(1f, 0.85f, 0.35f), 45);
         SpeechBubble bubble = Bubble(root.transform, new Vector2(0.9f, 2.9f));
         bubble.transform.localScale = Vector3.one * 0.5f;
 
         SetField(level, "marble", marble);
-        SetField(level, "go", go);
+        SetField(level, "goButton", goCol);
+        SetField(level, "goVisual", goArt);
+        SetField(level, "powerFill", power);
         SetField(level, "cupZone", zone);
         SetField(level, "confetti", confetti);
         SetField(level, "bubble", bubble);
