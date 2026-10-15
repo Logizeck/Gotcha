@@ -336,6 +336,12 @@ namespace Gotcha.EditorArt
                 DoodleSprites.MorseKey(0), DoodleSprites.MorseKey(1), DoodleSprites.MorseKey(2), DoodleSprites.MorseKey(3), DoodleSprites.MorseKey(4),
                 DoodleSprites.Workshop(), DoodleSprites.Dynamite(), DoodleSprites.TimerBox(), DoodleSprites.WireEnd(), DoodleSprites.Boom(),
                 DoodleSprites.BigButton("blue_button", Rgba.Hex("3E8EF7"), Rgba.Hex("2563C9")),
+                DoodleSprites.NeonArc("arc_cyan", DoodleSprites.NeonCyan), DoodleSprites.NeonArc("arc_magenta", DoodleSprites.NeonMagenta),
+                DoodleSprites.NeonArc("arc_yellow", DoodleSprites.NeonYellow),
+                DoodleSprites.Guy(false), DoodleSprites.Guy(true), DoodleSprites.Sweat(),
+                DoodleSprites.CatFace(0), DoodleSprites.CatFace(1), DoodleSprites.CatFace(2), DoodleSprites.CatFace(3),
+                DoodleSprites.AngerMark(), DoodleSprites.HiFi(), DoodleSprites.Speaker(), DoodleSprites.Note(),
+                DoodleSprites.Wasp(), DoodleSprites.WaspWing(), DoodleSprites.WaspDead(), DoodleSprites.Garden(),
             };
         }
     }

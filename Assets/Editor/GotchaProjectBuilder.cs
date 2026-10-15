@@ -31,7 +31,7 @@ public static class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 8;
+    const int BuilderVersion = 9;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -96,6 +96,15 @@ public static class GotchaProjectBuilder
             Define("Bomb", "defuse", "TICK TOCK",
                 "Follow the wires. Only one of them really goes to the timer.",
                 BuildBombLevel()),
+            Define("Volume", "shush", "SHHH!",
+                "That music is way too loud for a cat. Maybe your phone can do something about it.",
+                BuildVolumeLevel()),
+            Define("Hold", "hold_both", "HOLD ON",
+                "One finger is not enough. Keep both pressed until the timer runs out.",
+                BuildHoldLevel()),
+            Define("Wasp", "angry_wasp", "BUZZ OFF",
+                "Tap that wasp. Again. And again. Ten times should do it.",
+                BuildWaspLevel()),
         };
 
         LevelCatalog catalog = LoadOrCreate<LevelCatalog>(LevelDir + "/LevelCatalog.asset");
@@ -403,19 +412,48 @@ public static class GotchaProjectBuilder
         return mat;
     }
 
-    /// <summary>Rettangolo di tubi (semi-larghezza hx, semi-altezza hy) con un varco opzionale al centro di un lato.</summary>
+    /// <summary>
+    /// Rettangolo di tubi con gli angoli arrotondati (quarti di cerchio al neon di raggio NeonCornerRadius)
+    /// e un varco opzionale al centro di un lato.
+    /// </summary>
     static void Rect(Transform parent, string name, float hx, float hy, string gapSide, string tube)
     {
         const float gap = 0.35f;   // metà larghezza del varco
+        float r = DoodleSprites.NeonCornerRadius;
         var g = new GameObject(name).transform;
         g.SetParent(parent, false);
 
-        if (gapSide == "top") { HWall(g, "TopL", -hx, -gap, hy, tube); HWall(g, "TopR", gap, hx, hy, tube); }
-        else HWall(g, "Top", -hx, hx, hy, tube);
-        if (gapSide == "bottom") { HWall(g, "BottomL", -hx, -gap, -hy, tube); HWall(g, "BottomR", gap, hx, -hy, tube); }
-        else HWall(g, "Bottom", -hx, hx, -hy, tube);
-        VWall(g, "Left", -hx, -hy, hy, tube);
-        VWall(g, "Right", hx, -hy, hy, tube);
+        if (gapSide == "top") { HWall(g, "TopL", -hx + r, -gap, hy, tube); HWall(g, "TopR", gap, hx - r, hy, tube); }
+        else HWall(g, "Top", -hx + r, hx - r, hy, tube);
+        if (gapSide == "bottom") { HWall(g, "BottomL", -hx + r, -gap, -hy, tube); HWall(g, "BottomR", gap, hx - r, -hy, tube); }
+        else HWall(g, "Bottom", -hx + r, hx - r, -hy, tube);
+        VWall(g, "Left", -hx, -hy + r, hy - r, tube);
+        VWall(g, "Right", hx, -hy + r, hy - r, tube);
+
+        string arc = tube.Replace("tube_", "arc_");
+        Corner(g, "CornerTR", new Vector2(hx - r, hy - r), 0f, arc);
+        Corner(g, "CornerTL", new Vector2(-hx + r, hy - r), 90f, arc);
+        Corner(g, "CornerBL", new Vector2(-hx + r, -hy + r), 180f, arc);
+        Corner(g, "CornerBR", new Vector2(hx - r, -hy + r), 270f, arc);
+    }
+
+    /// <summary>Curva al neon: quarto di cerchio centrato in center, ruotato di angle gradi; collider a bordo arrotondato.</summary>
+    static void Corner(Transform parent, string name, Vector2 center, float angle, string arc)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        go.transform.localPosition = center;
+        go.transform.localRotation = Quaternion.Euler(0, 0, angle);
+        Art(go.transform, "Art", arc, 5, false);
+        EdgeCollider2D edge = go.AddComponent<EdgeCollider2D>();
+        var pts = new Vector2[9];
+        for (int i = 0; i < pts.Length; i++)
+        {
+            float a = i / (float)(pts.Length - 1) * Mathf.PI * 0.5f;
+            pts[i] = new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * DoodleSprites.NeonCornerRadius;
+        }
+        edge.points = pts;
+        edge.edgeRadius = WallT * 0.5f;
     }
 
     static void HWall(Transform parent, string name, float x1, float x2, float y, string tube)
@@ -848,7 +886,240 @@ public static class GotchaProjectBuilder
         SetField(level, "smoke", smoke);
         SetField(level, "bubble", bubble);
         SetField(level, "wireMaterial", StrokeMaterial());
+
+        // Il tizio nel panico che guarda il giocatore, trema e suda
+        var guy = new GameObject("Guy");
+        guy.transform.SetParent(root.transform, false);
+        guy.transform.localPosition = new Vector3(-1.95f, 2.5f, 0);
+        guy.transform.localScale = Vector3.one * 0.9f;
+        Tremble tremble = guy.AddComponent<Tremble>();
+        GameObject panic = Art(guy.transform, "Panic", "guy_panic", 8).gameObject;
+        GameObject relieved = Art(guy.transform, "Relieved", "guy_relieved", 8).gameObject;
+        relieved.SetActive(false);
+        var sweatGo = new GameObject("Sweat");
+        sweatGo.transform.SetParent(guy.transform, false);
+        sweatGo.transform.localPosition = new Vector3(0, 0.6f, 0);
+        SmokeEmitter sweat = sweatGo.AddComponent<SmokeEmitter>();
+        sweat.puffSprite = sprites["sweat"];
+        sweat.puffsPerSecond = 2f;
+        sweat.life = 0.8f;
+        sweat.riseSpeed = -0.9f;
+        sweat.sideDrift = 0.7f;
+        sweat.spread = 0.45f;
+        sweat.startScale = 1f;
+        sweat.growth = 0f;
+        sweat.spinRange = 0f;
+        sweat.tint = Color.white;
+        sweat.sortingOrder = 9;
+        SetField(level, "guyPanic", panic);
+        SetField(level, "guyRelieved", relieved);
+        SetField(level, "guyTremble", tremble);
+        SetField(level, "sweat", sweat);
         return SavePrefab(root, LevelDir + "/Bomb/Level_Bomb.prefab");
+    }
+
+    // ---------- Livello 8: abbassa il volume ----------
+
+    static GameObject BuildVolumeLevel()
+    {
+        var root = new GameObject("Level_Volume");
+        VolumeLevel level = root.AddComponent<VolumeLevel>();
+        AudioSource stereo = root.AddComponent<AudioSource>();
+        stereo.playOnAwake = false;
+        stereo.loop = true;
+        stereo.clip = Soundtrack();
+        Art(root.transform, "Room", "night_bg", -20, false);
+
+        var hifi = new GameObject("HiFi").transform;
+        hifi.SetParent(root.transform, false);
+        hifi.localPosition = new Vector3(0, 0.75f, 0);
+        Art(hifi, "Unit", "hifi", 4);
+        var speakers = new List<Pulse>();
+        foreach (float x in new[] { -1.55f, 1.55f })
+        {
+            Transform sp = Art(hifi, "Speaker", "speaker", 4, false, new Vector2(x, 0.1f));
+            Pulse pulse = sp.gameObject.AddComponent<Pulse>();
+            pulse.speed = 14f;
+            pulse.amount = 0.06f;
+            speakers.Add(pulse);
+        }
+        var notesGo = new GameObject("Notes");
+        notesGo.transform.SetParent(hifi, false);
+        notesGo.transform.localPosition = new Vector3(0, 0.6f, 0);
+        SmokeEmitter notes = notesGo.AddComponent<SmokeEmitter>();
+        notes.puffSprite = sprites["note"];
+        notes.puffsPerSecond = 5f;
+        notes.life = 1.8f;
+        notes.riseSpeed = 0.7f;
+        notes.spread = 1.8f;
+        notes.sideDrift = 0.4f;
+        notes.startScale = 1f;
+        notes.growth = 0.3f;
+        notes.spinRange = 25f;
+        notes.tint = Color.white;
+
+        // Lo stesso gatto del livello 4, sveglio e arrabbiato
+        var cat = new GameObject("Cat").transform;
+        cat.SetParent(root.transform, false);
+        cat.localPosition = new Vector3(0, -1.75f, 0);
+        cat.localScale = Vector3.one * 1.35f;
+        Transform catArt = Art(cat, "Art", "cat", 2);
+        Pulse breathe = catArt.gameObject.AddComponent<Pulse>();
+        breathe.amount = 0.025f;
+        breathe.speed = 2.2f;
+        var faces = new GameObject[4];
+        for (int i = 0; i < 4; i++)
+        {
+            faces[i] = Art(cat, "Face" + i, "cat_face_" + i, 3, false).gameObject;
+            faces[i].SetActive(i == 0);
+        }
+        GameObject anger = Art(cat, "Anger", "anger", 4, true, new Vector2(-0.35f, 0.78f)).gameObject;
+
+        var steamGo = new GameObject("Steam");
+        steamGo.transform.SetParent(cat, false);
+        steamGo.transform.localPosition = new Vector3(-0.72f, 0.85f, 0);
+        SmokeEmitter steam = steamGo.AddComponent<SmokeEmitter>();
+        steam.puffSprite = sprites["puff"];
+        steam.puffsPerSecond = 6f;
+        steam.life = 0.9f;
+        steam.riseSpeed = 1.1f;
+        steam.spread = 0.3f;
+        steam.startScale = 0.35f;
+        steam.tint = new Color(1f, 1f, 1f, 0.85f);
+
+        var zzzGo = new GameObject("Zzz");
+        zzzGo.transform.SetParent(cat, false);
+        zzzGo.transform.localPosition = new Vector3(-0.35f, 0.75f, 0);
+        SmokeEmitter zzz = zzzGo.AddComponent<SmokeEmitter>();
+        zzz.puffSprite = sprites["zzz"];
+        zzz.puffsPerSecond = 1.3f;
+        zzz.life = 2.2f;
+        zzz.riseSpeed = 0.45f;
+        zzz.startScale = 0.7f;
+        zzz.spread = 0.1f;
+        zzz.spinRange = 12f;
+        zzz.growth = 0.9f;
+        zzz.sideDrift = 0.15f;
+        zzz.tint = Color.white;
+
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(0.4f, -0.55f));
+        bubble.transform.localScale = Vector3.one * 0.55f;
+
+        SetField(level, "stereo", stereo);
+        SetArray(level, "faces", faces);
+        SetField(level, "anger", anger);
+        SetField(level, "steam", steam);
+        SetField(level, "notes", notes);
+        SetField(level, "zzz", zzz);
+        SetArray(level, "speakers", speakers.ToArray());
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/Volume/Level_Volume.prefab");
+    }
+
+    // ---------- Livello 9: tieni premuti entrambi ----------
+
+    static GameObject BuildHoldLevel()
+    {
+        var root = new GameObject("Level_Hold");
+        HoldLevel level = root.AddComponent<HoldLevel>();
+        Art(root.transform, "Workshop", "workshop_bg", -20, false);
+
+        var box = new GameObject("Timer").transform;
+        box.SetParent(root.transform, false);
+        box.localPosition = new Vector3(0, 1.5f, 0);
+        box.localScale = Vector3.one * 1.4f;
+        Art(box, "Art", "timer_box", 5);
+        TextMesh display = Label(box, new Vector2(0, 0.04f), 6, "5.0", 0.06f);
+        display.color = new Color(1f, 0.2f, 0.2f);
+
+        Transform left = HoldButton(root.transform, "BlueButton", "blue_button", new Vector2(-1.5f, -3.3f), out Collider2D leftCol);
+        Transform right = HoldButton(root.transform, "RedButton", "big_button", new Vector2(1.5f, -3.3f), out Collider2D rightCol);
+
+        // cavi dai pulsanti ai due morsetti del timer
+        var wires = new List<LineRenderer>();
+        foreach (float side in new[] { -1f, 1f })
+        {
+            Vector3 a = new Vector3(side * 1.5f, -3.15f, 0), b = new Vector3(side * 0.49f, 0.8f, 0);
+            Vector3 c = new Vector3(side * 2.4f, -1.0f, 0);
+            var pts = new Vector3[24];
+            for (int i = 0; i < pts.Length; i++)
+            {
+                float t = i / (float)(pts.Length - 1);
+                pts[i] = (1 - t) * (1 - t) * a + 2 * (1 - t) * t * c + t * t * b;
+            }
+            StaticLine(root.transform, "WireOutline", pts, 0.15f, InkColor, 3);
+            wires.Add(StaticLine(root.transform, "Wire", pts, 0.09f, new Color(0.75f, 0.62f, 0.15f), 4));
+        }
+
+        SetField(level, "leftButton", leftCol);
+        SetField(level, "rightButton", rightCol);
+        SetField(level, "leftVisual", left);
+        SetField(level, "rightVisual", right);
+        SetField(level, "display", display);
+        SetArray(level, "wires", wires.ToArray());
+        return SavePrefab(root, LevelDir + "/Hold/Level_Hold.prefab");
+    }
+
+    static Transform HoldButton(Transform parent, string name, string sprite, Vector2 pos, out Collider2D col)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        go.transform.localPosition = pos;
+        Transform art = Art(go.transform, "Art", sprite, 6);
+        BoxCollider2D box = go.AddComponent<BoxCollider2D>();
+        box.size = new Vector2(1.9f, 1.3f);
+        col = box;
+        return art;
+    }
+
+    static LineRenderer StaticLine(Transform parent, string name, Vector3[] pts, float width, Color color, int order)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        LineRenderer lr = go.AddComponent<LineRenderer>();
+        lr.useWorldSpace = false;
+        lr.widthMultiplier = width;
+        lr.numCapVertices = 5;
+        lr.numCornerVertices = 4;
+        lr.sharedMaterial = StrokeMaterial();
+        lr.startColor = lr.endColor = color;
+        lr.sortingOrder = order;
+        lr.positionCount = pts.Length;
+        lr.SetPositions(pts);
+        return lr;
+    }
+
+    // ---------- Livello 10: la vespa furiosa ----------
+
+    static GameObject BuildWaspLevel()
+    {
+        var root = new GameObject("Level_Wasp");
+        WaspLevel level = root.AddComponent<WaspLevel>();
+        AudioSource buzz = root.AddComponent<AudioSource>();
+        buzz.playOnAwake = false;
+        Art(root.transform, "Garden", "garden_bg", -20, false);
+
+        var wasp = new GameObject("Wasp").transform;
+        wasp.SetParent(root.transform, false);
+        wasp.localPosition = new Vector3(0.5f, 1.0f, 0);
+        var alive = new GameObject("Alive").transform;
+        alive.SetParent(wasp, false);
+        SpriteRenderer body = Art(alive, "Body", "wasp", 10).GetComponent<SpriteRenderer>();
+        foreach (var w in new[] { new { x = -0.02f, order = 9, rot = 15f }, new { x = 0.08f, order = 11, rot = -10f } })
+        {
+            Transform wing = Art(alive, "Wing", "wasp_wing", w.order, false, new Vector2(w.x, 0.12f));
+            wing.localRotation = Quaternion.Euler(0, 0, w.rot);
+            wing.gameObject.AddComponent<WingFlap>();
+        }
+        GameObject dead = Art(wasp, "Dead", "wasp_dead", 10).gameObject;
+        dead.SetActive(false);
+
+        SetField(level, "wasp", wasp);
+        SetField(level, "alive", alive.gameObject);
+        SetField(level, "dead", dead);
+        SetField(level, "body", body);
+        SetField(level, "buzz", buzz);
+        return SavePrefab(root, LevelDir + "/Wasp/Level_Wasp.prefab");
     }
 
     static TapButton BombButton(Transform parent, string name, string sprite, Vector2 pos, out Transform wireStart)

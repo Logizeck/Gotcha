@@ -29,6 +29,9 @@ namespace Gotcha.Sensors
 
         float volumeCache = 1f;
         float volumeTimer;
+#if UNITY_EDITOR
+        float editorVolume = 1f;   // nell'Editor il volume si simula coi tasti - e +
+#endif
 
         void Awake()
         {
@@ -48,6 +51,10 @@ namespace Gotcha.Sensors
             lastAccel = a;
             shake = Mathf.Max(delta * 10f, Mathf.Lerp(shake, 0f, 8f * Time.unscaledDeltaTime));
 
+#if UNITY_EDITOR
+            if (Input.GetKey(KeyCode.Minus) || Input.GetKey(KeyCode.KeypadMinus)) editorVolume = Mathf.Max(0f, editorVolume - 0.6f * Time.unscaledDeltaTime);
+            if (Input.GetKey(KeyCode.Equals) || Input.GetKey(KeyCode.KeypadPlus)) editorVolume = Mathf.Min(1f, editorVolume + 0.6f * Time.unscaledDeltaTime);
+#endif
             volumeTimer -= Time.unscaledDeltaTime;
             if (volumeTimer <= 0f)
             {
@@ -105,6 +112,8 @@ namespace Gotcha.Sensors
                 }
             }
             catch { return 1f; }
+#elif UNITY_EDITOR
+            return editorVolume;
 #else
             return AudioListener.volume;
 #endif

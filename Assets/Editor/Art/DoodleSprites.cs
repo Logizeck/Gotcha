@@ -919,5 +919,292 @@ namespace Gotcha.EditorArt
             p.Shape(Sd.Polygon(inner), Rgba.Hex("FFE14A"));
             return new DoodleArt("boom", p);
         }
+
+        // ---------- Livello 2: curve al neon per gli angoli ----------
+
+        public const float NeonCornerRadius = 0.24f;
+
+        /// <summary>
+        /// Quarto di cerchio al neon per gli angoli arrotondati: centro della curva in (0,0), raggio NeonCornerRadius,
+        /// da (R,0) a (0,R). Si ruota di 90° per gli altri angoli.
+        /// </summary>
+        public static DoodleArt NeonArc(string name, Rgba color)
+        {
+            const float tubeR = 0.08f, glow = 0.15f, R = NeonCornerRadius;
+            var p = new DoodlePainter(-tubeR - glow, -tubeR - glow, R + tubeR + glow, R + tubeR + glow, 300) { Wobble = 0f };
+            Sdf ring = (x, y) => Math.Abs((float)Math.Sqrt(x * x + y * y) - R) - tubeR;
+            Sdf quadrant = (x, y) => Math.Max(ring(x, y), Math.Max(-x, -y));
+            p.FillFunc((x, y) => Math.Max(-x, -y), (x, y) =>
+            {
+                float d = Math.Max(0f, ring(x, y));
+                return color.WithAlpha((float)Math.Exp(-d * 20f) * 0.6f);
+            });
+            p.FillFunc(quadrant, (x, y) =>
+            {
+                float t = Clamp(-ring(x, y) / tubeR);
+                Rgba c = Rgba.Lerp(Rgba.Lerp(color, Rgba.White, 0.15f), Rgba.White, Clamp((t - 0.45f) / 0.45f));
+                return Rgba.Lerp(Rgba.Lerp(color, Ink, 0.15f), c, Clamp(t * 4f));
+            });
+            return new DoodleArt(name, p);
+        }
+
+        // ---------- Livello 7: il tizio nel panico ----------
+
+        static readonly Rgba Skin = Rgba.Hex("FFD3A8"), SkinShade = Rgba.Hex("E8AE7E");
+
+        /// <summary>Tizio in camicia (busto): relaxed = false faccia di panico, true faccia sollevata. Testa in (0,0.3).</summary>
+        public static DoodleArt Guy(bool relieved)
+        {
+            var p = new DoodlePainter(-0.95f, -1.15f, 0.95f, 1.1f, 110) { Ink = 0.05f };
+            // busto con camicia e cravatta
+            Sdf body = Sd.Union(Sd.Ellipse(0, -0.85f, 0.8f, 0.45f), Sd.Box(0, -0.95f, 0.8f, 0.25f, 0.1f));
+            Body(p, body, Rgba.Hex("8FB8FF"), Rgba.Hex("6A94E0"));
+            p.Shape(Sd.Polygon(-0.07f, -0.42f, 0.07f, -0.42f, 0.1f, -0.95f, 0f, -1.05f, -0.1f, -0.95f), Rgba.Hex("E23B3B"), 0.03f);
+            // capelli spettinati dietro la testa
+            float[] hair = new float[28];
+            for (int i = 0; i < 14; i++)
+            {
+                double a = Math.PI * (0.05 + 0.9 * i / 13.0);
+                float r = i % 2 == 0 ? 0.68f : 0.55f;
+                hair[i * 2] = (float)Math.Cos(a) * r; hair[i * 2 + 1] = 0.35f + (float)Math.Sin(a) * r;
+            }
+            p.Shape(Sd.Polygon(hair), Rgba.Hex("7A4A2A"), 0.04f);
+            Sdf head = Sd.Ellipse(0, 0.25f, 0.5f, 0.56f);
+            Body(p, head, Skin, SkinShade, null, -0.05f, 0.06f);
+            p.Shape(Sd.Ellipse(-0.52f, 0.2f, 0.09f, 0.14f), Skin, 0.035f);
+            p.Shape(Sd.Ellipse(0.52f, 0.2f, 0.09f, 0.14f), Skin, 0.035f);
+            if (!relieved)
+            {
+                // occhi spalancati che guardano il giocatore, sopracciglia alzate, bocca tremolante
+                foreach (float x in new[] { -0.2f, 0.2f })
+                {
+                    p.Shape(Sd.Ellipse(x, 0.38f, 0.15f, 0.18f), Rgba.White, 0.035f);
+                    p.Fill(Sd.Circle(x, 0.36f, 0.045f), Ink);
+                    p.Fill(Sd.Circle(x - 0.015f, 0.38f, 0.015f), Rgba.White);
+                }
+                p.InkLine(0.035f, -0.36f, 0.6f, -0.24f, 0.68f, -0.08f, 0.64f);
+                p.InkLine(0.035f, 0.36f, 0.6f, 0.24f, 0.68f, 0.08f, 0.64f);
+                Sdf mouth = Sd.Ellipse(0, 0.0f, 0.17f, 0.13f);
+                p.Shape(mouth, Rgba.Hex("5A1E2A"), 0.035f);
+                p.Fill(Sd.Intersect(mouth, Sd.Box(0, 0.1f, 0.2f, 0.04f)), Rgba.White);
+                p.InkLine(0.02f, -0.12f, 0.06f, -0.06f, 0.08f, 0f, 0.06f, 0.06f, 0.08f, 0.12f, 0.06f);
+                // gocce di sudore sulla fronte
+                foreach (var d in new[] { new[] { 0.36f, 0.62f }, new[] { -0.4f, 0.5f } })
+                {
+                    Sdf drop = Sd.Union(Sd.Circle(d[0], d[1] - 0.03f, 0.05f), Sd.Polygon(d[0] - 0.045f, d[1] - 0.01f, d[0] + 0.045f, d[1] - 0.01f, d[0], d[1] + 0.09f));
+                    p.Shape(drop, Rgba.Hex("8FD3FF"), 0.02f);
+                }
+                p.Line(Rgba.Hex("9AA3D9"), 0.025f, -0.3f, 0.18f, -0.3f, 0.06f);   // occhiaie da panico
+                p.Line(Rgba.Hex("9AA3D9"), 0.025f, 0.3f, 0.18f, 0.3f, 0.06f);
+            }
+            else
+            {
+                p.InkLine(0.035f, -0.3f, 0.36f, -0.2f, 0.42f, -0.1f, 0.36f);
+                p.InkLine(0.035f, 0.1f, 0.36f, 0.2f, 0.42f, 0.3f, 0.36f);
+                p.Shape(Sd.Intersect(Sd.Ellipse(0, 0.08f, 0.2f, 0.13f), Sd.Box(0, -0.02f, 0.25f, 0.1f)), Rgba.Hex("5A1E2A"), 0.035f);
+                p.Shape(Sd.Ellipse(-0.3f, 0.12f, 0.08f, 0.05f), Rgba.Hex("FF9BB0"), 0.0f);
+                p.Shape(Sd.Ellipse(0.3f, 0.12f, 0.08f, 0.05f), Rgba.Hex("FF9BB0"), 0.0f);
+            }
+            return new DoodleArt(relieved ? "guy_relieved" : "guy_panic", p);
+        }
+
+        /// <summary>Goccia di sudore.</summary>
+        public static DoodleArt Sweat()
+        {
+            var p = new DoodlePainter(-0.1f, -0.1f, 0.1f, 0.14f, 120) { Ink = 0.022f };
+            p.Shape(Sd.Union(Sd.Circle(0, -0.03f, 0.06f), Sd.Polygon(-0.052f, -0.01f, 0.052f, -0.01f, 0, 0.11f)), Rgba.Hex("8FD3FF"));
+            p.Fill(Sd.Circle(-0.02f, -0.02f, 0.015f), Rgba.White);
+            return new DoodleArt("sweat", p);
+        }
+
+        // ---------- Livello 8: il gatto arrabbiato e lo stereo ----------
+
+        /// <summary>Espressioni del gatto (si sovrappongono alla testa del gatto che dorme): 0 furioso … 3 assonnato.</summary>
+        public static DoodleArt CatFace(int mood)
+        {
+            var p = new DoodlePainter(-1.15f, -0.08f, -0.28f, 0.62f, 160) { Ink = 0.025f };
+            p.Fill(Sd.Ellipse(-0.72f, 0.33f, 0.3f, 0.12f), CatOrange, false);   // copre gli occhi chiusi
+            float[] ex = { -0.86f, -0.58f };
+            switch (mood)
+            {
+                case 0:   // furioso: occhi sbarrati, sopracciglia a V, bocca che soffia coi denti
+                    foreach (float x in ex)
+                    {
+                        p.Shape(Sd.Ellipse(x, 0.34f, 0.1f, 0.1f), Rgba.Hex("FFF27A"));
+                        p.Fill(Sd.Ellipse(x, 0.33f, 0.02f, 0.08f), Ink);
+                    }
+                    p.InkLine(0.04f, -1.0f, 0.5f, -0.78f, 0.42f);
+                    p.InkLine(0.04f, -0.44f, 0.5f, -0.66f, 0.42f);
+                    p.Shape(Sd.Ellipse(-0.7f, 0.03f, 0.13f, 0.08f), Rgba.Hex("7A1E2A"));
+                    p.Fill(Sd.Polygon(-0.78f, 0.1f, -0.74f, 0.1f, -0.76f, 0.03f), Rgba.White);
+                    p.Fill(Sd.Polygon(-0.66f, 0.1f, -0.62f, 0.1f, -0.64f, 0.03f), Rgba.White);
+                    p.Fill(Sd.Ellipse(-0.93f, 0.2f, 0.07f, 0.04f), Rgba.Hex("FF4D5E", 0.6f));
+                    p.Fill(Sd.Ellipse(-0.47f, 0.2f, 0.07f, 0.04f), Rgba.Hex("FF4D5E", 0.6f));
+                    break;
+                case 1:   // arrabbiato: occhi stretti, sopracciglia giù, broncio
+                    foreach (float x in ex)
+                    {
+                        p.Shape(Sd.Intersect(Sd.Ellipse(x, 0.33f, 0.1f, 0.08f), Sd.Box(x, 0.29f, 0.12f, 0.05f)), Rgba.Hex("FFF27A"));
+                        p.Fill(Sd.Circle(x, 0.3f, 0.03f), Ink);
+                    }
+                    p.InkLine(0.035f, -0.98f, 0.44f, -0.76f, 0.39f);
+                    p.InkLine(0.035f, -0.46f, 0.44f, -0.68f, 0.39f);
+                    p.InkLine(0.025f, -0.8f, 0.05f, -0.7f, 0.09f, -0.6f, 0.05f);
+                    break;
+                case 2:   // seccato: palpebre a metà, bocca piatta
+                    foreach (float x in ex)
+                    {
+                        p.Shape(Sd.Intersect(Sd.Ellipse(x, 0.33f, 0.1f, 0.08f), Sd.Box(x, 0.29f, 0.12f, 0.04f)), Rgba.Hex("FFF27A"));
+                        p.Fill(Sd.Circle(x, 0.3f, 0.025f), Ink);
+                        p.InkLine(0.03f, x - 0.1f, 0.33f, x + 0.1f, 0.33f);
+                    }
+                    p.InkLine(0.022f, -0.78f, 0.07f, -0.62f, 0.07f);
+                    break;
+                default:  // assonnato: occhi socchiusi e mezzo sorriso
+                    foreach (float x in ex) p.InkLine(0.028f, x - 0.08f, 0.33f, x, 0.3f, x + 0.08f, 0.33f);
+                    p.InkLine(0.022f, -0.78f, 0.08f, -0.7f, 0.05f, -0.62f, 0.08f);
+                    break;
+            }
+            return new DoodleArt("cat_face_" + mood, p);
+        }
+
+        /// <summary>Simbolo della rabbia (vena a croce).</summary>
+        public static DoodleArt AngerMark()
+        {
+            var p = new DoodlePainter(-0.22f, -0.22f, 0.22f, 0.22f, 120) { Ink = 0.0f };
+            foreach (int q in new[] { 0, 1, 2, 3 })
+            {
+                float sx = q % 2 == 0 ? 1 : -1, sy = q < 2 ? 1 : -1;
+                p.Line(Rgba.Hex("E23B3B"), 0.05f, sx * 0.05f, sy * 0.17f, sx * 0.05f, sy * 0.05f, sx * 0.17f, sy * 0.05f);
+            }
+            return new DoodleArt("anger", p);
+        }
+
+        /// <summary>Stereo: unità centrale con display e manopole (centro 0,0).</summary>
+        public static DoodleArt HiFi()
+        {
+            var p = new DoodlePainter(-0.75f, -0.6f, 0.75f, 0.6f, 110) { Ink = 0.05f };
+            Body(p, Sd.Box(0, 0, 0.66f, 0.5f, 0.1f), Rgba.Hex("3A3D49"), Rgba.Hex("2A2C36"));
+            p.Shape(Sd.Box(0, 0.22f, 0.5f, 0.12f, 0.03f), Rgba.Hex("103B2A"), 0.03f);
+            p.Line(Rgba.Hex("5CFF9D"), 0.03f, -0.4f, 0.2f, -0.3f, 0.28f, -0.2f, 0.16f, -0.1f, 0.3f, 0f, 0.18f, 0.1f, 0.27f, 0.2f, 0.2f, 0.3f, 0.26f, 0.4f, 0.22f);
+            foreach (float x in new[] { -0.35f, 0f, 0.35f }) p.Shape(Sd.Circle(x, -0.18f, 0.11f), Rgba.Hex("B7BCC9"), 0.03f);
+            p.Fill(Sd.Box(-0.35f, -0.12f, 0.012f, 0.06f), Ink);
+            p.Fill(Sd.Box(0.35f, -0.12f, 0.012f, 0.06f), Ink);
+            return new DoodleArt("hifi", p);
+        }
+
+        /// <summary>Cassa acustica (centro 0,0).</summary>
+        public static DoodleArt Speaker()
+        {
+            var p = new DoodlePainter(-0.48f, -0.72f, 0.48f, 0.72f, 110) { Ink = 0.05f };
+            Body(p, Sd.Box(0, 0, 0.42f, 0.66f, 0.08f), Rgba.Hex("5A4A55"), Rgba.Hex("44363F"));
+            p.Shape(Sd.Circle(0, -0.18f, 0.3f), Rgba.Hex("2A2C36"), 0.035f);
+            p.Shape(Sd.Circle(0, -0.18f, 0.12f), Rgba.Hex("6B6F7E"), 0.03f);
+            p.Shape(Sd.Circle(0, 0.38f, 0.14f), Rgba.Hex("2A2C36"), 0.03f);
+            p.Fill(Sd.Circle(-0.04f, 0.42f, 0.03f), Rgba.White.WithAlpha(0.5f));
+            return new DoodleArt("speaker", p);
+        }
+
+        /// <summary>Nota musicale (croma).</summary>
+        public static DoodleArt Note()
+        {
+            var p = new DoodlePainter(-0.2f, -0.22f, 0.22f, 0.26f, 120) { Ink = 0.03f };
+            p.Shape(Sd.Union(Sd.Rotate(Sd.Ellipse(-0.06f, -0.12f, 0.09f, 0.065f), -0.06f, -0.12f, 25f),
+                             Sd.Capsule(0.02f, -0.1f, 0.02f, 0.2f, 0.022f),
+                             Sd.Polyline(0.022f, 0.02f, 0.2f, 0.14f, 0.12f, 0.12f, 0.02f)), Rgba.Hex("FFE14A"));
+            return new DoodleArt("note", p);
+        }
+
+        // ---------- Livello 10: la vespa ----------
+
+        static readonly Rgba WaspYellow = Rgba.Hex("FFC83D"), WaspShade = Rgba.Hex("E09A16");
+
+        static void WaspBody(DoodlePainter p, bool dead)
+        {
+            float flip = dead ? -1f : 1f;   // da morta è a pancia in su
+            // zampe
+            for (int i = 0; i < 3; i++)
+            {
+                float x = -0.12f + i * 0.13f;
+                if (!dead) p.InkLine(0.025f, x, -0.15f, x - 0.06f, -0.32f, x - 0.02f, -0.4f);
+                else p.InkLine(0.025f, x, 0.15f, x - 0.04f, 0.36f, x + 0.03f, 0.44f);
+            }
+            Sdf body = Sd.Ellipse(0.08f, 0, 0.33f, 0.21f);
+            p.Fill(body, WaspYellow);
+            p.Fill(Sd.Intersect(body, Sd.Union(Sd.Box(0.02f, 0, 0.045f, 0.3f), Sd.Box(0.18f, 0, 0.045f, 0.3f), Sd.Box(0.33f, 0, 0.04f, 0.3f))), Ink);
+            p.Fill(Sd.Crescent(body, -0.03f, flip * 0.05f), WaspShade.WithAlpha(0.6f));
+            p.Shape(body, Rgba.Clear);
+            p.Shape(Sd.Polygon(0.38f, 0.05f, 0.38f, -0.05f, 0.54f, 0), Ink, 0.02f);   // pungiglione
+            Sdf head = Sd.Circle(-0.32f, 0.02f, 0.16f);
+            Body(p, head, WaspYellow, WaspShade, null, -0.03f, flip * 0.04f);
+            p.InkLine(0.02f, -0.38f, flip * 0.15f, -0.48f, flip * 0.32f, -0.56f, flip * 0.3f);
+            p.InkLine(0.02f, -0.3f, flip * 0.16f, -0.32f, flip * 0.34f, -0.24f, flip * 0.38f);
+        }
+
+        /// <summary>Vespa furiosa (guarda a sinistra; le ali sono a parte).</summary>
+        public static DoodleArt Wasp()
+        {
+            var p = new DoodlePainter(-0.62f, -0.45f, 0.6f, 0.45f, 160) { Ink = 0.035f };
+            WaspBody(p, false);
+            p.Shape(Sd.Ellipse(-0.37f, 0.05f, 0.06f, 0.07f), Rgba.White, 0.02f);
+            p.Fill(Sd.Circle(-0.39f, 0.04f, 0.028f), Ink);
+            p.InkLine(0.03f, -0.46f, 0.15f, -0.31f, 0.1f);   // sopracciglio arrabbiato
+            p.InkLine(0.02f, -0.42f, -0.06f, -0.33f, -0.08f, -0.26f, -0.05f);
+            return new DoodleArt("wasp", p);
+        }
+
+        /// <summary>Ala della vespa, semitrasparente (attaccata in 0,0, si allunga verso l'alto).</summary>
+        public static DoodleArt WaspWing()
+        {
+            var p = new DoodlePainter(-0.2f, -0.05f, 0.2f, 0.42f, 160) { Ink = 0.022f };
+            Sdf wing = Sd.Rotate(Sd.Ellipse(0.03f, 0.2f, 0.11f, 0.2f), 0, 0, -15f);
+            p.Shape(wing, Rgba.Hex("D6F1FF", 0.65f));
+            p.Line(Rgba.Hex("9CC3EA", 0.8f), 0.012f, 0f, 0.02f, 0.06f, 0.32f);
+            return new DoodleArt("wasp_wing", p);
+        }
+
+        /// <summary>Vespa stecchita: a pancia in su, zampe all'aria, occhi a X.</summary>
+        public static DoodleArt WaspDead()
+        {
+            var p = new DoodlePainter(-0.62f, -0.45f, 0.6f, 0.5f, 160) { Ink = 0.035f };
+            p.Shape(Sd.Rotate(Sd.Ellipse(0.05f, -0.22f, 0.2f, 0.08f), 0.05f, -0.22f, 10f), Rgba.Hex("D6F1FF", 0.65f), 0.02f);
+            WaspBody(p, true);
+            p.InkLine(0.025f, -0.42f, 0.08f, -0.33f, -0.01f);
+            p.InkLine(0.025f, -0.42f, -0.01f, -0.33f, 0.08f);
+            p.Shape(Sd.Ellipse(-0.3f, -0.08f, 0.04f, 0.025f), Rgba.Hex("FF8FA3"), 0.015f);   // linguaccia
+            return new DoodleArt("wasp_dead", p);
+        }
+
+        /// <summary>Giardino: cielo, staccionata, erba e fiori (coordinate del livello; prato sotto y = -2.6).</summary>
+        public static DoodleArt Garden()
+        {
+            var p = new DoodlePainter(-4.5f, -7f, 4.5f, 7f, 50) { Ink = 0.06f };
+            p.FillFunc(Sd.Box(0, 0, 4.6f, 7.1f), (x, y) => Rgba.Lerp(Rgba.Hex("EAF8FF"), Rgba.Hex("8ED4FF"), Clamp((y + 2f) / 6f)));
+            Body(p, Sd.Circle(2.6f, 3.4f, 0.55f), Rgba.Hex("FFE14A"), Rgba.Hex("FFC23A"));
+            for (float x = -4.2f; x < 4.5f; x += 0.6f)
+                Body(p, Sd.Polygon(x - 0.2f, -2.6f, x + 0.2f, -2.6f, x + 0.2f, -1.5f, x, -1.3f, x - 0.2f, -1.5f), Rgba.Hex("FFF3D6"), Rgba.Hex("E2CFA6"));
+            p.Shape(Sd.Box(0, -1.9f, 5f, 0.06f), Rgba.Hex("E2CFA6"), 0.03f);
+            Sdf grass = Sd.Box(0, -5f, 5f, 2.5f);
+            Body(p, grass, Rgba.Hex("7ED36B"), Rgba.Hex("5BB04B"), null, -0.05f, 0.1f);
+            var rnd = new Random(12);
+            for (int i = 0; i < 40; i++)
+            {
+                float x = (float)rnd.NextDouble() * 8.6f - 4.3f, y = -2.7f - (float)rnd.NextDouble() * 3.5f;
+                p.Line(Rgba.Hex("4E9A3F"), 0.025f, x, y, x + 0.05f, y + 0.15f);
+            }
+            Rgba[] petals = { Rgba.Hex("FF8FA3"), Rgba.Hex("FFFFFF"), Rgba.Hex("B9A3FF") };
+            for (int i = 0; i < 7; i++)
+            {
+                float x = -3.6f + i * 1.2f + (float)rnd.NextDouble() * 0.4f, y = -2.9f - (float)rnd.NextDouble() * 1.4f;
+                p.InkLine(0.03f, x, y, x, y + 0.45f);
+                for (int k = 0; k < 5; k++)
+                {
+                    double a = k * Math.PI * 2 / 5;
+                    p.Shape(Sd.Circle(x + (float)Math.Cos(a) * 0.12f, y + 0.5f + (float)Math.Sin(a) * 0.12f, 0.09f), petals[i % 3], 0.025f);
+                }
+                p.Shape(Sd.Circle(x, y + 0.5f, 0.07f), Rgba.Hex("FFD25A"), 0.025f);
+            }
+            return new DoodleArt("garden_bg", p);
+        }
     }
 }

@@ -23,6 +23,11 @@ namespace Gotcha.Levels
         [SerializeField] SmokeEmitter smoke;
         [SerializeField] SpeechBubble bubble;
         [SerializeField] Material wireMaterial;
+        [Header("Il tizio nel panico")]
+        [SerializeField] GameObject guyPanic;
+        [SerializeField] GameObject guyRelieved;
+        [SerializeField] Tremble guyTremble;
+        [SerializeField] SmokeEmitter sweat;
         [SerializeField] float seconds = 10f;
 
         static readonly Color WireYellow = new Color(1f, 0.85f, 0.15f);
@@ -37,7 +42,7 @@ namespace Gotcha.Levels
         public override void OnLevelStart()
         {
             redIsConnected = Random.value < 0.5f;
-            Vector3 looseEnd = new Vector3(Random.value < 0.5f ? -1.9f : 1.9f, Random.Range(-1.6f, -0.6f), 0f);
+            Vector3 looseEnd = new Vector3(Random.value < 0.5f ? -1.9f : 1.9f, Random.Range(-0.3f, 1.3f), 0f);   // alto quanto il timer: non si capisce dalla lunghezza
             Vector3 toTimer = timerTerminal.position;
             Transform connected = redIsConnected ? redStart : blueStart;
             Transform loose = redIsConnected ? blueStart : redStart;
@@ -60,6 +65,9 @@ namespace Gotcha.Levels
             redButton.Pressed += OnButton;
             remaining = seconds;
             running = true;
+            if (guyPanic != null) guyPanic.SetActive(true);
+            if (guyRelieved != null) guyRelieved.SetActive(false);
+            if (sweat != null) sweat.Play();
         }
 
         void OnDestroy()
@@ -77,6 +85,10 @@ namespace Gotcha.Levels
                 display.text = Mathf.Max(0f, remaining).ToString("0.0");
                 display.color = remaining < 3f && Mathf.Repeat(remaining, 0.3f) < 0.15f ? Color.white : LedRed;
             }
+            // più il tempo stringe, più il tizio trema e suda
+            float panic = 1f - Mathf.Clamp01(remaining / seconds);
+            if (guyTremble != null) guyTremble.amplitude = Mathf.Lerp(0.015f, 0.06f, panic);
+            if (sweat != null) sweat.puffsPerSecond = Mathf.Lerp(2f, 8f, panic);
             if (remaining <= 0f) { running = false; StartCoroutine(Explode()); }
         }
 
@@ -93,6 +105,10 @@ namespace Gotcha.Levels
         {
             if (display != null) { display.text = "--.-"; display.color = LedGreen; }
             if (bubble != null) bubble.Show("Phew!");
+            if (sweat != null) sweat.Stop();
+            if (guyTremble != null) guyTremble.enabled = false;
+            if (guyPanic != null) guyPanic.SetActive(false);
+            if (guyRelieved != null) guyRelieved.SetActive(true);
             yield return new WaitForSeconds(1.3f);
             Win();
         }
@@ -101,6 +117,7 @@ namespace Gotcha.Levels
         {
             if (display != null) display.text = "0.0";
             if (bomb != null) bomb.SetActive(false);
+            if (sweat != null) sweat.Stop();
             if (boom != null)
             {
                 boom.SetActive(true);
@@ -124,18 +141,31 @@ namespace Gotcha.Levels
 
         // ---------- Cavi ----------
 
-        /// <summary>Percorso aggrovigliato da a verso b che ondeggia da un lato all'altro (side = ±1).</summary>
+        /// <summary>
+        /// Percorso molto aggrovigliato da a verso b: ondeggia da un lato all'altro (side = ±1) con ampiezze casuali
+        /// e fa uno o due riccioli su se stesso, così i due cavi si incrociano più volte e sono difficili da seguire.
+        /// </summary>
         static List<Vector3> Tangle(Vector3 a, Vector3 b, float side)
         {
             var ctrl = new List<Vector3> { a };
-            int bends = 4;
+            const int bends = 7;
+            int loopA = Random.Range(1, bends + 1), loopB = Random.Range(1, bends + 1);
             for (int i = 1; i <= bends; i++)
             {
                 float t = i / (float)(bends + 1);
                 Vector3 p = Vector3.Lerp(a, b, t);
-                p.x = side * (i % 2 == 0 ? -1f : 1f) * Random.Range(0.8f, 1.7f);
-                p.y += Random.Range(-0.15f, 0.15f);
+                p.x = side * (i % 2 == 0 ? -1f : 1f) * Random.Range(0.4f, 2.1f);
+                p.y += Random.Range(-0.3f, 0.3f);
                 ctrl.Add(p);
+                if (i == loopA || i == loopB)   // ricciolo
+                {
+                    float r = Random.Range(0.2f, 0.32f), dir = Random.value < 0.5f ? 1f : -1f;
+                    for (int k = 1; k <= 5; k++)
+                    {
+                        float ang = dir * k * Mathf.PI * 2f / 6f;
+                        ctrl.Add(p + new Vector3(Mathf.Sin(ang) * r, (1f - Mathf.Cos(ang)) * r, 0f));
+                    }
+                }
             }
             ctrl.Add(b);
 
@@ -143,9 +173,9 @@ namespace Gotcha.Levels
             for (int i = 0; i < ctrl.Count - 1; i++)
             {
                 Vector3 p0 = ctrl[Mathf.Max(0, i - 1)], p1 = ctrl[i], p2 = ctrl[i + 1], p3 = ctrl[Mathf.Min(ctrl.Count - 1, i + 2)];
-                for (int j = 0; j < 12; j++)
+                for (int j = 0; j < 10; j++)
                 {
-                    float t = j / 12f, t2 = t * t, t3 = t2 * t;
+                    float t = j / 10f, t2 = t * t, t3 = t2 * t;
                     pts.Add(0.5f * (2f * p1 + (-p0 + p2) * t + (2f * p0 - 5f * p1 + 4f * p2 - p3) * t2 + (-p0 + 3f * p1 - 3f * p2 + p3) * t3));
                 }
             }

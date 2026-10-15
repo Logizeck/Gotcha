@@ -1,4 +1,4 @@
-# Gotcha! — v0.8 (sette livelli, musica, pubblicità simulata)
+# Gotcha! — v0.9 (dieci livelli, musica, pubblicità simulata)
 
 Progetto Unity 2022.3 LTS o Unity 6, C#, 2D (Built-in Render Pipeline).
 Grafica in stile cartone "doodle" generata da codice (nessuna immagine esterna da importare).
@@ -37,10 +37,10 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - `Core/PointerInput`, `Core/SaveData` utilità touch/mouse e salvataggio.
 - `Sensors/SensorHub` unico accesso ai sensori.
 - `Ads/AdBreakManager` regola 5 livelli / 120 s di gioco attivo; `LogAdProvider` simula gli annunci in Editor.
-- `Levels/` LevelController, LevelDefinition, LevelCatalog e i livelli KeyDoor, Maze, Snowman, Idle, Apple, Morse, Bomb.
+- `Levels/` LevelController, LevelDefinition, LevelCatalog e i livelli KeyDoor, Maze, Snowman, Idle, Apple, Morse, Bomb, Volume, Hold, Wasp.
 - `Components/` Draggable2D (con limite allo schermo), DropSlot, PinchScalable, TiltGravity, GoalZone, IdleTimer,
   SensorCondition, EasterEggTrigger, LockedDoor, CameraFit, DoodleWobble, Pulse, StrokeDrawer (disegno col dito),
-  SmokeEmitter/SmokePuff (fumo, Z, cuori, succo), SwipeCutter (taglio col dito), TapButton (pulsanti nel mondo di gioco), SpeechBubble (fumetto), ChromeBall (sfera cromata che riflette l'ambiente).
+  SmokeEmitter/SmokePuff (fumo, Z, cuori, succo), SwipeCutter (taglio col dito), TapButton (pulsanti nel mondo di gioco), Tremble (tremolio), WingFlap (battito d'ali), SpeechBubble (fumetto), ChromeBall (sfera cromata che riflette l'ambiente).
 - `Shaders/ChromeBall.shader` riflesso sferico + luce speculare.
 - Prefab riutilizzabili in `Assets/Prefabs`: Key, Door, Carrot, Coal.
 - `UI/GameUI` interfaccia costruita da codice in stile doodle.
@@ -52,8 +52,9 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 
 ## Livello 2 — Tilt Maze
 - Una biglia d'acciaio parte fuori dal labirinto e va portata alla stella al centro inclinando il telefono.
-- Pareti a tubi al neon arrotondati (anche i collider sono a capsula, così la biglia scorre morbida sugli spigoli):
-  recinto e anello interno ciano, primo anello magenta, secondo anello giallo.
+- Pareti a tubi al neon arrotondati, con gli angoli a quarto di cerchio (raggio `NeonCornerRadius`); anche i
+  collider sono arrotondati (capsule e bordi con raggio), così la biglia scorre morbida.
+  Recinto e anello interno ciano, primo anello magenta, secondo anello giallo.
 - Sensibilità: TiltGravity `strength` 37.3 (ridotta due volte del 10%), `response` 0.5; poco attrito, scia luminosa.
 - Aspetto realistico calcolato dallo shader `Gotcha/ChromeBall`: al centro riflette il "soffitto" (luce di studio
   con softbox), ai bordi le pareti al neon che ha intorno (camera di riflesso), fresnel, due luci speculari,
@@ -87,10 +88,29 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
   mentre suonano i segnali. Toni generati da codice (sinusoide 760 Hz).
 
 ## Livello 7 — Tick Tock
-- Pulsante blu e pulsante rosso, due cavi gialli aggrovigliati in modo casuale: uno finisce libero (fili di rame
-  sfilacciati), l'altro entra nel timer della dinamite. Il timer parte da 10 secondi (lampeggia negli ultimi 3).
+- Pulsante blu e pulsante rosso, due cavi gialli molto aggrovigliati (sette curve e uno o due riccioli ciascuno,
+  si incrociano più volte): uno finisce libero (fili di rame sfilacciati, all'altezza del timer così la lunghezza
+  non tradisce), l'altro entra nel timer della dinamite. Il timer parte da 10 secondi (lampeggia negli ultimi 3).
+- Un tizio in camicia guarda il giocatore in preda al panico: trema e suda sempre di più man mano che il tempo
+  scende; se la bomba viene disinnescata tira un sospiro di sollievo.
 - Il pulsante collegato al timer lo ferma ("Phew!"). Quello sbagliato o il tempo scaduto: BOOM! e GOTCHA!
   Ogni tentativo ridisegna i cavi e sceglie a caso quale pulsante è quello giusto.
+
+## Livello 8 — Shhh!
+- Lo stereo suona a tutto volume e il gatto (lo stesso del livello 4) è furioso: soffia, fuma dalle orecchie.
+- Si risolve abbassando al minimo il volume del telefono: man mano che scende il gatto passa da furioso ad
+  arrabbiato, seccato, assonnato; a volume zero si addormenta. Nell'Editor il volume si simula coi tasti - e +.
+- Se il volume è già a zero all'inizio bisogna prima alzarlo (la musica deve essere "sentita" almeno una volta).
+
+## Livello 9 — Hold On
+- Due pulsanti collegati a un timer da 5 secondi. Il conto alla rovescia parte solo se entrambi sono premuti
+  insieme (due dita; i cavi si illuminano). Se uno viene rilasciato prima della fine il timer torna a 5.
+  Nell'Editor il secondo dito si simula tenendo premuta la barra spaziatrice.
+
+## Livello 10 — Buzz Off
+- Una vespa furiosa svolazza a zig-zag (ronzio generato da codice). Va colpita con un tocco 10 volte: a ogni colpo
+  sbanda, lampeggia di rosso, ronza più acuta e vola più veloce. Al decimo colpo cade a terra a zampe all'aria,
+  stecchita, con gli occhi a X.
 
 ## Musica
 - Colonna sonora `Assets/Audio/Soundtrack.wav` in loop (importata compressa Vorbis). Si spegne/accende dal MENU

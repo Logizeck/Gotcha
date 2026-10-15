@@ -10,5 +10,8 @@ Livelli attuali:
 5. **Slice It!** — taglia la mela con il dito.
 6. **Beep Beep** — ascolta il segnale della radio e premi il tasto con il codice giusto.
 7. **Tick Tock** — segui i cavi e premi il pulsante giusto prima che il timer arrivi a zero.
+8. **Shhh!** — abbassa il volume del telefono per calmare il gatto.
+9. **Hold On** — tieni premuti due pulsanti insieme per 5 secondi.
+10. **Buzz Off** — colpisci la vespa furiosa 10 volte.
 
 Istruzioni per aprire il progetto e creare l'APK: vedi [README_SETUP.md](README_SETUP.md).
