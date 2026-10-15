@@ -1,4 +1,4 @@
-# Gotcha! — v0.18 (35 livelli)
+# Gotcha! — v0.19 (35 livelli)
 
 La versione installata si legge nel MENU del gioco (accanto al conteggio degli Easter egg).
 
@@ -165,6 +165,10 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Trascina la tanica sul razzo, alza il coperchio di sicurezza, tieni premuto il pulsante per tutto il
   conto alla rovescia (se lo lasci: ABORT!). Editor: barra spaziatrice per tenere premuto.
 
+## Fumetti
+- Il testo va a capo da solo sulle parole; se ancora non entra si rimpicciolisce un po' (mai sotto il 75%) e poi è
+  il fumetto ad allargarsi: il testo resta sempre dentro e leggibile (`SpeechBubble.maxTextWidth/maxTextHeight`).
+
 ## Gatti che miagolano
 - Quando un gatto "parla" (livelli 3, 7, 12, 19) si sente il verso, sintetizzato da `Components/CatVoice`: miagolio,
   soffio ("HISSS!"), fusa ("Purrr..."), trillo ("Mrr?"), sbadiglio ("Yaaawn..."). Si attiva con `catVoice` sul fumetto.
@@ -222,7 +226,8 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 
 ## Livelli 32-35
 - **32 Pizza Chef**: trascina gli ingredienti dalle ciotole sulla pasta. La lavagna sul muro ha i "disegnini della
-  nonna" (pomodoro, mozzarella, fungo, oliva): sono la ricetta, ma non sembra. Poi trascina la pizza nel forno, tagliala
+  nonna" (pomodoro, mozzarella, fungo, oliva): sono la ricetta, ma non sembra. Ogni ciotola ha il nome sotto. Poi
+  trascina la pizza sul forno (o tocca il forno, che si illumina quando la pizza è pronta), tagliala
   in quattro (due tagli dal centro) e dai una fetta a ogni topolino. Ricetta giusta: festa; manca qualcosa o c'è
   l'ananas: si riprova. Easter egg `spicy_pizza`: col peperoncino i topi diventano paonazzi, furiosi, con gli occhi in
   fiamme e la lingua di fuori (video da condividere).

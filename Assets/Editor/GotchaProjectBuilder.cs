@@ -31,7 +31,7 @@ public static class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 18;
+    const int BuilderVersion = 19;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -2945,7 +2945,13 @@ public static class GotchaProjectBuilder
         mouth.transform.localPosition = new Vector3(0, 0.75f, 0);
         BoxCollider2D mouthCol = mouth.AddComponent<BoxCollider2D>();
         mouthCol.isTrigger = true;
-        mouthCol.size = new Vector2(1.8f, 1.4f);
+        mouthCol.size = new Vector2(2.3f, 2.1f);   // tutto il forno: basta avvicinarci la pizza
+        DropSlot ovenSlot = mouth.AddComponent<DropSlot>();
+        ovenSlot.acceptedId = "pizza";
+        ovenSlot.snap = false;
+        TapButton ovenButton = mouth.AddComponent<TapButton>();
+        ovenButton.visual = oven;
+        ovenButton.pressedScaleY = 0.95f;
         SmokeEmitter ovenSmoke = Emitter(oven, "Smoke", new Vector2(0.62f, 1.9f), "puff", 6f, 1.6f, 0.9f, 0.15f, 0.4f, new Color(0.8f, 0.8f, 0.85f, 0.8f));
 
         // pizza: pasta + strati (accesi man mano che si aggiungono gli ingredienti)
@@ -3014,11 +3020,15 @@ public static class GotchaProjectBuilder
             bowl.transform.SetParent(root.transform, false);
             bowl.transform.localPosition = new Vector3(-2.3f + k * 0.92f, -3.25f, 0);
             Art(bowl.transform, "Art", "ing_bowl", 8);
-            if (ids[k] == "tomato") Art(bowl.transform, "Content", "sauce", 9, false, new Vector2(0, 0.06f)).localScale = new Vector3(0.36f, 0.08f, 1f);
-            else if (ids[k] == "mozzarella") Art(bowl.transform, "Content", "cheese", 9, false, new Vector2(0, 0.1f)).localScale = Vector3.one * 0.32f;
+            // contenuto bello pieno, che si riconosce a colpo d'occhio, e il nome sotto
+            if (ids[k] == "tomato") Art(bowl.transform, "Content", "sauce", 9, false, new Vector2(0, 0.08f)).localScale = new Vector3(0.4f, 0.12f, 1f);
+            else if (ids[k] == "mozzarella") Art(bowl.transform, "Content", "cheese", 9, false, new Vector2(0, 0.14f)).localScale = Vector3.one * 0.42f;
             else
-                foreach (float x in new[] { -0.15f, 0.12f, -0.01f })
-                    Art(bowl.transform, "Content", "top_" + ids[k], 9, false, new Vector2(x, 0.1f + (x < 0f ? 0f : 0.04f)));
+                foreach (float[] q in new[] { new[] { -0.18f, 0.1f }, new[] { 0.16f, 0.12f }, new[] { -0.01f, 0.22f } })
+                    Art(bowl.transform, "Content", "top_" + ids[k], 9, false, new Vector2(q[0], q[1])).localScale = Vector3.one * 1.35f;
+            string[] names = { "TOMATO", "MOZZARELLA", "MUSHROOMS", "OLIVES", "CHILI", "PINEAPPLE" };
+            TextMesh name = Label(bowl.transform, new Vector2(0, -0.45f), 9, names[k], 0.03f);
+            name.gameObject.AddComponent<TextMeshFit>().maxWidth = 0.86f;
             bowl.AddComponent<BoxCollider2D>().size = new Vector2(0.88f, 0.7f);
             Draggable2D d = bowl.AddComponent<Draggable2D>();
             d.itemId = ids[k];
@@ -3076,6 +3086,8 @@ public static class GotchaProjectBuilder
         SetArray(level, "bakeTint", new Object[] { dough, cheeseWhole });
         SetField(level, "pizza", pizza);
         SetField(level, "ovenMouth", mouthCol);
+        SetField(level, "ovenSlot", ovenSlot);
+        SetField(level, "ovenButton", ovenButton);
         SetField(level, "ovenGlow", ovenGlow);
         SetField(level, "ovenSmoke", ovenSmoke);
         SetField(level, "cutMark", cutMark);

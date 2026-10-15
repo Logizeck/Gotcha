@@ -28,6 +28,8 @@ namespace Gotcha.Levels
 
         [Header("Forno")]
         [SerializeField] Collider2D ovenMouth;
+        [SerializeField] DropSlot ovenSlot;          // trascinare la pizza sul forno la inforna
+        [SerializeField] TapButton ovenButton;       // ...e basta anche toccare il forno
         [SerializeField] SpriteRenderer ovenGlow;
         [SerializeField] SmokeEmitter ovenSmoke;
 
@@ -62,7 +64,9 @@ namespace Gotcha.Levels
             cam = Camera.main;
             foreach (Draggable2D b in bowls) b.Dropped += OnIngredient;
             pizzaDrag = pizza.GetComponent<Draggable2D>();
-            if (pizzaDrag != null) { pizzaDrag.enabled = false; pizzaDrag.Dropped += OnPizzaDropped; }
+            if (pizzaDrag != null) pizzaDrag.enabled = false;
+            if (ovenSlot != null) ovenSlot.Filled += OnOvenFilled;
+            if (ovenButton != null) ovenButton.Pressed += OnOvenTapped;
             foreach (GameObject l in wholeLayers) if (l != null) l.SetActive(false);
             foreach (Transform s in slices) s.gameObject.SetActive(false);
             foreach (DropSlot p in plates) p.Filled += OnServed;
@@ -78,6 +82,8 @@ namespace Gotcha.Levels
         {
             if (bowls != null) foreach (Draggable2D b in bowls) if (b != null) b.Dropped -= OnIngredient;
             if (plates != null) foreach (DropSlot p in plates) if (p != null) p.Filled -= OnServed;
+            if (ovenSlot != null) ovenSlot.Filled -= OnOvenFilled;
+            if (ovenButton != null) ovenButton.Pressed -= OnOvenTapped;
             if (ClipRecorder.Instance != null && ClipRecorder.Instance.IsCapturing) ClipRecorder.Instance.Discard();
         }
 
@@ -111,10 +117,16 @@ namespace Gotcha.Levels
 
         // ---------- 2. forno ----------
 
-        void OnPizzaDropped(Draggable2D d, DropSlot slot)
+        void OnOvenFilled(DropSlot slot, Draggable2D d)
+        {
+            if (phase == Phase.Toppings && added.Count > 0) StartCoroutine(Bake());
+        }
+
+        void OnOvenTapped(TapButton b)
         {
             if (phase != Phase.Toppings) return;
-            if (ovenMouth != null && ovenMouth.OverlapPoint(d.transform.position)) StartCoroutine(Bake());
+            if (added.Count == 0) { if (bubble != null) { bubble.Show("Toppings first!"); StartCoroutine(HideLater(1.3f)); } return; }
+            StartCoroutine(Bake());
         }
 
         IEnumerator Bake()
@@ -124,8 +136,15 @@ namespace Gotcha.Levels
             foreach (Draggable2D b in bowls) b.gameObject.SetActive(false);
             Vector3 home = pizzaHome();
             Vector3 inOven = ovenMouth.bounds.center;
-            pizza.position = inOven;
             Vector3 scale = pizza.localScale;
+            Vector3 from = pizza.position;
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.35f)   // la pizza vola dentro il forno
+            {
+                pizza.position = Vector3.Lerp(from, inOven, k) + Vector3.up * Mathf.Sin(k * Mathf.PI) * 0.4f;
+                pizza.localScale = Vector3.Lerp(scale, scale * 0.45f, k);
+                yield return null;
+            }
+            pizza.position = inOven;
             pizza.localScale = scale * 0.45f;
             if (ovenSmoke != null) ovenSmoke.Play();
             for (float k = 0f; k < 1f; k += Time.deltaTime / 2.2f)
@@ -165,6 +184,8 @@ namespace Gotcha.Levels
         void Update()
         {
             FadeTrail();
+            if (phase == Phase.Toppings && ovenGlow != null)   // il forno "chiama" quando la pizza ha i condimenti
+                ovenGlow.color = new Color(1f, 0.6f, 0.2f, added.Count > 0 ? 0.25f + Mathf.PingPong(Time.time, 0.5f) * 0.6f : 0f);
             if (phase != Phase.Cutting || IsFinished) return;
             if (!PointerInput.TryGetPrimary(out Vector2 sp, out bool began, out bool ended)) return;
             Vector2 w = PointerInput.ToWorld(cam, sp);
