@@ -31,7 +31,7 @@ public static class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 23;
+    const int BuilderVersion = 24;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -196,6 +196,7 @@ public static class GotchaProjectBuilder
                 "Watch the cat, listen, then play it back.",
                 BuildCopycatLevel()),
         };
+        levels.AddRange(VariantLevels());   // 41-60: dopo i livelli originali, i cui prefab servono da base
 
         LevelCatalog catalog = LoadOrCreate<LevelCatalog>(LevelDir + "/LevelCatalog.asset");
         catalog.levels = levels;
@@ -264,6 +265,8 @@ public static class GotchaProjectBuilder
         SetField(ui, "flow", flow);
         SetField(ui, "roundedSprite", sprites["ui_panel"]);
         SetField(ui, "heartSprite", sprites["heart"]);
+        // logo della schermata del titolo: il PNG originale se importato come sprite, altrimenti l'icona disegnata
+        SetField(ui, "logoSprite", AssetDatabase.LoadAssetAtPath<Sprite>(CustomIconPath) ?? sprites["app_icon"]);
 
         EditorSceneManager.SaveScene(scene, ScenePath);
         EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
@@ -1732,9 +1735,13 @@ public static class GotchaProjectBuilder
         return e;
     }
 
-    static GameObject BuildTrapMazeLevel()
+    static GameObject BuildTrapMazeLevel(string folder = "TrapMaze", string neon = "maze_trap", DoodleSprites.MazeSeg[] segs = null,
+        float[] pp = null, float[] lz = null, Vector2? goalAt = null)
     {
-        var root = new GameObject("Level_TrapMaze");
+        segs = segs ?? DoodleSprites.TrapMaze;
+        pp = pp ?? DoodleSprites.TrapPits;
+        lz = lz ?? DoodleSprites.TrapLasers;
+        var root = new GameObject("Level_" + folder);
         TrapMazeLevel level = root.AddComponent<TrapMazeLevel>();
         TiltGravity tilt = root.AddComponent<TiltGravity>();
         tilt.strength = 32f;     // un filo più lento del livello 2: qui un errore costa caro
@@ -1744,16 +1751,14 @@ public static class GotchaProjectBuilder
         var maze = new GameObject("Maze").transform;
         maze.SetParent(root.transform, false);
         maze.localPosition = new Vector3(0, -0.4f, 0);
-        Art(maze, "Neon", "maze_trap", 5, false);
-        SegWalls(maze, DoodleSprites.TrapMaze);
+        Art(maze, "Neon", neon, 5, false);
+        SegWalls(maze, segs);
 
         var pits = new List<Transform>();
-        float[] pp = DoodleSprites.TrapPits;
         for (int i = 0; i < pp.Length; i += 2)
             pits.Add(Art(maze, "Pit", "pit", 3, false, new Vector2(pp[i], pp[i + 1])));
 
         var lasers = new List<LaserBeam>();
-        float[] lz = DoodleSprites.TrapLasers;
         for (int i = 0; i < lz.Length; i += 3)
         {
             float len = lz[i + 2] - lz[i + 1];
@@ -1775,7 +1780,7 @@ public static class GotchaProjectBuilder
             lasers.Add(beam);
         }
 
-        MazeGoal(maze, new Vector2(-2.2f, 2.6f));
+        MazeGoal(maze, goalAt ?? new Vector2(-2.2f, 2.6f));
         Rigidbody2D ball = MazeBall(maze, new Vector2(-2.2f, -3.0f));
         SmokeEmitter sparks = Sparks(root.transform, "Sparks", new Color(1f, 0.45f, 0.3f));
         SpeechBubble bubble = Bubble(root.transform, new Vector2(1.5f, -4.45f));
@@ -1786,12 +1791,14 @@ public static class GotchaProjectBuilder
         SetArray(level, "lasers", lasers.ToArray());
         SetField(level, "sparks", sparks);
         SetField(level, "bubble", bubble);
-        return SavePrefab(root, LevelDir + "/TrapMaze/Level_TrapMaze.prefab");
+        return SavePrefab(root, LevelDir + "/" + folder + "/Level_" + folder + ".prefab");
     }
 
-    static GameObject BuildDarkMazeLevel()
+    static GameObject BuildDarkMazeLevel(string folder = "DarkMaze", string neon = "maze_dark", DoodleSprites.MazeSeg[] segs = null,
+        DoodleSprites.MazeSeg? gateSeg = null, Vector2? keyAt = null, Vector2? exitAt = null)
     {
-        var root = new GameObject("Level_DarkMaze");
+        segs = segs ?? DoodleSprites.DarkMaze;
+        var root = new GameObject("Level_" + folder);
         DarkMazeLevel level = root.AddComponent<DarkMazeLevel>();
         TiltGravity tilt = root.AddComponent<TiltGravity>();
         tilt.strength = 34f;
@@ -1801,11 +1808,11 @@ public static class GotchaProjectBuilder
         var maze = new GameObject("Maze").transform;
         maze.SetParent(root.transform, false);
         maze.localPosition = new Vector3(0, -0.4f, 0);
-        Art(maze, "Neon", "maze_dark", 5, false);
-        SegWalls(maze, DoodleSprites.DarkMaze);
+        Art(maze, "Neon", neon, 5, false);
+        SegWalls(maze, segs);
 
         // cancello rosso con lucchetto davanti all'uscita
-        DoodleSprites.MazeSeg g = DoodleSprites.DarkGate;
+        DoodleSprites.MazeSeg g = gateSeg ?? DoodleSprites.DarkGate;
         var gate = new GameObject("Gate");
         gate.transform.SetParent(maze, false);
         gate.transform.localPosition = new Vector3((g.x1 + g.x2) * 0.5f, (g.y1 + g.y2) * 0.5f, 0);
@@ -1819,14 +1826,15 @@ public static class GotchaProjectBuilder
         // chiave luminosa in un vicolo cieco
         var key = new GameObject("Key").transform;
         key.SetParent(maze, false);
-        key.localPosition = new Vector3(DoodleSprites.DarkKeyX, DoodleSprites.DarkKeyY, 0);
+        Vector2 keyPos = keyAt ?? new Vector2(DoodleSprites.DarkKeyX, DoodleSprites.DarkKeyY);
+        key.localPosition = new Vector3(keyPos.x, keyPos.y, 0);
         key.localScale = Vector3.one * 0.32f;
         SpriteRenderer halo = Art(key, "Glow", "glow", 4, false).GetComponent<SpriteRenderer>();
         halo.color = new Color(1f, 0.85f, 0.3f, 0.9f);
         halo.transform.localScale = Vector3.one * 2.4f;
         Art(key, "Art", "key", 11, false, new Vector2(0.6f, 0f));
 
-        MazeGoal(maze, new Vector2(DoodleSprites.DarkExitX, DoodleSprites.DarkExitY));
+        MazeGoal(maze, exitAt ?? new Vector2(DoodleSprites.DarkExitX, DoodleSprites.DarkExitY));
         Rigidbody2D ball = MazeBall(maze, new Vector2(-2.2f, -3.0f));
         Transform darkness = Art(root.transform, "Darkness", "darkness", 20, false);
         SmokeEmitter sparkle = Sparks(root.transform, "Sparkle", new Color(1f, 0.85f, 0.3f));
@@ -1839,7 +1847,7 @@ public static class GotchaProjectBuilder
         SetField(level, "gate", gate);
         SetField(level, "sparkle", sparkle);
         SetField(level, "bubble", bubble);
-        return SavePrefab(root, LevelDir + "/DarkMaze/Level_DarkMaze.prefab");
+        return SavePrefab(root, LevelDir + "/" + folder + "/Level_" + folder + ".prefab");
     }
 
     // ---------- Livello 18: la cassaforte nascosta ----------
@@ -3256,9 +3264,11 @@ public static class GotchaProjectBuilder
 
     // ---------- Livelli 36-40 ----------
 
-    static GameObject BuildWaspMazeLevel()
+    static GameObject BuildWaspMazeLevel(string folder = "WaspMaze", string neon = "maze_wasp", DoodleSprites.MazeSeg[] segs = null,
+        Vector2? goalAt = null, Vector2? ballAt = null, Vector2? waspAt = null, float waspSpeed = 1.75f)
     {
-        var root = new GameObject("Level_WaspMaze");
+        segs = segs ?? DoodleSprites.WaspMaze;
+        var root = new GameObject("Level_" + folder);
         WaspMazeLevel level = root.AddComponent<WaspMazeLevel>();
         TiltGravity tilt = root.AddComponent<TiltGravity>();
         tilt.strength = 34f;
@@ -3270,15 +3280,16 @@ public static class GotchaProjectBuilder
         var maze = new GameObject("Maze").transform;
         maze.SetParent(root.transform, false);
         maze.localPosition = new Vector3(0, -0.4f, 0);
-        Art(maze, "Neon", "maze_wasp", 5, false);
-        SegWalls(maze, DoodleSprites.WaspMaze);
-        MazeGoal(maze, new Vector2(-2.2f, 2.7f));
-        Rigidbody2D ball = MazeBall(maze, new Vector2(-1.0f, -3.0f));
+        Art(maze, "Neon", neon, 5, false);
+        SegWalls(maze, segs);
+        MazeGoal(maze, goalAt ?? new Vector2(-2.2f, 2.7f));
+        Rigidbody2D ball = MazeBall(maze, ballAt ?? new Vector2(-1.0f, -3.0f));
 
         // la vespa parte dall'angolo alle spalle della sfera
         var wasp = new GameObject("Wasp").transform;
         wasp.SetParent(maze, false);
-        wasp.localPosition = new Vector3(-2.3f, -2.25f, 0);
+        Vector2 waspPos = waspAt ?? new Vector2(-2.3f, -2.25f);
+        wasp.localPosition = new Vector3(waspPos.x, waspPos.y, 0);
         wasp.localScale = Vector3.one * 0.6f;
         SpriteRenderer body = Art(wasp, "Body", "wasp_furious", 12).GetComponent<SpriteRenderer>();
         foreach (var w in new[] { new { x = -0.02f, order = 11, rot = 15f }, new { x = 0.08f, order = 13, rot = -10f } })
@@ -3294,14 +3305,15 @@ public static class GotchaProjectBuilder
         SetField(level, "ball", ball);
         SetField(level, "wasp", wasp);
         SetField(level, "waspBody", body);
+        SetFloat(level, "speed", waspSpeed);
         SetField(level, "buzz", buzz);
         SetField(level, "bubble", bubble);
-        return SavePrefab(root, LevelDir + "/WaspMaze/Level_WaspMaze.prefab");
+        return SavePrefab(root, LevelDir + "/" + folder + "/Level_" + folder + ".prefab");
     }
 
-    static GameObject BuildLampSafeLevel()
+    static GameObject BuildLampSafeLevel(string folder = "LampSafe", int digitCount = 4)
     {
-        var root = new GameObject("Level_LampSafe");
+        var root = new GameObject("Level_" + folder);
         LampSafeLevel level = root.AddComponent<LampSafeLevel>();
         SpriteRenderer wall = Art(root.transform, "Wall", "plain", -20, false).GetComponent<SpriteRenderer>();
         wall.transform.localScale = new Vector3(12f, 16f, 1f);
@@ -3313,7 +3325,9 @@ public static class GotchaProjectBuilder
         GameObject blue = Lamp(root.transform, "BlueLamp", new Vector2(1.35f, 2.9f), new Color(0.3f, 0.45f, 1f));
 
         var digits = new List<TextMesh>();
-        for (int i = 0; i < 4; i++) digits.Add(Label(root.transform, new Vector2(-1.65f + i * 1.1f, 0.7f), 3, "0", 0.17f));
+        float step = Mathf.Min(1.1f, 4.2f / Mathf.Max(1, digitCount - 1));
+        for (int i = 0; i < digitCount; i++)
+            digits.Add(Label(root.transform, new Vector2((i - (digitCount - 1) * 0.5f) * step, 0.7f), 3, "0", digitCount > 4 ? 0.15f : 0.17f));
 
         // cassaforte sotto le cifre
         var safe = new GameObject("Safe").transform;
@@ -3348,7 +3362,7 @@ public static class GotchaProjectBuilder
         SetField(level, "display", display);
         SetField(level, "confetti", confetti);
         SetField(level, "bubble", bubble);
-        return SavePrefab(root, LevelDir + "/LampSafe/Level_LampSafe.prefab");
+        return SavePrefab(root, LevelDir + "/" + folder + "/Level_" + folder + ".prefab");
     }
 
     static TapButton SwitchButton(Transform parent, string name, string sprite, Vector2 pos)
@@ -3440,31 +3454,34 @@ public static class GotchaProjectBuilder
         return SavePrefab(root, LevelDir + "/AppleCatch/Level_AppleCatch.prefab");
     }
 
-    static GameObject BuildMarbleRunLevel()
+    /// <param name="mirror">variante specchiata: mensola a destra, tazza a sinistra, muretto più alto</param>
+    static GameObject BuildMarbleRunLevel(string folder = "MarbleRun", bool mirror = false)
     {
-        var root = new GameObject("Level_MarbleRun");
+        var root = new GameObject("Level_" + folder);
         MarbleRunLevel level = root.AddComponent<MarbleRunLevel>();
+        float m = mirror ? -1f : 1f;
+        float wallH = mirror ? 5.0f : 4.3f, wallY = mirror ? -0.9f : -1.25f;
         Art(root.transform, "Workshop", "workshop_bg", -20, false);
         Color wood = new Color(0.66f, 0.42f, 0.25f);
 
         // mensola di partenza in alto a sinistra
-        Bar(root.transform, "Ledge", new Vector2(-2.05f, 2.2f), new Vector2(1.4f, 0.16f), wood, 3);
+        Bar(root.transform, "Ledge", new Vector2(-2.05f * m, 2.2f), new Vector2(1.4f, 0.16f), wood, 3);
         var ledge = new GameObject("LedgeCollider");
         ledge.transform.SetParent(root.transform, false);
-        ledge.transform.localPosition = new Vector3(-2.05f, 2.2f, 0);
+        ledge.transform.localPosition = new Vector3(-2.05f * m, 2.2f, 0);
         ledge.AddComponent<BoxCollider2D>().size = new Vector2(1.4f, 0.16f);
 
         // muretto in mezzo: la biglia deve passarci sopra
-        Bar(root.transform, "Wall", new Vector2(0.1f, -1.25f), new Vector2(0.28f, 4.3f), wood, 3);
+        Bar(root.transform, "Wall", new Vector2(0.1f * m, wallY), new Vector2(0.28f, wallH), wood, 3);
         var wallGo = new GameObject("WallCollider");
         wallGo.transform.SetParent(root.transform, false);
-        wallGo.transform.localPosition = new Vector3(0.1f, -1.25f, 0);
-        wallGo.AddComponent<BoxCollider2D>().size = new Vector2(0.28f, 4.3f);
+        wallGo.transform.localPosition = new Vector3(0.1f * m, wallY, 0);
+        wallGo.AddComponent<BoxCollider2D>().size = new Vector2(0.28f, wallH);
 
         // tazza in basso a destra (pareti a U + zona di arrivo)
         var cup = new GameObject("Cup").transform;
         cup.SetParent(root.transform, false);
-        cup.localPosition = new Vector3(1.9f, -3.3f, 0);
+        cup.localPosition = new Vector3(1.9f * m, -3.3f, 0);
         cup.localScale = Vector3.one * 1.2f;
         Art(cup, "Art", "cup", 6);
         EdgeCollider2D cupWalls = cup.gameObject.AddComponent<EdgeCollider2D>();
@@ -3477,7 +3494,7 @@ public static class GotchaProjectBuilder
         zone.size = new Vector2(0.9f, 0.7f);
         zone.offset = new Vector2(0, 0.4f);
 
-        Rigidbody2D marble = MazeBall(root.transform, new Vector2(-2.45f, 2.48f));
+        Rigidbody2D marble = MazeBall(root.transform, new Vector2(-2.45f * m, 2.48f));
         marble.bodyType = RigidbodyType2D.Kinematic;
 
         // area di disegno (sopra il pulsante GO)
@@ -3503,7 +3520,7 @@ public static class GotchaProjectBuilder
 
         var goGo = new GameObject("Go");
         goGo.transform.SetParent(root.transform, false);
-        goGo.transform.localPosition = new Vector3(-1.6f, -3.95f, 0);
+        goGo.transform.localPosition = new Vector3(-1.6f * m, -3.95f, 0);
         Transform goArt = Art(goGo.transform, "Art", "big_button", 30);
         goArt.localScale = Vector3.one * 0.8f;
         TextMesh goLabel = Label(goGo.transform, new Vector2(0, 0.08f), 31, "GO", 0.09f);
@@ -3511,24 +3528,25 @@ public static class GotchaProjectBuilder
         BoxCollider2D goCol = goGo.AddComponent<BoxCollider2D>();
         goCol.size = new Vector2(1.6f, 1.0f);
         // barra della spinta: si riempie tenendo premuto GO
-        Bar(root.transform, "PowerBack", new Vector2(0.75f, -3.95f), new Vector2(2.7f, 0.32f), InkColor, 30);
+        Bar(root.transform, "PowerBack", new Vector2(0.75f * m, -3.95f), new Vector2(2.7f, 0.32f), InkColor, 30);
         var power = new GameObject("Power").transform;
         power.SetParent(root.transform, false);
-        power.localPosition = new Vector3(-0.55f, -3.95f, 0);
-        Bar(power, "Fill", new Vector2(1.3f, 0f), new Vector2(2.6f, 0.22f), new Color(1f, 0.6f, 0.3f), 31);
+        power.localPosition = new Vector3(-0.55f * m, -3.95f, 0);
+        Bar(power, "Fill", new Vector2(1.3f * m, 0f), new Vector2(2.6f, 0.22f), new Color(1f, 0.6f, 0.3f), 31);
 
-        SmokeEmitter confetti = Emitter(root.transform, "Confetti", new Vector2(1.9f, -2.4f), "confetti", 30f, 1.2f, 1.6f, 0.6f, 1.1f, new Color(1f, 0.85f, 0.35f), 45);
-        SpeechBubble bubble = Bubble(root.transform, new Vector2(0.9f, 2.9f));
+        SmokeEmitter confetti = Emitter(root.transform, "Confetti", new Vector2(1.9f * m, -2.4f), "confetti", 30f, 1.2f, 1.6f, 0.6f, 1.1f, new Color(1f, 0.85f, 0.35f), 45);
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(0.9f * m, 2.9f));
         bubble.transform.localScale = Vector3.one * 0.5f;
 
         SetField(level, "marble", marble);
         SetField(level, "goButton", goCol);
+        SetFloat(level, "direction", m);
         SetField(level, "goVisual", goArt);
         SetField(level, "powerFill", power);
         SetField(level, "cupZone", zone);
         SetField(level, "confetti", confetti);
         SetField(level, "bubble", bubble);
-        return SavePrefab(root, LevelDir + "/MarbleRun/Level_MarbleRun.prefab");
+        return SavePrefab(root, LevelDir + "/" + folder + "/Level_" + folder + ".prefab");
     }
 
     static GameObject BuildCopycatLevel()
@@ -3580,6 +3598,217 @@ public static class GotchaProjectBuilder
         SetField(level, "catBubble", bubble);
         SetField(level, "roundLabel", roundLabel);
         return SavePrefab(root, LevelDir + "/Copycat/Level_Copycat.prefab");
+    }
+
+    // ---------- Livelli 41-60: varianti delle meccaniche già collaudate ----------
+
+    static List<LevelDefinition> VariantLevels()
+    {
+        Vector2 Cell(int c, int r) => new Vector2(-2.2f + c * 1.1f, -3.0f + r);
+        return new List<LevelDefinition>
+        {
+            Define("Maze2", "zig_zag", "ZIG ZAG",
+                "Same old tilt... the star is right in the middle.",
+                BuildMaze2Level()),
+            Define("Pancake2", "pancake_tower", "PANCAKE TOWER",
+                "Five flips this time. Steady wrist!",
+                Variant("Pancake", "Pancake2", go =>
+                {
+                    Tune(Level(go), "flipsNeeded", 5);
+                    Ref<TextMesh>(Level(go), "counter").text = "0 / 5";
+                })),
+            Define("Shell2", "shell_shock", "SHELL SHOCK",
+                "Faster hands, more swaps. Watch the tail!",
+                Variant("Shell", "Shell2", go =>
+                {
+                    Tune(Level(go), "swaps", 14);
+                    Tune(Level(go), "firstSwap", 0.42f);
+                    Tune(Level(go), "lastSwap", 0.18f);
+                })),
+            Define("LampSafe2", "code_breaker", "CODE BREAKER",
+                "Five digits now. Red light, blue light... memory!",
+                BuildLampSafeLevel("LampSafe2", 5)),
+            Define("Cookie2", "top_shelf", "TOP SHELF",
+                "The jar moved higher. Tilt it out, roll it over.",
+                Variant("Cookie", "Cookie2", go =>
+                {
+                    Transform t = go.transform;
+                    t.Find("Shelf").localPosition = new Vector3(1.45f, 0.42f, 0);
+                    t.Find("Jar").localPosition = new Vector3(1.45f, 1.2f, 0);
+                    t.Find("Cookie").localPosition = new Vector3(1.45f, 0.9f, 0);
+                    t.Find("Mouse").localPosition = new Vector3(-1.7f, -1.5f, 0);
+                    t.Find("Bubble").localPosition = new Vector3(-1.65f, -0.15f, 0);
+                })),
+            Define("Defend2", "bodyguard_2", "BODYGUARD 2",
+                "Angrier wasp, only two walls. Draw them well.",
+                Variant("Defend", "Defend2", go =>
+                {
+                    Tune(Level(go), "speed", 3.7f);
+                    Tune(Level(go), "survive", 12f);
+                    go.GetComponentInChildren<StrokeDrawer>(true).maxStrokes = 2;
+                })),
+            Define("Balloon2", "big_balloon", "BIG BALLOON",
+                "Bigger balloon, longer wait. Patience...",
+                Variant("Balloon", "Balloon2", go =>
+                {
+                    Tune(Level(go), "pumpsNeeded", 14);
+                    Tune(Level(go), "waitSeconds", 3f);
+                })),
+            Define("TrapMaze2", "trap_maze_2", "TRAP MAZE 2",
+                "Hug the walls around the holes. Wait for the laser.",
+                BuildTrapMazeLevel("TrapMaze2", "maze_trap2", DoodleSprites.TrapMaze2, DoodleSprites.TrapPits2, DoodleSprites.TrapLasers2, Cell(4, 6))),
+            Define("Birthday2", "big_birthday", "BIG BIRTHDAY",
+                "Seven candles. Take a deep breath!",
+                Variant("Birthday", "Birthday2", go =>
+                {
+                    Transform cake = go.transform.Find("Cake");
+                    for (int i = cake.childCount - 1; i >= 0; i--)
+                    {
+                        Transform c = cake.GetChild(i);
+                        if (c.name == "Candle" || c.name == "Flame") Object.DestroyImmediate(c.gameObject);
+                    }
+                    var flames = new List<Transform>();
+                    for (int i = 0; i < 7; i++)
+                    {
+                        float x = -0.6f + i * 0.2f;
+                        Art(cake, "Candle", "candle", 4, true, new Vector2(x, 0.6f));
+                        var flame = new GameObject("Flame").transform;
+                        flame.SetParent(cake, false);
+                        flame.localPosition = new Vector3(x, 1.18f, 0);
+                        Art(flame, "Art", "flame", 5, false);
+                        flames.Add(flame);
+                    }
+                    SetArray(Level(go), "flames", flames.ToArray());
+                })),
+            Define("Plant2", "high_plant", "HIGH PLANT",
+                "The pot is up on the shelf. Aim higher!",
+                Variant("Plant", "Plant2", go =>
+                {
+                    Transform pot = go.transform.Find("Pot");
+                    pot.localPosition = new Vector3(1.55f, 0.45f, 0);
+                    Bar(go.transform, "Shelf", new Vector2(1.55f, -0.52f), new Vector2(1.8f, 0.18f), new Color(0.66f, 0.42f, 0.25f), 5);
+                    Bar(go.transform, "Bracket", new Vector2(2.3f, -0.85f), new Vector2(0.12f, 0.6f), new Color(0.5f, 0.31f, 0.18f), 4);
+                    var shelf = new GameObject("ShelfCollider");
+                    shelf.transform.SetParent(go.transform, false);
+                    shelf.transform.localPosition = new Vector3(1.55f, -0.52f, 0);
+                    shelf.AddComponent<BoxCollider2D>().size = new Vector2(1.8f, 0.18f);
+                    Ref<TextMesh>(Level(go), "counter").transform.localPosition = new Vector3(1.55f, -0.95f, -0.01f);
+                    Ref<SpeechBubble>(Level(go), "bubble").transform.localPosition = new Vector3(-0.2f, 1.7f, 0);
+                })),
+            Define("Copycat2", "copycat_pro", "COPYCAT PRO",
+                "Longer songs, quicker paws.",
+                Variant("Copycat", "Copycat2", go =>
+                {
+                    Tune(Level(go), "roundLengths", new[] { 4, 5, 6 });
+                    Tune(Level(go), "noteSeconds", 0.33f);
+                })),
+            Define("Wasp2", "wasp_returns", "WASP RETURNS",
+                "It's back, faster. Fifteen hits!",
+                Variant("Wasp", "Wasp2", go =>
+                {
+                    Tune(Level(go), "hitsNeeded", 15);
+                    Tune(Level(go), "baseSpeed", 2.7f);
+                })),
+            Define("MarbleRun2", "marble_run_2", "MARBLE RUN 2",
+                "Right to left now, over a taller wall.",
+                BuildMarbleRunLevel("MarbleRun2", true)),
+            Define("FrozenKey2", "deep_freeze", "DEEP FREEZE",
+                "Thicker ice. Rub, rub, rub!",
+                Variant("FrozenKey", "FrozenKey2", go => Tune(Level(go), "rubNeeded", 30f))),
+            Define("CatEyes2", "tiny_mouse", "TINY MOUSE",
+                "A smaller mouse, a longer stare.",
+                Variant("CatEyes", "CatEyes2", go =>
+                {
+                    go.transform.Find("Mouse").localScale = Vector3.one * 0.35f;
+                    Tune(Level(go), "holdSeconds", 4.5f);
+                })),
+            Define("Runaway2", "snooze_alarm", "SNOOZE ALARM",
+                "A faster button, only three fences.",
+                Variant("Runaway", "Runaway2", go =>
+                {
+                    Tune(Level(go), "speed", 3.0f);
+                    go.GetComponentInChildren<StrokeDrawer>(true).maxStrokes = 3;
+                })),
+            Define("DarkMaze2", "darker", "DARKER",
+                "Find the key in the dark. The gate is somewhere up there.",
+                BuildDarkMazeLevel("DarkMaze2", "maze_dark2", DoodleSprites.DarkMaze2, DoodleSprites.DarkGate2,
+                    new Vector2(DoodleSprites.DarkKey2X, DoodleSprites.DarkKey2Y), new Vector2(DoodleSprites.DarkExit2X, DoodleSprites.DarkExit2Y))),
+            Define("AppleCatch2", "apple_rain", "APPLE RAIN",
+                "Seven apples this time, and they fall faster.",
+                Variant("AppleCatch", "AppleCatch2", go =>
+                {
+                    Tune(Level(go), "needed", 7);
+                    Tune(Level(go), "gravity", 12f);
+                })),
+            Define("Campfire2", "wet_wood", "WET WOOD",
+                "Damp sticks: rub longer, and blow REALLY gently.",
+                Variant("Campfire", "Campfire2", go =>
+                {
+                    Tune(Level(go), "strokesNeeded", 16);
+                    Tune(Level(go), "strongAbove", 0.6f);
+                })),
+            Define("WaspMaze2", "wasp_nest", "WASP NEST",
+                "The wasp waits in the middle. Loop around it!",
+                BuildWaspMazeLevel("WaspMaze2", "maze_wasp2", DoodleSprites.WaspMaze2, Cell(4, 6), Cell(0, 0), Cell(4, 2), 2.0f)),
+        };
+    }
+
+    /// <summary>Tabellone 2: labirinto a griglia senza trappole, stella al centro.</summary>
+    static GameObject BuildMaze2Level()
+    {
+        var root = new GameObject("Level_Maze2");
+        MazeLevel level = root.AddComponent<MazeLevel>();
+        TiltGravity tilt = root.AddComponent<TiltGravity>();
+        tilt.strength = 34f;
+        tilt.response = 0.5f;
+        Art(root.transform, "Night", "maze_bg", -20, false);
+        var maze = new GameObject("Maze").transform;
+        maze.SetParent(root.transform, false);
+        maze.localPosition = new Vector3(0, -0.4f, 0);
+        Art(maze, "Neon", "maze_2", 5, false);
+        SegWalls(maze, DoodleSprites.Maze2);
+        MazeGoal(maze, Vector2.zero);
+        Rigidbody2D ball = MazeBall(maze, new Vector2(-2.2f, -3.0f));
+        SetField(level, "ball", ball);
+        return SavePrefab(root, LevelDir + "/Maze2/Level_Maze2.prefab");
+    }
+
+    /// <summary>Copia un livello già costruito e ne cambia qualche parametro (stessa meccanica, nuova sfida).</summary>
+    static GameObject Variant(string baseFolder, string folder, System.Action<GameObject> tweak)
+    {
+        var basePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(LevelDir + "/" + baseFolder + "/Level_" + baseFolder + ".prefab");
+        var go = (GameObject)PrefabUtility.InstantiatePrefab(basePrefab);
+        PrefabUtility.UnpackPrefabInstance(go, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+        go.name = "Level_" + folder;
+        tweak(go);
+        return SavePrefab(go, LevelDir + "/" + folder + "/Level_" + folder + ".prefab");
+    }
+
+    static LevelController Level(GameObject go) { return go.GetComponent<LevelController>(); }
+
+    static T Ref<T>(Object target, string field) where T : Object
+    {
+        SerializedProperty p = new SerializedObject(target).FindProperty(field);
+        return p != null ? p.objectReferenceValue as T : null;
+    }
+
+    /// <summary>Imposta un campo serializzato numerico (float, int, bool o int[]).</summary>
+    static void Tune(Object target, string field, object value)
+    {
+        var so = new SerializedObject(target);
+        SerializedProperty p = so.FindProperty(field);
+        if (p == null) { Debug.LogError("[Gotcha] Campo non trovato: " + target.GetType().Name + "." + field); return; }
+        switch (value)
+        {
+            case float f: p.floatValue = f; break;
+            case int i: p.intValue = i; break;
+            case bool b: p.boolValue = b; break;
+            case int[] arr:
+                p.arraySize = arr.Length;
+                for (int k = 0; k < arr.Length; k++) p.GetArrayElementAtIndex(k).intValue = arr[k];
+                break;
+        }
+        so.ApplyModifiedPropertiesWithoutUndo();
     }
 
     static TapButton BombButton(Transform parent, string name, string sprite, Vector2 pos, out Transform wireStart)

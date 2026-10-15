@@ -258,6 +258,20 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - **40 Copycat** (memoria): il gatto suona una sequenza sui 4 tasti colorati (do, mi, sol, si); ripetila. Tre turni
   da 3, 4 e 5 note; un tasto sbagliato e il gatto ride. Lunghezze in `roundLengths`.
 
+## Schermata del titolo (0.22)
+- All'avvio non parte più subito un livello: c'è il titolo con **NEW GAME** (riparte dal livello 1, i livelli
+  sbloccati restano), **LEVEL SELECTION** (le pagine dei livelli; si gioca solo quelli sbloccati) e **SETTINGS**
+  (musica, livelli/Easter egg trovati, versione, RESET PROGRESS con doppio tocco di conferma). Se c'è già un
+  progresso compare anche **CONTINUE (LEVEL N)**.
+- Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
+  Sprite, altrimenti l'icona disegnata.
+
+## Livelli 41-60 (varianti)
+Costruiti dal builder copiando il prefab del livello originale e cambiandone i parametri (`Variant(...)` in
+`GotchaProjectBuilder.VariantLevels`), oppure con labirinti nuovi (`DoodleSprites6.cs`: griglia 5x7 generata una
+volta, con percorso verificato). Le regole sono quelle dei livelli originali, cambiano i numeri: vedi l'elenco nel
+README. Per ritoccare una variante basta cambiare il valore in `VariantLevels` (es. `Tune(Level(go), "swaps", 14)`).
+
 ## Correzioni 0.20
 - **Bodyguard / Wake-up Call**: le barriere disegnate ora fermano sempre la vespa e il pulsante: il contatto è
   calcolato geometricamente sui tratti (`Components/StrokeBarrier`), non più col cast fisico che a volte li

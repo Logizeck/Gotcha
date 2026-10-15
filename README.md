@@ -44,4 +44,15 @@ Livelli attuali:
 39. **Marble Run** — disegna le rampe e porta la biglia nella tazza, oltre il muretto.
 40. **Copycat** — ripeti le sequenze di luci e note del gatto (3, 4, 5 note).
 
+Livelli 41-60 — varianti più difficili delle meccaniche già collaudate:
+41. **Zig Zag** (labirinto nuovo) · 42. **Pancake Tower** (5 giri) · 43. **Shell Shock** (più scambi, più veloci) ·
+44. **Code Breaker** (codice rosso/blu a 5 cifre) · 45. **Top Shelf** (barattolo più in alto, specchiato) ·
+46. **Bodyguard 2** (vespa più veloce, 2 barriere) · 47. **Big Balloon** (14 pompate, 3 s di attesa) ·
+48. **Trap Maze 2** (labirinto nuovo con buche e laser) · 49. **Big Birthday** (7 candeline) ·
+50. **High Plant** (vaso sulla mensola) · 51. **Copycat Pro** (4-5-6 note, più veloci) · 52. **Wasp Returns** (15 colpi) ·
+53. **Marble Run 2** (da destra a sinistra, muretto più alto) · 54. **Deep Freeze** (ghiaccio più spesso) ·
+55. **Tiny Mouse** (topolino piccolo, 4.5 s) · 56. **Snooze Alarm** (pulsante più veloce, 3 staccionate) ·
+57. **Darker** (labirinto al buio nuovo) · 58. **Apple Rain** (7 mele, cadono più veloci) ·
+59. **Wet Wood** (più strofinio, soffio delicatissimo) · 60. **Wasp Nest** (labirinto con anelli, vespa più veloce).
+
 Istruzioni per aprire il progetto e creare l'APK: vedi [README_SETUP.md](README_SETUP.md).

@@ -20,6 +20,7 @@ namespace Gotcha.Levels
         [SerializeField] float minPush = 1.5f;       // velocità di partenza con un tocco
         [SerializeField] float maxPush = 6.5f;       // velocità con la barra piena
         [SerializeField] float chargeSeconds = 1.2f;
+        [SerializeField] float direction = 1f;       // 1 = verso destra, -1 = verso sinistra (variante specchiata)
         [SerializeField] Collider2D cupZone;
         [SerializeField] float lostBelow = -3.0f;   // sotto il piano di lavoro, fuori dalla tazza = mancata
         [SerializeField] SmokeEmitter confetti;
@@ -62,7 +63,7 @@ namespace Gotcha.Levels
         {
             Hold();
             marble.bodyType = RigidbodyType2D.Dynamic;
-            Vector2 v = new Vector2(Mathf.Lerp(minPush, maxPush, power), 0f);
+            Vector2 v = new Vector2(Mathf.Lerp(minPush, maxPush, power) * direction, 0f);
 #if UNITY_6000_0_OR_NEWER
             marble.linearVelocity = v;
 #else

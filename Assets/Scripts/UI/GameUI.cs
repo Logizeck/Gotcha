@@ -9,18 +9,19 @@ using Gotcha.Levels;
 namespace Gotcha.UI
 {
     /// <summary>
-    /// Interfaccia di gioco costruita da codice: barra in alto (Menu, titolo, Hint),
-    /// pannelli Hint, Menu, Esito livello e Fine gioco. Si aggancia agli eventi di GameFlow.
+    /// Interfaccia di gioco costruita da codice: schermata del titolo (New Game, Level Selection, Settings),
+    /// barra in alto (Menu, titolo, Hint), pannelli Hint, Menu, Impostazioni, Esito livello e Fine gioco. Si aggancia agli eventi di GameFlow.
     /// Menu e Hint mettono in pausa il gioco; il tasto Indietro di Android apre/chiude il menu.
     /// </summary>
     public class GameUI : MonoBehaviour
     {
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.21";
+        public const string Version = "0.22";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
         [SerializeField] Sprite heartSprite;     // cuori delle vite
+        [SerializeField] Sprite logoSprite;      // logo della schermata del titolo
 
         // Palette "doodle": inchiostro scuro, corallo, verde acqua, carta
         static readonly Color Accent = new Color(1f, 0.36f, 0.42f);
@@ -36,7 +37,10 @@ namespace Gotcha.UI
         Rect lastSafeArea;
 
         Text titleText;
-        GameObject hintPanel, menuPanel, resultPanel, completedPanel;
+        GameObject hintPanel, menuPanel, resultPanel, completedPanel, titlePanel, settingsPanel;
+        Text menuHeader, menuBackLabel, continueLabel, settingsMusicLabel, settingsInfo, resetLabel;
+        GameObject continueButton, menuMusicRow;
+        bool menuFromTitle, resetArmed;
         Text hintBody, menuEggs, resultTitle, resultBody, resultButton, musicLabel, shareLabel;
         Button shareButton;
         RectTransform pagesContent;
@@ -65,6 +69,7 @@ namespace Gotcha.UI
             flow.LevelFinished += OnLevelFinished;
             flow.GameCompleted += OnGameCompleted;
             flow.OutOfLives += OnOutOfLives;
+            ShowTitle();
         }
 
         void Start()
@@ -90,13 +95,15 @@ namespace Gotcha.UI
             if (!livesHooked && flow.Lives != null) { flow.Lives.Changed += OnLivesChanged; livesHooked = true; }
             UpdateHearts();
             if (livesPanel.activeSelf) RefreshLivesPanel();
-            if (menuPanel.activeSelf) RefreshMusicLabel();   // si aggiorna se alzi il volume col menu aperto
+            if (menuPanel.activeSelf || settingsPanel.activeSelf) RefreshMusicLabel();   // si aggiorna se alzi il volume col menu aperto
 
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 if (livesPanel.activeSelf) CloseLives();
+                else if (settingsPanel.activeSelf) CloseSettings();
                 else if (hintPanel.activeSelf) CloseOverlay(hintPanel);
-                else if (menuPanel.activeSelf) CloseOverlay(menuPanel);
+                else if (menuPanel.activeSelf) CloseMenu();
+                else if (titlePanel.activeSelf) { }
                 else if (!resultPanel.activeSelf && !completedPanel.activeSelf) OpenMenu();
             }
         }
@@ -106,6 +113,8 @@ namespace Gotcha.UI
         void OnLevelStarted(LevelDefinition def, int index)
         {
             titleText.text = def.title;
+            titlePanel.SetActive(false);
+            settingsPanel.SetActive(false);
             hintPanel.SetActive(false);
             menuPanel.SetActive(false);
             resultPanel.SetActive(false);
@@ -168,15 +177,89 @@ namespace Gotcha.UI
             flow.Paused = true;
         }
 
+        // ---------- Schermata del titolo ----------
+
+        void ShowTitle()
+        {
+            flow.StopLevel();
+            titleText.text = "";
+            hintPanel.SetActive(false);
+            menuPanel.SetActive(false);
+            resultPanel.SetActive(false);
+            completedPanel.SetActive(false);
+            settingsPanel.SetActive(false);
+            RefreshTitle();
+            titlePanel.SetActive(true);
+        }
+
+        void RefreshTitle()
+        {
+            int resume = flow.ResumeIndex;
+            continueButton.SetActive(resume > 0);
+            continueLabel.text = "CONTINUE (LEVEL " + (resume + 1) + ")";
+        }
+
+        void NewGame() { flow.TryStartLevel(0); }
+
+        void ContinueGame() { flow.TryStartLevel(flow.ResumeIndex); }
+
+        void OpenLevelSelection()
+        {
+            menuFromTitle = true;
+            ShowMenu();
+        }
+
+        void OpenSettings()
+        {
+            resetArmed = false;
+            resetLabel.text = "RESET PROGRESS";
+            RefreshMusicLabel();
+            settingsInfo.text = "Levels: " + Mathf.Min(SaveData.HighestUnlocked + 1, flow.LevelCount) + " / " + flow.LevelCount +
+                "\nEaster eggs found: " + SaveData.EasterEggCount + "\nVersion " + Version;
+            settingsPanel.SetActive(true);
+            if (!titlePanel.activeSelf) flow.Paused = true;
+        }
+
+        void CloseSettings()
+        {
+            settingsPanel.SetActive(false);
+            if (!titlePanel.activeSelf && !menuPanel.activeSelf) flow.Paused = false;
+        }
+
+        /// <summary>Primo tocco: chiede conferma; secondo tocco: azzera livelli sbloccati ed Easter egg.</summary>
+        void ResetProgress()
+        {
+            if (!resetArmed) { resetArmed = true; resetLabel.text = "TAP AGAIN TO CONFIRM"; return; }
+            SaveData.ResetProgress();
+            OpenSettings();
+            resetLabel.text = "PROGRESS RESET";
+            RefreshTitle();
+        }
+
+        void CloseMenu()
+        {
+            menuPanel.SetActive(false);
+            if (!menuFromTitle) flow.Paused = false;
+        }
+
         void OpenMenu()
         {
-            if (resultPanel.activeSelf || completedPanel.activeSelf) return;
+            if (resultPanel.activeSelf || completedPanel.activeSelf || titlePanel.activeSelf) return;
+            menuFromTitle = false;
+            ShowMenu();
+        }
+
+        void ShowMenu()
+        {
+            menuHeader.text = menuFromTitle ? "LEVELS" : "MENU";
+            menuBackLabel.text = menuFromTitle ? "BACK" : "RESUME";
+            menuMusicRow.SetActive(!menuFromTitle);
             RebuildLevelList();
             menuEggs.text = "Easter eggs found: " + SaveData.EasterEggCount + "   ·   v" + Version;
             RefreshMusicLabel();
             hintPanel.SetActive(false);
             menuPanel.SetActive(true);
-            flow.Paused = true;
+            if (!menuFromTitle) flow.Paused = true;
         }
 
         void ToggleMusic()
@@ -193,7 +276,9 @@ namespace Gotcha.UI
             // se la musica è accesa ma il telefono è a volume zero (es. dopo il livello del gatto) lo diciamo,
             // altrimenti sembra che l'interruttore funzioni al contrario
             bool phoneSilent = SensorHub.Instance != null && SensorHub.Instance.SystemVolume01 <= 0.01f;
-            musicLabel.text = !on ? "MUSIC: OFF" : phoneSilent ? "MUSIC: ON (PHONE VOLUME 0)" : "MUSIC: ON";
+            string label = !on ? "MUSIC: OFF" : phoneSilent ? "MUSIC: ON (PHONE VOLUME 0)" : "MUSIC: ON";
+            musicLabel.text = label;
+            if (settingsMusicLabel != null) settingsMusicLabel.text = label;
         }
 
         void CloseOverlay(GameObject panel)
@@ -228,7 +313,7 @@ namespace Gotcha.UI
                 dot.raycastTarget = false;
             }
             pager.PageCount = pages;
-            int current = Mathf.Max(0, flow.CurrentIndex) / LevelsPerPage;
+            int current = Mathf.Max(0, menuFromTitle ? flow.ResumeIndex : flow.CurrentIndex) / LevelsPerPage;
             pager.SetPage(current, true);
             LayoutDots();
         }
@@ -238,7 +323,8 @@ namespace Gotcha.UI
             LevelDefinition def = flow.GetDefinition(index);
             bool egg = def != null && !string.IsNullOrEmpty(def.easterEggId);
             bool found = egg && SaveData.HasEasterEgg(def.easterEggId);
-            Color color = !open ? LockedColor : index == flow.CurrentIndex ? Accent : egg ? EggColor : Dark;
+            bool here = menuFromTitle ? index == flow.ResumeIndex : index == flow.CurrentIndex;
+            Color color = !open ? LockedColor : here ? Accent : egg ? EggColor : Dark;
             Button b = CreateButton(page, "", color, () =>
             {
                 menuPanel.SetActive(false);
@@ -354,8 +440,9 @@ namespace Gotcha.UI
                 "\nInvite a friend: +1 life when they join!";
             adButton.interactable = !full;
             bool canPlay = pendingLevel >= 0 && lm.CanPlay;
-            playButton.interactable = pendingLevel < 0 || canPlay;
-            playLabel.text = pendingLevel >= 0 ? (canPlay ? "PLAY!" : "WAITING...") : "CLOSE";
+            bool atTitle = titlePanel.activeSelf;   // dal titolo si può sempre tornare indietro
+            playButton.interactable = pendingLevel < 0 || canPlay || atTitle;
+            playLabel.text = pendingLevel >= 0 ? (canPlay ? "PLAY!" : atTitle ? "BACK" : "WAITING...") : "CLOSE";
         }
 
         void WatchAdForLife()
@@ -372,7 +459,13 @@ namespace Gotcha.UI
         {
             if (pendingLevel >= 0)
             {
-                if (!flow.Lives.CanPlay) return;   // senza vite non si gioca
+                if (!flow.Lives.CanPlay)
+                {
+                    if (!titlePanel.activeSelf) return;   // senza vite non si gioca
+                    pendingLevel = -1;
+                    CloseOverlay(livesPanel);
+                    return;
+                }
                 int level = pendingLevel;
                 pendingLevel = -1;
                 livesPanel.SetActive(false);
@@ -437,6 +530,36 @@ namespace Gotcha.UI
             livesTimer.alignment = TextAnchor.MiddleRight;
             Place(livesTimer.transform, new Vector2(0.55f, 0), new Vector2(1, 1));
 
+            // Schermata del titolo (sopra barra e cuori, sotto gli altri pannelli)
+            RectTransform title = CreateRect("TitleScreen", safeRoot.parent, Vector2.zero, Vector2.one);
+            Image paper = title.gameObject.AddComponent<Image>();
+            paper.color = new Color(1f, 0.97f, 0.9f);
+            titlePanel = title.gameObject;
+            RectTransform titleArea = CreateRect("Content", title, Vector2.zero, Vector2.one);
+            titleArea.anchorMin = safeRoot.anchorMin;
+            titleArea.anchorMax = safeRoot.anchorMax;
+            if (logoSprite != null)
+            {
+                Image logo = CreateRect("Logo", titleArea, new Vector2(0.24f, 0.62f), new Vector2(0.76f, 0.9f)).gameObject.AddComponent<Image>();
+                logo.sprite = logoSprite;
+                logo.preserveAspect = true;
+                logo.raycastTarget = false;
+            }
+            Text big = CreateText(titleArea, "GOTCHA!", 150, Accent, FontStyle.Bold);
+            Place(big.transform, new Vector2(0.05f, logoSprite != null ? 0.5f : 0.6f), new Vector2(0.95f, logoSprite != null ? 0.62f : 0.8f));
+            big.transform.localRotation = Quaternion.Euler(0, 0, 4f);
+            big.gameObject.AddComponent<Shadow>().effectColor = Ink;
+            Text tagline = CreateText(titleArea, "Nothing is what it seems.", 50, Ink, FontStyle.Normal);
+            Place(tagline.transform, new Vector2(0.1f, 0.45f), new Vector2(0.9f, 0.5f));
+            Button cont = CreateButton(titleArea, "CONTINUE", Dark, ContinueGame);
+            continueLabel = cont.GetComponentInChildren<Text>();
+            continueButton = cont.gameObject;
+            Place(cont.transform, new Vector2(0.17f, 0.355f), new Vector2(0.83f, 0.425f));
+            Place(CreateButton(titleArea, "NEW GAME", Accent, NewGame).transform, new Vector2(0.17f, 0.255f), new Vector2(0.83f, 0.335f));
+            Place(CreateButton(titleArea, "LEVEL SELECTION", Dark, OpenLevelSelection).transform, new Vector2(0.17f, 0.155f), new Vector2(0.83f, 0.235f));
+            Place(CreateButton(titleArea, "SETTINGS", EggColor, OpenSettings).transform, new Vector2(0.17f, 0.055f), new Vector2(0.83f, 0.135f));
+            titlePanel.SetActive(false);
+
             // Hint
             RectTransform hintCard;
             hintPanel = CreateOverlay("HintPanel", out hintCard);
@@ -448,7 +571,7 @@ namespace Gotcha.UI
             // Menu
             RectTransform menuCard;
             menuPanel = CreateOverlay("MenuPanel", out menuCard, 1500);
-            AddHeader(menuCard, "MENU");
+            menuHeader = AddHeader(menuCard, "MENU");
             menuEggs = CreateText(menuCard, "", 46, Ink, FontStyle.Normal);
             Place(menuEggs.transform, new Vector2(0.08f, 0.76f), new Vector2(0.92f, 0.84f));
             // livelli a pagine da 10, scorrevoli con lo swipe (o con le frecce)
@@ -468,10 +591,29 @@ namespace Gotcha.UI
             Place(prev.transform, new Vector2(0.06f, 0.25f), new Vector2(0.2f, 0.31f));
             Button nextPage = CreateButton(menuCard, ">", Dark, () => pager.SetPage(pager.Page + 1));
             Place(nextPage.transform, new Vector2(0.8f, 0.25f), new Vector2(0.94f, 0.31f));
-            Button music = CreateButton(menuCard, "MUSIC: ON", Dark, ToggleMusic);
+            RectTransform musicRow = CreateRect("Row", menuCard, new Vector2(0.06f, 0.155f), new Vector2(0.94f, 0.235f));
+            menuMusicRow = musicRow.gameObject;
+            Button music = CreateButton(musicRow, "MUSIC: ON", Dark, ToggleMusic);
             musicLabel = music.GetComponentInChildren<Text>();
-            Place(music.transform, new Vector2(0.25f, 0.155f), new Vector2(0.75f, 0.235f));
-            Place(CreateButton(menuCard, "RESUME", Accent, () => CloseOverlay(menuPanel)).transform, new Vector2(0.25f, 0.05f), new Vector2(0.75f, 0.13f));
+            Place(music.transform, new Vector2(0f, 0f), new Vector2(0.62f, 1f));
+            Place(CreateButton(musicRow, "HOME", EggColor, ShowTitle).transform, new Vector2(0.66f, 0f), new Vector2(1f, 1f));
+            Button back = CreateButton(menuCard, "RESUME", Accent, CloseMenu);
+            menuBackLabel = back.GetComponentInChildren<Text>();
+            Place(back.transform, new Vector2(0.25f, 0.05f), new Vector2(0.75f, 0.13f));
+
+            // Impostazioni
+            RectTransform setCard;
+            settingsPanel = CreateOverlay("SettingsPanel", out setCard, 1100);
+            AddHeader(setCard, "SETTINGS");
+            Button setMusic = CreateButton(setCard, "MUSIC: ON", Dark, ToggleMusic);
+            settingsMusicLabel = setMusic.GetComponentInChildren<Text>();
+            Place(setMusic.transform, new Vector2(0.12f, 0.66f), new Vector2(0.88f, 0.77f));
+            settingsInfo = CreateText(setCard, "", 46, Ink, FontStyle.Normal);
+            Place(settingsInfo.transform, new Vector2(0.08f, 0.4f), new Vector2(0.92f, 0.63f));
+            Button reset = CreateButton(setCard, "RESET PROGRESS", Accent, ResetProgress);
+            resetLabel = reset.GetComponentInChildren<Text>();
+            Place(reset.transform, new Vector2(0.12f, 0.22f), new Vector2(0.88f, 0.33f));
+            Place(CreateButton(setCard, "BACK", Dark, CloseSettings).transform, new Vector2(0.25f, 0.06f), new Vector2(0.75f, 0.16f));
 
             // Vite: attesa, pubblicità con premio, invito
             RectTransform livesCard;
@@ -512,10 +654,10 @@ namespace Gotcha.UI
             AddHeader(doneCard, "YOU DID IT!");
             Text doneBody = CreateText(doneCard, "All levels solved.\nMore coming soon!", 52, Ink, FontStyle.Normal);
             Place(doneBody.transform, new Vector2(0.08f, 0.3f), new Vector2(0.92f, 0.7f));
-            Place(CreateButton(doneCard, "PLAY AGAIN", Accent, () =>
+            Place(CreateButton(doneCard, "TITLE SCREEN", Accent, () =>
             {
                 completedPanel.SetActive(false);
-                flow.StartLevel(0);
+                ShowTitle();
             }).transform, new Vector2(0.2f, 0.06f), new Vector2(0.8f, 0.24f));
         }
 

@@ -31,6 +31,14 @@ namespace Gotcha.Core
             }
         }
 
+        /// <summary>Riparte da zero: livelli bloccati (tranne il primo) ed Easter egg dimenticati. Le vite restano.</summary>
+        public static void ResetProgress()
+        {
+            PlayerPrefs.DeleteKey(UnlockedKey);
+            PlayerPrefs.DeleteKey(EggsKey);
+            PlayerPrefs.Save();
+        }
+
         public static void AddEasterEgg(string id)
         {
             if (string.IsNullOrEmpty(id) || HasEasterEgg(id)) return;

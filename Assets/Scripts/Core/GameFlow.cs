@@ -70,11 +70,20 @@ namespace Gotcha.Core
             Time.timeScale = 1f;
         }
 
-        void Start()
+        /// <summary>Primo livello non ancora risolto (per "Continua").</summary>
+        public int ResumeIndex => Mathf.Clamp(SaveData.HighestUnlocked, 0, Mathf.Max(0, LevelCount - 1));
+
+        // All'avvio non parte nessun livello: la UI mostra la schermata del titolo.
+
+        /// <summary>Chiude il livello in corso (si torna alla schermata del titolo).</summary>
+        public void StopLevel()
         {
-            int first = Mathf.Min(SaveData.HighestUnlocked, LevelCount - 1);
-            StartLevel(first);
-            if (!Lives.CanPlay) { Paused = true; OutOfLives?.Invoke(first); }
+            Paused = false;
+            if (current == null) return;
+            current.Finished -= OnFinished;
+            Destroy(current.gameObject);
+            current = null;
+            CurrentDefinition = null;
         }
 
         /// <summary>Avvia un livello solo se c'è almeno una vita; altrimenti avvisa la UI.</summary>
