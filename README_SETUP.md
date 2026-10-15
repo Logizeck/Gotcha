@@ -1,4 +1,4 @@
-# Gotcha! — v0.7 (cinque livelli, musica, pubblicità simulata)
+# Gotcha! — v0.8 (sette livelli, musica, pubblicità simulata)
 
 Progetto Unity 2022.3 LTS o Unity 6, C#, 2D (Built-in Render Pipeline).
 Grafica in stile cartone "doodle" generata da codice (nessuna immagine esterna da importare).
@@ -37,10 +37,10 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - `Core/PointerInput`, `Core/SaveData` utilità touch/mouse e salvataggio.
 - `Sensors/SensorHub` unico accesso ai sensori.
 - `Ads/AdBreakManager` regola 5 livelli / 120 s di gioco attivo; `LogAdProvider` simula gli annunci in Editor.
-- `Levels/` LevelController, LevelDefinition, LevelCatalog e i livelli KeyDoor, Maze, Snowman, Idle, Apple.
+- `Levels/` LevelController, LevelDefinition, LevelCatalog e i livelli KeyDoor, Maze, Snowman, Idle, Apple, Morse, Bomb.
 - `Components/` Draggable2D (con limite allo schermo), DropSlot, PinchScalable, TiltGravity, GoalZone, IdleTimer,
   SensorCondition, EasterEggTrigger, LockedDoor, CameraFit, DoodleWobble, Pulse, StrokeDrawer (disegno col dito),
-  SmokeEmitter/SmokePuff (fumo, Z, cuori, succo), SwipeCutter (taglio col dito), SpeechBubble (fumetto), ChromeBall (sfera cromata che riflette l'ambiente).
+  SmokeEmitter/SmokePuff (fumo, Z, cuori, succo), SwipeCutter (taglio col dito), TapButton (pulsanti nel mondo di gioco), SpeechBubble (fumetto), ChromeBall (sfera cromata che riflette l'ambiente).
 - `Shaders/ChromeBall.shader` riflesso sferico + luce speculare.
 - Prefab riutilizzabili in `Assets/Prefabs`: Key, Door, Carrot, Coal.
 - `UI/GameUI` interfaccia costruita da codice in stile doodle.
@@ -54,20 +54,20 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Una biglia d'acciaio parte fuori dal labirinto e va portata alla stella al centro inclinando il telefono.
 - Pareti a tubi al neon arrotondati (anche i collider sono a capsula, così la biglia scorre morbida sugli spigoli):
   recinto e anello interno ciano, primo anello magenta, secondo anello giallo.
-- Sensibilità: TiltGravity `strength` 41.4 (-10% rispetto alla v0.5), `response` 0.5; poco attrito, scia luminosa.
+- Sensibilità: TiltGravity `strength` 37.3 (ridotta due volte del 10%), `response` 0.5; poco attrito, scia luminosa.
 - Aspetto realistico calcolato dallo shader `Gotcha/ChromeBall`: al centro riflette il "soffitto" (luce di studio
   con softbox), ai bordi le pareti al neon che ha intorno (camera di riflesso), fresnel, due luci speculari,
   bordo di contatto scuro. Sotto c'è un'ombra morbida.
 
 ## Livello 3 — Snowman
-- Pupazzo in posa di 3/4 (guarda a sinistra): il sedere sporge sul retro, a destra in basso.
-- Occhi (carboni) e naso (carota) restano attaccati dove li lasci sulla testa; altrove cadono nella neve.
-  Nessuna posizione è indicata. Per vincere ogni occhio deve stare nella sua zona (ampia e invisibile)
-  e il naso al centro; la bocca si disegna col dito e resta come un solco nella neve: deve essere un sorriso.
-- Easter egg `snowman_butt`: lascia la carota sul sedere. La carota resta piantata lì; il pupazzo arrossisce,
-  fuma, dice "Oh noooo!" e si scioglie lentamente dalla testa in giù; la base resta a terra in una pozzanghera.
-  Passarci sopra trascinando o farla cadere non fa scattare niente: conta solo dove la lasci.
-- Zone e misure sono regolabili dall'Inspector del prefab `Level_Snowman`.
+- Pupazzo dalle sembianze umane (gambe tozze, fianchi, busto) con una testa enorme e buffa, in posa di 3/4
+  (guarda a sinistra). Il sedere è solo accennato dalla curva dei fianchi sul retro.
+- Occhi (carboni) e naso (carota), più grandi del normale, restano attaccati dove li lasci sulla testa;
+  altrove cadono nella neve. Nessuna posizione è indicata: ogni occhio deve stare nella sua zona (ampia e
+  invisibile) e il naso al centro; la bocca si disegna col dito e resta come un solco: deve essere un sorriso.
+- Easter egg `snowman_butt`: lascia la carota sul sedere. Resta piantata lì; il pupazzo arrossisce, fuma,
+  dice "Oh noooo!" e si scioglie lentamente dalla testa in giù; la base resta a terra in una pozzanghera.
+- Zone, misure e punti d'appoggio sono regolabili dall'Inspector del prefab `Level_Snowman`.
 
 ## Livello 4 — Big Red Button
 - Il gatto è sveglio e miagola: ha fame. Bisogna prendere il pesce dal quadro e darglielo.
@@ -78,6 +78,19 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 ## Livello 5 — Slice It!
 - Taglia la mela col dito: il gesto deve entrare nella mela e uscire dall'altra parte (un taglio deciso).
   La mela si divide in due metà orientate come il taglio, che cadono sul tagliere con qualche goccia di succo.
+
+## Livello 6 — Beep Beep
+- La radio suona a caso uno di cinque segnali: `...` (tre brevi), `---` (tre lunghi), `.--`, `-.-`, `.-.`.
+  Bisogna premere il tasto col disegno corrispondente. Toccando la radio il segnale si riascolta.
+- Tasto sbagliato: ronzio, tutto trema e GOTCHA! (si riprova con un nuovo segnale a caso).
+- La spia della radio si accende insieme ai toni (si gioca anche col telefono silenzioso); la musica si abbassa
+  mentre suonano i segnali. Toni generati da codice (sinusoide 760 Hz).
+
+## Livello 7 — Tick Tock
+- Pulsante blu e pulsante rosso, due cavi gialli aggrovigliati in modo casuale: uno finisce libero (fili di rame
+  sfilacciati), l'altro entra nel timer della dinamite. Il timer parte da 10 secondi (lampeggia negli ultimi 3).
+- Il pulsante collegato al timer lo ferma ("Phew!"). Quello sbagliato o il tempo scaduto: BOOM! e GOTCHA!
+  Ogni tentativo ridisegna i cavi e sceglie a caso quale pulsante è quello giusto.
 
 ## Musica
 - Colonna sonora `Assets/Audio/Soundtrack.wav` in loop (importata compressa Vorbis). Si spegne/accende dal MENU

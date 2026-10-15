@@ -332,6 +332,10 @@ namespace Gotcha.EditorArt
                 DoodleSprites.Zzz(), DoodleSprites.Heart(), DoodleSprites.BigButton(), DoodleSprites.Fish(),
                 DoodleSprites.Kitchen(), DoodleSprites.Board(), DoodleSprites.Apple(), DoodleSprites.AppleHalf(-1),
                 DoodleSprites.AppleHalf(1), DoodleSprites.JuiceDrop(),
+                DoodleSprites.RadioRoom(), DoodleSprites.Radio(), DoodleSprites.RadioLamp(),
+                DoodleSprites.MorseKey(0), DoodleSprites.MorseKey(1), DoodleSprites.MorseKey(2), DoodleSprites.MorseKey(3), DoodleSprites.MorseKey(4),
+                DoodleSprites.Workshop(), DoodleSprites.Dynamite(), DoodleSprites.TimerBox(), DoodleSprites.WireEnd(), DoodleSprites.Boom(),
+                DoodleSprites.BigButton("blue_button", Rgba.Hex("3E8EF7"), Rgba.Hex("2563C9")),
             };
         }
     }

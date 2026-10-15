@@ -31,6 +31,12 @@ namespace Gotcha.Core
 
         void OnDestroy() { if (Instance == this) Instance = null; }
 
+        /// <summary>Abbassa la musica (es. mentre si ascoltano i segnali del livello 6).</summary>
+        public void SetDucked(bool ducked)
+        {
+            if (source != null) source.volume = ducked ? volume * 0.15f : volume;
+        }
+
         public void SetMuted(bool muted)
         {
             Muted = muted;

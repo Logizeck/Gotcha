@@ -31,21 +31,26 @@ namespace Gotcha.Levels
         [SerializeField] StrokeDrawer mouthPen;  // centrato sulla testa
 
         [Header("Zone invisibili (coordinate del pupazzo, piedi in 0,0)")]
-        [SerializeField] Vector2 headCenter = new Vector2(-0.12f, 4.02f);
-        [SerializeField] float stickRadius = 0.8f;                              // dove gli oggetti restano attaccati
-        [SerializeField] Rect leftEyeZone = new Rect(-0.8f, 3.98f, 0.6f, 0.55f);
-        [SerializeField] Rect rightEyeZone = new Rect(-0.22f, 3.98f, 0.62f, 0.55f);
-        [SerializeField] Rect noseZone = new Rect(-0.8f, 3.66f, 1.0f, 0.46f);
-        [SerializeField] Rect mouthZone = new Rect(-0.78f, 3.38f, 1.25f, 0.6f); // dove deve stare il sorriso
-        [SerializeField] Vector2 buttCenter = new Vector2(1.45f, 0.78f);
-        [SerializeField] float buttRadius = 0.6f;
-        [SerializeField] Vector2 buttSurface = new Vector2(1.58f, 0.78f);         // dove si pianta la punta della carota
+        [SerializeField] Vector2 headCenter = new Vector2(-0.1f, 3.7f);
+        [SerializeField] float stickRadius = 1.15f;                             // dove gli oggetti restano attaccati
+        [SerializeField] Rect leftEyeZone = new Rect(-1.05f, 3.72f, 0.85f, 0.75f);
+        [SerializeField] Rect rightEyeZone = new Rect(-0.2f, 3.72f, 0.9f, 0.75f);
+        [SerializeField] Rect noseZone = new Rect(-1.05f, 3.3f, 1.5f, 0.66f);
+        [SerializeField] Rect mouthZone = new Rect(-1.05f, 2.8f, 1.8f, 0.85f);  // dove deve stare il sorriso
+        [SerializeField] Vector2 buttCenter = new Vector2(0.86f, 1.02f);
+        [SerializeField] float buttRadius = 0.5f;
+        [SerializeField] Vector2 buttSurface = new Vector2(0.86f, 1.02f);       // dove si pianta la punta della carota
+
+        [Header("Punti d'appoggio delle parti (coordinate del pupazzo)")]
+        [SerializeField] float middlePivot = 1.5f;
+        [SerializeField] float shoulderY = 2.45f;
+        [SerializeField] float headPivot = 2.72f;
+        [SerializeField] float hatPivot = 4.62f;
 
         [Header("Easter egg")]
         [SerializeField] string eggId = "snowman_butt";
         [SerializeField] float groundY = -3.9f;
 
-        const float MiddlePivot = 1.95f, ShoulderY = 2.85f, HeadPivot = 3.42f, HatPivot = 4.55f;
         static readonly Color BlushTint = new Color(1f, 0.78f, 0.83f);
         static readonly Color MeltTint = new Color(0.86f, 0.94f, 1f);
 
@@ -194,7 +199,7 @@ namespace Gotcha.Levels
             Transform t = carrot.transform;
             t.SetParent(basePart, true);
             t.localScale = new Vector3(-Mathf.Abs(t.localScale.x), t.localScale.y, t.localScale.z);
-            Vector3 target = snowman.TransformPoint(buttSurface + new Vector2(0.36f, 0f));
+            Vector3 target = snowman.TransformPoint(buttSurface + new Vector2(0.4f * Mathf.Abs(t.localScale.x), 0f));
             target.z = t.position.z;
             Vector3 from = t.position;
             for (float k = 0f; k < 1f; k += Time.deltaTime / 0.15f) { t.position = Vector3.Lerp(from, target, k); yield return null; }
@@ -240,12 +245,12 @@ namespace Gotcha.Levels
         void Pose(float sb, float sm, float sh, float overall)
         {
             Squash(basePart, 0f, sb);
-            float middleY = MiddlePivot * sb;
+            float middleY = middlePivot * sb;
             Squash(middlePart, middleY, sm);
-            if (armsPart != null) armsPart.localPosition = new Vector3(0f, middleY + (ShoulderY - MiddlePivot) * sm, 0f);
-            float headY = middleY + (HeadPivot - MiddlePivot) * sm;
+            if (armsPart != null) armsPart.localPosition = new Vector3(0f, middleY + (shoulderY - middlePivot) * sm, 0f);
+            float headY = middleY + (headPivot - middlePivot) * sm;
             Squash(headPart, headY, sh);
-            if (hatPart != null) hatPart.localPosition = new Vector3(0f, headY + (HatPivot - HeadPivot) * sh, 0f);
+            if (hatPart != null) hatPart.localPosition = new Vector3(0f, headY + (hatPivot - headPivot) * sh, 0f);
 
             if (puddle != null) puddle.localScale = Vector3.one * Mathf.Min(1f, overall * 1.1f);
             SetTint(Color.Lerp(BlushTint, MeltTint, overall), 1f - Mathf.Clamp01(overall * 2.5f));

@@ -31,7 +31,7 @@ public static class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 7;
+    const int BuilderVersion = 8;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -90,6 +90,12 @@ public static class GotchaProjectBuilder
             Define("Apple", "slice_apple", "SLICE IT!",
                 "No knife? No problem. A quick finger is sharp enough.",
                 BuildAppleLevel()),
+            Define("Morse", "beep_code", "BEEP BEEP",
+                "Listen carefully. Short and long... Tap the radio to hear it again.",
+                BuildMorseLevel()),
+            Define("Bomb", "defuse", "TICK TOCK",
+                "Follow the wires. Only one of them really goes to the timer.",
+                BuildBombLevel()),
         };
 
         LevelCatalog catalog = LoadOrCreate<LevelCatalog>(LevelDir + "/LevelCatalog.asset");
@@ -258,7 +264,7 @@ public static class GotchaProjectBuilder
         var root = new GameObject("Level_Maze");
         MazeLevel level = root.AddComponent<MazeLevel>();
         TiltGravity tilt = root.AddComponent<TiltGravity>();
-        tilt.strength = 41.4f;   // risposta rapida ma un po' più dolce (-10% rispetto a 46)
+        tilt.strength = 37.3f;   // sensibilità ridotta due volte del 10% (46 → 41.4 → 37.3)
         tilt.response = 0.5f;
         Art(root.transform, "Night", "maze_bg", -20, false);
 
@@ -452,7 +458,7 @@ public static class GotchaProjectBuilder
         snowman.localPosition = new Vector3(0, -3.0f, 0);
         Transform basePart = Part(snowman, "Base", 0f);
         Transform middlePart = Part(snowman, "Middle", DoodleSprites.SnowMiddlePivot);
-        Transform armsPart = Part(snowman, "Arms", 2.85f);
+        Transform armsPart = Part(snowman, "Arms", DoodleSprites.SnowShoulderY);
         Transform headPart = Part(snowman, "Head", DoodleSprites.SnowHeadPivot);
         Transform hatPart = Part(snowman, "Hat", DoodleSprites.SnowHatPivot);
         var bodies = new List<SpriteRenderer>
@@ -461,11 +467,13 @@ public static class GotchaProjectBuilder
             Art(middlePart, "Art", "sm_middle", 3, true, new Vector2(0, -DoodleSprites.SnowMiddlePivot)).GetComponent<SpriteRenderer>(),
             Art(headPart, "Art", "sm_head", 4, true, new Vector2(0, -DoodleSprites.SnowHeadPivot)).GetComponent<SpriteRenderer>(),
         };
-        Art(armsPart, "Art", "sm_arms", 1, true, new Vector2(0, -2.85f));
+        Art(armsPart, "Art", "sm_arms", 1, true, new Vector2(0, -DoodleSprites.SnowShoulderY));
         Art(hatPart, "Art", "sm_hat", 7, true, new Vector2(0, -DoodleSprites.SnowHatPivot));
         float headLocal = DoodleSprites.SnowHeadCenterY - DoodleSprites.SnowHeadPivot;   // centro della testa nel pivot della testa
         float headX = DoodleSprites.SnowHeadCenterX;
-        SpriteRenderer blush = Art(headPart, "Blush", "blush", 5, true, new Vector2(headX - 0.06f, headLocal - 0.08f)).GetComponent<SpriteRenderer>();
+        Transform blushT = Art(headPart, "Blush", "blush", 5, true, new Vector2(headX - 0.06f, headLocal - 0.12f));
+        blushT.localScale = Vector3.one * 1.6f;   // guance grandi per la faccia grande
+        SpriteRenderer blush = blushT.GetComponent<SpriteRenderer>();
 
         // Bocca: si disegna col dito sulla testa e resta come un solco nella neve
         var pen = new GameObject("MouthPen");
@@ -480,9 +488,9 @@ public static class GotchaProjectBuilder
         drawer.material = StrokeMaterial();
         drawer.layers = new[]
         {
-            new StrokeDrawer.Layer { color = Color.white, width = 0.085f, offset = new Vector2(0, -0.022f) },               // bordo illuminato
-            new StrokeDrawer.Layer { color = new Color(0.61f, 0.73f, 0.84f), width = 0.08f, offset = new Vector2(0, 0.006f) }, // pareti del solco
-            new StrokeDrawer.Layer { color = new Color(0.42f, 0.55f, 0.71f), width = 0.04f, offset = new Vector2(0, 0.012f) }, // fondo in ombra
+            new StrokeDrawer.Layer { color = Color.white, width = 0.11f, offset = new Vector2(0, -0.028f) },               // bordo illuminato
+            new StrokeDrawer.Layer { color = new Color(0.61f, 0.73f, 0.84f), width = 0.105f, offset = new Vector2(0, 0.008f) }, // pareti del solco
+            new StrokeDrawer.Layer { color = new Color(0.42f, 0.55f, 0.71f), width = 0.055f, offset = new Vector2(0, 0.015f) }, // fondo in ombra
         };
 
         var smokeGo = new GameObject("Smoke");
@@ -500,9 +508,13 @@ public static class GotchaProjectBuilder
         SpeechBubble bubble = Bubble(root.transform, new Vector2(0.95f, 2.45f));
 
         // Pezzi sparsi nella neve: nessuna posizione è suggerita sul pupazzo
-        Instance(coalPrefab, root.transform, new Vector2(-2.0f, -3.95f)).name = "Eye1";
-        Instance(coalPrefab, root.transform, new Vector2(-1.35f, -4.35f)).name = "Eye2";
-        Instance(carrotPrefab, root.transform, new Vector2(1.55f, -4.1f)).name = "Carrot";
+        // pezzi più grandi del normale: la faccia è enorme e buffa
+        GameObject eye1 = Instance(coalPrefab, root.transform, new Vector2(-2.0f, -3.95f));
+        GameObject eye2 = Instance(coalPrefab, root.transform, new Vector2(-1.3f, -4.35f));
+        GameObject carrot = Instance(carrotPrefab, root.transform, new Vector2(1.5f, -4.1f));
+        eye1.name = "Eye1"; eye2.name = "Eye2"; carrot.name = "Carrot";
+        eye1.transform.localScale = eye2.transform.localScale = Vector3.one * 1.4f;
+        carrot.transform.localScale = Vector3.one * 1.3f;
 
         SetField(level, "snowman", snowman);
         SetField(level, "basePart", basePart);
@@ -516,6 +528,10 @@ public static class GotchaProjectBuilder
         SetField(level, "bubble", bubble);
         SetField(level, "smoke", smoke);
         SetField(level, "mouthPen", drawer);
+        SetFloat(level, "middlePivot", DoodleSprites.SnowMiddlePivot);
+        SetFloat(level, "shoulderY", DoodleSprites.SnowShoulderY);
+        SetFloat(level, "headPivot", DoodleSprites.SnowHeadPivot);
+        SetFloat(level, "hatPivot", DoodleSprites.SnowHatPivot);
         return SavePrefab(root, LevelDir + "/Snowman/Level_Snowman.prefab");
     }
 
@@ -724,6 +740,133 @@ public static class GotchaProjectBuilder
         return rb;
     }
 
+    // ---------- Livello 6: ascolta i segnali ----------
+
+    static GameObject BuildMorseLevel()
+    {
+        var root = new GameObject("Level_Morse");
+        MorseLevel level = root.AddComponent<MorseLevel>();
+        AudioSource source = root.AddComponent<AudioSource>();
+        source.playOnAwake = false;
+        Art(root.transform, "Room", "radio_bg", -20, false);
+
+        var stage = new GameObject("Stage").transform;   // tutto ciò che trema quando sbagli
+        stage.SetParent(root.transform, false);
+
+        var radioGo = new GameObject("Radio");
+        radioGo.transform.SetParent(stage, false);
+        radioGo.transform.localPosition = new Vector3(0, 1.3f, 0);
+        Transform radioArt = Art(radioGo.transform, "Art", "radio", 2);
+        radioGo.AddComponent<BoxCollider2D>().size = new Vector2(2.7f, 1.9f);
+        TapButton radio = radioGo.AddComponent<TapButton>();
+        radio.id = "radio";
+        radio.visual = radioArt;
+        radio.pressedScaleY = 0.95f;
+        GameObject lamp = Art(radioGo.transform, "Lamp", "radio_lamp", 3, false, new Vector2(0.45f, 0.72f)).gameObject;
+
+        var keys = new TapButton[MorseLevel.Codes.Length];
+        Vector2[] slots = { new Vector2(-1.75f, -1.55f), new Vector2(0f, -1.55f), new Vector2(1.75f, -1.55f), new Vector2(-0.9f, -2.95f), new Vector2(0.9f, -2.95f) };
+        for (int i = 0; i < keys.Length; i++)
+        {
+            var key = new GameObject("Key " + MorseLevel.Codes[i]);
+            key.transform.SetParent(stage, false);
+            key.transform.localPosition = slots[i];
+            Transform art = Art(key.transform, "Art", "morse_" + i, 4);
+            key.AddComponent<BoxCollider2D>().size = new Vector2(1.5f, 1.0f);
+            TapButton b = key.AddComponent<TapButton>();
+            b.id = MorseLevel.Codes[i];
+            b.visual = art;
+            keys[i] = b;
+        }
+
+        SetField(level, "source", source);
+        SetArray(level, "keys", keys);
+        SetField(level, "radio", radio);
+        SetField(level, "lamp", lamp);
+        SetField(level, "shakeTarget", stage);
+        return SavePrefab(root, LevelDir + "/Morse/Level_Morse.prefab");
+    }
+
+    // ---------- Livello 7: disinnesca la bomba ----------
+
+    static GameObject BuildBombLevel()
+    {
+        var root = new GameObject("Level_Bomb");
+        BombLevel level = root.AddComponent<BombLevel>();
+        Art(root.transform, "Workshop", "workshop_bg", -20, false);
+
+        var bomb = new GameObject("Bomb");
+        bomb.transform.SetParent(root.transform, false);
+        bomb.transform.localPosition = new Vector3(0, 1.45f, 0);
+        Art(bomb.transform, "Dynamite", "dynamite", 2);
+        var timer = new GameObject("Timer");
+        timer.transform.SetParent(bomb.transform, false);
+        timer.transform.localPosition = new Vector3(0, 1.35f, 0);
+        Art(timer.transform, "Art", "timer_box", 5);
+        TextMesh display = Label(timer.transform, new Vector2(0, 0.04f), 6, "10.0", 0.06f);
+        display.color = new Color(1f, 0.2f, 0.2f);
+        var terminal = new GameObject("Terminal").transform;
+        terminal.SetParent(timer.transform, false);
+        terminal.localPosition = new Vector3(-0.35f, -0.55f, 0);
+
+        TapButton blue = BombButton(root.transform, "BlueButton", "blue_button", new Vector2(-1.3f, -3.6f), out Transform blueStart);
+        TapButton red = BombButton(root.transform, "RedButton", "big_button", new Vector2(1.3f, -3.6f), out Transform redStart);
+
+        var wireEnd = new GameObject("WireEnd").transform;
+        wireEnd.SetParent(root.transform, false);
+        Art(wireEnd, "Art", "wire_end", 5, false);
+
+        var boom = new GameObject("Boom");
+        boom.transform.SetParent(root.transform, false);
+        boom.transform.localPosition = new Vector3(0, 1.6f, 0);
+        Art(boom.transform, "Art", "boom", 70);
+        Label(boom.transform, new Vector2(0, 0.05f), 71, "BOOM!", 0.09f);
+
+        var smokeGo = new GameObject("Smoke");
+        smokeGo.transform.SetParent(root.transform, false);
+        smokeGo.transform.localPosition = new Vector3(0, 1.6f, 0);
+        SmokeEmitter smoke = smokeGo.AddComponent<SmokeEmitter>();
+        smoke.puffSprite = sprites["puff"];
+        smoke.puffsPerSecond = 14f;
+        smoke.spread = 1.2f;
+        smoke.startScale = 1.2f;
+        smoke.tint = new Color(0.45f, 0.45f, 0.5f, 0.95f);
+        smoke.sortingOrder = 72;
+
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(1.0f, 3.1f));
+        bubble.transform.localScale = Vector3.one * 0.7f;
+
+        SetField(level, "blueButton", blue);
+        SetField(level, "redButton", red);
+        SetField(level, "blueStart", blueStart);
+        SetField(level, "redStart", redStart);
+        SetField(level, "timerTerminal", terminal);
+        SetField(level, "wireEnd", wireEnd);
+        SetField(level, "display", display);
+        SetField(level, "bomb", bomb);
+        SetField(level, "boom", boom);
+        SetField(level, "smoke", smoke);
+        SetField(level, "bubble", bubble);
+        SetField(level, "wireMaterial", StrokeMaterial());
+        return SavePrefab(root, LevelDir + "/Bomb/Level_Bomb.prefab");
+    }
+
+    static TapButton BombButton(Transform parent, string name, string sprite, Vector2 pos, out Transform wireStart)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        go.transform.localPosition = pos;
+        Transform art = Art(go.transform, "Art", sprite, 6);
+        go.AddComponent<BoxCollider2D>().size = new Vector2(1.8f, 1.1f);
+        TapButton b = go.AddComponent<TapButton>();
+        b.id = name;
+        b.visual = art;
+        wireStart = new GameObject("WireStart").transform;
+        wireStart.SetParent(go.transform, false);
+        wireStart.localPosition = new Vector3(0, 0.15f, 0);
+        return b;
+    }
+
     // ---------- Aiuti per la costruzione ----------
 
     /// <summary>Figlio con uno sprite doodle, posizionato in modo che le coordinate del disegno coincidano con quelle locali.</summary>
@@ -849,6 +992,15 @@ public static class GotchaProjectBuilder
         SerializedProperty p = so.FindProperty(field);
         if (p == null) { Debug.LogError("[Gotcha] Campo non trovato: " + target.GetType().Name + "." + field); return; }
         p.objectReferenceValue = value;
+        so.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    static void SetFloat(Object target, string field, float value)
+    {
+        var so = new SerializedObject(target);
+        SerializedProperty p = so.FindProperty(field);
+        if (p == null) { Debug.LogError("[Gotcha] Campo non trovato: " + target.GetType().Name + "." + field); return; }
+        p.floatValue = value;
         so.ApplyModifiedPropertiesWithoutUndo();
     }
 
