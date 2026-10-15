@@ -16,7 +16,7 @@ namespace Gotcha.UI
     public class GameUI : MonoBehaviour
     {
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.15";
+        public const string Version = "0.16";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
@@ -120,7 +120,7 @@ namespace Gotcha.UI
 
             bool solved = result == LevelResult.Solved;
             resultTitle.text = solved ? "SOLVED!" : "GOTCHA!";
-            if (solved) resultBody.text = "Nice one.";
+            if (solved) resultBody.text = string.IsNullOrEmpty(eggId) ? "Nice one." : "Solved... AND you found a secret!\nEaster eggs: " + SaveData.EasterEggCount;
             else if (!string.IsNullOrEmpty(eggId)) resultBody.text = "You found a secret!\nEaster eggs: " + SaveData.EasterEggCount;
             else
             {
@@ -141,7 +141,10 @@ namespace Gotcha.UI
             if (ClipRecorder.Instance == null || ClipRecorder.Instance.IsSharing) return;
             shareButton.interactable = false;
             shareLabel.text = "PREPARING...";
-            ClipRecorder.Instance.Share("I just melted a snowman in Gotcha! Can you beat it? #GotchaGame", ok =>
+            string msg = flow.CurrentDefinition != null && flow.CurrentDefinition.easterEggId == "mecha_robot"
+                ? "My robot just evolved into a battle mech in Gotcha! #GotchaGame"
+                : "I just found a secret in Gotcha! Can you find it too? #GotchaGame";
+            ClipRecorder.Instance.Share(msg, ok =>
             {
                 shareLabel.text = ok ? "SHARE AGAIN" : "SHARE FAILED";
                 shareButton.interactable = true;

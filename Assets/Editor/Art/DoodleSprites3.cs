@@ -542,5 +542,84 @@ namespace Gotcha.EditorArt
                 }
             return new DoodleArt("ring_waves", p);
         }
+
+        // ---------- Easter egg del livello 21: il robot si evolve ----------
+
+        /// <summary>
+        /// Robot da battaglia "alla giapponese" (piedi in 0,0, alto ~3.4): elmo con la V dorata, visiera con occhi
+        /// luminosi, spalloni bianchi, petto blu con prese d'aria gialle, un pugno alzato e una spada laser.
+        /// </summary>
+        public static DoodleArt RobotMecha()
+        {
+            var p = new DoodlePainter(-1.75f, -0.1f, 1.45f, 3.45f, 110) { Ink = 0.05f };
+            Rgba white = Rgba.Hex("F4F5FA"), whiteShade = Rgba.Hex("C3C8D6");
+            Rgba blue = Rgba.Hex("2F6FE0"), blueShade = Rgba.Hex("1F4FAE");
+            Rgba red = Rgba.Hex("E23B3B"), redShade = Rgba.Hex("B22A2A");
+            Rgba yellow = Rgba.Hex("FFC93C"), yellowShade = Rgba.Hex("E39B1B");
+            Rgba grey = Rgba.Hex("8D93A6"), greyShade = Rgba.Hex("666B7D");
+
+            // spada laser (dietro al braccio sinistro)
+            p.FillFunc(Sd.Capsule(-0.95f, 1.15f, -1.6f, 0.15f, 0.16f), (x, y) =>
+            {
+                float d = DistToSeg(x, y, -0.95f, 1.15f, -1.6f, 0.15f);
+                return Rgba.Lerp(Rgba.White, Rgba.Hex("FF4FD8"), Clamp(d / 0.07f)).WithAlpha(Clamp(1.2f - d / 0.16f));
+            });
+            // gambe
+            foreach (float sx in new[] { -1f, 1f })
+            {
+                Body(p, Sd.Box(sx * 0.38f, 0.13f, 0.27f, 0.13f, 0.05f), red, redShade);                 // piedi
+                Body(p, Sd.Box(sx * 0.34f, 0.6f, 0.18f, 0.36f, 0.05f), white, whiteShade);              // stinchi
+                Body(p, Sd.Box(sx * 0.34f, 0.95f, 0.15f, 0.08f, 0.03f), blue, blueShade);               // ginocchiere
+                Body(p, Sd.Box(sx * 0.29f, 1.18f, 0.15f, 0.17f, 0.03f), grey, greyShade);               // cosce
+            }
+            Body(p, Sd.Box(0, 1.4f, 0.4f, 0.12f, 0.04f), red, redShade);                                // cintura
+            p.Shape(Sd.Polygon(-0.1f, 1.48f, 0.1f, 1.48f, 0f, 1.32f), yellow, 0.025f);
+            Body(p, Sd.Box(0, 1.64f, 0.3f, 0.14f, 0.04f), white, whiteShade);                           // addome
+            for (int i = 0; i < 3; i++) p.InkLine(0.02f, -0.2f, 1.58f + i * 0.05f, 0.2f, 1.58f + i * 0.05f);
+            // braccio sinistro giù (con l'elsa della spada), braccio destro alzato col pugno
+            Body(p, Sd.Capsule(-0.72f, 2.05f, -0.88f, 1.3f, 0.13f), grey, greyShade);
+            Body(p, Sd.Circle(-0.92f, 1.2f, 0.16f), white, whiteShade);
+            p.Shape(Sd.Rotate(Sd.Box(-0.95f, 1.15f, 0.05f, 0.14f, 0.02f), -0.95f, 1.15f, 45f), greyShade, 0.02f);
+            Body(p, Sd.Capsule(0.72f, 2.1f, 0.98f, 2.8f, 0.13f), grey, greyShade);
+            Body(p, Sd.Box(1.0f, 3.0f, 0.17f, 0.17f, 0.06f), white, whiteShade);
+            p.InkLine(0.018f, 0.88f, 3.04f, 1.12f, 3.04f);
+            // petto
+            Sdf chest = Sd.Polygon(-0.55f, 2.3f, 0.55f, 2.3f, 0.42f, 1.78f, -0.42f, 1.78f);
+            Body(p, chest, blue, blueShade);
+            foreach (float sx in new[] { -1f, 1f })
+            {
+                p.Shape(Sd.Box(sx * 0.24f, 2.08f, 0.16f, 0.12f, 0.03f), yellow, 0.025f);
+                for (int i = 0; i < 3; i++) p.InkLine(0.015f, sx * 0.24f - 0.12f, 2.02f + i * 0.06f, sx * 0.24f + 0.12f, 2.02f + i * 0.06f);
+            }
+            // spalloni
+            foreach (float sx in new[] { -1f, 1f })
+            {
+                Body(p, Sd.Box(sx * 0.75f, 2.2f, 0.26f, 0.22f, 0.08f), white, whiteShade);
+                p.Fill(Sd.Box(sx * 0.75f, 2.33f, 0.24f, 0.04f), red);
+                p.Shape(Sd.Box(sx * 0.75f, 2.2f, 0.26f, 0.22f, 0.08f), Rgba.Clear);
+            }
+            // testa
+            p.Shape(Sd.Box(0, 2.38f, 0.1f, 0.06f, 0.02f), greyShade, 0.02f);
+            Sdf helmet = Sd.Box(0, 2.62f, 0.22f, 0.2f, 0.07f);
+            Body(p, helmet, white, whiteShade);
+            p.Shape(Sd.Box(0, 2.66f, 0.17f, 0.055f, 0.03f), Rgba.Hex("1E2029"), 0.02f);   // visiera
+            foreach (float sx in new[] { -1f, 1f })
+                p.FillFunc(Sd.Ellipse(sx * 0.08f, 2.66f, 0.055f, 0.03f), (x, y) => Rgba.Lerp(Rgba.White, Rgba.Hex("3CFF9A"), Clamp(Math.Abs(x - sx * 0.08f) / 0.05f)));
+            p.Shape(Sd.Box(0, 2.5f, 0.1f, 0.05f, 0.02f), red, 0.02f);                    // mento
+            p.Shape(Sd.Circle(0, 2.79f, 0.04f), red, 0.015f);                             // sensore sulla fronte
+            // la V dorata
+            Sdf vfin = Sd.Union(Sd.Polygon(-0.02f, 2.78f, -0.5f, 3.3f, -0.42f, 3.32f, 0.02f, 2.86f),
+                                Sd.Polygon(0.02f, 2.78f, 0.5f, 3.3f, 0.42f, 3.32f, -0.02f, 2.86f));
+            Body(p, vfin, yellow, yellowShade);
+            return new DoodleArt("robot_mecha", p);
+        }
+
+        static float DistToSeg(float x, float y, float ax, float ay, float bx, float by)
+        {
+            float dx = bx - ax, dy = by - ay;
+            float t = Math.Max(0f, Math.Min(1f, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy)));
+            float px = ax + dx * t - x, py = ay + dy * t - y;
+            return (float)Math.Sqrt(px * px + py * py);
+        }
     }
 }

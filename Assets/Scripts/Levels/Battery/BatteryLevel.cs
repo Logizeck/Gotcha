@@ -32,6 +32,13 @@ namespace Gotcha.Levels
         [SerializeField] float crankRadius = 1.4f;
         [SerializeField] float turnsNeeded = 6f;
         [SerializeField] GameObject robotSad;
+        [Header("Easter egg: col caricatore vero il robot si evolve")]
+        [SerializeField] GameObject robotMecha;
+        [SerializeField] GameObject batteryUi;
+        [SerializeField] SpriteRenderer aura;
+        [SerializeField] SpriteRenderer flash;
+        [SerializeField] SmokeEmitter sparks;
+        [SerializeField] string eggId = "mecha_robot";
 
         bool armed, done, cranking, cranked;
         float lastAngle;
@@ -48,6 +55,11 @@ namespace Gotcha.Levels
             armed = !plugged;   // già in carica: prima va staccato
             if (robotOn != null) robotOn.SetActive(false);
             if (robotSad != null) robotSad.SetActive(false);
+            if (robotMecha != null) robotMecha.SetActive(false);
+            if (aura != null) aura.color = new Color(1f, 1f, 1f, 0f);
+            if (flash != null) flash.color = new Color(1f, 1f, 1f, 0f);
+            // si registra sempre: se parte la trasformazione, il video è pronto da condividere
+            if (ClipRecorder.Instance != null) ClipRecorder.Instance.Begin();
             if (crank != null) crank.SetActive(false);
             if (skipButton != null) skipButton.Pressed += OnSkip;
             if (bolt != null) bolt.SetActive(false);
@@ -56,7 +68,11 @@ namespace Gotcha.Levels
             Show();
         }
 
-        void OnDestroy() { if (skipButton != null) skipButton.Pressed -= OnSkip; }
+        void OnDestroy()
+        {
+            if (skipButton != null) skipButton.Pressed -= OnSkip;
+            if (ClipRecorder.Instance != null && ClipRecorder.Instance.IsCapturing) ClipRecorder.Instance.Discard();
+        }
 
         void OnSkip(TapButton b)
         {
@@ -142,6 +158,7 @@ namespace Gotcha.Levels
             if (skipButton != null) skipButton.gameObject.SetActive(false);
             if (byHand)
             {
+                if (ClipRecorder.Instance != null) ClipRecorder.Instance.Discard();
                 // acceso a manovella: funziona, ma che tristezza
                 if (robotSad != null) robotSad.SetActive(true);
                 if (bubble != null) bubble.Show("Meh... tastes like hamster wheel. :(");
@@ -156,20 +173,49 @@ namespace Gotcha.Levels
                 Win();
                 yield break;
             }
+            // caricatore vero: 100%... e poi sovraccarico! Il robot si evolve in un robot da battaglia
             if (robotOn != null) robotOn.SetActive(true);
-            if (notes != null) notes.Play();
-            if (bubble != null) bubble.Show("100%! Let's dance!");
+            if (bubble != null) bubble.Show("100%! ...wait... MORE?!");
             Vector3 home = robotHome;
             for (float k = 0f; k < 1.6f; k += Time.deltaTime)
             {
-                robot.localPosition = home + new Vector3(Mathf.Sin(k * 9f) * 0.15f, Mathf.Abs(Mathf.Sin(k * 9f)) * 0.25f, 0f);
-                robot.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(k * 9f) * 8f);
+                float e = k / 1.6f;
+                robot.localPosition = home + (Vector3)(Random.insideUnitCircle * 0.06f * e);   // trema sempre di più
+                if (aura != null) aura.color = new Color(0.6f, 0.95f, 1f, e * 0.9f);
+                if (aura != null) aura.transform.localScale = Vector3.one * (6f + Mathf.Sin(k * 30f) * 0.6f);
+                if (sparks != null && k > 0.3f) sparks.Play();
+                yield return null;
+            }
+            if (bubble != null) bubble.Show("OVERCHARGE!!!");
+            if (batteryUi != null) batteryUi.SetActive(false);
+            // lampo bianco: durante il lampo il robot cambia
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.15f) { if (flash != null) flash.color = new Color(1f, 1f, 1f, k); yield return null; }
+            if (robotOn != null) robotOn.SetActive(false);
+            if (robotMecha != null) robotMecha.SetActive(true);
+            home = robotHome + new Vector3(0.5f, 0f, 0f);   // il robot da battaglia è più grosso: un passo verso il centro
+            robot.localPosition = home;
+            if (sparks != null) sparks.Stop();
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.6f)
+            {
+                if (flash != null) flash.color = new Color(1f, 1f, 1f, 1f - k);
+                if (aura != null) aura.color = new Color(1f, 0.85f, 0.4f, (1f - k) * 0.9f);
+                float pop = 1f + Mathf.Sin(k * Mathf.PI) * 0.15f;   // "TA-DA!"
+                if (robotMecha != null) robotMecha.transform.localScale = Vector3.one * pop;
+                yield return null;
+            }
+            if (robotMecha != null) robotMecha.transform.localScale = Vector3.one;
+            if (bubble != null) bubble.Show("ARIGATO, MASTER!");
+            // posa da eroe: piccolo salto e atterraggio pesante
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.5f)
+            {
+                robot.localPosition = home + Vector3.up * Mathf.Sin(k * Mathf.PI) * 0.4f;
                 yield return null;
             }
             robot.localPosition = home;
-            robot.localRotation = Quaternion.identity;
-            if (notes != null) notes.Stop();
-            Win();
+            if (sparks != null) { sparks.Play(); yield return new WaitForSeconds(0.15f); sparks.Stop(); }
+            yield return new WaitForSeconds(1.6f);
+            if (ClipRecorder.Instance != null) ClipRecorder.Instance.Stop();
+            WinWithEgg(eggId);
         }
 
         IEnumerator HideLater(float seconds)

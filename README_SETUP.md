@@ -1,4 +1,4 @@
-# Gotcha! — v0.15 (miagolii, nuovo ordine dei livelli)
+# Gotcha! — v0.16 (Easter egg del robot)
 
 La versione installata si legge nel MENU del gioco (accanto al conteggio degli Easter egg).
 
@@ -195,6 +195,9 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - **21 Low Battery**: collega davvero il caricatore (se era già collegato: staccalo e riattaccalo). Editor: tasto C.
   Senza caricatore: "NO CHARGER?" fa comparire una dinamo a manovella da girare col dito; il livello si supera
   ma il robot si accende triste.
+  Easter egg `mecha_robot`: se la carica arriva dal caricatore VERO, il robot va in sovraccarico, lampo bianco, e si
+  evolve in un robot da battaglia giapponese (V dorata, spada laser) che ringrazia "ARIGATO, MASTER!". Il livello è
+  superato E l'Easter egg viene contato; la scena è registrata e si può condividere (SHARE VIDEO).
 - **22 Hot Soup**: soffia nel microfono per raffreddare la zuppa, POI trascinala al topolino. Editor: B.
 - **23 Frozen Key**: strofina il ghiaccio col dito, rimpicciolisci la chiave col pizzico, apri la porta.
 - **24 Campfire**: strofina il bastoncino avanti e indietro per la scintilla, poi soffia PIANO (forte la spegne).

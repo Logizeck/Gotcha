@@ -18,6 +18,9 @@ namespace Gotcha.Levels
 
         protected void Win() { Finish(LevelResult.Solved, null); }
         protected void Fail() { Finish(LevelResult.Failed, null); }
+        /// <summary>Vittoria che svela anche un Easter egg (es. il robot che si evolve).</summary>
+        protected void WinWithEgg(string eggId) { Finish(LevelResult.Solved, eggId); }
+
         /// <summary>Fallimento "divertente": registra l'Easter egg trovato.</summary>
         protected void FailWithEgg(string eggId) { Finish(LevelResult.Failed, eggId); }
 

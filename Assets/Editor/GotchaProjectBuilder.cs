@@ -31,7 +31,7 @@ public static class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 15;
+    const int BuilderVersion = 16;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -137,7 +137,7 @@ public static class GotchaProjectBuilder
                 BuildRocketLevel()),
             Define("Battery", "low_battery", "LOW BATTERY",
                 "Robots run on electricity. So does your phone...",
-                BuildBatteryLevel()),
+                BuildBatteryLevel(), "mecha_robot"),
             Define("Soup", "hot_soup", "HOT SOUP",
                 "Careful, it's boiling! How do you cool soup down?",
                 BuildSoupLevel()),
@@ -2186,6 +2186,8 @@ public static class GotchaProjectBuilder
         GameObject off = Art(robot, "Off", "robot_off", 5).gameObject;
         GameObject on = Art(robot, "On", "robot_on", 5).gameObject;
         GameObject sad = Art(robot, "Sad", "robot_sad", 5).gameObject;
+        GameObject mecha = Art(robot, "Mecha", "robot_mecha", 5).gameObject;   // Easter egg: l'evoluzione
+        SpriteRenderer aura = Art(robot, "Aura", "glow", 3, false, new Vector2(0, 1.5f)).GetComponent<SpriteRenderer>();
         BoxCollider2D body = robot.gameObject.AddComponent<BoxCollider2D>();
         body.size = new Vector2(2f, 2.9f);
         body.offset = new Vector2(0, 1.45f);
@@ -2234,6 +2236,15 @@ public static class GotchaProjectBuilder
         crankText.color = Color.white;
         crank.SetActive(false);
 
+        SpriteRenderer flash = Bar(root.transform, "Flash", Vector2.zero, new Vector2(12f, 16f), new Color(1f, 1f, 1f, 0f), 55);
+        SmokeEmitter sparks = Sparks(robot, "Sparks", new Color(0.55f, 0.95f, 1f));
+        sparks.transform.localPosition = new Vector3(0, 1.4f, 0);
+        sparks.spread = 1.2f;
+        SetField(level, "robotMecha", mecha);
+        SetField(level, "batteryUi", battery.gameObject);
+        SetField(level, "aura", aura);
+        SetField(level, "flash", flash);
+        SetField(level, "sparks", sparks);
         SetField(level, "skipButton", skipButton);
         SetField(level, "crank", crank);
         SetField(level, "crankArm", arm);
