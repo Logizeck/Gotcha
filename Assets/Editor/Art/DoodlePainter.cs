@@ -354,6 +354,12 @@ namespace Gotcha.EditorArt
                 DoodleSprites.Glass(), DoodleSprites.BoxCup(), DoodleSprites.StickyNote(),
                 DoodleSprites.MouthO(), DoodleSprites.MouthSmile(), DoodleSprites.Sun(), DoodleSprites.Cloud(),
                 DoodleSprites.Pizza(), DoodleSprites.PizzaSlice(), DoodleSprites.SnowScarf(), DoodleSprites.SnowBodyFull(), DoodleSprites.RobotSad(), DoodleSprites.CrankWheel(), DoodleSprites.CrankArm(), DoodleSprites.Slingshot(), DoodleSprites.StillLifeWithKey(), DoodleSprites.StillLifeEmpty(), DoodleSprites.AlarmClock(), DoodleSprites.RingWaves(), DoodleSprites.RobotMecha(), DoodleSprites.MouseSkeleton(), DoodleSprites.MouseTail(), DoodleSprites.Moon(), DoodleSprites.SnowForeground(),
+                DoodleSprites.Chalkboard(), DoodleSprites.PizzaOven(), DoodleSprites.Dough(false), DoodleSprites.Dough(true),
+                DoodleSprites.Sauce(false), DoodleSprites.Sauce(true), DoodleSprites.Cheese(false), DoodleSprites.Cheese(true),
+                DoodleSprites.Topping("mushroom"), DoodleSprites.Topping("olive"), DoodleSprites.Topping("chili"), DoodleSprites.Topping("pineapple"),
+                DoodleSprites.IngredientBowl(), DoodleSprites.Tongue(), DoodleSprites.Balloon(), DoodleSprites.BalloonOutline(),
+                DoodleSprites.Pump(), DoodleSprites.PumpHandle(), DoodleSprites.BalloonScrap(), DoodleSprites.CatBigFace(),
+                DoodleSprites.CatPupil(), DoodleSprites.MouseHole(), DoodleSprites.Pan(), DoodleSprites.PancakeCooked(), DoodleSprites.PancakeRaw(),
             };
         }
     }

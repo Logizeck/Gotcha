@@ -34,5 +34,9 @@ Livelli attuali:
 29. **Sunny Day** — proteggi il pupazzo con una nuvola.
 30. **Cut the Rope** — taglia al momento giusto.
 31. **Pizza Party** — taglia in quattro e servi.
+32. **Pizza Chef** — condisci come suggerisce la lavagna, inforna, taglia e servi (col peperoncino: Easter egg).
+33. **Blow It Up** — gonfia il palloncino fino alla sagoma tratteggiata, col fiato o con 10 colpi di pompa.
+34. **Cat Eyes** — muovi gli occhi del gatto inclinando il telefono e fissa il topolino per 3 secondi.
+35. **Pancake Flip** — lancia la frittella con un colpo di polso e riprendila nella padella, 3 volte.
 
 Istruzioni per aprire il progetto e creare l'APK: vedi [README_SETUP.md](README_SETUP.md).

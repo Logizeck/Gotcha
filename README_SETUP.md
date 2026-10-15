@@ -1,4 +1,4 @@
-# Gotcha! — v0.17 (topo bruciato, coda, tramonto)
+# Gotcha! — v0.18 (35 livelli)
 
 La versione installata si legge nel MENU del gioco (accanto al conteggio degli Easter egg).
 
@@ -218,6 +218,21 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
   limite parte la stessa tragedia dell'Easter egg del livello 11 (`Components/SnowmanMeltdown`): Easter egg `sun_melt`.
 - **30 Cut the Rope** (taglio + tempismo): taglia una corda, aspetta l'oscillazione, taglia l'altra.
 - **31 Pizza Party** (taglio + trascinamento): due tagli dal centro, poi una fetta a ogni topolino.
+
+## Livelli 32-35
+- **32 Pizza Chef**: trascina gli ingredienti dalle ciotole sulla pasta. La lavagna sul muro ha i "disegnini della
+  nonna" (pomodoro, mozzarella, fungo, oliva): sono la ricetta, ma non sembra. Poi trascina la pizza nel forno, tagliala
+  in quattro (due tagli dal centro) e dai una fetta a ogni topolino. Ricetta giusta: festa; manca qualcosa o c'è
+  l'ananas: si riprova. Easter egg `spicy_pizza`: col peperoncino i topi diventano paonazzi, furiosi, con gli occhi in
+  fiamme e la lingua di fuori (video da condividere).
+- **33 Blow It Up**: gonfia il palloncino fino alla sagoma tratteggiata col fiato (microfono) o con la pompa (10 colpi).
+  Arrivati alla sagoma bisogna aspettare 2 secondi: un colpo in più o troppo fiato e PLOP! Editor: B per soffiare.
+- **34 Cat Eyes**: le pupille del gatto seguono l'inclinazione del telefono (rispetto a come lo tieni all'inizio); un
+  topolino sbuca da una tana a caso: fissalo per 3 secondi di fila. Editor: frecce.
+- **35 Pancake Flip**: un colpo secco col telefono lancia la frittella, che deve fare mezzo giro e ricadere nella
+  padella (si sposta inclinando il telefono). Tre giri riusciti. Troppo piano non si gira, troppo forte resta
+  appiccicata al soffitto, fuori dalla padella cade per terra. Editor: tasti 1/2/3 (piano/giusto/forte) e frecce.
+  La forza del colpo si regola con `speedPerShake` e `idealSpeed` nel prefab.
 
 ## Icona dell'app
 - L'icona "G!" al neon è ridisegnata dal codice (`DoodleSprites.AppIcon`). Per usare il logo originale basta

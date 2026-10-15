@@ -31,7 +31,7 @@ public static class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 17;
+    const int BuilderVersion = 18;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -168,6 +168,18 @@ public static class GotchaProjectBuilder
             Define("Pizza", "pizza_party", "PIZZA PARTY",
                 "Four friends, four slices. Cut right through the middle!",
                 BuildPizzaLevel()),
+            Define("PizzaChef", "pizza_chef", "PIZZA CHEF",
+                "Grandma never wrote recipes down. She just... drew them.",
+                BuildPizzaChefLevel(), "spicy_pizza"),
+            Define("Balloon", "balloon", "BLOW IT UP",
+                "Fill the dotted line. Not a puff more!",
+                BuildBalloonLevel()),
+            Define("CatEyes", "cat_eyes", "CAT EYES",
+                "The cat's eyes follow your phone. Stare at the mouse!",
+                BuildCatEyesLevel()),
+            Define("Pancake", "pancake", "PANCAKE FLIP",
+                "A quick flick of the wrist... not too gentle, not too wild.",
+                BuildPancakeLevel()),
         };
 
         LevelCatalog catalog = LoadOrCreate<LevelCatalog>(LevelDir + "/LevelCatalog.asset");
@@ -2907,6 +2919,313 @@ public static class GotchaProjectBuilder
         SetField(level, "bubble", bubble);
         SetField(level, "trail", trail);
         return SavePrefab(root, LevelDir + "/Pizza/Level_Pizza.prefab");
+    }
+
+    // ---------- Livelli 32-35 ----------
+
+    static GameObject BuildPizzaChefLevel()
+    {
+        var root = new GameObject("Level_PizzaChef");
+        PizzaChefLevel level = root.AddComponent<PizzaChefLevel>();
+        Art(root.transform, "Kitchen", "kitchen_bg", -20, false);
+        Transform board = Art(root.transform, "Chalkboard", "chalkboard", -5, true, new Vector2(-1.35f, 2.4f));
+        board.localScale = Vector3.one * 0.95f;
+
+        // forno su una mensola
+        Bar(root.transform, "OvenShelf", new Vector2(1.5f, 1.0f), new Vector2(2.6f, 0.16f), new Color(0.55f, 0.36f, 0.24f), -4);
+        var oven = new GameObject("Oven").transform;
+        oven.SetParent(root.transform, false);
+        oven.localPosition = new Vector3(1.5f, 1.05f, 0);
+        oven.localScale = Vector3.one * 0.95f;
+        Art(oven, "Art", "oven", -3);
+        SpriteRenderer ovenGlow = Art(oven, "Glow", "glow", -2, false, new Vector2(0, 0.7f)).GetComponent<SpriteRenderer>();
+        ovenGlow.transform.localScale = Vector3.one * 2.2f;
+        var mouth = new GameObject("Mouth");
+        mouth.transform.SetParent(oven, false);
+        mouth.transform.localPosition = new Vector3(0, 0.75f, 0);
+        BoxCollider2D mouthCol = mouth.AddComponent<BoxCollider2D>();
+        mouthCol.isTrigger = true;
+        mouthCol.size = new Vector2(1.8f, 1.4f);
+        SmokeEmitter ovenSmoke = Emitter(oven, "Smoke", new Vector2(0.62f, 1.9f), "puff", 6f, 1.6f, 0.9f, 0.15f, 0.4f, new Color(0.8f, 0.8f, 0.85f, 0.8f));
+
+        // pizza: pasta + strati (accesi man mano che si aggiungono gli ingredienti)
+        string[] ids = { "tomato", "mozzarella", "mushroom", "olive", "chili", "pineapple" };
+        var pizza = new GameObject("Pizza").transform;
+        pizza.SetParent(root.transform, false);
+        pizza.localPosition = new Vector3(0, -0.4f, 0);
+        SpriteRenderer dough = Art(pizza, "Dough", "dough", 3).GetComponent<SpriteRenderer>();
+        pizza.gameObject.AddComponent<CircleCollider2D>().radius = 1.1f;
+        Draggable2D pizzaDrag = pizza.gameObject.AddComponent<Draggable2D>();
+        pizzaDrag.itemId = "pizza";
+        var wholeLayers = new List<GameObject>();
+        SpriteRenderer cheeseWhole = null;
+        float[][] bitsWhole = { new[] { 0.45f, 0.3f }, new[] { -0.4f, 0.45f }, new[] { -0.55f, -0.25f }, new[] { 0.2f, -0.55f }, new[] { 0.6f, -0.2f }, new[] { -0.05f, 0.05f }, new[] { 0.05f, 0.65f } };
+        for (int k = 0; k < ids.Length; k++)
+        {
+            var layer = new GameObject("Layer_" + ids[k]).transform;
+            layer.SetParent(pizza, false);
+            if (ids[k] == "tomato") Art(layer, "Sauce", "sauce", 4, false);
+            else if (ids[k] == "mozzarella") cheeseWhole = Art(layer, "Cheese", "cheese", 5, false).GetComponent<SpriteRenderer>();
+            else
+                for (int b = 0; b < bitsWhole.Length; b++)
+                {
+                    float[] q = bitsWhole[(b + k * 2) % bitsWhole.Length];
+                    Transform bit = Art(layer, "Bit", "top_" + ids[k], 6 + k, false, new Vector2(q[0] + k * 0.04f, q[1] - k * 0.05f));
+                    bit.localRotation = Quaternion.Euler(0, 0, b * 47f + k * 13f);
+                }
+            wholeLayers.Add(layer.gameObject);
+        }
+
+        // i quattro spicchi: stessi strati ritagliati a quarto (pivot nel baricentro, per afferrarli bene)
+        float c = 4f * 1.1f / (3f * Mathf.PI) / Mathf.Sqrt(2f);
+        var slices = new List<Transform>();
+        for (int i = 0; i < 4; i++)
+        {
+            var sl = new GameObject("Slice" + i);
+            sl.transform.SetParent(root.transform, false);
+            int o = 12 + i * 8;
+            Art(sl.transform, "Dough", "dough_q", o, false, new Vector2(-c, -c));
+            for (int k = 0; k < ids.Length; k++)
+            {
+                var layer = new GameObject("Layer_" + ids[k]).transform;
+                layer.SetParent(sl.transform, false);
+                if (ids[k] == "tomato") Art(layer, "Sauce", "sauce_q", o + 1, false, new Vector2(-c, -c));
+                else if (ids[k] == "mozzarella") Art(layer, "Cheese", "cheese_q", o + 2, false, new Vector2(-c, -c));
+                else
+                    foreach (float[] q in new[] { new[] { 25f + k * 6f, 0.45f }, new[] { 62f - k * 5f, 0.72f } })
+                    {
+                        float a = q[0] * Mathf.Deg2Rad;
+                        Art(layer, "Bit", "top_" + ids[k], o + 3, false, new Vector2(Mathf.Cos(a) * q[1] - c, Mathf.Sin(a) * q[1] - c));
+                    }
+                layer.gameObject.SetActive(false);
+            }
+            sl.AddComponent<CircleCollider2D>().radius = 0.5f;
+            Draggable2D d = sl.AddComponent<Draggable2D>();
+            d.itemId = "slice";
+            sl.SetActive(false);
+            slices.Add(sl.transform);
+        }
+
+        // ciotole degli ingredienti
+        var bowls = new List<Draggable2D>();
+        for (int k = 0; k < ids.Length; k++)
+        {
+            var bowl = new GameObject("Bowl_" + ids[k]);
+            bowl.transform.SetParent(root.transform, false);
+            bowl.transform.localPosition = new Vector3(-2.3f + k * 0.92f, -3.25f, 0);
+            Art(bowl.transform, "Art", "ing_bowl", 8);
+            if (ids[k] == "tomato") Art(bowl.transform, "Content", "sauce", 9, false, new Vector2(0, 0.06f)).localScale = new Vector3(0.36f, 0.08f, 1f);
+            else if (ids[k] == "mozzarella") Art(bowl.transform, "Content", "cheese", 9, false, new Vector2(0, 0.1f)).localScale = Vector3.one * 0.32f;
+            else
+                foreach (float x in new[] { -0.15f, 0.12f, -0.01f })
+                    Art(bowl.transform, "Content", "top_" + ids[k], 9, false, new Vector2(x, 0.1f + (x < 0f ? 0f : 0.04f)));
+            bowl.AddComponent<BoxCollider2D>().size = new Vector2(0.88f, 0.7f);
+            Draggable2D d = bowl.AddComponent<Draggable2D>();
+            d.itemId = ids[k];
+            bowls.Add(d);
+        }
+
+        // i quattro topolini (arrivano a pizza cotta) con la faccia "piccante" pronta
+        var mice = new GameObject("Mice").transform;
+        mice.SetParent(root.transform, false);
+        var plates = new List<DropSlot>();
+        var miceArt = new List<SpriteRenderer>();
+        var spicy = new List<GameObject>();
+        foreach (Vector2 m in new[] { new Vector2(-2.15f, 0.55f), new Vector2(2.15f, -0.5f), new Vector2(-2.15f, -2.45f), new Vector2(2.15f, -2.45f) })
+        {
+            var mouse = new GameObject("Mouse").transform;
+            mouse.SetParent(mice, false);
+            mouse.localPosition = m;
+            mouse.localScale = Vector3.one * 0.75f;
+            miceArt.Add(Art(mouse, "Art", "mouse", 20).GetComponent<SpriteRenderer>());
+            var face = new GameObject("Spicy").transform;
+            face.SetParent(mouse, false);
+            foreach (float x in new[] { -0.2f, 0.02f })
+            {
+                Transform f = Art(face, "FireEye", "flame", 22, false, new Vector2(x, 0.3f));
+                f.localScale = Vector3.one * 1.5f;
+                f.gameObject.AddComponent<Pulse>();
+            }
+            Art(face, "Tongue", "tongue", 22, false, new Vector2(-0.17f, 0.12f)).localScale = Vector3.one * 1.3f;
+            Art(face, "Anger", "anger", 22, true, new Vector2(0.3f, 0.65f));
+            spicy.Add(face.gameObject);
+            var plate = new GameObject("Plate");
+            plate.transform.SetParent(mice, false);
+            plate.transform.localPosition = m + new Vector2(0, -0.25f);
+            plate.AddComponent<CircleCollider2D>().radius = 0.75f;
+            DropSlot slot = plate.AddComponent<DropSlot>();
+            slot.acceptedId = "slice";
+            plates.Add(slot);
+        }
+
+        LineRenderer cutMark = Line(root.transform, "CutMark", 0.05f, new Color(0.45f, 0.18f, 0.12f), 11);
+        LineRenderer trail = Line(root.transform, "Trail", 0.1f, new Color(1f, 1f, 1f, 0.9f), 50);
+        trail.positionCount = 0;
+        SmokeEmitter hearts = Emitter(root.transform, "Hearts", new Vector2(0, 0.2f), "heart", 8f, 1.4f, 1f, 2.2f, 0.8f, Color.white);
+        SmokeEmitter steam = Emitter(root.transform, "Steam", new Vector2(0, -0.4f), "puff", 6f, 1.3f, 0.8f, 0.6f, 0.4f, new Color(1f, 1f, 1f, 0.6f));
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(0.2f, 1.0f));
+        bubble.transform.localScale = Vector3.one * 0.5f;
+
+        SetArray(level, "bowls", bowls.ToArray());
+        var idField = new SerializedObject(level);
+        SerializedProperty idsProp = idField.FindProperty("layerIds");
+        idsProp.arraySize = ids.Length;
+        for (int k = 0; k < ids.Length; k++) idsProp.GetArrayElementAtIndex(k).stringValue = ids[k];
+        idField.ApplyModifiedPropertiesWithoutUndo();
+        SetArray(level, "wholeLayers", wholeLayers.ToArray());
+        SetArray(level, "bakeTint", new Object[] { dough, cheeseWhole });
+        SetField(level, "pizza", pizza);
+        SetField(level, "ovenMouth", mouthCol);
+        SetField(level, "ovenGlow", ovenGlow);
+        SetField(level, "ovenSmoke", ovenSmoke);
+        SetField(level, "cutMark", cutMark);
+        SetField(level, "trail", trail);
+        SetArray(level, "slices", slices.ToArray());
+        SetArray(level, "plates", plates.ToArray());
+        SetField(level, "mice", mice.gameObject);
+        SetArray(level, "miceArt", miceArt.ToArray());
+        SetArray(level, "spicyFaces", spicy.ToArray());
+        SetField(level, "hearts", hearts);
+        SetField(level, "steam", steam);
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/PizzaChef/Level_PizzaChef.prefab");
+    }
+
+    static GameObject BuildBalloonLevel()
+    {
+        var root = new GameObject("Level_Balloon");
+        BalloonLevel level = root.AddComponent<BalloonLevel>();
+        Art(root.transform, "Party", "party_bg", -20, false);
+
+        var holder = new GameObject("BalloonSpot").transform;
+        holder.SetParent(root.transform, false);
+        holder.localPosition = new Vector3(-0.5f, -2.0f, 0);
+        holder.localScale = Vector3.one * 1.5f;
+        SpriteRenderer outline = Art(holder, "Outline", "balloon_outline", 2, false).GetComponent<SpriteRenderer>();
+        var balloon = new GameObject("Balloon").transform;
+        balloon.SetParent(holder, false);
+        Art(balloon, "Art", "balloon", 5);
+
+        var pump = new GameObject("Pump");
+        pump.transform.SetParent(root.transform, false);
+        pump.transform.localPosition = new Vector3(1.75f, -3.45f, 0);
+        Art(pump.transform, "Art", "pump", 6);
+        var handle = new GameObject("Handle").transform;
+        handle.SetParent(pump.transform, false);
+        handle.localPosition = new Vector3(0, 1.55f, 0);
+        Art(handle, "Art", "pump_handle", 6, false);
+        BoxCollider2D pc = pump.AddComponent<BoxCollider2D>();
+        pc.size = new Vector2(1.3f, 2.2f);
+        pc.offset = new Vector2(0, 0.9f);
+        TapButton pumpButton = pump.AddComponent<TapButton>();
+        pumpButton.pressedScaleY = 1f;
+        LineRenderer hose = Line(root.transform, "Hose", 0.06f, new Color(0.17f, 0.13f, 0.2f), 4);
+        hose.positionCount = 3;
+        hose.SetPositions(new[] { new Vector3(1.75f, -3.35f, 0), new Vector3(0.6f, -3.7f, 0), new Vector3(-0.5f, -2.05f, 0) });
+        TextMesh counter = Label(root.transform, new Vector2(1.75f, -0.8f), 30, "", 0.12f);
+        counter.color = new Color(0.17f, 0.13f, 0.2f);
+
+        GameObject boom = Art(root.transform, "Boom", "boom", 50, true, new Vector2(-0.5f, 0.0f)).gameObject;
+        SmokeEmitter scraps = Emitter(root.transform, "Scraps", Vector2.zero, "balloon_scrap", 40f, 0.9f, -1.2f, 1.2f, 1.6f, Color.white, 45);
+        scraps.spinRange = 500f;
+        scraps.sideDrift = 2f;
+        scraps.growth = 0f;
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(1.2f, 1.9f));
+        bubble.transform.localScale = Vector3.one * 0.55f;
+
+        SetField(level, "balloon", balloon);
+        SetField(level, "outline", outline);
+        SetField(level, "pump", pumpButton);
+        SetField(level, "pumpHandle", handle);
+        SetField(level, "scraps", scraps);
+        SetField(level, "boom", boom);
+        SetField(level, "counter", counter);
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/Balloon/Level_Balloon.prefab");
+    }
+
+    static GameObject BuildCatEyesLevel()
+    {
+        var root = new GameObject("Level_CatEyes");
+        CatEyesLevel level = root.AddComponent<CatEyesLevel>();
+        // parete liscia con le tane (niente quadri o lampade a confondere dove guardare)
+        Bar(root.transform, "Wall", new Vector2(0, 1f), new Vector2(12f, 14f), new Color(1f, 0.93f, 0.8f), -20);
+        Bar(root.transform, "Skirting", new Vector2(0, -3.18f), new Vector2(12f, 0.12f), new Color(0.55f, 0.36f, 0.24f), -19);
+        Bar(root.transform, "Floor", new Vector2(0, -5.3f), new Vector2(12f, 4.2f), new Color(0.78f, 0.55f, 0.36f), -19);
+        var face = new GameObject("CatFace").transform;
+        face.SetParent(root.transform, false);
+        face.localPosition = new Vector3(0, 0.15f, 0);
+        Art(face, "Art", "cat_big_face", 2);
+        var pupils = new List<Transform>();
+        foreach (float x in new[] { -0.58f, 0.58f })
+        {
+            var p = new GameObject("Pupil").transform;
+            p.SetParent(face, false);
+            p.localPosition = new Vector3(x, 0.25f, 0);
+            Art(p, "Art", "cat_pupil", 3, false);
+            pupils.Add(p);
+        }
+        var spots = new List<Transform>();
+        foreach (Vector2 v in new[] { new Vector2(-2.1f, 2.75f), new Vector2(2.1f, 2.75f), new Vector2(-2.35f, 0.45f), new Vector2(2.35f, 0.45f), new Vector2(-1.8f, -2.8f), new Vector2(1.8f, -2.8f) })
+        {
+            Transform hole = Art(root.transform, "Hole", "mouse_hole", -6, false, v);
+            hole.localScale = Vector3.one * 0.85f;
+            spots.Add(hole);
+        }
+        var mouse = new GameObject("Mouse").transform;
+        mouse.SetParent(root.transform, false);
+        mouse.localScale = Vector3.one * 0.5f;
+        Art(mouse, "Art", "mouse", -4);
+
+        Bar(root.transform, "BarBack", new Vector2(0, -3.75f), new Vector2(3.2f, 0.28f), new Color(0.17f, 0.13f, 0.2f), 20);
+        var fill = new GameObject("Progress").transform;
+        fill.SetParent(root.transform, false);
+        fill.localPosition = new Vector3(-1.55f, -3.75f, 0);
+        Bar(fill, "Bar", new Vector2(1.55f, 0f), new Vector2(3.1f, 0.2f), new Color(0.36f, 1f, 0.45f), 21);
+
+        SpeechBubble catBubble = Bubble(root.transform, new Vector2(1.3f, 2.1f));
+        catBubble.transform.localScale = Vector3.one * 0.5f;
+        catBubble.catVoice = true;   // il gatto miagola quando parla
+        SpeechBubble mouseBubble = Bubble(root.transform, Vector2.zero);
+        mouseBubble.transform.localScale = Vector3.one * 0.4f;
+
+        SetArray(level, "pupils", pupils.ToArray());
+        SetField(level, "face", face);
+        SetField(level, "mouse", mouse);
+        SetArray(level, "spots", spots.ToArray());
+        SetField(level, "progress", fill);
+        SetField(level, "catBubble", catBubble);
+        SetField(level, "mouseBubble", mouseBubble);
+        return SavePrefab(root, LevelDir + "/CatEyes/Level_CatEyes.prefab");
+    }
+
+    static GameObject BuildPancakeLevel()
+    {
+        var root = new GameObject("Level_Pancake");
+        PancakeLevel level = root.AddComponent<PancakeLevel>();
+        Art(root.transform, "Kitchen", "kitchen_bg", -20, false);
+        var pan = new GameObject("Pan").transform;
+        pan.SetParent(root.transform, false);
+        pan.localPosition = new Vector3(0, -2.0f, 0);
+        Art(pan, "Art", "pan", 4);
+        var pancake = new GameObject("Pancake").transform;
+        pancake.SetParent(root.transform, false);
+        pancake.localPosition = new Vector3(0, -1.8f, 0);
+        GameObject raw = Art(pancake, "Raw", "pancake_raw", 5, false).gameObject;
+        GameObject cooked = Art(pancake, "Cooked", "pancake_cooked", 5, false).gameObject;
+        SmokeEmitter steam = Emitter(pancake, "Steam", new Vector2(0, 0.15f), "puff", 4f, 1.3f, 0.8f, 0.5f, 0.35f, new Color(1f, 1f, 1f, 0.6f));
+        TextMesh counter = Label(root.transform, new Vector2(0, 2.95f), 30, "0 / 3", 0.1f);
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(1.0f, 0.6f));
+        bubble.transform.localScale = Vector3.one * 0.55f;
+
+        SetField(level, "pan", pan);
+        SetField(level, "pancake", pancake);
+        SetField(level, "rawUp", raw);
+        SetField(level, "cookedUp", cooked);
+        SetField(level, "steam", steam);
+        SetField(level, "counter", counter);
+        SetField(level, "bubble", bubble);
+        return SavePrefab(root, LevelDir + "/Pancake/Level_Pancake.prefab");
     }
 
     static TapButton BombButton(Transform parent, string name, string sprite, Vector2 pos, out Transform wireStart)
