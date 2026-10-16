@@ -31,6 +31,9 @@ namespace Gotcha.Core
 
         static IStore CreateStore()
         {
+            // nell'Editor sempre il negozio simulato: niente Unity Services (che senza un Project ID collegato
+            // riempirebbero la console di avvisi) e acquisti provabili subito
+            if (Application.isEditor) return new SimulatedStore();
             Type real = Type.GetType("Gotcha.Store.UnityIapStore, Gotcha.Iap");
             if (real != null && Activator.CreateInstance(real) is IStore s) return s;
             return new SimulatedStore();

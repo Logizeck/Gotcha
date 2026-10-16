@@ -282,7 +282,7 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Pacchetto Unity IAP `com.unity.purchasing` 4.12.2 (già in `Packages/manifest.json`). Il codice che lo usa
   (`Assets/Scripts/Store/Iap/UnityIapStore.cs`, assembly `Gotcha.Iap`) si compila solo se il pacchetto c'è
   (define `GOTCHA_IAP`): senza il pacchetto il gioco compila lo stesso e usa il negozio simulato.
-- Nell'Editor il negozio è **simulato**: ogni acquisto riesce subito (per provare vite infinite e niente pubblicità).
+- Nell'Editor il negozio è **simulato** (Unity Services non vengono avviati): ogni acquisto riesce subito (per provare vite infinite e niente pubblicità). Per la build vera collega il progetto in Project Settings → Services (Project ID).
   Su telefono senza IAP configurato gli acquisti falliscono con un messaggio.
 - Per pubblicare: in Google Play Console → Monetizza → Prodotti in-app crea i due ID qui sopra con gli stessi prezzi;
   carica una build firmata su un canale di test; aggiungi i tester. In Unity: Services → collega il progetto

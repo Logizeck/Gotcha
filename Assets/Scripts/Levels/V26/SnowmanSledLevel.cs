@@ -24,7 +24,7 @@ namespace Gotcha.Levels
         [SerializeField] float dayLength = 22f;
         [SerializeField] float push = 9f, friction = 0.6f, maxX = 2.5f;
         [SerializeField] float heatSeconds = 2.2f;
-        [SerializeField] float crashSpeed = 4.2f, trunkHalf = 0.22f;
+        [SerializeField] float crashSpeed = 4.2f;
         [SerializeField] string eggId = "growth_spurt";
 
         readonly SteadyTilt steady = new SteadyTilt { smoothing = 0.1f, deadZone = 0.02f, shakeLevel = 99f };
