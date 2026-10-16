@@ -48,7 +48,10 @@ namespace Gotcha.Ads
 
         public void SetProvider(IAdProvider newProvider) { provider = newProvider; }
 
-        public bool IsDue => LevelsSinceAd >= LevelsInterval || PlaySecondsSinceAd >= SecondsInterval;
+        /// <summary>Acquisto "niente pubblicità": le pause tra i livelli spariscono (quella con premio resta, è volontaria).</summary>
+        public Func<bool> AdsRemoved { get; set; }
+
+        public bool IsDue => (AdsRemoved == null || !AdsRemoved()) && (LevelsSinceAd >= LevelsInterval || PlaySecondsSinceAd >= SecondsInterval);
 
         public void Tick(float deltaTime, bool isPlaying)
         {

@@ -23,10 +23,12 @@ namespace Gotcha.Levels
         [SerializeField] SpeechBubble bubble;
         [SerializeField] int runesNeeded = 3;
         [SerializeField] int mistakesAllowed = 3;
-        [SerializeField] float minScore = 0.75f;
+        [SerializeField] float minScore = 0.66f;
+        [SerializeField] float tolerance = 0.06f;
 
         static readonly string[] Names = { "circle", "triangle", "square", "zigzag", "star", "check" };
         static List<Vector2>[] templates;
+        static List<Vector2> starOutline;   // molti disegnano la stella col contorno, non a pentagramma: vale uguale
 
         readonly List<int> order = new List<int>();
         int current, solved, mistakes;
@@ -46,6 +48,12 @@ namespace Gotcha.Levels
             for (int i = 0; i <= 10; i++) { float a = Mathf.PI / 2f + i * 4f * Mathf.PI / 5f; starPts.Add(new Vector2(Mathf.Cos(a), Mathf.Sin(a))); }
             templates[4] = starPts;
             templates[5] = new List<Vector2> { new Vector2(-1, 0.1f), new Vector2(-0.35f, -0.8f), new Vector2(1, 1) };
+            starOutline = new List<Vector2>();
+            for (int i = 0; i <= 10; i++)
+            {
+                float a = Mathf.PI / 2f + i * Mathf.PI / 5f, r = i % 2 == 0 ? 1f : 0.42f;
+                starOutline.Add(new Vector2(Mathf.Cos(a) * r, Mathf.Sin(a) * r));
+            }
             return templates;
         }
 
@@ -84,13 +92,17 @@ namespace Gotcha.Levels
             var pts = new List<Vector2>();
             foreach (Vector3 p in d.LastStrokePoints) pts.Add(p);
             int best = -1;
-            float bestScore = 0f;
+            float bestScore = 0f, wanted = 0f;
             for (int i = 0; i < templates.Length; i++)
             {
-                float s = ShapeRecognizer.Score(pts, templates[i]);
-                if (s > bestScore) { bestScore = s; best = i; }
+                float sc = ShapeRecognizer.Score(pts, templates[i]);
+                if (i == 4) sc = Mathf.Max(sc, ShapeRecognizer.Score(pts, starOutline));
+                if (i == current) wanted = sc;
+                if (sc > bestScore) { bestScore = sc; best = i; }
             }
-            bool ok = best == current && bestScore >= minScore;
+            // generoso: basta che la runa richiesta sia abbastanza simile e non molto peggio della forma più vicina
+            // (la stella fatta a mano è sempre un po' storta)
+            bool ok = wanted >= minScore && (best == current || wanted >= bestScore - tolerance);
             StartCoroutine(ok ? Right() : Wrong());
         }
 

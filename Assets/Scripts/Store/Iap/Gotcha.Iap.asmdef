@@ -1,0 +1,27 @@
+{
+    "name": "Gotcha.Iap",
+    "rootNamespace": "Gotcha.Store",
+    "references": [
+        "Gotcha.StoreCore",
+        "UnityEngine.Purchasing",
+        "UnityEngine.Purchasing.Stores",
+        "Unity.Services.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "GOTCHA_IAP"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.purchasing",
+            "expression": "4.0.0",
+            "define": "GOTCHA_IAP"
+        }
+    ],
+    "noEngineReferences": false
+}

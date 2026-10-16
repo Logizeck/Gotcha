@@ -34,6 +34,7 @@ namespace Gotcha.Core
         public event Action<int, int> Changed;   // (vite prima, vite dopo)
 
         float accum;            // secondi accumulati verso la prossima vita
+        float infiniteLeft;     // secondi di vite infinite rimasti (orologio monotòno, come la ricarica)
         long lastElapsedMs;     // tempo monotòno all'ultimo aggiornamento
         int lastBoot;
         float pollTimer, sinceSave;
@@ -62,13 +63,25 @@ namespace Gotcha.Core
 
         // ---------- API ----------
 
-        public bool CanPlay => Lives > 0;
+        public bool CanPlay => Lives > 0 || Infinite;
+
+        /// <summary>Vite infinite (acquisto da 0,99 €): fallire non costa niente finché dura.</summary>
+        public bool Infinite => infiniteLeft > 0f;
+        public float InfiniteSecondsLeft => infiniteLeft;
+
+        public void GrantInfinite(float seconds)
+        {
+            Tick();
+            infiniteLeft += seconds;
+            Save();
+            Changed?.Invoke(Lives, Lives);
+        }
 
         /// <summary>Un fallimento: una vita in meno (la ricarica parte da qui se prima erano piene).</summary>
         public void LoseLife()
         {
             Tick();
-            if (Lives <= 0) return;
+            if (Infinite || Lives <= 0) return;
             int before = Lives;
             if (Lives >= MaxLives) accum = 0f;
             Lives--;
@@ -101,6 +114,9 @@ namespace Gotcha.Core
             lastElapsedMs = now;
             lastBoot = boot;
             sinceSave += (float)delta;
+            bool wasInfinite = infiniteLeft > 0f;
+            if (infiniteLeft > 0f) infiniteLeft = Mathf.Max(0f, infiniteLeft - (float)delta);
+            if (wasInfinite && infiniteLeft <= 0f) { Save(); Changed?.Invoke(Lives, Lives); }
 
             int before = Lives;
             if (Lives < MaxLives)
@@ -158,7 +174,7 @@ namespace Gotcha.Core
                 return;
             }
             string[] p = data.Split('|');
-            if (sig != Sign(data) || p.Length != 4 ||
+            if (sig != Sign(data) || (p.Length != 4 && p.Length != 5) ||
                 !int.TryParse(p[0], out int lives) || !float.TryParse(p[1], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float acc) ||
                 !long.TryParse(p[2], out long el) || !int.TryParse(p[3], out int bc))
             {
@@ -174,11 +190,13 @@ namespace Gotcha.Core
             accum = Mathf.Clamp(acc, 0f, RegenSeconds);
             lastElapsedMs = el;
             lastBoot = bc;
+            infiniteLeft = p.Length == 5 && float.TryParse(p[4], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float inf) ? Mathf.Clamp(inf, 0f, 24f * 3600f) : 0f;
         }
 
         void Save()
         {
-            string data = Lives + "|" + accum.ToString("R", System.Globalization.CultureInfo.InvariantCulture) + "|" + lastElapsedMs + "|" + lastBoot;
+            string data = Lives + "|" + accum.ToString("R", System.Globalization.CultureInfo.InvariantCulture) + "|" + lastElapsedMs + "|" + lastBoot
+                          + "|" + infiniteLeft.ToString("R", System.Globalization.CultureInfo.InvariantCulture);
             PlayerPrefs.SetString(DataKey, data);
             PlayerPrefs.SetString(SigKey, Sign(data));
             PlayerPrefs.Save();

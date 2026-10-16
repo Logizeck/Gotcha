@@ -21,7 +21,7 @@ using Gotcha.UI;
 /// ATTENZIONE: rilanciarlo ricrea scena, sprite e prefab generati (le modifiche fatte a mano a quei file si perdono).
 /// </summary>
 [InitializeOnLoad]
-public static class GotchaProjectBuilder
+public static partial class GotchaProjectBuilder
 {
     const string ScenePath = "Assets/Scenes/Main.unity";
     const string SpriteDir = "Assets/Art/Generated";
@@ -31,7 +31,7 @@ public static class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 27;
+    const int BuilderVersion = 28;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -1932,7 +1932,7 @@ public static class GotchaProjectBuilder
         darkness.localScale = Vector3.one * 1.35f;   // zona illuminata più ampia
         var wasps = new List<MazeChaser>();
         if (waspsAt != null)
-            foreach (Vector2 at in waspsAt) wasps.Add(MazeWasp(maze, at, ball, 1.7f, 1.35f));
+            foreach (Vector2 at in waspsAt) wasps.Add(MazeWasp(maze, at, ball, 1.45f, 1.15f));   // lenta: al buio la si deve poter aggirare
         SmokeEmitter sparkle = Sparks(root.transform, "Sparkle", new Color(1f, 0.85f, 0.3f));
         SpeechBubble bubble = Bubble(root.transform, new Vector2(1.5f, -4.45f));
         bubble.transform.localScale = Vector3.one * 0.5f;
@@ -3923,7 +3923,7 @@ public static class GotchaProjectBuilder
                 "Hug the walls around the holes. Wait for the laser.",
                 BuildTrapMazeLevel("TrapMaze2", "maze_trap2", DoodleSprites.TrapMaze2, DoodleSprites.TrapPits2, DoodleSprites.TrapLasers2, Cell(4, 6))),
             Define("Birthday2", "big_birthday", "BIG BIRTHDAY",
-                "Seven candles. Take a deep breath (but not a hurricane)!",
+                "Seven candles. Take a deep breath!",
                 Variant("Birthday", "Birthday2", go =>
                 {
                     Transform cake = go.transform.Find("Cake");
@@ -3946,7 +3946,8 @@ public static class GotchaProjectBuilder
                     }
                     SetArray(Level(go), "flames", flames.ToArray());
                     SetArray(Level(go), "candles", candles.ToArray());
-                }), "candle_storm"),
+                    Tune(Level(go), "stormLevel", 99f);   // l'uragano di candeline è solo nel livello 15
+                })),
             Define("Plant2", "high_plant", "HIGH PLANT",
                 "The pot is up on the shelf. Aim higher!",
                 Variant("Plant", "Plant2", go =>
@@ -3961,7 +3962,9 @@ public static class GotchaProjectBuilder
                     shelf.AddComponent<BoxCollider2D>().size = new Vector2(1.8f, 0.18f);
                     Ref<TextMesh>(Level(go), "counter").transform.localPosition = new Vector3(1.55f, -0.95f, -0.01f);
                     Ref<SpeechBubble>(Level(go), "bubble").transform.localPosition = new Vector3(-0.2f, 1.7f, 0);
-                }), "angry_bird"),
+                    SetField(Level(go), "bird", null);   // l'uccellino arrabbiato è solo nel livello 26
+                    go.transform.Find("Bird").gameObject.SetActive(false);
+                })),
             Define("Copycat2", "copycat_pro", "COPYCAT PRO",
                 "Longer songs, quicker paws.",
                 Variant("Copycat", "Copycat2", go =>
@@ -4016,9 +4019,9 @@ public static class GotchaProjectBuilder
                     Tune(Level(go), "strokesNeeded", 12);
                     Tune(Level(go), "strongAbove", 0.7f);
                 }), "burnt_umbrella"),
-            Define("WaspMaze2", "wasp_nest", "WASP NEST",
-                "The wasp waits in the middle. Loop around it!",
-                BuildWaspMazeLevel("WaspMaze2", "maze_wasp2", DoodleSprites.WaspMaze2, Cell(4, 6), Cell(0, 0), new[] { Cell(2, 3) }, 1.8f)),
+            Define("Flashlight", "flashlight", "FLASHLIGHT",
+                "Your finger is a torch. Find the light switch... and don't shine on whatever sleeps up there.",
+                BuildFlashlightLevel()),
         };
     }
 
@@ -4307,7 +4310,7 @@ public static class GotchaProjectBuilder
         return p != null ? p.objectReferenceValue as T : null;
     }
 
-    /// <summary>Imposta un campo serializzato numerico (float, int, bool o int[]).</summary>
+    /// <summary>Imposta un campo serializzato (float, int, bool, string, Vector2 o array di int/float/string).</summary>
     static void Tune(Object target, string field, object value)
     {
         var so = new SerializedObject(target);
@@ -4321,6 +4324,7 @@ public static class GotchaProjectBuilder
                 else p.intValue = i;
                 break;
             case bool b: p.boolValue = b; break;
+            case string str: p.stringValue = str; break;
             case string[] strs:
                 p.arraySize = strs.Length;
                 for (int k = 0; k < strs.Length; k++) p.GetArrayElementAtIndex(k).stringValue = strs[k];
@@ -4329,6 +4333,11 @@ public static class GotchaProjectBuilder
                 p.arraySize = arr.Length;
                 for (int k = 0; k < arr.Length; k++) p.GetArrayElementAtIndex(k).intValue = arr[k];
                 break;
+            case float[] farr:
+                p.arraySize = farr.Length;
+                for (int k = 0; k < farr.Length; k++) p.GetArrayElementAtIndex(k).floatValue = farr[k];
+                break;
+            case Vector2 v2: p.vector2Value = v2; break;
         }
         so.ApplyModifiedPropertiesWithoutUndo();
     }
@@ -4368,13 +4377,9 @@ public static class GotchaProjectBuilder
             Define("Rune", "magic_rune", "MAGIC RUNE",
                 "Copy the rune from the scroll in ONE stroke inside the circle. Three runes open the chest.",
                 BuildRuneLevel()),
-            Define("Cookie3", "sticky_cookie", "STICKY COOKIE",
-                "This cookie is gooey: it barely rolls. Tilt harder!",
-                Variant("Cookie", "Cookie3", go =>
-                {
-                    Tune(Level(go), "rollingDrag", 2.6f);
-                    Tune(Level(go), "airDrag", 0.6f);
-                })),
+            Define("Mirror", "foggy_mirror", "FOGGY MIRROR",
+                "Someone wrote the code on the mirror with a finger. How do you make it show up?",
+                BuildMirrorLevel(), "bad_breath"),
             Define("Morse2", "fast_beeps", "FIVE BEEPS",
                 "Five beeps this time, long and short. Tap the radio to listen again.",
                 Tuned(BuildMorseLevel("Morse2", true), go =>
@@ -4383,8 +4388,8 @@ public static class GotchaProjectBuilder
                     Tune(Level(go), "dashSeconds", 0.36f);
                     Tune(Level(go), "gapSeconds", 0.12f);
                 })),
-            Dark("DarkMaze3", "pitch_black", "PITCH BLACK", "Something buzzes in the dark... don't shine your light on it!", DoodleSprites.DarkMaze3,
-                DoodleSprites.DarkMaze3Gate, DoodleSprites.DarkMaze3Spots, new[] { Cell(2, 3) }),
+            Dark("DarkMaze3", "pitch_black", "PITCH BLACK", "Something buzzes in the dark. Listen: louder means closer. Take another road!", DoodleSprites.DarkMaze3,
+                DoodleSprites.DarkMaze3Gate, DoodleSprites.DarkMaze3Spots, new[] { Cell(2, 2) }),
             Define("Shell3", "shell_storm", "SHELL STORM",
                 "Twenty swaps, lightning fast.",
                 Variant("Shell", "Shell3", go =>
@@ -4429,7 +4434,9 @@ public static class GotchaProjectBuilder
                     Tune(Level(go), "windMode", 2);       // raffiche di 1-4 s, pause di 2-4 s
                     Tune(Level(go), "windMax", 2.2f);
                     Ref<TextMesh>(Level(go), "counter").text = "0 / 6";
-                }), "angry_bird"),
+                    SetField(Level(go), "bird", null);   // l'uccellino arrabbiato è solo nel livello 26
+                    go.transform.Find("Bird").gameObject.SetActive(false);
+                })),
             Tilt("Maze4", "centre_spiral", "SPIRAL", "The star waits in the middle again.", DoodleSprites.Maze4, Cell(0, 0), Cell(2, 3)),
             Define("Safe2", "heavy_safe", "HEAVY SAFE",
                 "The painting is stuck harder. Shake it longer!",
@@ -4440,7 +4447,8 @@ public static class GotchaProjectBuilder
                 {
                     Tune(Level(go), "blowSeconds", 4f);
                     Tune(Level(go), "fanDistance", 22f);
-                }), "hot_soup"),
+                    Tune(Level(go), "eggId", "");   // qui la zuppa bollente è solo un errore (l'Easter egg è nel 22)
+                })),
             Define("Balloon3", "giant_balloon", "GIANT BALLOON",
                 "Twenty pumps, four seconds of nerves.",
                 Variant("Balloon", "Balloon3", go =>
@@ -4448,7 +4456,9 @@ public static class GotchaProjectBuilder
                     Tune(Level(go), "pumpsNeeded", 20);
                     Tune(Level(go), "waitSeconds", 4f);
                 })),
-            Trap("TrapMaze4", "trap_maze_4", "TRAP MAZE 4", "Longer road, more holes.", DoodleSprites.TrapMaze4, DoodleSprites.TrapMaze4Pits, DoodleSprites.TrapMaze4Lasers),
+            Define("Tightrope", "tightrope", "TIGHTROPE",
+                "He leans, you lean the OTHER way. Watch out for the wind!",
+                BuildTightropeLevel()),
             Define("SkyWire2", "quick_wire", "QUICK WIRE",
                 "Seven seconds. What colour is the sky right now?",
                 Variant("SkyWire", "SkyWire2", go => Tune(Level(go), "seconds", 7f))),
@@ -4467,70 +4477,54 @@ public static class GotchaProjectBuilder
                     Tune(Level(go), "maxHops", 7);
                     Tune(Level(go), "hopEvery", 2.5f);
                 })),
-            Define("Sunny2", "heat_wave", "HEAT WAVE",
-                "Hotter sun, stronger wind, longer day.",
-                Variant("Sunny", "Sunny2", go =>
-                {
-                    Tune(Level(go), "heatSeconds", 5.5f);
-                    Tune(Level(go), "sunsetAfter", 18f);
-                    Tune(Level(go), "wind", 0.45f);
-                }), "sun_melt"),
-            Dark("DarkMaze4", "blackout", "BLACKOUT", "The exit is at the top, in the middle.", DoodleSprites.DarkMaze4, DoodleSprites.DarkMaze4Gate, DoodleSprites.DarkMaze4Spots),
-            Define("Runaway3", "alarm_marathon", "ALARM MARATHON",
-                "A sprinter button. Corner it!",
-                Variant("Runaway", "Runaway3", go =>
-                {
-                    Tune(Level(go), "speed", 3.5f);
-                    Tune(Level(go), "scareRadius", 1.6f);
-                })),
-            Define("Pizza2", "precise_pizza", "PRECISE PIZZA",
-                "The mice are picky: cut EXACTLY through the middle.",
-                Variant("Pizza", "Pizza2", go => Tune(Level(go), "centerTolerance", 0.2f))),
-            Define("FrozenKey3", "glacier", "GLACIER",
-                "Ice like a glacier. Rub until your finger is warm!",
-                Variant("FrozenKey", "FrozenKey3", go => Tune(Level(go), "rubNeeded", 45f))),
-            Tilt("Maze5", "upside_down", "UPSIDE DOWN", "Start on the right, finish top left.", DoodleSprites.Maze5, Cell(4, 0), Cell(0, 6)),
-            Define("Battery2", "long_crank", "LONG CRANK",
-                "A thirstier robot. Real charger... or a long crank.",
-                Variant("Battery", "Battery2", go =>
-                {
-                    Tune(Level(go), "turnsNeeded", 10f);
-                    Tune(Level(go), "chargeSeconds", 4f);
-                }), "mecha_robot"),
-            Define("AppleCatch3", "apple_storm", "APPLE STORM",
-                "Eight apples out of ten. Don't drop many!",
-                Variant("AppleCatch", "AppleCatch3", go =>
-                {
-                    Tune(Level(go), "needed", 8);
-                    Tune(Level(go), "gravity", 11f);
-                })),
-            Define("Birthday3", "windy_wish", "WINDY WISH",
-                "Seven candles, stubborn flames. Blow harder and longer.",
-                Variant("Birthday2", "Birthday3", go =>
-                {
-                    Tune(Level(go), "blowPerCandle", 0.32f);
-                    Tune(Level(go), "blowThreshold", 0.38f);
-                }), "candle_storm"),
-            Sting("WaspMaze4", "wasp_corner", "WASP CORNER", "The star is top left. The wasp is on the right.", DoodleSprites.WaspMaze4,
-                Cell(4, 0), Cell(0, 6), new[] { Cell(4, 5) }, 2.0f),
-            Define("MarbleRun3", "tiny_push", "TINY PUSH",
-                "A weak push only: build a smoother track.",
-                Variant("MarbleRun", "MarbleRun3", go => Tune(Level(go), "maxPush", 3.8f))),
-            Define("Campfire3", "storm_fire", "STORM FIRE",
-                "A real storm: soaked wood, heavy rain, a very cold mouse. Umbrella!",
-                Tuned(BuildCampfireLevel("Campfire3", true), go =>
-                {
-                    Tune(Level(go), "strokesNeeded", 16);
-                    Tune(Level(go), "strongAbove", 0.6f);
-                    Tune(Level(go), "rainSpeed", 12f);
-                    Tune(Level(go), "wetEvery", 0.8f);
-                    Tune(Level(go), "coldSeconds", 32f);
-                }), "burnt_umbrella"),
-            Trap("TrapMaze5", "trap_maze_5", "TRAP MAZE 5", "The longest trap maze. Slow and steady.", DoodleSprites.TrapMaze5, DoodleSprites.TrapMaze5Pits, DoodleSprites.TrapMaze5Lasers),
-            Dark("DarkMaze5", "lights_out", "LIGHTS OUT", "The exit is on the right side this time.", DoodleSprites.DarkMaze5, DoodleSprites.DarkMaze5Gate, DoodleSprites.DarkMaze5Spots),
-            Tilt("Maze6", "grand_maze", "GRAND MAZE", "The longest road of all.", DoodleSprites.Maze6, Cell(0, 0), Cell(4, 6)),
-            Sting("WaspMaze5", "wasp_finale", "WASP FINALE", "The last chase: two wasps. Keep moving!", DoodleSprites.WaspMaze5,
-                Cell(0, 0), Cell(4, 6), new[] { Cell(4, 2), Cell(1, 5) }, 2.0f),
+            Define("SnowmanSled", "snowman_skate", "SNOWMAN ON ICE",
+                "Stay in the shade of the tree until sunset. The shade moves with the sun... and ice is slippery!",
+                BuildSnowmanSledLevel(), "growth_spurt"),
+            Define("PaperPlane", "paper_plane", "PAPER PLANE",
+                "Tilt to pitch the nose: dive to gain speed, climb to spend it. Blow for a push. Every ring!",
+                BuildPaperPlaneLevel()),
+            Define("SafeCrack", "safe_cracker", "SAFE CRACKER",
+                "Turn the dial right, left, right. Listen for the CLUNK and stop there.",
+                BuildSafeCrackLevel()),
+            Define("ScreamBird", "scream_bird", "SING, BIRDIE",
+                "This bird flies on your voice. Louder is higher!",
+                BuildScreamBirdLevel(), "space_bird"),
+            Define("Coffee", "coffee_pour", "COFFEE TIME",
+                "Tilt the pot to pour. Fill the mug exactly to the red line.",
+                BuildCoffeeLevel(), "coffee_cat"),
+            Define("Domino", "domino", "DOMINO",
+                "Fill the gaps so the dominoes ring the bell. A falling tile reaches as far as it is tall.",
+                BuildDominoLevel()),
+            Define("MirrorMaze", "mirror_path", "MIRROR PATH",
+                "Guide the mouse along the path. Your finger moves him... the wrong way round.",
+                BuildMirrorMazeLevel()),
+            Define("Magnet", "magnet_fishing", "MAGNET FISHING",
+                "Fish the key out with the magnet. Caught junk? Shake it off. Watch the piranha!",
+                BuildMagnetLevel()),
+            Define("Cuckoo", "cuckoo_clock", "CUCKOO CLOCK",
+                "Solve the riddle, set the hands, press the button. The cuckoo hates wrong answers.",
+                BuildCuckooLevel(), "lunch_time"),
+            Define("Fireflies", "fireflies", "FIREFLIES",
+                "Catch six fireflies while they glow. Yellow lights in pairs that don't move are NOT fireflies.",
+                BuildFirefliesLevel()),
+            Define("CakeStack", "cake_tower", "CAKE TOWER",
+                "Tap to drop each layer. Whatever hangs over gets cut off. Eight layers!",
+                BuildCakeStackLevel()),
+            Define("BubbleNumbers", "bubble_count", "BUBBLE COUNT",
+                "Pop the bubbles from 1 to 8. Careful: some numbers are upside down.",
+                BuildBubbleNumbersLevel()),
+            Define("Sneaky", "sneaky_mouse", "SNEAKY MOUSE",
+                "Drag the mouse to the cheese without being lit by the torch. Furniture casts shadows. Don't run!",
+                BuildSneakyLevel()),
+            Define("Bowling", "bowling", "BOWLING",
+                "Swipe up to bowl. Swipe in a curve to spin around the cone. Two balls.",
+                BuildBowlingLevel()),
+            Define("Whack", "whack_a_mole", "WHACK-A-MOLE",
+                "Bonk the angry moles (gold = 3). Never the party moles!",
+                BuildWhackLevel(), "cat_bonk"),
+            Define("Trophy", "the_trophy", "THE TROPHY",
+                "The last level. Everything you learned: shake, blow, rub.",
+                BuildTrophyLevel(), "polish_maniac"),
         };
     }
 

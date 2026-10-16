@@ -266,6 +266,33 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.26 (free to play, livelli nuovi)
+### Acquisti in-app
+- Due prodotti: `gotcha.infinite_lives_1h` (consumabile, **0,99 €**: 1 ora di vite infinite) e `gotcha.remove_ads`
+  (non consumabile, **4,99 €**: niente pause pubblicitarie per sempre; la pubblicità con premio resta, è volontaria).
+- Pacchetto Unity IAP `com.unity.purchasing` 4.12.2 (già in `Packages/manifest.json`). Il codice che lo usa
+  (`Assets/Scripts/Store/Iap/UnityIapStore.cs`, assembly `Gotcha.Iap`) si compila solo se il pacchetto c'è
+  (define `GOTCHA_IAP`): senza il pacchetto il gioco compila lo stesso e usa il negozio simulato.
+- Nell'Editor il negozio è **simulato**: ogni acquisto riesce subito (per provare vite infinite e niente pubblicità).
+  Su telefono senza IAP configurato gli acquisti falliscono con un messaggio.
+- Per pubblicare: in Google Play Console → Monetizza → Prodotti in-app crea i due ID qui sopra con gli stessi prezzi;
+  carica una build firmata su un canale di test; aggiungi i tester. In Unity: Services → collega il progetto
+  (Unity Gaming Services) se richiesto da IAP 4.x. Il negozio si apre dal titolo (SHOP) e dal pannello delle vite.
+- "RESTORE PURCHASES" ripristina "niente pubblicità" (su Android avviene anche in automatico all'avvio).
+- Lo stato è salvato in PlayerPrefs (`gotcha.noads`) e nei dati delle vite (secondi di vite infinite rimasti).
+
+### Livelli
+- **66 Magic Rune**: la stella si accetta più facilmente (soglia 0.66, confronto anche col contorno della stella).
+- **69 Pitch Black**: labirinto nuovo con anelli: la vespa si può aggirare.
+- Ogni meccanica compare al massimo 3 volte; gli Easter egg non si ripetono (tolti dalle varianti).
+- Livelli nuovi (script in `Assets/Scripts/Levels/V26`, scene in `Assets/Editor/GotchaLevels26.cs`, disegni in
+  `DoodleSprites9.cs` e `DoodleSprites10.cs`, suoni sintetizzati in `Components/Sfx.cs`):
+  60 Flashlight · 67 Foggy Mirror (egg `bad_breath`) · 81 Tightrope · 85 Snowman on Ice (egg `growth_spurt`) ·
+  86 Paper Plane · 87 Safe Cracker · 88 Sing, Birdie (egg `space_bird`) · 89 Coffee Time (egg `coffee_cat`) · 90 Domino ·
+  91 Mirror Path · 92 Magnet Fishing · 93 Cuckoo Clock (egg `lunch_time`) · 94 Fireflies · 95 Cake Tower ·
+  96 Bubble Count · 97 Sneaky Mouse · 98 Bowling · 99 Whack-a-Mole (egg `cat_bonk`) · 100 The Trophy (egg `polish_maniac`).
+- Tasti nell'Editor: B = soffio/voce, N = urlo/soffio fortissimo, S = scossone, frecce = inclinazione.
+
 ## Versione 0.24 (correzioni dopo il primo giro di prove)
 - **Tutti i livelli sono sbloccati** nella selezione (`GameFlow.UnlockAllLevels`, da rimettere a `false` per il rilascio).
 - **9 Bug Spray** (nuovo): tieni il dito sullo schermo, lo spray esce verso l'alto; 1.3 s nella nuvola uccidono lo

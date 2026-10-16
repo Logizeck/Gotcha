@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using Gotcha.Core;
 using Gotcha.Sensors;
 using Gotcha.Levels;
+using Gotcha.Store;
 
 namespace Gotcha.UI
 {
@@ -16,7 +17,7 @@ namespace Gotcha.UI
     public class GameUI : MonoBehaviour
     {
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.25";
+        public const string Version = "0.26";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
@@ -39,7 +40,9 @@ namespace Gotcha.UI
         Text titleText;
         GameObject hintPanel, menuPanel, resultPanel, completedPanel, titlePanel, settingsPanel;
         Text menuHeader, menuBackLabel, continueLabel, settingsMusicLabel, settingsInfo, resetLabel;
-        GameObject continueButton, menuMusicRow;
+        GameObject continueButton, menuMusicRow, shopPanel;
+        Text shopLivesLabel, shopAdsLabel, shopStatus;
+        Button shopAdsButton;
         bool menuFromTitle, resetArmed;
         Text hintBody, menuEggs, resultTitle, resultBody, resultButton, musicLabel, shareLabel;
         Button shareButton;
@@ -97,9 +100,11 @@ namespace Gotcha.UI
             if (livesPanel.activeSelf) RefreshLivesPanel();
             if (menuPanel.activeSelf || settingsPanel.activeSelf) RefreshMusicLabel();   // si aggiorna se alzi il volume col menu aperto
 
+            if (shopPanel.activeSelf) RefreshShop();
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                if (livesPanel.activeSelf) CloseLives();
+                if (shopPanel.activeSelf) CloseShop();
+                else if (livesPanel.activeSelf) CloseLives();
                 else if (settingsPanel.activeSelf) CloseSettings();
                 else if (hintPanel.activeSelf) CloseOverlay(hintPanel);
                 else if (menuPanel.activeSelf) CloseMenu();
@@ -218,6 +223,53 @@ namespace Gotcha.UI
                 "\nEaster eggs found: " + SaveData.EasterEggCount + "\nVersion " + Version;
             settingsPanel.SetActive(true);
             if (!titlePanel.activeSelf) flow.Paused = true;
+        }
+
+        // ---------- Negozio ----------
+
+        void OpenShop()
+        {
+            if (shopStatus != null) shopStatus.text = "";
+            RefreshShop();
+            shopPanel.SetActive(true);
+            if (!titlePanel.activeSelf) flow.Paused = true;
+        }
+
+        void CloseShop()
+        {
+            shopPanel.SetActive(false);
+            if (!titlePanel.activeSelf && !menuPanel.activeSelf && !livesPanel.activeSelf) flow.Paused = false;
+        }
+
+        void RefreshShop()
+        {
+            StoreManager st = StoreManager.Instance;
+            if (st == null) return;
+            bool inf = flow.Lives != null && flow.Lives.Infinite;
+            shopLivesLabel.text = (inf ? "+1 HOUR MORE" : "1 HOUR OF INFINITE LIVES") + "   " + st.Price(Products.InfiniteLives1h);
+            shopAdsLabel.text = st.AdsRemoved ? "NO ADS: THANK YOU!" : "NO ADS FOREVER   " + st.Price(Products.RemoveAds);
+            shopAdsButton.interactable = !st.AdsRemoved;
+        }
+
+        void Buy(string productId)
+        {
+            StoreManager st = StoreManager.Instance;
+            if (st == null) return;
+            shopStatus.text = "...";
+            st.Buy(productId, (ok, message) =>
+            {
+                shopStatus.text = ok ? "Thank you!" : "Purchase not completed." + (string.IsNullOrEmpty(message) ? "" : "\n" + message);
+                RefreshShop();
+                if (ok && livesPanel.activeSelf) RefreshLivesPanel();
+            });
+        }
+
+        void RestorePurchases()
+        {
+            StoreManager st = StoreManager.Instance;
+            if (st == null) return;
+            shopStatus.text = "...";
+            st.Restore(ok => { shopStatus.text = ok ? "Purchases restored." : "Restore failed."; RefreshShop(); });
         }
 
         void CloseSettings()
@@ -399,6 +451,13 @@ namespace Gotcha.UI
                 float beat = full ? Mathf.Pow(Mathf.Abs(Mathf.Sin(t * 2.6f + i * 0.35f)), 8f) * 0.18f : 0f;   // battito
                 rt.localScale = Vector3.one * (1f + beat);
             }
+            if (flow.Lives.Infinite)
+            {
+                // vite infinite: i cuori pulsano tutti, dorati, e il timer conta all'indietro
+                for (int i = 0; i < hearts.Length; i++) hearts[i].color = new Color(1f, 0.85f, 0.3f);
+                livesTimer.text = "UNLIMITED " + FormatTime(flow.Lives.InfiniteSecondsLeft);
+                return;
+            }
             livesTimer.text = lives >= LivesManager.MaxLives ? "FULL" : "+1 IN " + FormatTime(flow.Lives.SecondsToNext);
         }
 
@@ -554,10 +613,11 @@ namespace Gotcha.UI
             Button cont = CreateButton(titleArea, "CONTINUE", Dark, ContinueGame);
             continueLabel = cont.GetComponentInChildren<Text>();
             continueButton = cont.gameObject;
-            Place(cont.transform, new Vector2(0.17f, 0.355f), new Vector2(0.83f, 0.425f));
-            Place(CreateButton(titleArea, "NEW GAME", Accent, NewGame).transform, new Vector2(0.17f, 0.255f), new Vector2(0.83f, 0.335f));
-            Place(CreateButton(titleArea, "LEVEL SELECTION", Dark, OpenLevelSelection).transform, new Vector2(0.17f, 0.155f), new Vector2(0.83f, 0.235f));
-            Place(CreateButton(titleArea, "SETTINGS", EggColor, OpenSettings).transform, new Vector2(0.17f, 0.055f), new Vector2(0.83f, 0.135f));
+            Place(cont.transform, new Vector2(0.17f, 0.37f), new Vector2(0.83f, 0.435f));
+            Place(CreateButton(titleArea, "NEW GAME", Accent, NewGame).transform, new Vector2(0.17f, 0.29f), new Vector2(0.83f, 0.355f));
+            Place(CreateButton(titleArea, "LEVEL SELECTION", Dark, OpenLevelSelection).transform, new Vector2(0.17f, 0.21f), new Vector2(0.83f, 0.275f));
+            Place(CreateButton(titleArea, "SHOP", new Color(0.95f, 0.7f, 0.15f), OpenShop).transform, new Vector2(0.17f, 0.13f), new Vector2(0.83f, 0.195f));
+            Place(CreateButton(titleArea, "SETTINGS", EggColor, OpenSettings).transform, new Vector2(0.17f, 0.05f), new Vector2(0.83f, 0.115f));
             titlePanel.SetActive(false);
 
             // Hint
@@ -615,6 +675,23 @@ namespace Gotcha.UI
             Place(reset.transform, new Vector2(0.12f, 0.22f), new Vector2(0.88f, 0.33f));
             Place(CreateButton(setCard, "BACK", Dark, CloseSettings).transform, new Vector2(0.25f, 0.06f), new Vector2(0.75f, 0.16f));
 
+            // Negozio (sopra a tutto: si apre anche dal pannello delle vite)
+            RectTransform shopCard;
+            shopPanel = CreateOverlay("ShopPanel", out shopCard, 1150);
+            AddHeader(shopCard, "SHOP");
+            Text pitch = CreateText(shopCard, "Gotcha! is free.\nWant a little boost?", 46, Ink, FontStyle.Normal);
+            Place(pitch.transform, new Vector2(0.08f, 0.68f), new Vector2(0.92f, 0.82f));
+            Button lives = CreateButton(shopCard, "", Accent, () => Buy(Products.InfiniteLives1h));
+            shopLivesLabel = lives.GetComponentInChildren<Text>();
+            Place(lives.transform, new Vector2(0.08f, 0.52f), new Vector2(0.92f, 0.64f));
+            shopAdsButton = CreateButton(shopCard, "", Dark, () => Buy(Products.RemoveAds));
+            shopAdsLabel = shopAdsButton.GetComponentInChildren<Text>();
+            Place(shopAdsButton.transform, new Vector2(0.08f, 0.37f), new Vector2(0.92f, 0.49f));
+            shopStatus = CreateText(shopCard, "", 40, Ink, FontStyle.Normal);
+            Place(shopStatus.transform, new Vector2(0.08f, 0.27f), new Vector2(0.92f, 0.35f));
+            Place(CreateButton(shopCard, "RESTORE PURCHASES", EggColor, RestorePurchases).transform, new Vector2(0.2f, 0.16f), new Vector2(0.8f, 0.24f));
+            Place(CreateButton(shopCard, "BACK", Dark, CloseShop).transform, new Vector2(0.3f, 0.05f), new Vector2(0.7f, 0.13f));
+
             // Vite: attesa, pubblicità con premio, invito
             RectTransform livesCard;
             livesPanel = CreateOverlay("LivesPanel", out livesCard, 1100);
@@ -624,6 +701,7 @@ namespace Gotcha.UI
             adButton = CreateButton(livesCard, "WATCH AD: +1 LIFE", Accent, WatchAdForLife);
             Place(adButton.transform, new Vector2(0.12f, 0.43f), new Vector2(0.88f, 0.55f));
             Place(CreateButton(livesCard, "INVITE A FRIEND", EggColor, InviteService.Share).transform, new Vector2(0.12f, 0.27f), new Vector2(0.88f, 0.39f));
+            Place(CreateButton(livesCard, "SHOP: INFINITE LIVES", new Color(0.95f, 0.7f, 0.15f), OpenShop).transform, new Vector2(0.12f, 0.2f), new Vector2(0.88f, 0.26f));
             playButton = CreateButton(livesCard, "CLOSE", Dark, CloseLives);
             playLabel = playButton.GetComponentInChildren<Text>();
             Place(playButton.transform, new Vector2(0.25f, 0.07f), new Vector2(0.75f, 0.19f));
@@ -659,6 +737,7 @@ namespace Gotcha.UI
                 completedPanel.SetActive(false);
                 ShowTitle();
             }).transform, new Vector2(0.2f, 0.06f), new Vector2(0.8f, 0.24f));
+            shopPanel.transform.SetAsLastSibling();   // il negozio si apre anche sopra il pannello delle vite
         }
 
         void ApplySafeArea()

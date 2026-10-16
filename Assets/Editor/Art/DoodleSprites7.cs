@@ -166,24 +166,23 @@ namespace Gotcha.EditorArt
             new MazeSeg(-2.75f, 3.50f, 2.75f, 3.50f, NeonCyan),
             new MazeSeg(-2.75f, -3.50f, -2.75f, 3.50f, NeonCyan),
             new MazeSeg(2.75f, -3.50f, 2.75f, 3.50f, NeonCyan),
-            new MazeSeg(-0.55f, -2.50f, 0.55f, -2.50f, NeonMagenta),
-            new MazeSeg(1.65f, -2.50f, 2.75f, -2.50f, NeonYellow),
-            new MazeSeg(0.55f, -1.50f, 1.65f, -1.50f, NeonMagenta),
-            new MazeSeg(-1.65f, -0.50f, 1.65f, -0.50f, NeonYellow),
-            new MazeSeg(-2.75f, 0.50f, 1.65f, 0.50f, NeonMagenta),
-            new MazeSeg(-0.55f, 1.50f, 1.65f, 1.50f, NeonYellow),
-            new MazeSeg(-1.65f, 2.50f, -0.55f, 2.50f, NeonMagenta),
-            new MazeSeg(0.55f, 2.50f, 2.75f, 2.50f, NeonYellow),
-            new MazeSeg(-1.65f, -3.50f, -1.65f, -0.50f, NeonMagenta),
-            new MazeSeg(-1.65f, 1.50f, -1.65f, 2.50f, NeonYellow),
-            new MazeSeg(-0.55f, -2.50f, -0.55f, -1.50f, NeonMagenta),
-            new MazeSeg(-0.55f, 1.50f, -0.55f, 2.50f, NeonYellow),
+            new MazeSeg(-1.65f, -1.50f, -0.55f, -1.50f, NeonMagenta),
+            new MazeSeg(0.55f, -0.50f, 1.65f, -0.50f, NeonYellow),
+            new MazeSeg(1.65f, 0.50f, 2.75f, 0.50f, NeonMagenta),
+            new MazeSeg(-1.65f, 1.50f, -0.55f, 1.50f, NeonYellow),
+            new MazeSeg(0.55f, 1.50f, 1.65f, 1.50f, NeonMagenta),
+            new MazeSeg(-1.65f, 2.50f, 0.55f, 2.50f, NeonYellow),
+            new MazeSeg(-1.65f, -3.50f, -1.65f, -1.50f, NeonMagenta),
+            new MazeSeg(-1.65f, -0.50f, -1.65f, 0.50f, NeonYellow),
+            new MazeSeg(-1.65f, 1.50f, -1.65f, 2.50f, NeonMagenta),
+            new MazeSeg(-0.55f, -1.50f, -0.55f, 1.50f, NeonYellow),
             new MazeSeg(0.55f, -2.50f, 0.55f, -1.50f, NeonMagenta),
-            new MazeSeg(1.65f, -1.50f, 1.65f, -0.50f, NeonYellow),
-            new MazeSeg(1.65f, 0.50f, 1.65f, 1.50f, NeonMagenta),
+            new MazeSeg(0.55f, 0.50f, 0.55f, 2.50f, NeonYellow),
+            new MazeSeg(1.65f, -2.50f, 1.65f, -1.50f, NeonMagenta),
+            new MazeSeg(1.65f, 2.50f, 1.65f, 3.50f, NeonYellow),
         };
-        public static readonly MazeSeg DarkMaze3Gate = new MazeSeg(1.65f, 2.50f, 1.65f, 3.50f, Rgba.Hex("FF3B4E"));
-        public static readonly float[] DarkMaze3Spots = { 1.10f, 1.00f, 2.20f, 3.00f };   // chiave x,y; uscita x,y
+        public static readonly MazeSeg DarkMaze3Gate = new MazeSeg(1.65f, 2.50f, 2.75f, 2.50f, Rgba.Hex("FF3B4E"));
+        public static readonly float[] DarkMaze3Spots = { -1.10f, 2.00f, 2.20f, 3.00f };   // chiave x,y; uscita x,y
         public static readonly MazeSeg[] DarkMaze4 =
         {
             new MazeSeg(-2.75f, -3.50f, 2.75f, -3.50f, NeonCyan),

@@ -7,6 +7,14 @@ namespace Gotcha.Core
     {
         const string UnlockedKey = "gotcha.unlocked";
         const string EggsKey = "gotcha.eggs";
+        const string NoAdsKey = "gotcha.noads";
+
+        /// <summary>Pubblicità rimossa (acquisto da 4,99 €). Il negozio la ripristina comunque a ogni avvio.</summary>
+        public static bool AdsRemoved
+        {
+            get => PlayerPrefs.GetInt(NoAdsKey, 0) == 1;
+            set { PlayerPrefs.SetInt(NoAdsKey, value ? 1 : 0); PlayerPrefs.Save(); }
+        }
 
         public static int HighestUnlocked => PlayerPrefs.GetInt(UnlockedKey, 0);
 
