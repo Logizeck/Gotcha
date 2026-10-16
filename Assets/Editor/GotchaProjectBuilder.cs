@@ -31,7 +31,7 @@ public static class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 26;
+    const int BuilderVersion = 27;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -4003,11 +4003,11 @@ public static class GotchaProjectBuilder
                 BuildDarkMazeLevel("DarkMaze2", "maze_dark2", DoodleSprites.DarkMaze2, DoodleSprites.DarkGate2,
                     new Vector2(DoodleSprites.DarkKey2X, DoodleSprites.DarkKey2Y), new Vector2(DoodleSprites.DarkExit2X, DoodleSprites.DarkExit2Y))),
             Define("AppleCatch2", "apple_rain", "APPLE RAIN",
-                "Seven apples this time, and they fall faster.",
+                "Six apples this time, and they fall a bit faster.",
                 Variant("AppleCatch", "AppleCatch2", go =>
                 {
-                    Tune(Level(go), "needed", 7);
-                    Tune(Level(go), "gravity", 12f);
+                    Tune(Level(go), "needed", 6);
+                    Tune(Level(go), "gravity", 10.5f);
                 })),
             Define("Campfire2", "wet_wood", "WET WOOD",
                 "It's raining! Hold the umbrella over the fire (not too close!) and get it going before the mouse freezes.",
@@ -4502,7 +4502,7 @@ public static class GotchaProjectBuilder
                 Variant("AppleCatch", "AppleCatch3", go =>
                 {
                     Tune(Level(go), "needed", 8);
-                    Tune(Level(go), "gravity", 12f);
+                    Tune(Level(go), "gravity", 11f);
                 })),
             Define("Birthday3", "windy_wish", "WINDY WISH",
                 "Seven candles, stubborn flames. Blow harder and longer.",

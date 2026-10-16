@@ -52,7 +52,7 @@ Livelli 41-60 — varianti più difficili delle meccaniche già collaudate:
 50. **High Plant** (vaso sulla mensola) · 51. **Copycat Pro** (4-5-6 note, più veloci) · 52. **Wasp Returns** (15 colpi) ·
 53. **Marble Run 2** (da destra a sinistra, muretto più alto) · 54. **Deep Freeze** (ghiaccio più spesso) ·
 55. **Tiny Mouse** (il topolino cambia tana ogni 3 s) · 56. **Snooze Alarm** (pulsante più veloce, 3 staccionate) ·
-57. **Darker** (labirinto al buio nuovo) · 58. **Apple Rain** (7 mele, cadono più veloci) ·
+57. **Darker** (labirinto al buio nuovo) · 58. **Apple Rain** (6 mele, cadono un po' più veloci) ·
 59. **Wet Wood** (pioggia: ombrello sopra il fuoco) · 60. **Wasp Nest** (labirinto con anelli, vespa più veloce).
 
 Livelli 61-100 — terza ondata (labirinti nuovi, livelli nuovi e varianti):

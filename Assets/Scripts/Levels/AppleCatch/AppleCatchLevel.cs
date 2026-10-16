@@ -25,6 +25,9 @@ namespace Gotcha.Levels
         [SerializeField] float basketTopY = -2.55f;
         [SerializeField] float groundY = -3.8f;
         [SerializeField] float gravity = 9f;
+        [SerializeField] float basketGain = 7.5f;     // quanto si sposta il cesto inclinando
+        [SerializeField] float basketFollow = 16f;    // quanto in fretta raggiunge la posizione
+        [SerializeField] float dropCooldown = 0.8f;   // secondi minimi tra una mela e l'altra
 
         class Falling { public Transform t; public float vy, vx, spin; }
         readonly List<Falling> falling = new List<Falling>();
@@ -32,7 +35,7 @@ namespace Gotcha.Levels
         int caught, lost;
         float cooldown;
         bool done;
-        readonly SteadyTilt steady = new SteadyTilt { shakeLevel = 8f, shakeHold = 0.5f };
+        readonly SteadyTilt steady = new SteadyTilt { shakeLevel = 8f, shakeHold = 0.3f, smoothing = 0.1f, deadZone = 0.02f };
         Vector3 treeHome;
 
         public override void OnLevelStart()
@@ -47,8 +50,8 @@ namespace Gotcha.Levels
         {
             if (done || IsFinished) return;
             // filtrata: niente tremolio, e scuotere l'albero non sposta il cesto
-            float bx = Mathf.Clamp(steady.Update(Time.deltaTime) * 5f, -basketRange, basketRange);
-            basket.position = new Vector3(Mathf.Lerp(basket.position.x, bx, 1f - Mathf.Exp(-7f * Time.deltaTime)), basket.position.y, basket.position.z);
+            float bx = Mathf.Clamp(steady.Update(Time.deltaTime) * basketGain, -basketRange, basketRange);
+            basket.position = new Vector3(Mathf.Lerp(basket.position.x, bx, 1f - Mathf.Exp(-basketFollow * Time.deltaTime)), basket.position.y, basket.position.z);
 
             float shake = SensorHub.Instance != null ? SensorHub.Instance.ShakeStrength : 0f;
 #if UNITY_EDITOR
@@ -57,8 +60,9 @@ namespace Gotcha.Levels
             cooldown -= Time.deltaTime;
             if (shake > shakeStrength && cooldown <= 0f && onTree.Count > 0)
             {
-                cooldown = 0.45f;
-                int n = Mathf.Min(onTree.Count, Random.value < 0.4f ? 2 : 1);
+                // una mela alla volta, e mai più di due in aria: ognuna si può prendere
+                cooldown = dropCooldown;
+                int n = falling.Count < 2 ? 1 : 0;
                 for (int i = 0; i < n; i++) Drop();
                 if (tree != null) StartCoroutine(Rustle());
             }
