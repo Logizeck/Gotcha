@@ -266,6 +266,15 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.27 (musica per tipo di livello)
+- Brani in `Assets/Audio/Music` (loop a 128 bpm): **Title** nel menu all'apertura (e quando si torna al titolo),
+  **Dungeon** per labirinti e livelli con chiavi, **Animals** per animali e natura, **Kitchen** per i livelli col cibo,
+  **Pressure** per tutti gli altri. La scelta è in `GotchaProjectBuilder.MusicFor` (per nome della cartella) e finisce
+  nel campo `music` di ogni `LevelDefinition` (si può cambiare a mano dall'Inspector).
+- Cambio di livello: se il nuovo livello usa un brano diverso, quello in corso sfuma (0,7 s) e il nuovo entra in
+  dissolvenza (0,9 s); se è lo stesso brano continua in loop senza interruzioni (`MusicPlayer.Play`).
+- `Soundtrack.wav` resta solo per gli stereo dei livelli 7 e 19.
+
 ## Versione 0.26 (free to play, livelli nuovi)
 ### Acquisti in-app
 - Due prodotti: `gotcha.infinite_lives_1h` (consumabile, **0,99 €**: 1 ora di vite infinite) e `gotcha.remove_ads`

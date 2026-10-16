@@ -1,10 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Gotcha.Levels;
 
 namespace Gotcha.Core
 {
     /// <summary>
-    /// Colonna sonora in loop. Si può spegnere dal menu; la scelta resta salvata.
+    /// Musica di sottofondo: un brano per il menu (Title) e uno per ogni tipo di livello (Dungeon, Animals, Kitchen,
+    /// Pressure), tutti in loop. Quando il brano richiesto cambia, quello in corso sfuma e il nuovo entra in dissolvenza;
+    /// se è lo stesso, continua senza interruzioni. Si può spegnere dal menu; la scelta resta salvata.
     /// I livelli possono abbassarla temporaneamente (Duck/Unduck): ogni richiesta è legata a chi la fa, e se
     /// quell'oggetto viene distrutto la richiesta decade da sola, così la musica non resta mai muta per errore.
     /// </summary>
@@ -13,31 +16,78 @@ namespace Gotcha.Core
     {
         const string MutedKey = "gotcha.musicMuted";
 
+        [Tooltip("Brano usato dagli stereo dei livelli 7/19 (non suona come sottofondo).")]
         public AudioClip soundtrack;
+        public AudioClip title, dungeon, animals, kitchen, pressure;
         [Range(0f, 1f)] public float volume = 0.6f;
+        public float fadeOut = 0.7f, fadeIn = 0.9f;
 
         public static MusicPlayer Instance { get; private set; }
         /// <summary>Scelta del giocatore dal menu (true = musica spenta).</summary>
         public bool Muted { get; private set; }
+        public MusicTrack Current { get; private set; } = MusicTrack.Title;
 
         AudioSource source;
         readonly Dictionary<Object, float> ducks = new Dictionary<Object, float>();
         readonly List<Object> stale = new List<Object>();
+        AudioClip pending;     // brano che entra dopo la sfumata
+        float fade = 1f;       // 0..1, moltiplica il volume
+        bool fadingOut;
 
         void Awake()
         {
             Instance = this;
             source = GetComponent<AudioSource>();
-            source.clip = soundtrack;
             source.loop = true;
             source.playOnAwake = false;
-            source.volume = volume;
             Muted = PlayerPrefs.GetInt(MutedKey, 0) == 1;
             source.mute = Muted;
-            if (soundtrack != null) source.Play();
+            // all'apertura del gioco: la musica del titolo, in dissolvenza
+            source.clip = Clip(MusicTrack.Title);
+            fade = 0f;
+            source.volume = 0f;
+            if (source.clip != null) source.Play();
         }
 
         void OnDestroy() { if (Instance == this) Instance = null; }
+
+        public AudioClip Clip(MusicTrack track)
+        {
+            AudioClip c;
+            switch (track)
+            {
+                case MusicTrack.Title: c = title; break;
+                case MusicTrack.Dungeon: c = dungeon; break;
+                case MusicTrack.Animals: c = animals; break;
+                case MusicTrack.Kitchen: c = kitchen; break;
+                default: c = pressure; break;
+            }
+            return c != null ? c : soundtrack;
+        }
+
+        /// <summary>Passa al brano richiesto: sfuma quello in corso e fa entrare il nuovo. Stesso brano = nessun cambio.</summary>
+        public void Play(MusicTrack track)
+        {
+            AudioClip next = Clip(track);
+            Current = track;
+            if (next == null) return;
+            if (pending == null && source.clip == next && !fadingOut) return;   // stesso brano: resta in loop
+            if (pending == next) return;
+            if (source.clip == next && fadingOut) { pending = null; fadingOut = false; return; }   // ci ripensa: risale
+            pending = next;
+            fadingOut = source.clip != null && source.isPlaying && fade > 0.01f;
+            if (!fadingOut) Switch();
+        }
+
+        void Switch()
+        {
+            source.Stop();
+            source.clip = pending;
+            pending = null;
+            fadingOut = false;
+            fade = 0f;
+            source.Play();
+        }
 
         void Update()
         {
@@ -46,11 +96,19 @@ namespace Gotcha.Core
             foreach (Object owner in ducks.Keys) if (owner == null) stale.Add(owner);
             foreach (Object owner in stale) ducks.Remove(owner);
 
+            float dt = Time.unscaledDeltaTime;   // le sfumate continuano anche in pausa
+            if (fadingOut)
+            {
+                fade = Mathf.MoveTowards(fade, 0f, dt / Mathf.Max(0.01f, fadeOut));
+                if (fade <= 0f) Switch();
+            }
+            else fade = Mathf.MoveTowards(fade, 1f, dt / Mathf.Max(0.01f, fadeIn));
+
             float factor = 1f;
             foreach (float f in ducks.Values) factor = Mathf.Min(factor, f);
-            source.volume = volume * factor;
+            source.volume = volume * factor * fade;
             source.mute = Muted;
-            if (!source.isPlaying && soundtrack != null && !AudioListener.pause) source.Play();
+            if (!source.isPlaying && source.clip != null && !AudioListener.pause) source.Play();
         }
 
         /// <summary>Abbassa la musica finché <paramref name="owner"/> non chiama Unduck (o viene distrutto).</summary>

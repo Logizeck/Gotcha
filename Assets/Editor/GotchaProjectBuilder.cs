@@ -31,7 +31,7 @@ public static partial class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 28;
+    const int BuilderVersion = 29;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -224,6 +224,7 @@ public static partial class GotchaProjectBuilder
         def.hint = hint;
         def.prefab = prefab;
         def.easterEggId = easterEgg;
+        def.music = MusicFor(folder);
         EditorUtility.SetDirty(def);
         return def;
     }
@@ -253,6 +254,11 @@ public static partial class GotchaProjectBuilder
         var musicGo = new GameObject("Music", typeof(AudioSource));
         MusicPlayer music = musicGo.AddComponent<MusicPlayer>();
         music.soundtrack = Soundtrack();
+        music.title = Music("Title");
+        music.dungeon = Music("Dungeon");
+        music.animals = Music("Animals");
+        music.kitchen = Music("Kitchen");
+        music.pressure = Music("Pressure");
         new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
 
         var flowGo = new GameObject("GameFlow");
@@ -533,6 +539,42 @@ public static partial class GotchaProjectBuilder
         importer.loadInBackground = true;
         importer.SaveAndReimport();
         return AssetDatabase.LoadAssetAtPath<AudioClip>(path);
+    }
+
+    /// <summary>Brano di sottofondo in Assets/Audio/Music (compresso Vorbis, caricato in memoria per loop senza buchi).</summary>
+    static AudioClip Music(string name)
+    {
+        string path = "Assets/Audio/Music/" + name + ".wav";
+        var importer = AssetImporter.GetAtPath(path) as AudioImporter;
+        if (importer == null) { Debug.LogWarning("[Gotcha] Musica non trovata: " + path); return null; }
+        AudioImporterSampleSettings settings = importer.defaultSampleSettings;
+        settings.loadType = AudioClipLoadType.CompressedInMemory;
+        settings.compressionFormat = AudioCompressionFormat.Vorbis;
+        settings.quality = 0.6f;
+        importer.defaultSampleSettings = settings;
+        importer.loadInBackground = true;
+        importer.SaveAndReimport();
+        return AssetDatabase.LoadAssetAtPath<AudioClip>(path);
+    }
+
+    /// <summary>
+    /// Musica di ogni livello (per nome della cartella): Dungeon = labirinti e chiavi, Animals = animali e natura,
+    /// Kitchen = cibo, Pressure = tutti gli altri.
+    /// </summary>
+    static MusicTrack MusicFor(string folder)
+    {
+        string[] dungeon = { "KeyDoor", "Maze", "TrapMaze", "DarkMaze", "WaspMaze", "ArtTheft", "FrozenKey", "Maze2", "TrapMaze2",
+            "DarkMaze2", "FrozenKey2", "WaspMaze6", "TrapMaze3", "DarkMaze3", "WaspMaze3", "TwoDoors", "Maze4", "MirrorMaze", "Magnet" };
+        string[] animals = { "Idle", "Volume", "Roach", "Snowman", "Defend", "Bedtime", "Campfire", "Plant", "Shell", "Sunny", "CatEyes",
+            "Copycat", "Shell2", "Defend2", "Plant2", "Copycat2", "Wasp", "Wasp2", "CatEyes2", "Campfire2", "Flashlight", "Bridge", "Copycat3",
+            "Shell3", "Volume2", "Defend3", "Plant3", "Tightrope", "Wasp3", "CatEyes3", "SnowmanSled", "ScreamBird", "Fireflies",
+            "Sneaky", "Whack" };
+        string[] kitchen = { "Apple", "Cookie", "Birthday", "Soup", "Rope", "Pizza", "PizzaChef", "Pancake", "AppleCatch", "Pancake2",
+            "Cookie2", "Birthday2", "AppleCatch2", "Soup2", "Coffee", "CakeStack" };
+        if (System.Array.IndexOf(dungeon, folder) >= 0) return MusicTrack.Dungeon;
+        if (System.Array.IndexOf(animals, folder) >= 0) return MusicTrack.Animals;
+        if (System.Array.IndexOf(kitchen, folder) >= 0) return MusicTrack.Kitchen;
+        return MusicTrack.Pressure;
     }
 
     static Material StrokeMaterial()

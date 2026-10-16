@@ -89,6 +89,7 @@ namespace Gotcha.Core
             Destroy(current.gameObject);
             current = null;
             CurrentDefinition = null;
+            if (MusicPlayer.Instance != null) MusicPlayer.Instance.Play(MusicTrack.Title);   // di nuovo al titolo
         }
 
         /// <summary>Avvia un livello solo se c'è almeno una vita; altrimenti avvisa la UI.</summary>
@@ -119,6 +120,8 @@ namespace Gotcha.Core
 
             CurrentIndex = index;
             CurrentDefinition = catalog.levels[index];
+            // musica del livello: se cambia, quella vecchia sfuma e la nuova entra; se è la stessa continua in loop
+            if (MusicPlayer.Instance != null) MusicPlayer.Instance.Play(CurrentDefinition.music);
             GameObject go = Instantiate(CurrentDefinition.prefab, levelHost);
             current = go.GetComponent<LevelController>();
             if (current == null)
@@ -150,6 +153,7 @@ namespace Gotcha.Core
             int next = lastResult == LevelResult.Solved ? CurrentIndex + 1 : CurrentIndex;
             if (next >= LevelCount)
             {
+                if (MusicPlayer.Instance != null) MusicPlayer.Instance.Play(MusicTrack.Title);
                 GameCompleted?.Invoke();
                 return;
             }
