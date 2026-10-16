@@ -41,10 +41,11 @@ namespace Gotcha.Components
         /// <summary>Distanza di un punto (mondo) dal raggio.</summary>
         public float DistanceTo(Vector2 p)
         {
-            Vector2 c = transform.position;
+            // il raggio corre lungo l'asse "su" del laser (che può essere inclinato nei labirinti deformati)
+            Vector2 c = transform.position, up = transform.up;
             float half = length * 0.5f * transform.lossyScale.y;
-            float y = Mathf.Clamp(p.y, c.y - half, c.y + half);
-            return Vector2.Distance(p, new Vector2(c.x, y));
+            float t = Mathf.Clamp(Vector2.Dot(p - c, up), -half, half);
+            return Vector2.Distance(p, c + up * t);
         }
     }
 }

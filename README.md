@@ -60,15 +60,15 @@ Livelli 61-100 — terza ondata (ogni meccanica compare al massimo 3 volte; dall
 65 Trap Maze 3 · 66 Magic Rune (ricopia le rune) · 67 Foggy Mirror (soffia per appannare lo specchio e leggere il codice) ·
 68 Five Beeps (morse a 5 suoni) · 69 Pitch Black (vespa nel buio) · 70 Shell Storm · 71 DJ Mouse (tocca a tempo di musica) ·
 72 Bodyguard 3 (due vespe) · 73 Wasp Hall (due vespe) · 74 Two Doors (chiavi nascoste, ragazza o mostro) · 75 Master Code ·
-76 Thirsty Tree (raffiche) · 77 Plumber (ruota i tubi) · 78 Fake Coin (bilancia, due pesate) · 79 Spot It (5 differenze) · 80 Counting Sheep (conta le pecore) ·
+76 Thirsty Tree (raffiche) · 77 Plumber (ruota i tubi) · 78 Fake Coin (bilancia, due pesate) · 79 Spot It (5 differenze) · 80 Where's Mouse? (zoom con due dita nella folla) ·
 81 Tightrope (tieni in equilibrio il funambolo inclinando al contrario) · 82 Shadow Play (ruota e ingrandisci con due dita) · 83 Wasp King · 84 Staring Contest ·
-85 Snowman on Ice (segui l'ombra dell'albero mentre il sole si sposta) · 86 Paper Plane (picchiata, salita e soffio negli anelli) ·
-87 Safe Cracker (gira la manopola e ascolta il CLUNK) · 88 Sing, Birdie (l'uccellino vola all'altezza della tua voce) ·
+85 House of Cards (mano ferma, attento al vento) · 86 Paper Plane (picchiata, salita e soffio negli anelli) ·
+87 Safe Cracker (gira la manopola e ascolta il CLUNK) · 88 Merry-Go-Round (gira su te stesso col telefono) ·
 89 Slide Puzzle (ritratto del gatto a tasselli) · 90 Domino (la tessera alta non sta sotto la mensola) ·
 91 Mirror Path (comandi allo specchio, poi anche su/giù) · 92 Magnet Fishing (calamita, scuoti via i rottami, piranha) ·
 93 Cuckoo Clock (indovinello e lancette) · 94 Fireflies (lucciole sì, occhi del lupo no) · 95 Cheating Cat (memory, il gatto scambia le carte) ·
 96 Bubble Count (numeri scritti in modi diversi, il 6 capovolto) · 97 Sneaky Mouse (torcia del cane e ombre dei mobili) ·
-98 Traffic Jam (libera il furgone rosso) · 99 Whack-a-Mole (mai la talpa con il cappellino) · 100 The End? (prendi il topolino nascosto nei titoli di coda).
+98 Blind Stopwatch (ferma il cronometro a occhi chiusi) · 99 Whack-a-Mole (mai la talpa con il cappellino) · 100 The End? (prendi il topolino nascosto nei titoli di coda).
 
 Free to play: si gioca gratis; nel **negozio** (SHOP) si possono comprare **1 ora di vite infinite (0,99 €)** e
 **niente pubblicità per sempre (4,99 €)**. Vedi README_SETUP.md per la configurazione degli acquisti.

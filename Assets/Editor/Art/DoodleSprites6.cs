@@ -100,9 +100,9 @@ namespace Gotcha.EditorArt
             new MazeSeg(1.65f, 1.50f, 1.65f, 2.50f, NeonMagenta),
         };
 
-        public static DoodleArt Maze2Neon() { return NeonMaze("maze_2", Maze2); }
-        public static DoodleArt TrapMaze2Neon() { return NeonMaze("maze_trap2", TrapMaze2); }
-        public static DoodleArt DarkMaze2Neon() { return NeonMaze("maze_dark2", DarkMaze2); }
+        public static DoodleArt Maze2Neon() { return NeonMaze("maze_2", Warped(Maze2, Maze2Warp)); }
+        public static DoodleArt TrapMaze2Neon() { return NeonMaze("maze_trap2", Warped(TrapMaze2, Trap2Warp)); }
+        public static DoodleArt DarkMaze2Neon() { return NeonMaze("maze_dark2", Warped(DarkMaze2, Dark2Warp)); }
         public static DoodleArt WaspMaze2Neon() { return NeonMaze("maze_wasp2", WaspMaze2); }
     }
 }

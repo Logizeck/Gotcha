@@ -15,6 +15,13 @@ public static partial class GotchaProjectBuilder
         return go;
     }
 
+    static SpeechBubble SmallBubble(Transform root, Vector2 pos)
+    {
+        SpeechBubble b = Bubble(root, pos);
+        b.transform.localScale = Vector3.one * 0.5f;
+        return b;
+    }
+
     static GameObject SaveLevel(GameObject root, string folder) => SavePrefab(root, LevelDir + "/" + folder + "/Level_" + folder + ".prefab");
 
     /// <summary>Barra orizzontale che si accorcia verso sinistra (scala x del Transform restituito).</summary>
@@ -162,82 +169,6 @@ public static partial class GotchaProjectBuilder
         SetField(level, "doneSprite", sprites["hoop_done"]);
         SetField(level, "bubble", bubble);
         return SaveLevel(root, "PaperPlane");
-    }
-
-    // ---------- 88: l'uccellino a voce ----------
-
-    static GameObject BuildScreamBirdLevel()
-    {
-        var root = new GameObject("Level_ScreamBird");
-        ScreamBirdLevel level = root.AddComponent<ScreamBirdLevel>();
-        Art(root.transform, "Sky", "sky_bg", -20, false);
-        var tops = new List<Transform>();
-        var bottoms = new List<Transform>();
-        for (int i = 0; i < 5; i++)
-        {
-            Transform top = Child(root.transform, "PipeTop" + i, new Vector2(10f, 3f)).transform;
-            Art(top, "Art", "pipe", 8, false).localScale = new Vector3(1f, -1f, 1f);
-            top.GetChild(0).localPosition = new Vector3(top.GetChild(0).localPosition.x, -top.GetChild(0).localPosition.y, 0f);
-            tops.Add(top);
-            Transform bottom = Child(root.transform, "PipeBottom" + i, new Vector2(10f, -3f)).transform;
-            Art(bottom, "Art", "pipe", 8, false);
-            bottoms.Add(bottom);
-        }
-        Transform bird = Child(root.transform, "Bird", new Vector2(-1.6f, -1f)).transform;
-        bird.localScale = Vector3.one * 0.55f;
-        GameObject up = Art(bird, "Up", "bird_up", 10).gameObject;
-        GameObject down = Art(bird, "Down", "bird_down", 10).gameObject;
-        SpeechBubble bubble = Bubble(root.transform, new Vector2(0.6f, 3.3f));
-        bubble.transform.localScale = Vector3.one * 0.5f;
-
-        SetField(level, "bird", bird);
-        SetField(level, "wingsUp", up);
-        SetField(level, "wingsDown", down);
-        SetArray(level, "pipesTop", tops.ToArray());
-        SetArray(level, "pipesBottom", bottoms.ToArray());
-        SetField(level, "bubble", bubble);
-        return SaveLevel(root, "ScreamBird");
-    }
-    static SpeechBubble SmallBubble(Transform root, Vector2 pos)
-    {
-        SpeechBubble b = Bubble(root, pos);
-        b.transform.localScale = Vector3.one * 0.5f;
-        return b;
-    }
-
-    // ---------- 85: il pupazzo sul ghiaccio ----------
-
-    static GameObject BuildSnowmanSledLevel()
-    {
-        var root = new GameObject("Level_SnowmanSled");
-        SnowmanSledLevel level = root.AddComponent<SnowmanSledLevel>();
-        Art(root.transform, "Lake", "ice_lake_bg", -20, false);
-        Transform sun = Art(root.transform, "Sun", "sun", -10, true, new Vector2(-2.6f, 1.0f));
-        sun.localScale = Vector3.one * 0.7f;
-        Transform sunFrom = Child(root.transform, "SunFrom", new Vector2(-2.6f, 1.2f)).transform;
-        Transform sunTo = Child(root.transform, "SunTo", new Vector2(2.6f, 1.2f)).transform;
-        Transform shade = Art(root.transform, "Shade", "shade", 2, false, new Vector2(0.2f, -2.65f));
-        shade.localScale = new Vector3(1.6f, 1.6f, 1f);
-        Transform tree = Child(root.transform, "Tree", new Vector2(0.2f, -2.7f)).transform;
-        Art(tree, "Art", "pine", 3);
-        Transform snowman = Child(root.transform, "Snowman", new Vector2(-1.9f, -2.6f)).transform;
-        SpriteRenderer body = Art(snowman, "Art", "snow_buddy", 5).GetComponent<SpriteRenderer>();
-        snowman.localScale = Vector3.one * 0.8f;
-        Transform heat = GaugeBar(root.transform, "Heat", new Vector2(0.25f, 3.9f), new Vector2(2.2f, 0.18f), new Color(0.17f, 0.13f, 0.2f, 0.6f), new Color(1f, 0.45f, 0.25f), 20);
-        Label(root.transform, new Vector2(-1.3f, 3.9f), 21, "HEAT", 0.035f);
-        SmokeEmitter dump = Emitter(root.transform, "SnowDump", new Vector2(0.2f, 0f), "puff", 45f, 1.2f, -2.5f, 0.9f, 1.2f, Color.white, 9);
-
-        SetField(level, "snowman", snowman);
-        SetField(level, "sun", sun);
-        SetField(level, "sunFrom", sunFrom);
-        SetField(level, "sunTo", sunTo);
-        SetField(level, "tree", tree);
-        SetField(level, "shade", shade);
-        SetField(level, "heatBar", heat);
-        SetField(level, "body", body);
-        SetField(level, "snowDump", dump);
-        SetField(level, "bubble", SmallBubble(root.transform, new Vector2(0, 3.1f)));
-        return SaveLevel(root, "SnowmanSled");
     }
 
     // ---------- 87: lo scassinatore ----------

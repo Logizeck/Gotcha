@@ -219,42 +219,6 @@ public static partial class GotchaProjectBuilder
         return SaveLevel(root, "Spot");
     }
 
-    // ---------- 80: conta le pecore ----------
-
-    static GameObject BuildSheepLevel()
-    {
-        var root = new GameObject("Level_Sheep");
-        SheepLevel level = root.AddComponent<SheepLevel>();
-        Art(root.transform, "Night", "camp_bg", -20, false);
-        Bar(root.transform, "Dim", Vector2.zero, new Vector2(12f, 16f), new Color(0f, 0f, 0.1f, 0.35f), -15);
-        Transform fence = Child(root.transform, "Fence", new Vector2(0, -3.0f)).transform;
-        Color wood = new Color(0.62f, 0.42f, 0.26f);
-        Bar(fence, "Post", new Vector2(0, 0.45f), new Vector2(0.16f, 0.95f), wood, 4);
-        Bar(fence, "Rail1", new Vector2(0, 0.35f), new Vector2(0.9f, 0.1f), wood, 4);
-        Bar(fence, "Rail2", new Vector2(0, 0.7f), new Vector2(0.9f, 0.1f), wood, 4);
-        Label(root.transform, new Vector2(1.7f, -1.4f), 5, "PEN →", 0.05f).color = Color.white;
-        Transform sheep = Child(root.transform, "Sheep", new Vector2(-5f, -3f)).transform;
-        sheep.localScale = Vector3.one * 0.75f;
-        Art(sheep, "Art", "sheep", 6);
-        sheep.gameObject.SetActive(false);
-        GameObject keypad = KeypadOverlay(root.transform, out BoxCollider2D panelCol, out TextMesh display, out TapButton[] keys);
-        TextMesh question = Label(root.transform, new Vector2(0, -2.7f), 40, "How many sheep in the PEN?", 0.055f);
-        question.color = Color.white;
-        GameObject sleep = Bar(root.transform, "Sleep", Vector2.zero, new Vector2(12f, 16f), new Color(0f, 0f, 0f, 0.88f), 70).gameObject;
-        Label(sleep.transform, Vector2.zero, 71, "Z z z . . .", 0.02f).color = Color.white;
-
-        SetField(level, "sheepTemplate", sheep);
-        SetField(level, "fence", fence);
-        SetField(level, "keypad", keypad);
-        SetArray(level, "keys", keys);
-        SetField(level, "display", display);
-        SetField(level, "question", question);
-        SetField(level, "sleepOverlay", sleep);
-        Tune(level, "groundY", -3.0f);
-        SetField(level, "bubble", SmallBubble(root.transform, new Vector2(0, 3.3f)));
-        return SaveLevel(root, "Sheep");
-    }
-
     // ---------- 82: le ombre cinesi ----------
 
     static GameObject BuildShadowLevel()
@@ -338,54 +302,6 @@ public static partial class GotchaProjectBuilder
         SetField(level, "info", info);
         SetField(level, "bubble", SmallBubble(root.transform, new Vector2(0, 3.6f)));
         return SaveLevel(root, "Memory");
-    }
-
-    // ---------- 98: l'ingorgo ----------
-
-    static GameObject BuildTrafficLevel()
-    {
-        var root = new GameObject("Level_Traffic");
-        TrafficLevel level = root.AddComponent<TrafficLevel>();
-        Bar(root.transform, "Ground", Vector2.zero, new Vector2(12f, 16f), new Color(0.35f, 0.38f, 0.42f), -20);
-        const float cell = 0.85f;
-        Vector2 center = new Vector2(0, -0.2f);
-        Vector2 origin = center + new Vector2(-2.5f * cell, 2.5f * cell);
-        Bar(root.transform, "Edge", center, new Vector2(6 * cell + 0.2f, 6 * cell + 0.2f), new Color(0.95f, 0.85f, 0.3f), -12);
-        Bar(root.transform, "Lot", center, new Vector2(6 * cell, 6 * cell), new Color(0.25f, 0.27f, 0.3f), -11);
-        Bar(root.transform, "Exit", origin + new Vector2(5.5f * cell + 0.1f, -2 * cell), new Vector2(0.25f, cell), new Color(0.25f, 0.27f, 0.3f), -10);
-        Label(root.transform, origin + new Vector2(5.5f * cell + 0.25f, -2 * cell + 0.6f), 5, "EXIT", 0.035f).color = Color.white;
-        for (int i = 1; i < 6; i++) Bar(root.transform, "Line", origin + new Vector2((i - 0.5f) * cell, -2.5f * cell), new Vector2(0.03f, 6 * cell), new Color(1f, 1f, 1f, 0.15f), -10);
-        // furgone rosso + 10 auto (puzzle verificato: si risolve in 22 mosse)
-        var spec = new (int c, int r, int len, bool h, string sprite)[]
-        {
-            (0, 2, 2, true, "car_red"), (3, 4, 2, true, "car_blue"), (0, 0, 2, true, "car_green"), (2, 0, 3, false, "truck_purple"),
-            (3, 0, 2, false, "car_yellow"), (3, 5, 3, true, "truck_orange"), (0, 3, 2, true, "car_yellow"), (0, 4, 2, false, "car_blue"),
-            (4, 0, 2, true, "car_blue"), (3, 2, 2, false, "car_green"), (5, 1, 3, false, "truck_purple"),
-        };
-        var cars = new List<Transform>();
-        foreach (var s in spec)
-        {
-            Transform car = Child(root.transform, "Car", Vector2.zero).transform;
-            Transform art = Art(car, "Art", s.sprite, 5, false);
-            art.localRotation = Quaternion.Euler(0, 0, s.h ? 0f : 90f);
-            art.localScale = Vector3.one * (cell / 0.9f);
-            cars.Add(car);
-        }
-        TextMesh moves = Label(root.transform, new Vector2(1.6f, 3.3f), 12, "", 0.045f);
-        moves.color = Color.white;
-        Transform time = GaugeBar(root.transform, "Time", new Vector2(-0.9f, 3.3f), new Vector2(2.2f, 0.16f), new Color(0f, 0f, 0f, 0.5f), new Color(1f, 0.85f, 0.3f), 20);
-
-        SetArray(level, "cars", cars.ToArray());
-        Tune(level, "col", System.Array.ConvertAll(spec, s => s.c));
-        Tune(level, "row", System.Array.ConvertAll(spec, s => s.r));
-        Tune(level, "length", System.Array.ConvertAll(spec, s => s.len));
-        Tune(level, "horizontal", System.Array.ConvertAll(spec, s => s.h));
-        Tune(level, "origin", origin);
-        Tune(level, "cell", cell);
-        SetField(level, "timeBar", time);
-        SetField(level, "moves", moves);
-        SetField(level, "bubble", SmallBubble(root.transform, new Vector2(0, -3.4f)));
-        return SaveLevel(root, "Traffic");
     }
 
     // ---------- 100: THE END? ----------

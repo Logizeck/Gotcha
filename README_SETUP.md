@@ -266,6 +266,26 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.29
+- **Titolo**: sfondo nero e logo "G!" al neon arcobaleno fatto come un labirinto (`DoodleSprites12.cs`,
+  `UI/TitleLogo.cs`): due palline cromate ci rotolano dentro inclinando il telefono (frecce nell'Editor).
+- **Musica al primo avvio**: i brani sono precaricati e ripartono quando l'app torna in primo piano (dopo la richiesta
+  del microfono); il titolo richiede sempre il suo brano.
+- **Vibrazione** (`Components/Haptics.cs`, Vibrator di Android): esplosioni (bomba, razzo, rune, fili), oggetti che si
+  rompono (biscotto, palloncino), scosse dei laser, schianti, punture. `Haptics.Enabled` per spegnerla.
+- **Vespe**: ovunque la prima puntura fa solo male (la vespa torna al suo posto), alla seconda si perde
+  (52/83 con la paletta, labirinti 36/61/69/73, Bodyguard 12/46/72).
+- **Labirinti senza vespe con pareti curve o inclinate** (`DoodleSprites13.cs`): 41 zig-zag, 16 ondulato, 48 a vortice,
+  65 a bolle, 17 inclinato, 57 a vortice inverso. È una deformazione continua del labirinto originale: il percorso
+  resta quello verificato; collider, buche, laser, cancelli e chiavi seguono la deformazione.
+- **Easter egg**: 15 `candle_storm` (soglia più bassa, il soffio a scatti non azzera), 29 `sun_melt` (si scioglie più in
+  fretta e l'egg viene assegnato anche se l'animazione si inceppa), 67 `bad_breath` (5 s, tollerante alle pause).
+- **74**: la ragazza ridisegnata come una diva in abito da sera rosso.
+- **Menu livelli**: i puntini delle pagine non si spostano più.
+- Livelli nuovi (`Assets/Scripts/Levels/V29`, `GotchaLevels29.cs`, `DoodleSprites14.cs`): 80 Where's Mouse? (zoom con due
+  dita) · 85 House of Cards (mano ferma, aspetta che la tenda si calmi) · 88 Merry-Go-Round (giroscopio: gira su te
+  stesso; senza giroscopio si fa girare il dito; egg `dizzy_cat`) · 98 Blind Stopwatch (conta a mente; egg `speedrun`).
+
 ## Versione 0.28
 - **Labirinti arcobaleno**: tutte le pareti al neon hanno una tinta che scorre in diagonale (`DoodleSprites.Rainbow`).
 - **41 Zig Zag**: tre cancelli rosa che si aprono e si chiudono da soli (`Components/SlidingGate`).

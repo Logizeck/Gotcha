@@ -31,7 +31,7 @@ public static partial class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 30;
+    const int BuilderVersion = 31;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -122,10 +122,10 @@ public static partial class GotchaProjectBuilder
                 BuildBirthdayLevel(), "candle_storm"),
             Define("TrapMaze", "trap_maze", "TRAP MAZE",
                 "Same old maze? Mind the holes... and the lasers keep a rhythm.",
-                BuildTrapMazeLevel()),
+                BuildTrapMazeLevel(warp: DoodleSprites.TrapWarp)),
             Define("DarkMaze", "dark_maze", "IN THE DARK",
                 "Who turned off the lights? Every locked gate has a key somewhere.",
-                BuildDarkMazeLevel()),
+                BuildDarkMazeLevel(warp: DoodleSprites.DarkWarp)),
             Define("Safe", "hidden_safe", "HIDDEN SAFE",
                 "That painting is stuck to the wall. Maybe a good shake would help?",
                 BuildSafeLevel(keyPrefab, doorPrefab)),
@@ -616,7 +616,7 @@ public static partial class GotchaProjectBuilder
         string[] animals = { "Idle", "Volume", "Roach", "Snowman", "Defend", "Bedtime", "Campfire", "Plant", "Shell", "Sunny", "CatEyes",
             "Copycat", "Shell2", "Defend2", "Plant2", "Copycat2", "Wasp", "Wasp2", "CatEyes2", "Campfire2", "Flashlight", "Bridge", "Copycat3",
             "Shell3", "Defend3", "Plant3", "Tightrope", "Wasp3", "CatEyes3", "SnowmanSled", "ScreamBird", "Fireflies",
-            "Sneaky", "Whack", "Laser", "Rhythm", "Pipes", "Sheep", "Slide" };
+            "Sneaky", "Whack", "Laser", "Rhythm", "Pipes", "Slide", "WhereMouse", "Carousel" };
         string[] kitchen = { "Apple", "Cookie", "Birthday", "Soup", "Rope", "Pizza", "PizzaChef", "Pancake", "AppleCatch", "Pancake2",
             "Cookie2", "Birthday2", "AppleCatch2", "Soup2", "Coffee", "CakeStack" };
         if (folder == "Credits") return MusicTrack.Title;   // il finale suona il tema del titolo
@@ -684,6 +684,25 @@ public static partial class GotchaProjectBuilder
     static void VWall(Transform parent, string name, float x, float y1, float y2)
     {
         Wall(parent, name, new Vector2(x, (y1 + y2) / 2f), new Vector2(WallT, y2 - y1 + WallT));
+    }
+
+    /// <summary>Tratto inclinato: capsula ruotata lungo il segmento (le curve sono fatte di tanti tratti corti).</summary>
+    static void SlantWall(Transform parent, string name, Vector2 a, Vector2 b)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        go.transform.localPosition = (a + b) * 0.5f;
+        go.transform.localRotation = Quaternion.Euler(0, 0, Mathf.Atan2(b.y - a.y, b.x - a.x) * Mathf.Rad2Deg);
+        CapsuleCollider2D col = go.AddComponent<CapsuleCollider2D>();
+        col.size = new Vector2(Vector2.Distance(a, b) + WallT, WallT);
+        col.direction = CapsuleDirection2D.Horizontal;
+    }
+
+    static Vector2 Warp(MazeWarp w, Vector2 p)
+    {
+        float x = p.x, y = p.y;
+        DoodleSprites.WarpPoint(w, ref x, ref y);
+        return new Vector2(x, y);
     }
 
     /// <summary>Tratto dritto fisico: collider a capsula grande quanto il tubo disegnato.</summary>
@@ -1873,7 +1892,8 @@ public static partial class GotchaProjectBuilder
         {
             DoodleSprites.MazeSeg g = segs[i];
             if (Mathf.Approximately(g.y1, g.y2)) HWall(walls, "Wall" + i, Mathf.Min(g.x1, g.x2), Mathf.Max(g.x1, g.x2), g.y1);
-            else VWall(walls, "Wall" + i, g.x1, Mathf.Min(g.y1, g.y2), Mathf.Max(g.y1, g.y2));
+            else if (Mathf.Approximately(g.x1, g.x2)) VWall(walls, "Wall" + i, g.x1, Mathf.Min(g.y1, g.y2), Mathf.Max(g.y1, g.y2));
+            else SlantWall(walls, "Wall" + i, new Vector2(g.x1, g.y1), new Vector2(g.x2, g.y2));   // pareti curve o inclinate
         }
     }
 
@@ -1913,10 +1933,10 @@ public static partial class GotchaProjectBuilder
     }
 
     static GameObject BuildTrapMazeLevel(string folder = "TrapMaze", string neon = "maze_trap", DoodleSprites.MazeSeg[] segs = null,
-        float[] pp = null, float[] lz = null, Vector2? goalAt = null)
+        float[] pp = null, float[] lz = null, Vector2? goalAt = null, MazeWarp warp = MazeWarp.None)
     {
-        segs = segs ?? DoodleSprites.TrapMaze;
-        pp = pp ?? DoodleSprites.TrapPits;
+        segs = DoodleSprites.Warped(segs ?? DoodleSprites.TrapMaze, warp);
+        pp = DoodleSprites.WarpPairs(pp ?? DoodleSprites.TrapPits, warp);
         lz = lz ?? DoodleSprites.TrapLasers;
         var root = new GameObject("Level_" + folder);
         TrapMazeLevel level = root.AddComponent<TrapMazeLevel>();
@@ -1943,10 +1963,13 @@ public static partial class GotchaProjectBuilder
         var lasers = new List<LaserBeam>();
         for (int i = 0; i < lz.Length; i += 3)
         {
-            float len = lz[i + 2] - lz[i + 1];
+            // estremi del laser deformati come le pareti: il raggio resta teso tra i due muri (anche se inclinato)
+            Vector2 la = Warp(warp, new Vector2(lz[i], lz[i + 1])), lb = Warp(warp, new Vector2(lz[i], lz[i + 2]));
+            float len = Vector2.Distance(la, lb);
             var go = new GameObject("Laser");
             go.transform.SetParent(maze, false);
-            go.transform.localPosition = new Vector3(lz[i], (lz[i + 1] + lz[i + 2]) * 0.5f, 0);
+            go.transform.localPosition = (la + lb) * 0.5f;
+            go.transform.localRotation = Quaternion.Euler(0, 0, Mathf.Atan2(lb.y - la.y, lb.x - la.x) * Mathf.Rad2Deg - 90f);
             LaserBeam beam = go.AddComponent<LaserBeam>();
             Transform b = Art(go.transform, "Beam", "laser", 7, false);
             b.localScale = new Vector3(1f, len, 1f);
@@ -1962,8 +1985,8 @@ public static partial class GotchaProjectBuilder
             lasers.Add(beam);
         }
 
-        MazeGoal(maze, goalAt ?? new Vector2(-2.2f, 2.6f));
-        Rigidbody2D ball = MazeBall(maze, new Vector2(-2.2f, -3.0f));
+        MazeGoal(maze, Warp(warp, goalAt ?? new Vector2(-2.2f, 2.6f)));
+        Rigidbody2D ball = MazeBall(maze, Warp(warp, new Vector2(-2.2f, -3.0f)));
         SmokeEmitter sparks = Sparks(root.transform, "Sparks", new Color(1f, 0.45f, 0.3f));
         SpeechBubble bubble = Bubble(root.transform, new Vector2(1.5f, -4.45f));
         bubble.transform.localScale = Vector3.one * 0.5f;
@@ -1978,9 +2001,9 @@ public static partial class GotchaProjectBuilder
     }
 
     static GameObject BuildDarkMazeLevel(string folder = "DarkMaze", string neon = "maze_dark", DoodleSprites.MazeSeg[] segs = null,
-        DoodleSprites.MazeSeg? gateSeg = null, Vector2? keyAt = null, Vector2? exitAt = null, Vector2[] waspsAt = null)
+        DoodleSprites.MazeSeg? gateSeg = null, Vector2? keyAt = null, Vector2? exitAt = null, Vector2[] waspsAt = null, MazeWarp warp = MazeWarp.None)
     {
-        segs = segs ?? DoodleSprites.DarkMaze;
+        segs = DoodleSprites.Warped(segs ?? DoodleSprites.DarkMaze, warp);
         var root = new GameObject("Level_" + folder);
         DarkMazeLevel level = root.AddComponent<DarkMazeLevel>();
         TiltGravity tilt = root.AddComponent<TiltGravity>();
@@ -1995,21 +2018,22 @@ public static partial class GotchaProjectBuilder
         SegWalls(maze, segs);
 
         // cancello rosso con lucchetto davanti all'uscita
-        DoodleSprites.MazeSeg g = gateSeg ?? DoodleSprites.DarkGate;
+        DoodleSprites.MazeSeg g = DoodleSprites.WarpSeg(gateSeg ?? DoodleSprites.DarkGate, warp);
         var gate = new GameObject("Gate");
         gate.transform.SetParent(maze, false);
         gate.transform.localPosition = new Vector3((g.x1 + g.x2) * 0.5f, (g.y1 + g.y2) * 0.5f, 0);
+        gate.transform.localRotation = Quaternion.Euler(0, 0, Mathf.Atan2(g.y2 - g.y1, g.x2 - g.x1) * Mathf.Rad2Deg);   // anche inclinato
+        float gateLen = Mathf.Sqrt((g.x2 - g.x1) * (g.x2 - g.x1) + (g.y2 - g.y1) * (g.y2 - g.y1));
         Transform bar = Art(gate.transform, "Art", "gate_bar", 6, false);
-        bool vertical = Mathf.Approximately(g.x1, g.x2);
-        if (vertical) bar.localRotation = Quaternion.Euler(0, 0, 90f);
+        bar.localScale = new Vector3(gateLen, 1f, 1f);
         CapsuleCollider2D gateCol = gate.AddComponent<CapsuleCollider2D>();
-        gateCol.size = vertical ? new Vector2(WallT, 1f + WallT) : new Vector2(1f + WallT, WallT);
-        gateCol.direction = vertical ? CapsuleDirection2D.Vertical : CapsuleDirection2D.Horizontal;
+        gateCol.size = new Vector2(gateLen + WallT, WallT);
+        gateCol.direction = CapsuleDirection2D.Horizontal;
 
         // chiave luminosa in un vicolo cieco
         var key = new GameObject("Key").transform;
         key.SetParent(maze, false);
-        Vector2 keyPos = keyAt ?? new Vector2(DoodleSprites.DarkKeyX, DoodleSprites.DarkKeyY);
+        Vector2 keyPos = Warp(warp, keyAt ?? new Vector2(DoodleSprites.DarkKeyX, DoodleSprites.DarkKeyY));
         key.localPosition = new Vector3(keyPos.x, keyPos.y, 0);
         key.localScale = Vector3.one * 0.32f;
         SpriteRenderer halo = Art(key, "Glow", "glow", 4, false).GetComponent<SpriteRenderer>();
@@ -2017,13 +2041,13 @@ public static partial class GotchaProjectBuilder
         halo.transform.localScale = Vector3.one * 2.4f;
         Art(key, "Art", "key", 11, false, new Vector2(0.6f, 0f));
 
-        MazeGoal(maze, exitAt ?? new Vector2(DoodleSprites.DarkExitX, DoodleSprites.DarkExitY));
-        Rigidbody2D ball = MazeBall(maze, new Vector2(-2.2f, -3.0f));
+        MazeGoal(maze, Warp(warp, exitAt ?? new Vector2(DoodleSprites.DarkExitX, DoodleSprites.DarkExitY)));
+        Rigidbody2D ball = MazeBall(maze, Warp(warp, new Vector2(-2.2f, -3.0f)));
         Transform darkness = Art(root.transform, "Darkness", "darkness", 20, false);
         darkness.localScale = Vector3.one * 1.35f;   // zona illuminata più ampia
         var wasps = new List<MazeChaser>();
         if (waspsAt != null)
-            foreach (Vector2 at in waspsAt) wasps.Add(MazeWasp(maze, at, ball, 1.45f, 1.15f));   // lenta: al buio la si deve poter aggirare
+            foreach (Vector2 at in waspsAt) wasps.Add(MazeWasp(maze, Warp(warp, at), ball, 1.45f, 1.15f));   // lenta: al buio la si deve poter aggirare
         SmokeEmitter sparkle = Sparks(root.transform, "Sparkle", new Color(1f, 0.85f, 0.3f));
         SpeechBubble bubble = Bubble(root.transform, new Vector2(1.5f, -4.45f));
         bubble.transform.localScale = Vector3.one * 0.5f;
@@ -4012,7 +4036,7 @@ public static partial class GotchaProjectBuilder
                 })),
             Define("TrapMaze2", "trap_maze_2", "TRAP MAZE 2",
                 "Hug the walls around the holes. Wait for the laser.",
-                BuildTrapMazeLevel("TrapMaze2", "maze_trap2", DoodleSprites.TrapMaze2, DoodleSprites.TrapPits2, DoodleSprites.TrapLasers2, Cell(4, 6))),
+                BuildTrapMazeLevel("TrapMaze2", "maze_trap2", DoodleSprites.TrapMaze2, DoodleSprites.TrapPits2, DoodleSprites.TrapLasers2, Cell(4, 6), DoodleSprites.Trap2Warp)),
             Define("Birthday2", "big_birthday", "BIG BIRTHDAY",
                 "Seven candles. Take a deep breath!",
                 Variant("Birthday", "Birthday2", go =>
@@ -4097,7 +4121,7 @@ public static partial class GotchaProjectBuilder
             Define("DarkMaze2", "darker", "DARKER",
                 "Find the key in the dark. The gate is somewhere up there.",
                 BuildDarkMazeLevel("DarkMaze2", "maze_dark2", DoodleSprites.DarkMaze2, DoodleSprites.DarkGate2,
-                    new Vector2(DoodleSprites.DarkKey2X, DoodleSprites.DarkKey2Y), new Vector2(DoodleSprites.DarkExit2X, DoodleSprites.DarkExit2Y))),
+                    new Vector2(DoodleSprites.DarkKey2X, DoodleSprites.DarkKey2Y), new Vector2(DoodleSprites.DarkExit2X, DoodleSprites.DarkExit2Y), null, DoodleSprites.Dark2Warp)),
             Define("AppleCatch2", "apple_rain", "APPLE RAIN",
                 "Six apples this time, and they fall a bit faster.",
                 Variant("AppleCatch", "AppleCatch2", go =>
@@ -4120,29 +4144,34 @@ public static partial class GotchaProjectBuilder
 
     static GameObject BuildMaze2Level()
     {
-        GameObject prefab = BuildGridMaze("Maze2", "maze_2", DoodleSprites.Maze2, new Vector2(-2.2f, -3.0f), Vector2.zero);
+        MazeWarp w = DoodleSprites.Maze2Warp;   // pareti a zig-zag
+        GameObject prefab = BuildGridMaze("Maze2", "maze_2", DoodleSprites.Warped(DoodleSprites.Maze2, w), Warp(w, new Vector2(-2.2f, -3.0f)), Warp(w, Vector2.zero));
         // ostacoli mobili: tre cancelli sul percorso che si aprono e si chiudono scivolando sopra i muri vicini
         return Tuned(prefab, go =>
         {
             Transform maze = go.transform.Find("Maze");
-            MovingGate(maze, new Vector2(-1.65f, -1.0f), true, new Vector2(0f, -1.0f), 0f);
-            MovingGate(maze, new Vector2(-0.55f, 2.0f), true, new Vector2(0f, -1.0f), 1.3f);
-            MovingGate(maze, new Vector2(2.2f, 0.5f), false, new Vector2(-1.0f, 0f), 2.6f);
+            MovingGate(maze, w, new Vector2(-1.65f, -1.5f), new Vector2(-1.65f, -0.5f), new Vector2(0f, -1.0f), 0f);
+            MovingGate(maze, w, new Vector2(-0.55f, 1.5f), new Vector2(-0.55f, 2.5f), new Vector2(0f, -1.0f), 1.3f);
+            MovingGate(maze, w, new Vector2(1.65f, 0.5f), new Vector2(2.75f, 0.5f), new Vector2(-1.0f, 0f), 2.6f);
         });
     }
 
     /// <summary>Cancello al neon che scivola avanti e indietro (SlidingGate), in coordinate locali del labirinto.</summary>
-    static void MovingGate(Transform maze, Vector2 closedAt, bool vertical, Vector2 openOffset, float phase)
+    static void MovingGate(Transform maze, MazeWarp w, Vector2 from, Vector2 to, Vector2 openOffset, float phase)
     {
+        Vector2 a = Warp(w, from), b = Warp(w, to), mid = (a + b) * 0.5f;
+        Vector2 openAt = Warp(w, (from + to) * 0.5f + openOffset);
+        float len = Vector2.Distance(a, b);
         var g = new GameObject("MovingGate");
         g.transform.SetParent(maze, false);
-        g.transform.localPosition = closedAt;
+        g.transform.localPosition = mid;
+        g.transform.localRotation = Quaternion.Euler(0, 0, Mathf.Atan2(b.y - a.y, b.x - a.x) * Mathf.Rad2Deg);
         Transform art = Art(g.transform, "Art", "gate_bar", 6, false);
-        art.localRotation = Quaternion.Euler(0, 0, vertical ? 90f : 0f);
-        art.localScale = new Vector3(vertical ? 1.0f : 1.1f, 1f, 1f);
+        art.localScale = new Vector3(len, 1f, 1f);
         art.GetComponent<SpriteRenderer>().color = new Color(1f, 0.55f, 0.9f);
         BoxCollider2D col = g.AddComponent<BoxCollider2D>();
-        col.size = vertical ? new Vector2(0.16f, 1.0f) : new Vector2(1.1f, 0.16f);
+        col.size = new Vector2(len, 0.16f);
+        openOffset = openAt - mid;
         g.AddComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
         SlidingGate sg = g.AddComponent<SlidingGate>();
         sg.openOffset = openOffset;
@@ -4471,7 +4500,7 @@ public static partial class GotchaProjectBuilder
     {
         Vector2 Cell(int c, int r) => new Vector2(-2.2f + c * 1.1f, -3.0f + r);
         LevelDefinition Trap(string n, string id, string title, string hint, DoodleSprites.MazeSeg[] segs, float[] pits, float[] lasers) =>
-            Define(n, id, title, hint, BuildTrapMazeLevel(n, "maze_" + n.ToLowerInvariant(), segs, pits, lasers, Cell(4, 6)));
+            Define(n, id, title, hint, BuildTrapMazeLevel(n, "maze_" + n.ToLowerInvariant(), segs, pits, lasers, Cell(4, 6), DoodleSprites.Trap3Warp));   // pareti "a bolle"
         LevelDefinition Dark(string n, string id, string title, string hint, DoodleSprites.MazeSeg[] segs, DoodleSprites.MazeSeg gate, float[] spots, Vector2[] wasps = null) =>
             Define(n, id, title, hint, BuildDarkMazeLevel(n, "maze_" + n.ToLowerInvariant(), segs, gate, new Vector2(spots[0], spots[1]), new Vector2(spots[2], spots[3]), wasps));
         LevelDefinition Sting(string n, string id, string title, string hint, DoodleSprites.MazeSeg[] segs, Vector2 ball, Vector2 goal, Vector2[] wasps, float speed) =>
@@ -4565,9 +4594,9 @@ public static partial class GotchaProjectBuilder
             Define("Spot", "spot_it", "SPOT IT",
                 "Five differences between the two pictures. Tap them! Three wrong taps and you lose.",
                 BuildSpotLevel()),
-            Define("Sheep", "counting_sheep", "COUNTING SHEEP",
-                "Count the sheep that end up in the pen. Some jump back... some change their mind.",
-                BuildSheepLevel(), "fell_asleep"),
+            Define("WhereMouse", "where_mouse", "WHERE'S MOUSE?",
+                "Find the mouse with the RED hat. Pinch to zoom, drag to look around.",
+                BuildWhereMouseLevel()),
             Define("Tightrope", "tightrope", "TIGHTROPE",
                 "He leans, you lean the OTHER way. Watch out for the wind!",
                 BuildTightropeLevel()),
@@ -4589,18 +4618,18 @@ public static partial class GotchaProjectBuilder
                     Tune(Level(go), "maxHops", 7);
                     Tune(Level(go), "hopEvery", 2.5f);
                 })),
-            Define("SnowmanSled", "snowman_skate", "SNOWMAN ON ICE",
-                "Stay in the shade of the tree until sunset. The shade moves with the sun... and ice is slippery!",
-                BuildSnowmanSledLevel(), "growth_spurt"),
+            Define("CardHouse", "card_house", "HOUSE OF CARDS",
+                "Tap to place each card. Hold the phone very still... and wait for the wind to calm down.",
+                BuildCardHouseLevel()),
             Define("PaperPlane", "paper_plane", "PAPER PLANE",
                 "Tilt to pitch the nose: dive to gain speed, climb to spend it. Blow for a push. Every ring!",
                 BuildPaperPlaneLevel()),
             Define("SafeCrack", "safe_cracker", "SAFE CRACKER",
                 "Turn the dial right, left, right. Listen for the CLUNK and stop there.",
                 BuildSafeCrackLevel()),
-            Define("ScreamBird", "scream_bird", "SING, BIRDIE",
-                "This bird flies on your voice. Louder is higher!",
-                BuildScreamBirdLevel(), "space_bird"),
+            Define("Carousel", "carousel", "MERRY-GO-ROUND",
+                "The ride only turns if YOU turn. Spin around with the phone: three turns, then stop.",
+                BuildCarouselLevel(), "dizzy_cat"),
             Define("Slide", "slide_puzzle", "SLIDE PUZZLE",
                 "Tap a tile next to the hole to slide it. Fix the portrait before the cat wakes up!",
                 BuildSlideLevel()),
@@ -4628,9 +4657,9 @@ public static partial class GotchaProjectBuilder
             Define("Sneaky", "sneaky_mouse", "SNEAKY MOUSE",
                 "Drag the mouse to the cheese without being lit by the torch. Furniture casts shadows. Don't run!",
                 BuildSneakyLevel()),
-            Define("Traffic", "traffic_jam", "TRAFFIC JAM",
-                "Slide the cars along their lanes and get the red van out on the right.",
-                BuildTrafficLevel()),
+            Define("Stopwatch", "blind_stopwatch", "BLIND STOPWATCH",
+                "Start, then stop at exactly the time shown. The digits vanish after two seconds!",
+                BuildStopwatchLevel(), "speedrun"),
             Define("Whack", "whack_a_mole", "WHACK-A-MOLE",
                 "Bonk the angry moles (gold = 3). Never the party moles!",
                 BuildWhackLevel(), "cat_bonk"),

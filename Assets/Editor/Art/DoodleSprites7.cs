@@ -326,7 +326,7 @@ namespace Gotcha.EditorArt
         public static DoodleArt Maze4Neon() { return NeonMaze("maze_maze4", Maze4); }
         public static DoodleArt Maze5Neon() { return NeonMaze("maze_maze5", Maze5); }
         public static DoodleArt Maze6Neon() { return NeonMaze("maze_maze6", Maze6); }
-        public static DoodleArt TrapMaze3Neon() { return NeonMaze("maze_trapmaze3", TrapMaze3); }
+        public static DoodleArt TrapMaze3Neon() { return NeonMaze("maze_trapmaze3", Warped(TrapMaze3, Trap3Warp)); }
         public static DoodleArt TrapMaze4Neon() { return NeonMaze("maze_trapmaze4", TrapMaze4); }
         public static DoodleArt TrapMaze5Neon() { return NeonMaze("maze_trapmaze5", TrapMaze5); }
         public static DoodleArt DarkMaze3Neon() { return NeonMaze("maze_darkmaze3", DarkMaze3); }
