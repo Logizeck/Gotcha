@@ -251,6 +251,8 @@ public static partial class GotchaProjectBuilder
         ClipRecorder recorder = new GameObject("ClipRecorder").AddComponent<ClipRecorder>();
         recorder.watermark = sprites["app_icon"].texture;   // il logo nell'angolo dei video condivisi
 
+        BuildTitleLogo();
+
         var musicGo = new GameObject("Music", typeof(AudioSource));
         MusicPlayer music = musicGo.AddComponent<MusicPlayer>();
         music.soundtrack = Soundtrack();
@@ -541,6 +543,47 @@ public static partial class GotchaProjectBuilder
         return AssetDatabase.LoadAssetAtPath<AudioClip>(path);
     }
 
+    /// <summary>Logo animato del titolo: "G!" al neon con le palline che rotolano inclinando il telefono, su fondo nero.</summary>
+    static void BuildTitleLogo()
+    {
+        var root = new GameObject("TitleLogo");
+        TitleLogo logo = root.AddComponent<TitleLogo>();
+        var content = new GameObject("Content");
+        content.transform.SetParent(root.transform, false);
+        Bar(content.transform, "Black", Vector2.zero, new Vector2(14f, 20f), Color.black, -100);
+        Transform maze = Child(content.transform, "Logo", new Vector2(0f, 2.75f)).transform;
+        maze.localScale = Vector3.one * 1.15f;
+        Art(maze, "Neon", "title_logo", -90, false);
+        foreach (float[] loop in DoodleSprites.TitleLogoLoops())
+        {
+            EdgeCollider2D e = maze.gameObject.AddComponent<EdgeCollider2D>();
+            var pts = new Vector2[loop.Length / 2 + 1];
+            for (int i = 0; i < loop.Length / 2; i++) pts[i] = new Vector2(loop[i * 2], loop[i * 2 + 1]);
+            pts[pts.Length - 1] = pts[0];
+            e.points = pts;
+        }
+        var balls = new List<Rigidbody2D>();
+        foreach (Vector2 at in new[] { new Vector2(-0.72f - 0.97f, 0f), new Vector2(1.38f, 0.6f) })
+        {
+            var b = new GameObject("Ball");
+            b.transform.SetParent(maze, false);
+            b.transform.localPosition = at;
+            b.transform.localScale = Vector3.one * 0.25f;
+            SpriteRenderer sr = b.AddComponent<SpriteRenderer>();
+            sr.sprite = sprites["chrome_ball"];
+            sr.sortingOrder = -80;
+            b.AddComponent<CircleCollider2D>().radius = 0.5f;
+            Rigidbody2D rb = b.AddComponent<Rigidbody2D>();
+            rb.gravityScale = 0f;
+            rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+            rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+            balls.Add(rb);
+        }
+        logo.content = content;
+        logo.balls = balls.ToArray();
+        content.SetActive(false);
+    }
+
     /// <summary>Brano di sottofondo in Assets/Audio/Music (compresso Vorbis, caricato in memoria per loop senza buchi).</summary>
     static AudioClip Music(string name)
     {
@@ -551,8 +594,13 @@ public static partial class GotchaProjectBuilder
         settings.loadType = AudioClipLoadType.CompressedInMemory;
         settings.compressionFormat = AudioCompressionFormat.Vorbis;
         settings.quality = 0.6f;
+#if UNITY_2022_2_OR_NEWER
+        settings.preloadAudioData = true;
+#else
+        importer.preloadAudioData = true;
+#endif
         importer.defaultSampleSettings = settings;
-        importer.loadInBackground = true;
+        importer.loadInBackground = false;   // pronta subito: al primo avvio la musica del titolo parte senza attese
         importer.SaveAndReimport();
         return AssetDatabase.LoadAssetAtPath<AudioClip>(path);
     }

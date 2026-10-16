@@ -30,7 +30,7 @@ namespace Gotcha.Levels
         [SerializeField] TextMesh countdown;
         [SerializeField] SpeechBubble bubble;
         [SerializeField] float coverRadius = 0.85f;
-        [SerializeField] float heatSeconds = 7f;      // di sole pieno prima del punto di non ritorno
+        [SerializeField] float heatSeconds = 5f;      // di sole pieno prima del punto di non ritorno
         [SerializeField] float sunsetAfter = 14f;
         [SerializeField] float wind = 0.32f;
         [SerializeField] float horizonY = -4.2f;      // dove spariscono sole e luna (dietro le colline)
@@ -105,7 +105,13 @@ namespace Gotcha.Levels
             cloud.enabled = false;
             if (countdown != null) countdown.text = "";
             if (sweat != null) sweat.Stop();
-            if (meltdown != null) yield return meltdown.Play(new List<Transform>(eyes), new List<Transform>(attached));
+            if (meltdown != null)
+            {
+                // con un limite di tempo: anche se l'animazione si inceppasse, l'Easter egg viene comunque assegnato
+                StartCoroutine(meltdown.Play(new List<Transform>(eyes), new List<Transform>(attached)));
+                yield return null;
+                for (float t = 0f; t < 10f && meltdown.Running; t += Time.deltaTime) yield return null;
+            }
             if (ClipRecorder.Instance != null) ClipRecorder.Instance.Stop();
             FailWithEgg(eggId);
         }

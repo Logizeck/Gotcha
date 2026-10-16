@@ -84,6 +84,7 @@ namespace Gotcha.Levels
 
         IEnumerator Crash()
         {
+            Haptics.Medium();
             done = true;
             if (bubble != null) bubble.Show("Crumple...");
             Vector3 s = plane.localScale;

@@ -117,6 +117,7 @@ namespace Gotcha.Levels
 
         IEnumerator Explode()
         {
+            Haptics.Heavy();
             if (display != null) display.text = "0.0";
             if (bomb != null) bomb.SetActive(false);
             if (sweat != null) sweat.Stop();

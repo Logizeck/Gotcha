@@ -79,6 +79,7 @@ namespace Gotcha.Levels
 
         IEnumerator Zap()
         {
+            Haptics.Medium();
             done = true;
             Sfx.Play(this, "buzz", 1f);
             if (bubble != null) bubble.Show("BZZZT!");

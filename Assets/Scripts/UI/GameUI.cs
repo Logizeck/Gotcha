@@ -16,6 +16,10 @@ namespace Gotcha.UI
     /// </summary>
     public class GameUI : MonoBehaviour
     {
+        static GameUI current;
+        /// <summary>La schermata del titolo è aperta (il logo animato si mostra solo lì).</summary>
+        public static bool TitleShown => current != null && current.titlePanel != null && current.titlePanel.activeSelf;
+
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
         public const string Version = "0.28";
 
@@ -62,6 +66,7 @@ namespace Gotcha.UI
         float brokenAt;
         void Awake()
         {
+            current = this;
             if (flow == null) flow = GameFlow.Instance;
             Font fallback = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             displayFont = Resources.Load<Font>("Fonts/LuckiestGuy-Regular") ?? fallback;
@@ -195,6 +200,7 @@ namespace Gotcha.UI
             settingsPanel.SetActive(false);
             RefreshTitle();
             titlePanel.SetActive(true);
+            if (MusicPlayer.Instance != null) MusicPlayer.Instance.Play(MusicTrack.Title);
         }
 
         void RefreshTitle()
@@ -343,8 +349,10 @@ namespace Gotcha.UI
 
         void RebuildLevelList()
         {
-            for (int i = pagesContent.childCount - 1; i >= 0; i--) Destroy(pagesContent.GetChild(i).gameObject);
-            for (int i = pageDots.childCount - 1; i >= 0; i--) Destroy(pageDots.GetChild(i).gameObject);
+            // Destroy agisce solo a fine frame: prima si staccano i figli, altrimenti i puntini vecchi
+            // (ancora presenti) vengono contati nell'impaginazione e quelli nuovi finiscono spostati
+            ClearChildren(pagesContent);
+            ClearChildren(pageDots);
 
             int count = flow.LevelCount;
             int pages = Mathf.Max(1, (count + LevelsPerPage - 1) / LevelsPerPage);
@@ -368,6 +376,16 @@ namespace Gotcha.UI
             int current = Mathf.Max(0, menuFromTitle ? flow.ResumeIndex : flow.CurrentIndex) / LevelsPerPage;
             pager.SetPage(current, true);
             LayoutDots();
+        }
+
+        static void ClearChildren(Transform parent)
+        {
+            for (int i = parent.childCount - 1; i >= 0; i--)
+            {
+                GameObject child = parent.GetChild(i).gameObject;
+                child.transform.SetParent(null, false);
+                Destroy(child);
+            }
         }
 
         RectTransform LevelCell(Transform page, int index, bool open)
@@ -412,14 +430,17 @@ namespace Gotcha.UI
         void LayoutDots()
         {
             int n = pageDots.childCount;
+            // passo adattato allo spazio tra le frecce: i puntini non escono mai dal loro riquadro
+            float width = pageDots.rect.width > 1f ? pageDots.rect.width : 400f;
+            float step = Mathf.Min(50f, width / Mathf.Max(1, n));
             for (int i = 0; i < n; i++)
             {
                 RectTransform d = (RectTransform)pageDots.GetChild(i);
                 bool on = pager != null && i == pager.Page;
-                float size = on ? 34f : 24f;
+                float size = Mathf.Min(on ? 34f : 24f, step * (on ? 0.9f : 0.65f));
                 d.anchorMin = d.anchorMax = new Vector2(0.5f, 0.5f);
                 d.sizeDelta = new Vector2(size, size);
-                d.anchoredPosition = new Vector2((i - (n - 1) * 0.5f) * 50f, 0f);
+                d.anchoredPosition = new Vector2((i - (n - 1) * 0.5f) * step, 0f);
                 d.GetComponent<Image>().color = on ? Accent : new Color(Ink.r, Ink.g, Ink.b, 0.3f);
             }
         }
@@ -592,23 +613,17 @@ namespace Gotcha.UI
             // Schermata del titolo (sopra barra e cuori, sotto gli altri pannelli)
             RectTransform title = CreateRect("TitleScreen", safeRoot.parent, Vector2.zero, Vector2.one);
             Image paper = title.gameObject.AddComponent<Image>();
-            paper.color = new Color(1f, 0.97f, 0.9f);
+            paper.color = new Color(0f, 0f, 0f, 0f);   // trasparente: dietro c'è il logo animato su fondo nero (TitleLogo)
             titlePanel = title.gameObject;
             RectTransform titleArea = CreateRect("Content", title, Vector2.zero, Vector2.one);
             titleArea.anchorMin = safeRoot.anchorMin;
             titleArea.anchorMax = safeRoot.anchorMax;
-            if (logoSprite != null)
-            {
-                Image logo = CreateRect("Logo", titleArea, new Vector2(0.24f, 0.62f), new Vector2(0.76f, 0.9f)).gameObject.AddComponent<Image>();
-                logo.sprite = logoSprite;
-                logo.preserveAspect = true;
-                logo.raycastTarget = false;
-            }
+            // il logo "G!" è nel mondo (TitleLogo), sopra la scritta
             Text big = CreateText(titleArea, "GOTCHA!", 150, Accent, FontStyle.Bold);
-            Place(big.transform, new Vector2(0.05f, logoSprite != null ? 0.5f : 0.6f), new Vector2(0.95f, logoSprite != null ? 0.62f : 0.8f));
+            Place(big.transform, new Vector2(0.05f, 0.5f), new Vector2(0.95f, 0.62f));
             big.transform.localRotation = Quaternion.Euler(0, 0, 4f);
             big.gameObject.AddComponent<Shadow>().effectColor = Ink;
-            Text tagline = CreateText(titleArea, "Nothing is what it seems.", 50, Ink, FontStyle.Normal);
+            Text tagline = CreateText(titleArea, "Nothing is what it seems.", 50, Color.white, FontStyle.Normal);
             Place(tagline.transform, new Vector2(0.1f, 0.45f), new Vector2(0.9f, 0.5f));
             Button cont = CreateButton(titleArea, "CONTINUE", Dark, ContinueGame);
             continueLabel = cont.GetComponentInChildren<Text>();

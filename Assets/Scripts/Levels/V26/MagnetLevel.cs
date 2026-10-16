@@ -102,6 +102,7 @@ namespace Gotcha.Levels
 
         IEnumerator Snap()
         {
+            Haptics.Medium();
             done = true;
             Sfx.Play(this, "bonk", 1f);
             if (bubble != null) bubble.Show("CHOMP! The line snapped!");

@@ -51,6 +51,18 @@ namespace Gotcha.Core
 
         void OnDestroy() { if (Instance == this) Instance = null; }
 
+        // Al primo avvio Android mostra la richiesta del microfono: l'app perde il fuoco e l'audio può restare
+        // fermo. Al ritorno si riparte (e si riparte anche se la clip non era ancora caricata al primo Play).
+        void OnApplicationFocus(bool focus) { if (focus) Resume(); }
+        void OnApplicationPause(bool paused) { if (!paused) Resume(); }
+
+        void Resume()
+        {
+            if (source == null || source.clip == null || AudioListener.pause) return;
+            if (source.clip.loadState == AudioDataLoadState.Unloaded) source.clip.LoadAudioData();
+            if (!source.isPlaying) source.Play();
+        }
+
         public AudioClip Clip(MusicTrack track)
         {
             AudioClip c;
@@ -108,7 +120,11 @@ namespace Gotcha.Core
             foreach (float f in ducks.Values) factor = Mathf.Min(factor, f);
             source.volume = volume * factor * fade;
             source.mute = Muted;
-            if (!source.isPlaying && source.clip != null && !AudioListener.pause) source.Play();
+            if (!source.isPlaying && source.clip != null && !AudioListener.pause && source.clip.loadState != AudioDataLoadState.Loading)
+            {
+                if (source.clip.loadState == AudioDataLoadState.Unloaded) source.clip.LoadAudioData();
+                else source.Play();
+            }
         }
 
         /// <summary>Abbassa la musica finché <paramref name="owner"/> non chiama Unduck (o viene distrutto).</summary>

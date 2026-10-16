@@ -94,6 +94,7 @@ namespace Gotcha.Levels
 
         IEnumerator Zap()
         {
+            Haptics.Medium();
             over = true;
             ball.simulated = false;
             Transform t = ball.transform;

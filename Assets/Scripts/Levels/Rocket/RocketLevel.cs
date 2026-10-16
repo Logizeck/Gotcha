@@ -137,6 +137,7 @@ namespace Gotcha.Levels
 
         IEnumerator Launch()
         {
+            Haptics.Heavy();
             launched = true;
             if (countdown != null) { countdown.text = "LIFT OFF!"; countdown.color = new Color(0.5f, 1f, 0.55f); }
             if (flame != null) flame.gameObject.SetActive(true);

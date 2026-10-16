@@ -49,6 +49,8 @@ namespace Gotcha.Levels
         Vector3 bubbleHome;
         float remaining, waiting;
         bool done;
+        int stings;
+        float hurt;
 
         Vector2 CatPoint => (Vector2)cat.position + new Vector2(-0.4f, 0.2f);
 
@@ -109,9 +111,18 @@ namespace Gotcha.Levels
 
             remaining -= Time.deltaTime;
             if (countdown != null) countdown.text = Mathf.CeilToInt(Mathf.Max(0f, remaining)).ToString();
+            hurt -= Time.deltaTime;
             foreach (Bug b in bugs)
             {
-                if (MoveBug(b)) { done = true; StartCoroutine(Stung()); return; }
+                if (!MoveBug(b) || hurt > 0f) continue;
+                stings++;
+                Haptics.Medium();
+                if (stings >= 2) { done = true; StartCoroutine(Stung()); return; }
+                // prima puntura: il gatto salta, la vespa viene ricacciata al suo posto
+                hurt = 1.2f;
+                b.t.position = new Vector3(b.home.x, b.home.y, b.t.position.z);
+                b.dir = -b.dir;
+                StartCoroutine(Ouch());
             }
             if (remaining <= 0f) { done = true; StartCoroutine(Survived()); }
         }
@@ -168,6 +179,17 @@ namespace Gotcha.Levels
         {
             yield return new WaitForSeconds(0.6f);
             if (bubble != null && !done) { bubble.Hide(); bubble.transform.position = bubbleHome; }
+        }
+
+        IEnumerator Ouch()
+        {
+            if (bubble != null) { bubble.transform.position = bubbleHome; bubble.Show("OUCH! (one more and I'm leaving)", true); }
+            if (catEyesOpen != null) catEyesOpen.SetActive(true);
+            Vector3 start = cat.localPosition;
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.35f) { cat.localPosition = start + Vector3.up * Mathf.Sin(k * Mathf.PI) * 0.35f; yield return null; }
+            cat.localPosition = start;
+            yield return new WaitForSeconds(0.8f);
+            if (!done) { if (catEyesOpen != null) catEyesOpen.SetActive(false); if (bubble != null) bubble.Hide(); }
         }
 
         IEnumerator Stung()

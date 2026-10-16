@@ -50,11 +50,11 @@ namespace Gotcha.Components
         }
 
         /// <summary>Breve vibrazione del telefono (solo su dispositivo).</summary>
-        public static void Buzz()
-        {
-#if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
-            Handheld.Vibrate();
+        public static void Buzz() { Haptics.Vibrate(60); }
+
+#if UNITY_ANDROID && !UNITY_EDITOR
+        // riferimento a Handheld.Vibrate: così Unity aggiunge il permesso VIBRATE al manifest
+        static void KeepVibratePermission() { Handheld.Vibrate(); }
 #endif
-        }
     }
 }

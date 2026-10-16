@@ -68,6 +68,7 @@ namespace Gotcha.Levels
 
         IEnumerator Break(Vector2 at)
         {
+            Haptics.Medium();
             cookie.simulated = false;
             cookie.gameObject.SetActive(false);
             if (brokenCookie != null)

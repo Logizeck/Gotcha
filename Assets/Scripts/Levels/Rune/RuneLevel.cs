@@ -158,6 +158,7 @@ namespace Gotcha.Levels
 
         IEnumerator Kaboom()
         {
+            Haptics.Heavy();
             done = true;
             if (smoke != null) { smoke.puffsPerSecond = 40f; smoke.startScale = 1.2f; smoke.Play(); }
             if (bubble != null) bubble.Show("KABOOM! *cough*");

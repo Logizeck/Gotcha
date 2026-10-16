@@ -20,8 +20,8 @@ namespace Gotcha.Levels
         [SerializeField] float blowThreshold = 0.3f;
         [SerializeField] float blowPerCandle = 0.22f;
         [SerializeField] Transform[] candles;
-        [SerializeField] float stormLevel = 0.9f;      // soffio "uragano"...
-        [SerializeField] float stormSeconds = 0.45f;   // ...tenuto così a lungo
+        [SerializeField] float stormLevel = 0.7f;      // soffio "uragano"...
+        [SerializeField] float stormSeconds = 0.5f;    // ...tenuto così a lungo (in totale, con piccole pause)
         [SerializeField] string eggId = "candle_storm";
 
         int lit;
@@ -54,7 +54,7 @@ namespace Gotcha.Levels
             if (Input.GetKey(KeyCode.B)) level = 0.6f;
             if (Input.GetKey(KeyCode.N)) level = 1f;
 #endif
-            storm = level > stormLevel ? storm + Time.deltaTime : Mathf.Max(0f, storm - Time.deltaTime);
+            storm = level > stormLevel ? storm + Time.deltaTime : Mathf.Max(0f, storm - Time.deltaTime * 0.25f);   // il soffio del microfono è a scatti: non si azzera subito
             if (storm >= stormSeconds && candles != null && candles.Length > 0) { done = true; StartCoroutine(Hurricane()); return; }
             // le fiamme tremano e si piegano col soffio
             for (int i = 0; i < flames.Length; i++)

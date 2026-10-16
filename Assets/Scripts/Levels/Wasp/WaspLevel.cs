@@ -36,7 +36,7 @@ namespace Gotcha.Levels
         [SerializeField] float attackEveryMax = 4.5f;
         [SerializeField] float attackScale = 3.2f;
         [Tooltip("Punture che si possono prendere: alla successiva il livello è perso (0 = infinite). Colpire la vespa mentre si lancia la ferma.")]
-        [SerializeField] int maxStings = 0;
+        [SerializeField] int maxStings = 2;
 
         [Header("Paletta")]
         [SerializeField] Transform swatter;           // pivot all'impugnatura, rete a +swatterReach
@@ -143,6 +143,7 @@ namespace Gotcha.Levels
             }
             // puntura!
             stings++;
+            Haptics.Medium();
             if (stingFlash != null) StartCoroutine(Flash());
             bool tooMany = maxStings > 0 && stings >= maxStings;
             if (bubble != null)
@@ -281,6 +282,7 @@ namespace Gotcha.Levels
 
         IEnumerator Fall()
         {
+            Haptics.Medium();
             state = State.Falling;
             if (buzz != null) buzz.Stop();
             if (alive != null) alive.SetActive(false);

@@ -22,7 +22,9 @@ namespace Gotcha.Levels
         [SerializeField] MazeChaser[] wasps;
 
         GoalZone goal;
-        bool hasKey, over;
+        bool hasKey, over, hurting;
+        int stings;
+        Vector3[] waspHome;
         Vector3 keyScale, darkScale = Vector3.one;
 
         public override void OnLevelStart()
@@ -32,6 +34,11 @@ namespace Gotcha.Levels
             if (key != null) keyScale = key.localScale;
             if (bubble != null) bubble.Hide();
             if (darkness != null) darkScale = darkness.localScale;
+            if (wasps != null)
+            {
+                waspHome = new Vector3[wasps.Length];
+                for (int i = 0; i < wasps.Length; i++) waspHome[i] = wasps[i].transform.position;
+            }
             if (wasps != null)
                 foreach (MazeChaser w in wasps)
                 {
@@ -56,9 +63,29 @@ namespace Gotcha.Levels
 
         void OnStung(MazeChaser w)
         {
-            if (over || IsFinished) return;
+            if (over || hurting || IsFinished) return;
+            stings++;
+            Haptics.Medium();
+            if (stings < 2) { StartCoroutine(Ouch()); return; }   // la prima puntura fa solo male
             over = true;
             StartCoroutine(Stung());
+        }
+
+        IEnumerator Ouch()
+        {
+            hurting = true;
+            if (bubble != null) { bubble.Show("OUCH! One more and it's over!", true); }
+            for (int i = 0; i < wasps.Length; i++) { wasps[i].Frozen = true; wasps[i].transform.position = waspHome[i]; }
+            SpriteRenderer sr = ball.GetComponent<SpriteRenderer>();
+            for (float k = 0f; k < 1.6f; k += Time.deltaTime)
+            {
+                if (sr != null) sr.color = Mathf.Repeat(k * 8f, 1f) < 0.5f ? new Color(1f, 0.5f, 0.5f) : Color.white;
+                yield return null;
+            }
+            if (sr != null) sr.color = Color.white;
+            if (bubble != null && !over) bubble.Hide();
+            if (!over) foreach (MazeChaser x in wasps) x.Frozen = false;
+            hurting = false;
         }
 
         IEnumerator Stung()

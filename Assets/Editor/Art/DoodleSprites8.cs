@@ -447,24 +447,54 @@ namespace Gotcha.EditorArt
         /// <summary>Ragazza bellissima che saluta (base in 0,0, alta circa 2.1).</summary>
         public static DoodleArt Lady()
         {
-            var p = new DoodlePainter(-0.8f, -0.05f, 0.8f, 2.25f, 120) { Ink = 0.04f };
-            Rgba skin = Rgba.Hex("FFD9C2"), skinShade = Rgba.Hex("F2B79C"), hair = Rgba.Hex("6B3A1E"), hairShade = Rgba.Hex("4A2512");
-            Body(p, Sd.Union(Sd.Ellipse(0, 1.6f, 0.42f, 0.52f), Sd.Box(0, 1.05f, 0.45f, 0.45f, 0.2f)), hair, hairShade);   // capelli lunghi
-            Body(p, Sd.Polygon(-0.55f, 0f, 0.55f, 0f, 0.3f, 1.0f, -0.3f, 1.0f), Rgba.Hex("E8433F"), Rgba.Hex("B92E2A"));   // vestito
-            Body(p, Sd.Box(0, 1.05f, 0.08f, 0.1f), skin, skinShade);
-            Body(p, Sd.Ellipse(0, 1.48f, 0.3f, 0.36f), skin, skinShade);
-            Body(p, Sd.Intersect(Sd.Ellipse(0.02f, 1.78f, 0.34f, 0.2f), Sd.Box(0, 1.85f, 0.4f, 0.16f)), hair, hairShade);  // frangia
+            // modella glamour: abito da sera rosso lungo e aderente, capelli biondi mossi sulla spalla, trucco da diva
+            var p = new DoodlePainter(-0.8f, -0.05f, 0.8f, 2.3f, 260) { Ink = 0.022f };
+            Rgba skin = Rgba.Hex("FFDCC8"), skinShade = Rgba.Hex("EFB79E");
+            Rgba hair = Rgba.Hex("F2C14E"), hairShade = Rgba.Hex("C98E2A");
+            Rgba gown = Rgba.Hex("D3123A"), gownShade = Rgba.Hex("8E0A26");
+            // capelli dietro (lunghi fino a metà schiena, mossi)
+            Sdf back = Sd.Union(Sd.Ellipse(0.0f, 1.9f, 0.27f, 0.3f), Sd.Union(Sd.Ellipse(-0.17f, 1.55f, 0.17f, 0.36f), Sd.Ellipse(0.2f, 1.5f, 0.15f, 0.36f)));
+            Body(p, back, hair, hairShade);
+            // braccia (una sul fianco, una che saluta) e busto, sotto l'abito
+            p.Shape(Sd.Union(Sd.Capsule(-0.2f, 1.6f, -0.37f, 1.3f, 0.045f), Sd.Capsule(-0.37f, 1.3f, -0.17f, 1.1f, 0.04f)), skin, 0.022f);
+            p.Shape(Sd.Union(Sd.Capsule(0.2f, 1.6f, 0.42f, 1.84f, 0.045f), Sd.Capsule(0.42f, 1.84f, 0.48f, 2.08f, 0.04f)), skin, 0.022f);
+            p.Shape(Sd.Ellipse(0.5f, 2.13f, 0.055f, 0.07f), skin, 0.02f);
+            p.Fill(Sd.Circle(0.45f, 1.92f, 0.03f), Gold);                                             // braccialetto
+            Body(p, Sd.Union(Sd.Box(0, 1.56f, 0.22f, 0.08f, 0.07f), Sd.Box(0, 1.7f, 0.05f, 0.1f)), skin, skinShade);
+            // abito da sera: corpetto a cuore, vita stretta, gonna lunga che si allarga e fa strascico
+            Sdf dress = Sd.Polygon(-0.2f, 1.5f, -0.12f, 1.25f, -0.19f, 1.02f, -0.36f, 0.32f, -0.44f, 0.02f, 0.56f, 0.02f, 0.38f, 0.3f, 0.2f, 1.02f, 0.12f, 1.25f, 0.2f, 1.5f, 0.1f, 1.53f, 0f, 1.47f, -0.1f, 1.53f);
+            Body(p, dress, gown, gownShade);
+            p.Line(Rgba.Hex("FF7A93", 0.8f), 0.02f, -0.08f, 1.3f, -0.12f, 0.9f, -0.2f, 0.3f);     // riflessi del raso
+            p.Line(Rgba.Hex("FF7A93", 0.6f), 0.015f, 0.1f, 1.0f, 0.18f, 0.5f, 0.3f, 0.1f);
+            p.InkLine(0.012f, 0.08f, 0.7f, 0.14f, 0.02f);                                            // spacco della gonna
+            p.Line(Gold, 0.01f, -0.055f, 1.66f, 0f, 1.6f, 0.055f, 1.66f);                            // collana
+            p.Shape(Sd.Circle(0f, 1.585f, 0.02f), Rgba.Hex("7FD3FF"), 0.008f);                         // ciondolo
+            // viso
+            Body(p, Sd.Ellipse(0, 1.9f, 0.155f, 0.2f), skin, skinShade);
             foreach (float sx in new[] { -1f, 1f })
             {
-                p.Shape(Sd.Ellipse(sx * 0.11f, 1.5f, 0.06f, 0.08f), Rgba.White, 0.018f);
-                p.Fill(Sd.Circle(sx * 0.11f, 1.49f, 0.04f), Rgba.Hex("3B7A57"));
-                p.InkLine(0.018f, sx * 0.05f, 1.58f, sx * 0.11f, 1.6f, sx * 0.18f, 1.58f, sx * 0.21f, 1.61f);   // ciglia
-                p.Fill(Sd.Ellipse(sx * 0.17f, 1.38f, 0.06f, 0.035f), Rgba.Hex("FF9BB0", 0.7f));                  // guance
+                float ex = sx * 0.065f, ey = 1.925f;
+                p.Fill(Sd.Ellipse(ex, ey + 0.022f, 0.055f, 0.03f), Rgba.Hex("C77BD9", 0.45f));        // ombretto
+                p.Fill(Sd.Ellipse(ex, ey, 0.044f, 0.024f), Rgba.White);
+                p.Fill(Sd.Circle(ex + sx * 0.004f, ey + 0.002f, 0.02f), Rgba.Hex("2E7FD1"));
+                p.Fill(Sd.Circle(ex + sx * 0.004f, ey + 0.002f, 0.009f), Ink);
+                p.Fill(Sd.Circle(ex + sx * 0.01f, ey + 0.01f, 0.005f), Rgba.White);
+                // palpebra socchiusa (sguardo languido) con l'eyeliner e la codina
+                p.Fill(Sd.Intersect(Sd.Ellipse(ex, ey + 0.004f, 0.047f, 0.028f), Sd.Box(ex, ey + 0.03f, 0.06f, 0.02f)), Rgba.Lerp(skin, Rgba.Hex("C77BD9"), 0.35f));
+                p.InkLine(0.009f, ex - sx * 0.045f, ey + 0.006f, ex, ey + 0.011f, ex + sx * 0.045f, ey + 0.008f, ex + sx * 0.066f, ey + 0.022f);
+                for (int i = 0; i < 3; i++) p.InkLine(0.004f, ex + sx * (0.012f + i * 0.014f), ey + 0.011f, ex + sx * (0.018f + i * 0.02f), ey + 0.028f);
+                p.InkLine(0.005f, sx * 0.03f, 2.0f, sx * 0.075f, 2.015f, sx * 0.115f, 2.005f);        // sopracciglio sottile e arcuato
+                p.Fill(Sd.Ellipse(sx * 0.095f, 1.86f, 0.035f, 0.018f), Rgba.Hex("FF8FA8", 0.5f));     // fard
             }
-            p.Shape(Sd.Intersect(Sd.Ellipse(0, 1.3f, 0.09f, 0.06f), Sd.Box(0, 1.27f, 0.1f, 0.04f)), Rgba.Hex("E23B5A"), 0.015f);   // sorriso
-            // braccio che saluta
-            p.Shape(Sd.Capsule(0.32f, 0.85f, 0.62f, 1.45f, 0.07f), skin, 0.03f);
-            p.Shape(Sd.Circle(0.64f, 1.5f, 0.09f), skin, 0.025f);
+            p.Shape(Sd.Circle(0.158f, 1.85f, 0.02f), Gold, 0.006f);                                 // orecchino
+            p.InkLine(0.005f, 0.008f, 1.895f, 0.015f, 1.862f, 0.002f, 1.855f);                      // naso
+            p.Fill(Sd.Union(Sd.Ellipse(-0.017f, 1.81f, 0.022f, 0.011f), Sd.Ellipse(0.017f, 1.81f, 0.022f, 0.011f)), Rgba.Hex("E0123A"));   // labbra rosse
+            p.Fill(Sd.Ellipse(0, 1.8f, 0.03f, 0.011f), Rgba.Hex("C20E32"));
+            p.Fill(Sd.Ellipse(-0.008f, 1.798f, 0.01f, 0.004f), Rgba.White.WithAlpha(0.6f));
+            // ciuffo di lato e onde che ricadono sulla spalla
+            Body(p, Sd.Intersect(Sd.Ellipse(-0.05f, 2.05f, 0.2f, 0.11f), Sd.Box(0, 2.11f, 0.25f, 0.09f)), hair, hairShade);
+            Body(p, Sd.Union(Sd.Ellipse(-0.155f, 1.97f, 0.055f, 0.14f), Sd.Union(Sd.Ellipse(-0.18f, 1.75f, 0.07f, 0.15f), Sd.Ellipse(-0.16f, 1.56f, 0.06f, 0.12f))), hair, hairShade);
+            p.Line(hairShade, 0.01f, -0.18f, 1.9f, -0.15f, 1.75f, -0.19f, 1.6f);
             return new DoodleArt("lady", p);
         }
 

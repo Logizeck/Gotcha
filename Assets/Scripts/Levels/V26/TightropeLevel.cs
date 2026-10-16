@@ -67,6 +67,7 @@ namespace Gotcha.Levels
 
         IEnumerator Fall()
         {
+            Haptics.Medium();
             done = true;
             if (bubble != null) bubble.Show("AAAAAH!", true);
             Vector3 from = acrobat.position;

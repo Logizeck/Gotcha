@@ -100,6 +100,7 @@ namespace Gotcha.Levels
 
         IEnumerator Pop()
         {
+            Haptics.Medium();
             done = true;
             balloon.gameObject.SetActive(false);
             sfx.PlayOneShot(Noise("pop", 0.25f, 0.9f, 0.05f));

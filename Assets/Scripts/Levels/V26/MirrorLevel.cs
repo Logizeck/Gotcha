@@ -23,8 +23,8 @@ namespace Gotcha.Levels
         [SerializeField] TextMesh display;
         [SerializeField] SmokeEmitter steam;
         [SerializeField] SpeechBubble bubble;
-        [SerializeField] float fogRise = 1.1f, fogFall = 0.22f, blowLevel = 0.25f;
-        [SerializeField] float eggSeconds = 7f;
+        [SerializeField] float fogRise = 1.1f, fogFall = 0.22f, blowLevel = 0.2f;
+        [SerializeField] float eggSeconds = 5f;
         [SerializeField] string eggId = "bad_breath";
 
         string secret, typed = "";
@@ -62,7 +62,7 @@ namespace Gotcha.Levels
             float mic = Inputs.Mic(this);
             bool blowing = mic > blowLevel;
             misty = Mathf.Clamp01(misty + (blowing ? fogRise : -fogFall) * Time.deltaTime);
-            blowingFor = blowing ? blowingFor + Time.deltaTime : 0f;
+            blowingFor = blowing ? blowingFor + Time.deltaTime : Mathf.Max(0f, blowingFor - Time.deltaTime * 0.3f);   // il fiato va a scatti: le pausette non azzerano
             if (steam != null) { if (blowing && !steam.IsPlaying) steam.Play(); else if (!blowing && steam.IsPlaying) steam.Stop(); }
             Apply();
             if (blowingFor > eggSeconds) { StartCoroutine(BadBreath()); return; }
