@@ -66,29 +66,51 @@ namespace Gotcha.EditorArt
             return (float)Math.Sqrt(px * px + py * py);
         }
 
+        /// <summary>
+        /// Distanza dal tubo più vicino e colore "mescolato": vicino a una giunzione tra tubi di colori diversi i colori
+        /// sfumano l'uno nell'altro (peso esponenziale sulla differenza di distanza) invece di tagliarsi di netto.
+        /// </summary>
+        static Rgba BlendedTube(IList<MazeSeg> segs, float x, float y, out float dmin)
+        {
+            const float blend = 0.2f;   // unità: lunghezza della sfumatura attorno alla giunzione
+            dmin = float.MaxValue;
+            int n = segs.Count;
+            var d = new float[n];
+            for (int i = 0; i < n; i++) { d[i] = SegDistance(segs[i], x, y); if (d[i] < dmin) dmin = d[i]; }
+            float r = 0f, g = 0f, b = 0f, wsum = 0f;
+            for (int i = 0; i < n; i++)
+            {
+                float w = (float)Math.Exp(-(d[i] - dmin) / blend * 1.6f);
+                if (w < 0.002f) continue;
+                Rgba c = segs[i].color;
+                r += c.r * w; g += c.g * w; b += c.b * w; wsum += w;
+            }
+            return new Rgba(r / wsum, g / wsum, b / wsum, 1f);
+        }
+
         /// <summary>Stessi tubi al neon del livello 2 (nucleo chiaro, corpo colorato, alone) per una lista di segmenti.</summary>
         static void NeonTubes(DoodlePainter p, Sdf area, IList<MazeSeg> segs)
         {
             const float glowReach = 0.17f;
-            foreach (MazeSeg s in segs)
+            // alone: un solo strato, col colore mescolato (alle giunzioni non si sommano due aloni di colori diversi)
+            p.FillFunc(area, (x, y) =>
             {
-                MazeSeg ss = s;
-                p.FillFunc(area, (x, y) =>
-                {
-                    float d = SegDistance(ss, x, y) - MazeTubeRadius;
-                    return d > glowReach ? Rgba.Clear : ss.color.WithAlpha((float)Math.Exp(-Math.Max(0f, d) * 20f) * 0.6f);
-                });
-            }
-            foreach (MazeSeg s in segs)
+                Rgba c = BlendedTube(segs, x, y, out float dmin);
+                float d = dmin - MazeTubeRadius;
+                return d > glowReach ? Rgba.Clear : c.WithAlpha((float)Math.Exp(-Math.Max(0f, d) * 20f) * 0.6f);
+            });
+            p.FillFunc((x, y) =>
             {
-                MazeSeg ss = s;
-                p.FillFunc((x, y) => SegDistance(ss, x, y) - MazeTubeRadius, (x, y) =>
-                {
-                    float t = Clamp(1f - SegDistance(ss, x, y) / MazeTubeRadius);
-                    Rgba core = Rgba.Lerp(Rgba.Lerp(ss.color, Rgba.White, 0.15f), Rgba.White, Clamp((t - 0.45f) / 0.45f));
-                    return Rgba.Lerp(Rgba.Lerp(ss.color, Ink, 0.15f), core, Clamp(t * 4f));
-                });
-            }
+                float dmin = float.MaxValue;
+                foreach (MazeSeg sg in segs) dmin = Math.Min(dmin, SegDistance(sg, x, y));
+                return dmin - MazeTubeRadius;
+            }, (x, y) =>
+            {
+                Rgba c = BlendedTube(segs, x, y, out float dmin);
+                float t = Clamp(1f - dmin / MazeTubeRadius);
+                Rgba core = Rgba.Lerp(Rgba.Lerp(c, Rgba.White, 0.15f), Rgba.White, Clamp((t - 0.45f) / 0.45f));
+                return Rgba.Lerp(Rgba.Lerp(c, Ink, 0.15f), core, Clamp(t * 4f));
+            });
         }
 
         static DoodleArt NeonMaze(string name, IList<MazeSeg> segs)

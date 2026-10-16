@@ -9,12 +9,16 @@ namespace Gotcha.Components
     /// </summary>
     public static class ScreamSynth
     {
-        public static AudioClip Create(float seconds = 1.7f, int rate = 22050)
+        /// <summary>Urletto di topolino: lo stesso urlo, ma acutissimo e più corto.</summary>
+        public static AudioClip Mouse() { return Create(1.1f, 22050, 1.85f); }
+
+        public static AudioClip Create(float seconds = 1.7f, int rate = 22050, float pitch = 1f)
         {
             int n = Mathf.RoundToInt(seconds * rate);
             var data = new float[n];
             // formanti di una "A" urlata da voce femminile (frequenza, larghezza, guadagno)
-            float[] fF = { 1050f, 1650f, 3000f, 4100f };
+            float fk = Mathf.Min(pitch, 1.5f);   // le formanti salgono meno del tono (bocca piccola)
+            float[] fF = { 1050f * fk, 1650f * fk, 3000f * fk, 4100f * fk };
             float[] fW = { 220f, 260f, 380f, 500f };
             float[] fG = { 1f, 0.7f, 0.45f, 0.2f };
             const int harmonics = 14;
@@ -25,9 +29,9 @@ namespace Gotcha.Components
             {
                 float t = i / (float)rate, k = t / seconds;
                 // tono: scatta su, sale ancora, trema e alla fine crolla
-                float f0 = 780f + 360f * Mathf.SmoothStep(0f, 1f, Mathf.Min(1f, t / 0.18f)) + 90f * k
+                float f0 = pitch * (780f + 360f * Mathf.SmoothStep(0f, 1f, Mathf.Min(1f, t / 0.18f)) + 90f * k
                            + Mathf.Sin(t * Mathf.PI * 2f * 7.5f) * 38f * Mathf.Min(1f, t / 0.3f)
-                           - 420f * Mathf.Pow(Mathf.Max(0f, (k - 0.82f) / 0.18f), 2f);
+                           - 420f * Mathf.Pow(Mathf.Max(0f, (k - 0.82f) / 0.18f), 2f));
                 float s = 0f;
                 for (int h = 0; h < harmonics; h++)
                 {

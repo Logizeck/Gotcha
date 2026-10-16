@@ -8,6 +8,8 @@ namespace Gotcha.Levels
     /// Livello 14 — il biscotto nel barattolo. Il topolino ha fame ma il biscotto è dentro un barattolo aperto solo in
     /// alto, sulla mensola. La gravità segue il telefono: bisogna capovolgerlo perché il biscotto esca dal barattolo,
     /// poi inclinarlo e raddrizzarlo per farlo cadere dal topolino. (Nell'Editor: frecce.)
+    /// Il biscotto è fragile: se sbatte troppo forte (telefono capovolto di colpo, caduta da troppo in alto)
+    /// si spezza e il topolino resta a bocca asciutta.
     /// </summary>
     public class CookieLevel : LevelController
     {
@@ -20,6 +22,10 @@ namespace Gotcha.Levels
         [SerializeField] float airDrag = 0.35f;
         [Tooltip("Attrito di rotolamento: un biscotto non gira come una ruota di bicicletta.")]
         [SerializeField] float rollingDrag = 1.2f;
+        [Tooltip("Velocità d'urto oltre la quale il biscotto si spezza.")]
+        [SerializeField] float breakImpact = 10.5f;
+        [SerializeField] GameObject brokenCookie;
+        [SerializeField] SmokeEmitter crumbsBurst;
 
         bool done;
         Vector2 lastPos;
@@ -27,6 +33,9 @@ namespace Gotcha.Levels
         public override void OnLevelStart()
         {
             if (cookie != null) lastPos = cookie.position;
+            if (brokenCookie != null) brokenCookie.SetActive(false);
+            ImpactCrumbs impact = cookie != null ? cookie.GetComponent<ImpactCrumbs>() : null;
+            if (impact != null) impact.Hit += OnHit;
             if (bubble != null) { bubble.Show("Cookie..."); StartCoroutine(HideLater(2f)); }
         }
 
@@ -48,6 +57,30 @@ namespace Gotcha.Levels
             lastPos = cookie.position;
             cookie.AddForce(-v * airDrag * cookie.mass);
             cookie.angularVelocity *= Mathf.Exp(-rollingDrag * Time.fixedDeltaTime);
+        }
+
+        void OnHit(float speed, Vector2 at)
+        {
+            if (done || IsFinished || speed < breakImpact) return;
+            done = true;
+            StartCoroutine(Break(at));
+        }
+
+        IEnumerator Break(Vector2 at)
+        {
+            cookie.simulated = false;
+            cookie.gameObject.SetActive(false);
+            if (brokenCookie != null)
+            {
+                brokenCookie.transform.position = new Vector3(cookie.position.x, cookie.position.y, 0f);
+                brokenCookie.SetActive(true);
+            }
+            if (crumbsBurst != null) { crumbsBurst.transform.position = at; crumbsBurst.Play(); }
+            if (bubble != null) bubble.Show("NOOO! My cookie!");
+            yield return new WaitForSeconds(0.3f);
+            if (crumbsBurst != null) crumbsBurst.Stop();
+            yield return new WaitForSeconds(1.2f);
+            Fail();
         }
 
         IEnumerator Eat()

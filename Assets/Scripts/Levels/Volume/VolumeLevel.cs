@@ -12,6 +12,8 @@ namespace Gotcha.Levels
     /// assonnato; a volume zero si addormenta. (Nell'Editor il volume si simula coi tasti - e +.)
     /// Serve sempre almeno una pressione di "volume -" durante il livello (VolumeDownWatch): un telefono già a volume
     /// zero non risolve il livello da solo; finché non premi il tasto il gatto resta arrabbiato.
+    /// Variante "silenzio totale": a volume zero il gatto si appisola, e il microfono ascolta la stanza: anche un
+    /// piccolo rumore (una voce, un colpo di tosse) lo sveglia di soprassalto e si ricomincia. (Editor: M = rumore.)
     /// </summary>
     public class VolumeLevel : LevelController
     {
@@ -25,6 +27,8 @@ namespace Gotcha.Levels
         [SerializeField] SpeechBubble bubble;
         [SerializeField] float silentBelow = 0.01f;
         [SerializeField] float holdSeconds = 0.8f;
+        [SerializeField] bool micSilence;
+        [SerializeField] float noiseLimit = 0.14f;
 
         bool done;
         readonly VolumeDownWatch watch = new VolumeDownWatch();
@@ -42,10 +46,12 @@ namespace Gotcha.Levels
             watch.Begin();
             if (zzz != null) zzz.Stop();
             if (bubble != null) { bubble.Show("HISSS!"); StartCoroutine(HideLater(1.4f)); }
+            if (micSilence && SensorHub.Instance != null) SensorHub.Instance.UseMic(this);
         }
 
         void OnDestroy()
         {
+            if (SensorHub.Instance != null) SensorHub.Instance.ReleaseMic(this);
             if (MusicPlayer.Instance != null) MusicPlayer.Instance.Unduck(this);
         }
 
@@ -62,6 +68,16 @@ namespace Gotcha.Levels
             if (notes != null) notes.puffsPerSecond = Mathf.Lerp(0.5f, 6f, v);
             if (speakers != null) foreach (Pulse s in speakers) if (s != null) s.amount = Mathf.Lerp(0f, 0.08f, v);
 
+            if (micSilence && silenced)
+            {
+                float noise = 0f;
+                if (SensorHub.Instance != null) { SensorHub.Instance.UseMic(this); noise = SensorHub.Instance.MicLevel01; }
+#if UNITY_EDITOR
+                if (Input.GetKey(KeyCode.M)) noise = 1f;
+#endif
+                if (silentFor > 0.2f && silentFor < 0.4f && bubble != null) bubble.Show("Shhh...", true);
+                if (noise > noiseLimit) { StartCoroutine(Woken()); return; }
+            }
             silentFor = silenced ? silentFor + Time.deltaTime : 0f;
             if (silentFor >= holdSeconds) StartCoroutine(FallAsleep());
         }
@@ -88,6 +104,24 @@ namespace Gotcha.Levels
             if (bubble != null) bubble.Show("Purrr...");
             yield return new WaitForSeconds(2.2f);
             Win();
+        }
+
+        /// <summary>Un rumore! Il gatto salta su furioso: si riprova.</summary>
+        IEnumerator Woken()
+        {
+            done = true;
+            SetMood(0);
+            if (bubble != null) bubble.Show("MRAOW?! WHO'S THERE?!");
+            Transform t = faces != null && faces.Length > 0 && faces[0] != null ? faces[0].transform.parent : transform;
+            Vector3 home = t.localPosition;
+            for (float k = 0f; k < 0.5f; k += Time.deltaTime)
+            {
+                t.localPosition = home + Vector3.up * Mathf.Sin(k / 0.5f * Mathf.PI) * 0.4f;
+                yield return null;
+            }
+            t.localPosition = home;
+            yield return new WaitForSeconds(1.0f);
+            Fail();
         }
 
         IEnumerator HideLater(float seconds)

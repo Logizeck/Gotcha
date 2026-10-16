@@ -14,6 +14,11 @@ namespace Gotcha.Levels
     public class MorseLevel : LevelController
     {
         public static readonly string[] Codes = { "...", "---", ".--", "-.-", ".-." };
+        /// <summary>Variante: cinque suoni lunghi o corti per segnale.</summary>
+        public static readonly string[] Codes5 = { "..--.", "-.-.-", ".-..-", "--.-.", "-...-" };
+
+        [Tooltip("Segnali di questo livello (vuoto = Codes); keys[i] corrisponde a codes[i].")]
+        [SerializeField] string[] codes;
 
         [SerializeField] AudioSource source;
         [SerializeField] TapButton[] keys;        // keys[i] corrisponde a Codes[i]
@@ -31,7 +36,8 @@ namespace Gotcha.Levels
 
         public override void OnLevelStart()
         {
-            answer = Random.Range(0, Codes.Length);
+            if (codes == null || codes.Length == 0) codes = Codes;
+            answer = Random.Range(0, codes.Length);
             dot = Tone("dot", frequency, dotSeconds);
             dash = Tone("dash", frequency, dashSeconds);
             buzz = Tone("buzz", 140f, 0.45f, true);
@@ -59,7 +65,7 @@ namespace Gotcha.Levels
             playing = true;
             if (MusicPlayer.Instance != null) MusicPlayer.Instance.Duck(this);
             yield return new WaitForSeconds(delay);
-            foreach (char c in Codes[answer])
+            foreach (char c in codes[answer])
             {
                 bool isDot = c == '.';
                 source.PlayOneShot(isDot ? dot : dash);

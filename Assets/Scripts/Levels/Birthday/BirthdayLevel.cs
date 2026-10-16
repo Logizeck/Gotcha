@@ -9,6 +9,7 @@ namespace Gotcha.Levels
     /// Livello 15 — buon compleanno! Sulla torta ci sono 5 candeline accese: si spengono soffiando davvero nel
     /// microfono del telefono. Le fiamme tremano quando soffi; ogni soffio deciso ne spegne una (con un filo di fumo).
     /// Spente tutte: coriandoli e "Happy birthday!". Nell'Editor si "soffia" tenendo premuto B.
+    /// Easter egg: soffiando fortissimo (Editor: N) le candeline volano via dalla torta, fiamme comprese.
     /// </summary>
     public class BirthdayLevel : LevelController
     {
@@ -18,9 +19,13 @@ namespace Gotcha.Levels
         [SerializeField] SpeechBubble bubble;
         [SerializeField] float blowThreshold = 0.3f;
         [SerializeField] float blowPerCandle = 0.22f;
+        [SerializeField] Transform[] candles;
+        [SerializeField] float stormLevel = 0.9f;      // soffio "uragano"...
+        [SerializeField] float stormSeconds = 0.45f;   // ...tenuto così a lungo
+        [SerializeField] string eggId = "candle_storm";
 
         int lit;
-        float blowing, noMicFor;
+        float blowing, noMicFor, storm;
         bool done, warned;
 
         public override void OnLevelStart()
@@ -46,8 +51,11 @@ namespace Gotcha.Levels
                 level = SensorHub.Instance.MicLevel01;
             }
 #if UNITY_EDITOR
-            if (Input.GetKey(KeyCode.B)) level = 1f;
+            if (Input.GetKey(KeyCode.B)) level = 0.6f;
+            if (Input.GetKey(KeyCode.N)) level = 1f;
 #endif
+            storm = level > stormLevel ? storm + Time.deltaTime : Mathf.Max(0f, storm - Time.deltaTime);
+            if (storm >= stormSeconds && candles != null && candles.Length > 0) { done = true; StartCoroutine(Hurricane()); return; }
             // le fiamme tremano e si piegano col soffio
             for (int i = 0; i < flames.Length; i++)
             {
@@ -93,6 +101,42 @@ namespace Gotcha.Levels
             smoke.Play();
             yield return new WaitForSeconds(0.25f);
             smoke.Stop();
+        }
+
+        /// <summary>Easter egg: un soffio da uragano strappa le candeline dalla torta e le fa volare via.</summary>
+        IEnumerator Hurricane()
+        {
+            if (bubble != null) bubble.Show("WHOOOSH!!");
+            var flying = new System.Collections.Generic.List<Transform>();
+            for (int i = 0; i < candles.Length; i++)
+            {
+                if (candles[i] == null) continue;
+                // la fiamma vola insieme alla sua candelina
+                if (i < flames.Length && flames[i] != null) flames[i].SetParent(candles[i], true);
+                flying.Add(candles[i]);
+            }
+            var vel = new Vector2[flying.Count];
+            var spin = new float[flying.Count];
+            for (int i = 0; i < flying.Count; i++)
+            {
+                vel[i] = new Vector2(Random.Range(2.5f, 5f), Random.Range(4f, 7.5f));
+                spin[i] = Random.Range(-720f, -240f);
+            }
+            if (smoke != null) { smoke.transform.position = flying.Count > 0 ? flying[0].position : transform.position; smoke.Play(); }
+            for (float t = 0f; t < 1.8f; t += Time.deltaTime)
+            {
+                for (int i = 0; i < flying.Count; i++)
+                {
+                    vel[i].y -= 6f * Time.deltaTime;
+                    flying[i].position += (Vector3)(vel[i] * Time.deltaTime);
+                    flying[i].Rotate(0, 0, spin[i] * Time.deltaTime);
+                }
+                yield return null;
+            }
+            if (smoke != null) smoke.Stop();
+            if (bubble != null) bubble.Show("...my candles?!");
+            yield return new WaitForSeconds(1.2f);
+            WinWithEgg(eggId);
         }
 
         IEnumerator Party()

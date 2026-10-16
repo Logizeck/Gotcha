@@ -5,20 +5,25 @@ namespace Gotcha.EditorArt
     /// <summary>Disegni dei livelli 36-40 (labirinto con la vespa, mele, biglia, tasti colorati).</summary>
     public static partial class DoodleSprites
     {
-        /// <summary>Labirinto aperto della vespa: quattro corridoi larghi e qualche pilastro dietro cui ripararsi.</summary>
+        /// <summary>Labirinto aperto per l'inseguimento: più strade (anelli) e qualche vicolo cieco.</summary>
         public static readonly MazeSeg[] WaspMaze =
         {
-            new MazeSeg(-2.75f, -3.5f, 2.75f, -3.5f, NeonCyan),
-            new MazeSeg(-2.75f, 3.5f, 2.75f, 3.5f, NeonCyan),
-            new MazeSeg(-2.75f, -3.5f, -2.75f, 3.5f, NeonCyan),
-            new MazeSeg(2.75f, -3.5f, 2.75f, 3.5f, NeonCyan),
-            new MazeSeg(-2.75f, -1.75f, 1.55f, -1.75f, NeonMagenta),
-            new MazeSeg(-1.55f, 0.05f, 2.75f, 0.05f, NeonYellow),
-            new MazeSeg(-2.75f, 1.85f, 1.55f, 1.85f, NeonMagenta),
-            new MazeSeg(0.0f, -3.5f, 0.0f, -2.75f, NeonYellow),       // pilastri: la vespa ci sbatte contro
-            new MazeSeg(0.35f, -1.75f, 0.35f, -0.95f, NeonCyan),
-            new MazeSeg(-0.35f, 0.05f, -0.35f, 0.85f, NeonYellow),
-            new MazeSeg(0.4f, 1.85f, 0.4f, 2.65f, NeonCyan),
+            new MazeSeg(-2.75f, -3.50f, 2.75f, -3.50f, NeonCyan),
+            new MazeSeg(-2.75f, 3.50f, 2.75f, 3.50f, NeonCyan),
+            new MazeSeg(-2.75f, -3.50f, -2.75f, 3.50f, NeonCyan),
+            new MazeSeg(2.75f, -3.50f, 2.75f, 3.50f, NeonCyan),
+            new MazeSeg(-1.65f, -2.50f, -0.55f, -2.50f, NeonMagenta),
+            new MazeSeg(0.55f, -2.50f, 1.65f, -2.50f, NeonYellow),
+            new MazeSeg(-0.55f, -1.50f, 0.55f, -1.50f, NeonMagenta),
+            new MazeSeg(-2.75f, 0.50f, 0.55f, 0.50f, NeonYellow),
+            new MazeSeg(1.65f, 0.50f, 2.75f, 0.50f, NeonMagenta),
+            new MazeSeg(-1.65f, 1.50f, -0.55f, 1.50f, NeonYellow),
+            new MazeSeg(-1.65f, 2.50f, 1.65f, 2.50f, NeonMagenta),
+            new MazeSeg(-1.65f, -2.50f, -1.65f, -0.50f, NeonYellow),
+            new MazeSeg(-1.65f, 1.50f, -1.65f, 2.50f, NeonMagenta),
+            new MazeSeg(0.55f, -2.50f, 0.55f, 0.50f, NeonYellow),
+            new MazeSeg(1.65f, -2.50f, 1.65f, -0.50f, NeonMagenta),
+            new MazeSeg(1.65f, 0.50f, 1.65f, 1.50f, NeonYellow),
         };
 
         public static DoodleArt WaspMazeNeon() { return NeonMaze("maze_wasp", WaspMaze); }

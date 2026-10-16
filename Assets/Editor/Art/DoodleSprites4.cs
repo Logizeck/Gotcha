@@ -17,19 +17,10 @@ namespace Gotcha.EditorArt
             Sdf board = Sd.Box(0, 0.02f, 1.13f, 0.7f);
             p.FillFunc(board, (x, y) => Rgba.Lerp(Rgba.Hex("2F4A3E"), Rgba.Hex("26392F"), Clamp(Noise.Value(x * 4f, y * 4f))));
             p.Hatch(board, Rgba.Hex("FFFFFF", 0.04f), 0.15f, 0.06f, 20f);   // aloni di gesso cancellato
-            // disegnini a gesso (sembrano scarabocchi di una nonna, non una lista)
-            ChalkCircle(p, -0.78f, 0.3f, 0.2f);                                                  // pomodoro con le foglioline
-            p.Line(Chalk, 0.022f, -0.88f, 0.52f, -0.78f, 0.47f, -0.68f, 0.52f);
-            p.Line(Chalk, 0.022f, -0.78f, 0.47f, -0.78f, 0.58f);
-            ChalkCircle(p, -0.15f, 0.3f, 0.2f);                                                  // mozzarella (pallina con il nodino)
-            p.Line(Chalk, 0.022f, -0.2f, 0.5f, -0.15f, 0.56f, -0.1f, 0.5f);
-            p.Line(Chalk, 0.016f, -0.25f, 0.28f, -0.2f, 0.32f);
-            p.Line(Chalk, 0.025f, 0.35f, 0.3f, 0.42f, 0.48f, 0.6f, 0.55f, 0.78f, 0.48f, 0.85f, 0.3f, 0.35f, 0.3f);   // fungo
-            p.Line(Chalk, 0.025f, 0.52f, 0.3f, 0.52f, 0.1f, 0.68f, 0.1f, 0.68f, 0.3f);
-            ChalkOval(p, -0.5f, -0.38f, 0.16f, 0.11f);                                           // oliva col buco
-            ChalkCircle(p, -0.5f, -0.38f, 0.04f);
-            p.Line(Chalk, 0.02f, 0.1f, -0.42f, 0.22f, -0.3f, 0.34f, -0.42f, 0.22f, -0.56f, 0.1f, -0.42f);   // cuoricino
-            foreach (float[] st in new[] { new[] { 0.7f, -0.32f }, new[] { 0.9f, -0.5f }, new[] { -0.95f, -0.15f } })   // stelline
+            // titolo a gesso; gli ingredienti (scelti a caso a ogni partita) li disegna il livello
+            p.Line(Chalk, 0.02f, -0.95f, 0.55f, 0.95f, 0.55f);
+            p.Line(Chalk, 0.016f, 0.1f, -0.62f, 0.22f, -0.5f, 0.34f, -0.62f, 0.22f, -0.74f, 0.1f, -0.62f);   // cuoricino
+            foreach (float[] st in new[] { new[] { 0.9f, -0.62f }, new[] { -0.95f, -0.62f } })   // stelline
             {
                 p.Line(Chalk, 0.016f, st[0] - 0.06f, st[1], st[0] + 0.06f, st[1]);
                 p.Line(Chalk, 0.016f, st[0], st[1] - 0.06f, st[0], st[1] + 0.06f);
@@ -37,6 +28,43 @@ namespace Gotcha.EditorArt
             p.Shape(board, Rgba.Clear, 0.03f);
             p.Shape(Sd.Box(0.75f, -0.78f, 0.18f, 0.04f, 0.02f), Rgba.White, 0.015f);   // gessetto
             return new DoodleArt("chalkboard", p);
+        }
+
+        /// <summary>Un ingrediente disegnato col gesso (centro 0,0, largo circa 0.5), da appendere alla lavagna.</summary>
+        public static DoodleArt ChalkIcon(string id)
+        {
+            var p = new DoodlePainter(-0.32f, -0.3f, 0.32f, 0.32f, 160) { Wobble = 0.012f };
+            switch (id)
+            {
+                case "tomato":
+                    ChalkCircle(p, 0, -0.03f, 0.2f);
+                    p.Line(Chalk, 0.022f, -0.1f, 0.19f, 0f, 0.14f, 0.1f, 0.19f);
+                    p.Line(Chalk, 0.022f, 0f, 0.14f, 0f, 0.27f);
+                    p.Line(Chalk, 0.016f, -0.1f, 0.0f, -0.06f, 0.06f);
+                    break;
+                case "mozzarella":
+                    ChalkCircle(p, 0, -0.05f, 0.19f);
+                    p.Line(Chalk, 0.022f, -0.06f, 0.15f, 0f, 0.24f, 0.06f, 0.15f);
+                    p.Line(Chalk, 0.016f, -0.1f, -0.06f, -0.05f, -0.02f);
+                    break;
+                case "mushroom":
+                    p.Line(Chalk, 0.025f, -0.25f, 0.0f, -0.18f, 0.18f, 0f, 0.25f, 0.18f, 0.18f, 0.25f, 0.0f, -0.25f, 0.0f);
+                    p.Line(Chalk, 0.025f, -0.08f, 0f, -0.08f, -0.22f, 0.08f, -0.22f, 0.08f, 0f);
+                    break;
+                case "olive":
+                    ChalkOval(p, 0, 0, 0.2f, 0.14f);
+                    ChalkCircle(p, 0, 0, 0.05f);
+                    break;
+                default:   // ananas
+                    ChalkOval(p, 0, -0.08f, 0.15f, 0.2f);
+                    p.Line(Chalk, 0.014f, -0.1f, -0.2f, 0.08f, 0.04f);
+                    p.Line(Chalk, 0.014f, 0.1f, -0.2f, -0.08f, 0.04f);
+                    p.Line(Chalk, 0.022f, -0.08f, 0.12f, 0f, 0.28f, 0.08f, 0.12f);
+                    p.Line(Chalk, 0.02f, 0f, 0.12f, -0.14f, 0.24f);
+                    p.Line(Chalk, 0.02f, 0f, 0.12f, 0.14f, 0.24f);
+                    break;
+            }
+            return new DoodleArt("chalk_" + id, p);
         }
 
         static void ChalkCircle(DoodlePainter p, float cx, float cy, float r) { ChalkOval(p, cx, cy, r, r); }

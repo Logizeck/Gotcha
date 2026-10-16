@@ -77,31 +77,60 @@ namespace Gotcha.Components
             melter.End();
             if (bubble != null) bubble.Hide();
 
-            // gli occhi, che erano volati via, ricadono nella pozzanghera: plop, plop
+            // gli occhi, che erano volati via di lato, tornano indietro dallo stesso lato con un arco
+            // e ricadono nella pozzanghera: plop, plop
             if (eyes != null)
                 for (int i = 0; i < eyes.Count; i++)
                 {
                     Transform eye = eyes[i];
                     if (eye == null) continue;
-                    eye.gameObject.SetActive(true);
-                    eye.localScale = Vector3.one * 1.4f;
-                    eye.position = snowman.TransformPoint(new Vector2(i == 0 ? -0.7f : 0.6f, 9f));
+                    float side = i < shotSide.Count ? shotSide[i] : (i == 0 ? -1f : 1f);
+                    yield return ComeBack(eye, side, snowman.TransformPoint(new Vector2(side * 0.55f, 1.2f)));
                     melter.Attach(eye);
                     melter.Drop(eye, Vector2.zero);
-                    yield return new WaitForSeconds(0.35f);
+                    yield return new WaitForSeconds(0.3f);
                     if (bubble != null) bubble.Show("plop!");
                 }
             yield return new WaitForSeconds(1.6f);
             Running = false;
         }
 
+        readonly List<float> shotSide = new List<float>();
+
+        /// <summary>Un occhio rientra in scena dal bordo da cui era uscito e plana a parabola sul punto indicato.</summary>
+        IEnumerator ComeBack(Transform eye, float side, Vector3 land)
+        {
+            eye.gameObject.SetActive(true);
+            Camera cam = Camera.main;
+            float edge = cam != null ? cam.orthographicSize * cam.aspect + 0.6f : 3.6f;
+            Vector3 from = new Vector3(cam != null ? cam.transform.position.x + side * edge : side * edge, land.y + 2.2f, eye.position.z);
+            land.z = eye.position.z;
+            const float seconds = 0.75f;
+            Vector3 big = Vector3.one * 2.2f, normal = Vector3.one * 1.4f;
+            for (float k = 0f; k < 1f; k += Time.deltaTime / seconds)
+            {
+                // parabola: sale un po' e poi scende sul punto d'arrivo
+                Vector3 p = Vector3.Lerp(from, land, k);
+                p.y += Mathf.Sin(k * Mathf.PI) * 1.4f;
+                eye.position = p;
+                eye.Rotate(0, 0, side * 720f * Time.deltaTime);
+                eye.localScale = Vector3.Lerp(big, normal, k);
+                yield return null;
+            }
+            eye.position = land;
+            eye.localRotation = Quaternion.identity;
+            eye.localScale = normal;
+        }
+
         void Shoot(List<Transform> eyes)
         {
             if (eyes == null || eyes.Count == 0) return;
             eyes.Sort((a, b) => a.position.x.CompareTo(b.position.x));
+            shotSide.Clear();
             for (int i = 0; i < eyes.Count; i++)
             {
                 float side = eyes.Count == 1 ? (eyes[i].position.x < snowman.position.x ? -1f : 1f) : (i == 0 ? -1f : 1f);
+                shotSide.Add(side);
                 melter.Detach(eyes[i]);
                 eyes[i].SetParent(snowman.parent, true);
                 StartCoroutine(Fly(eyes[i], new Vector2(side * Random.Range(7f, 9f), Random.Range(5f, 7f))));

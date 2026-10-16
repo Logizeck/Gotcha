@@ -8,6 +8,8 @@ namespace Gotcha.Levels
     /// Livello 12 — proteggi il gatto. Il gatto dorme e una vespa inferocita prova a pungerlo. Col dito si disegnano
     /// linee (al massimo 3, le più vecchie spariscono) che fanno da barriera: la vespa ci rimbalza contro.
     /// Resisti 10 secondi e la vespa, sfinita, se ne va. Se raggiunge il gatto: MEOW! e si riprova.
+    /// Varianti: più vespe (<see cref="extraWasps"/>) e barriere "spostabili": una linea che non tocca il gatto
+    /// (non è fissata a lui) viene spinta via un po' a ogni urto.
     /// </summary>
     public class DefendLevel : LevelController
     {
@@ -30,10 +32,22 @@ namespace Gotcha.Levels
         [SerializeField] float waspRadius = 0.28f;
         [SerializeField] Vector2 boundsMin = new Vector2(-2.7f, -3.6f);
         [SerializeField] Vector2 boundsMax = new Vector2(2.7f, 3.4f);
+        [SerializeField] Transform[] extraWasps;
+        [SerializeField] bool pushUnanchored;
+        [SerializeField] float anchorReach = 0.45f;     // una linea che passa così vicino al gatto è "fissata"
+        [SerializeField] float pushPerHit = 0.09f;
 
-        Vector2 dir, hoverHome;
+        class Bug
+        {
+            public Transform t;
+            public SpriteRenderer body;
+            public Vector2 dir, home;
+            public float flash, phase;
+        }
+
+        readonly System.Collections.Generic.List<Bug> bugs = new System.Collections.Generic.List<Bug>();
         Vector3 bubbleHome;
-        float remaining, flash, waiting;
+        float remaining, waiting;
         bool done;
 
         Vector2 CatPoint => (Vector2)cat.position + new Vector2(-0.4f, 0.2f);
@@ -42,8 +56,11 @@ namespace Gotcha.Levels
         {
             remaining = survive;
             waiting = warmUp;
-            hoverHome = wasp.position;
-            dir = Quaternion.Euler(0, 0, Random.Range(-50f, 50f)) * (CatPoint - (Vector2)wasp.position).normalized;
+            bugs.Add(new Bug { t = wasp, body = waspBody, home = wasp.position });
+            if (extraWasps != null)
+                foreach (Transform w in extraWasps)
+                    if (w != null) bugs.Add(new Bug { t = w, body = w.GetComponentInChildren<SpriteRenderer>(), home = w.position, phase = Random.Range(0f, 6f) });
+            foreach (Bug b in bugs) b.dir = Quaternion.Euler(0, 0, Random.Range(-50f, 50f)) * (CatPoint - b.home).normalized;
             if (catEyesOpen != null) catEyesOpen.SetActive(false);
             if (catAlert != null) catAlert.SetActive(false);
             if (zzz != null) zzz.Play();
@@ -72,49 +89,85 @@ namespace Gotcha.Levels
             if (done || IsFinished) return;
             if (waspAnger != null) waspAnger.transform.localScale = Vector3.one * (1f + Mathf.Abs(Mathf.Sin(Time.time * 9f)) * 0.35f);
 
-            // prima di attaccare la vespa ronza furiosa sul posto: c'è tempo per disegnare le barriere
+            // prima di attaccare le vespe ronzano furiose sul posto: c'è tempo per disegnare le barriere
             if (waiting > 0f)
             {
                 waiting -= Time.deltaTime;
-                Vector2 hover = hoverHome + new Vector2(Mathf.Sin(Time.time * 5.3f) * 0.35f, Mathf.Sin(Time.time * 8.1f) * 0.18f);
-                float jitter = Mathf.Sin(Time.time * 47f) * 0.03f;   // trema dalla rabbia
-                wasp.position = new Vector3(hover.x + jitter, hover.y, wasp.position.z);
-                wasp.localScale = new Vector3(CatPoint.x < hover.x ? 1f : -1f, 1f, 1f);
+                foreach (Bug b in bugs)
+                {
+                    float t = Time.time + b.phase;
+                    Vector2 hover = b.home + new Vector2(Mathf.Sin(t * 5.3f) * 0.35f, Mathf.Sin(t * 8.1f) * 0.18f);
+                    float jitter = Mathf.Sin(t * 47f) * 0.03f;   // trema dalla rabbia
+                    b.t.position = new Vector3(hover.x + jitter, hover.y, b.t.position.z);
+                    b.t.localScale = new Vector3(CatPoint.x < hover.x ? 1f : -1f, 1f, 1f);
+                }
                 if (countdown != null) countdown.text = Mathf.CeilToInt(survive).ToString();
                 if (bubble != null && waiting <= 0f) { bubble.Hide(); bubble.transform.position = bubbleHome; }
                 if (waiting > 0f) return;
-                dir = Quaternion.Euler(0, 0, Random.Range(-50f, 50f)) * (CatPoint - (Vector2)wasp.position).normalized;
+                foreach (Bug b in bugs) b.dir = Quaternion.Euler(0, 0, Random.Range(-50f, 50f)) * (CatPoint - (Vector2)b.t.position).normalized;
             }
 
             remaining -= Time.deltaTime;
             if (countdown != null) countdown.text = Mathf.CeilToInt(Mathf.Max(0f, remaining)).ToString();
-            if (flash > 0f) flash -= Time.deltaTime;
-            if (waspBody != null) waspBody.color = flash > 0f ? new Color(1f, 0.6f, 0.6f) : Color.white;
+            foreach (Bug b in bugs)
+            {
+                if (MoveBug(b)) { done = true; StartCoroutine(Stung()); return; }
+            }
+            if (remaining <= 0f) { done = true; StartCoroutine(Survived()); }
+        }
+
+        /// <summary>Muove una vespa; true se ha punto il gatto.</summary>
+        bool MoveBug(Bug b)
+        {
+            if (b.flash > 0f) b.flash -= Time.deltaTime;
+            if (b.body != null) b.body.color = b.flash > 0f ? new Color(1f, 0.6f, 0.6f) : Color.white;
 
             // punta il gatto, con un po' di zig-zag
-            Vector2 pos = wasp.position;
+            Vector2 pos = b.t.position;
             Vector2 to = (CatPoint - pos).normalized;
-            dir = (dir + to * steer * Time.deltaTime).normalized;
-            Vector2 wiggle = new Vector2(-dir.y, dir.x) * Mathf.Sin(Time.time * 11f) * 0.35f;
-            Vector2 step = (dir + wiggle).normalized * speed * Time.deltaTime;
+            b.dir = (b.dir + to * steer * Time.deltaTime).normalized;
+            Vector2 wiggle = new Vector2(-b.dir.y, b.dir.x) * Mathf.Sin((Time.time + b.phase) * 11f) * 0.35f;
+            Vector2 next = pos + (b.dir + wiggle).normalized * speed * Time.deltaTime;
 
-            // rimbalza sulle linee disegnate (geometria esatta: non può attraversarle né restarci dentro)
-            Vector2 next = pos + step;
-            if (pen != null && StrokeBarrier.Resolve(pen.transform, pos, ref next, waspRadius, pen.colliderRadius, out Vector2 normal))
+            // prima i bordi dello schermo, poi le linee: così il rimbalzo sul bordo non la spinge oltre una linea
+            if (next.x < boundsMin.x || next.x > boundsMax.x) { b.dir.x = -b.dir.x; next.x = Mathf.Clamp(next.x, boundsMin.x, boundsMax.x); }
+            if (next.y < boundsMin.y || next.y > boundsMax.y) { b.dir.y = -b.dir.y; next.y = Mathf.Clamp(next.y, boundsMin.y, boundsMax.y); }
+
+            // rimbalza sulle linee disegnate (geometria esatta, anche la linea che si sta ancora disegnando)
+            if (pen != null && StrokeBarrier.Resolve(pen.transform, pos, ref next, waspRadius, pen.colliderRadius, out Vector2 normal, out Transform stroke))
             {
-                if (Vector2.Dot(dir, normal) < 0f) dir = Vector2.Reflect(dir, normal).normalized;
-                flash = 0.12f;
+                if (Vector2.Dot(b.dir, normal) < 0f) b.dir = Vector2.Reflect(b.dir, normal).normalized;
+                b.flash = 0.12f;
+                if (pushUnanchored && stroke != null && !Anchored(stroke)) Push(stroke, -normal);
             }
-            pos = next;
+            b.t.position = new Vector3(next.x, next.y, b.t.position.z);
+            b.t.localScale = new Vector3(b.dir.x < 0f ? 1f : -1f, 1f, 1f);
 
-            // bordi dello schermo
-            if (pos.x < boundsMin.x || pos.x > boundsMax.x) { dir.x = -dir.x; pos.x = Mathf.Clamp(pos.x, boundsMin.x, boundsMax.x); }
-            if (pos.y < boundsMin.y || pos.y > boundsMax.y) { dir.y = -dir.y; pos.y = Mathf.Clamp(pos.y, boundsMin.y, boundsMax.y); }
-            wasp.position = new Vector3(pos.x, pos.y, wasp.position.z);
-            wasp.localScale = new Vector3(dir.x < 0f ? 1f : -1f, 1f, 1f);
+            // punge solo se arriva al gatto senza una linea in mezzo
+            return Vector2.Distance(next, CatPoint) < catRadius && (pen == null || !StrokeBarrier.Blocks(pen.transform, next, CatPoint, 0f));
+        }
 
-            if (Vector2.Distance(pos, CatPoint) < catRadius) { done = true; StartCoroutine(Stung()); }
-            else if (remaining <= 0f) { done = true; StartCoroutine(Survived()); }
+        /// <summary>Una linea è fissata al gatto se in qualche punto lo tocca.</summary>
+        bool Anchored(Transform stroke)
+        {
+            EdgeCollider2D e = stroke.GetComponent<EdgeCollider2D>();
+            if (e == null) return true;   // ancora in disegno: non si sposta
+            foreach (Vector2 p in e.points)
+                if (Vector2.Distance(stroke.TransformPoint(p), CatPoint) < catRadius + anchorReach) return true;
+            return false;
+        }
+
+        void Push(Transform stroke, Vector2 dir)
+        {
+            stroke.position += (Vector3)(dir * pushPerHit);
+            stroke.Rotate(0, 0, Random.Range(-4f, 4f));
+            if (bubble != null && Random.value < 0.25f) { bubble.transform.position = (Vector3)stroke.position + new Vector3(0.8f, 0.5f, 0f); bubble.Show("Shove!", true); StartCoroutine(BubbleBack()); }
+        }
+
+        IEnumerator BubbleBack()
+        {
+            yield return new WaitForSeconds(0.6f);
+            if (bubble != null && !done) { bubble.Hide(); bubble.transform.position = bubbleHome; }
         }
 
         IEnumerator Stung()
@@ -140,10 +193,10 @@ namespace Gotcha.Levels
             if (countdown != null) countdown.text = "";
             if (waspAnger != null) waspAnger.SetActive(false);
             if (bubble != null) bubble.Show("Phew!");
-            // la vespa, sfinita, se ne va
+            // le vespe, sfinite, se ne vanno
             for (float k = 0f; k < 1.5f; k += Time.deltaTime)
             {
-                wasp.position += new Vector3(0.6f, 2.8f, 0f) * Time.deltaTime;
+                foreach (Bug b in bugs) b.t.position += new Vector3(0.6f, 2.8f, 0f) * Time.deltaTime;
                 yield return null;
             }
             if (buzz != null) buzz.Stop();

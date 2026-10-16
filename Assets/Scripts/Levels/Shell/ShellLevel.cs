@@ -82,10 +82,11 @@ namespace Gotcha.Levels
             while (!done)
             {
                 yield return new WaitForSeconds(Random.Range(tailEvery.x, tailEvery.y));
-                if (done || tail == null || mouse.gameObject.activeSelf) continue;
+                // solo a mescolamento finito, mentre si sceglie: mai durante gli scambi né dopo la scoperta
+                if (done || tail == null || !picking || mouse.gameObject.activeSelf) continue;
                 // la codina scivola fuori, si agita un attimo e rientra
-                for (float k = 0f; k < 1f; k += Time.deltaTime / 0.25f) { tail.localScale = new Vector3(tailSize, k * tailSize, 1f); yield return null; }
-                for (float k = 0f; k < 0.7f; k += Time.deltaTime) { tail.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(k * 25f) * 5f); yield return null; }
+                for (float k = 0f; k < 1f && !done; k += Time.deltaTime / 0.25f) { tail.localScale = new Vector3(tailSize, k * tailSize, 1f); yield return null; }
+                for (float k = 0f; k < 0.7f && !done; k += Time.deltaTime) { tail.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(k * 25f) * 5f); yield return null; }
                 tail.localRotation = Quaternion.identity;
                 for (float k = 1f; k > 0f; k -= Time.deltaTime / 0.2f) { tail.localScale = new Vector3(tailSize, k * tailSize, 1f); yield return null; }
                 tail.localScale = new Vector3(tailSize, 0f, 1f);

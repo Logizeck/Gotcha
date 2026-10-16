@@ -7,7 +7,8 @@ namespace Gotcha.Levels
     /// <summary>
     /// Livello 17 — labirinto al buio. Si vede solo intorno alla sfera. L'uscita (stella) è chiusa da un cancello
     /// rosso: prima bisogna trovare la chiave, nascosta in un vicolo cieco. Toccandola con la sfera la si prende
-    /// e il cancello si apre.
+    /// e il cancello si apre. Nelle varianti nel buio dorme una vespa: se la luce della sfera la raggiunge si sveglia e
+    /// insegue (il ronzio si sente sempre più forte avvicinandosi, anche attraverso i muri). Se punge, si riprova.
     /// </summary>
     public class DarkMazeLevel : LevelController
     {
@@ -18,10 +19,11 @@ namespace Gotcha.Levels
         [SerializeField] GameObject gate;
         [SerializeField] SmokeEmitter sparkle;
         [SerializeField] SpeechBubble bubble;
+        [SerializeField] MazeChaser[] wasps;
 
         GoalZone goal;
         bool hasKey, over;
-        Vector3 keyScale;
+        Vector3 keyScale, darkScale = Vector3.one;
 
         public override void OnLevelStart()
         {
@@ -29,9 +31,51 @@ namespace Gotcha.Levels
             if (goal != null) goal.Reached += OnGoal;
             if (key != null) keyScale = key.localScale;
             if (bubble != null) bubble.Hide();
+            if (darkness != null) darkScale = darkness.localScale;
+            if (wasps != null)
+                foreach (MazeChaser w in wasps)
+                {
+                    w.Stung += OnStung;
+                    if (w.buzz != null) { w.buzz.clip = WaspLevel.BuzzClip(); w.buzz.loop = true; w.buzz.Play(); }
+                }
         }
 
-        void OnDestroy() { if (goal != null) goal.Reached -= OnGoal; }
+        void OnDestroy()
+        {
+            if (goal != null) goal.Reached -= OnGoal;
+            if (wasps != null)
+                foreach (MazeChaser w in wasps)
+                    if (w != null && w.buzz != null && w.buzz.clip != null) Destroy(w.buzz.clip);
+        }
+
+        void StopWasps()
+        {
+            if (wasps == null) return;
+            foreach (MazeChaser w in wasps) { w.Frozen = true; if (w.buzz != null) w.buzz.Stop(); }
+        }
+
+        void OnStung(MazeChaser w)
+        {
+            if (over || IsFinished) return;
+            over = true;
+            StartCoroutine(Stung());
+        }
+
+        IEnumerator Stung()
+        {
+            ball.simulated = false;
+            if (wasps != null) foreach (MazeChaser w in wasps) w.Frozen = true;
+            if (bubble != null) bubble.Show("STING!", true);
+            SpriteRenderer sr = ball.GetComponent<SpriteRenderer>();
+            for (float k = 0f; k < 0.6f; k += Time.deltaTime)
+            {
+                if (sr != null) sr.color = Mathf.Repeat(k * 10f, 1f) < 0.5f ? new Color(1f, 0.4f, 0.4f) : Color.white;
+                yield return null;
+            }
+            StopWasps();
+            yield return new WaitForSeconds(0.6f);
+            Fail();
+        }
 
         void LateUpdate()
         {
@@ -72,6 +116,7 @@ namespace Gotcha.Levels
                     yield return null;
                 }
                 gate.SetActive(false);
+                if (wasps != null) foreach (MazeChaser w in wasps) w.Build();   // il varco ora è aperto anche per le vespe
             }
             yield return new WaitForSeconds(0.8f);
             if (bubble != null) bubble.Hide();
@@ -87,12 +132,13 @@ namespace Gotcha.Levels
         IEnumerator GoalRoutine()
         {
             ball.simulated = false;
+            StopWasps();
             Transform t = ball.transform;
             Vector3 from = t.position, to = new Vector3(goal.transform.position.x, goal.transform.position.y, from.z);
             for (float k = 0f; k < 1f; k += Time.deltaTime / 0.4f)
             {
                 t.position = Vector3.Lerp(from, to, k);
-                if (darkness != null) darkness.localScale = Vector3.one * (1f + k * 4f);   // si accende la luce
+                if (darkness != null) darkness.localScale = darkScale * (1f + k * 4f);   // si accende la luce
                 yield return null;
             }
             Win();

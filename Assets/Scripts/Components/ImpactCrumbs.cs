@@ -12,9 +12,13 @@ namespace Gotcha.Components
 
         float stopAt;
 
+        /// <summary>Ogni urto, con la velocità relativa e il punto di contatto.</summary>
+        public event System.Action<float, Vector2> Hit;
+
         void OnCollisionEnter2D(Collision2D c)
         {
             float speed = c.relativeVelocity.magnitude;
+            Hit?.Invoke(speed, c.GetContact(0).point);
             if (speed < minImpact) return;
             if (crumbs != null)
             {

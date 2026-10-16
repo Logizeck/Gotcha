@@ -11,6 +11,7 @@ namespace Gotcha.Components
     public static class StrokeBarrier
     {
         static readonly List<Vector2> segs = new List<Vector2>();
+        static readonly List<Transform> owners = new List<Transform>();   // tratto a cui appartiene ogni segmento
 
         /// <summary>
         /// Corregge <paramref name="to"/> se il movimento da <paramref name="from"/> urta una linea.
@@ -18,7 +19,14 @@ namespace Gotcha.Components
         /// </summary>
         public static bool Resolve(Transform pen, Vector2 from, ref Vector2 to, float radius, float thickness, out Vector2 normal)
         {
+            return Resolve(pen, from, ref to, radius, thickness, out normal, out _);
+        }
+
+        /// <summary>Come sopra, e dice anche quale tratto è stato urtato (il GameObject "Stroke").</summary>
+        public static bool Resolve(Transform pen, Vector2 from, ref Vector2 to, float radius, float thickness, out Vector2 normal, out Transform stroke)
+        {
             normal = Vector2.zero;
+            stroke = null;
             if (pen == null) return false;
             Collect(pen);
             bool hitAny = false;
@@ -42,6 +50,7 @@ namespace Gotcha.Components
                     // rimesso dal suo lato, appena fuori dalla linea
                     to = c + toward * (r + 0.02f);
                     normal = toward;
+                    stroke = owners[i / 2];
                     hit = hitAny = true;
                 }
                 if (!hit) break;
@@ -49,17 +58,53 @@ namespace Gotcha.Components
             return hitAny;
         }
 
+        /// <summary>True se il segmento a→b attraversa (o sfiora entro <paramref name="pad"/>) una linea disegnata.</summary>
+        public static bool Blocks(Transform pen, Vector2 a, Vector2 b, float pad)
+        {
+            if (pen == null) return false;
+            Collect(pen);
+            for (int i = 0; i < segs.Count; i += 2)
+            {
+                if (SegmentsCross(a, b, segs[i], segs[i + 1])) return true;
+                if (pad > 0f && Vector2.Distance(Closest(segs[i], segs[i + 1], b), b) < pad) return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Raccoglie i segmenti di tutti i tratti: quelli finiti (EdgeCollider2D) e anche quello che si sta ancora
+        /// disegnando (solo LineRenderer), così una linea tracciata davanti alla vespa la ferma subito.
+        /// </summary>
         static void Collect(Transform pen)
         {
             segs.Clear();
-            foreach (EdgeCollider2D e in pen.GetComponentsInChildren<EdgeCollider2D>())
+            owners.Clear();
+            for (int s = 0; s < pen.childCount; s++)
             {
-                if (!e.enabled) continue;
-                Vector2[] pts = e.points;
-                for (int i = 0; i + 1 < pts.Length; i++)
+                Transform stroke = pen.GetChild(s);
+                if (!stroke.gameObject.activeInHierarchy) continue;
+                EdgeCollider2D e = stroke.GetComponent<EdgeCollider2D>();
+                if (e != null)
                 {
-                    segs.Add(e.transform.TransformPoint(pts[i] + e.offset));
-                    segs.Add(e.transform.TransformPoint(pts[i + 1] + e.offset));
+                    if (!e.enabled) continue;
+                    Vector2[] pts = e.points;
+                    for (int i = 0; i + 1 < pts.Length; i++)
+                    {
+                        segs.Add(e.transform.TransformPoint(pts[i] + e.offset));
+                        segs.Add(e.transform.TransformPoint(pts[i + 1] + e.offset));
+                        owners.Add(stroke);
+                    }
+                    continue;
+                }
+                LineRenderer lr = stroke.GetComponentInChildren<LineRenderer>();
+                if (lr == null || lr.positionCount < 2) continue;
+                Transform space = lr.transform;
+                for (int i = 0; i + 1 < lr.positionCount; i++)
+                {
+                    Vector3 p0 = lr.GetPosition(i), p1 = lr.GetPosition(i + 1);
+                    segs.Add(lr.useWorldSpace ? (Vector2)p0 : (Vector2)space.TransformPoint(p0));
+                    segs.Add(lr.useWorldSpace ? (Vector2)p1 : (Vector2)space.TransformPoint(p1));
+                    owners.Add(stroke);
                 }
             }
         }

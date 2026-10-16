@@ -16,7 +16,7 @@ namespace Gotcha.UI
     public class GameUI : MonoBehaviour
     {
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.23";
+        public const string Version = "0.24";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
@@ -305,7 +305,7 @@ namespace Gotcha.UI
                     int index = p * LevelsPerPage + k;
                     if (index >= count) break;
                     int col = k % 2, row = k / 2;
-                    RectTransform cell = LevelCell(page, index, index <= unlocked);
+                    RectTransform cell = LevelCell(page, index, GameFlow.UnlockAllLevels || index <= unlocked);
                     Place(cell, new Vector2(col * 0.5f + 0.015f, 1f - (row + 1) * 0.2f + 0.012f), new Vector2((col + 1) * 0.5f - 0.015f, 1f - row * 0.2f - 0.012f));
                 }
                 Image dot = CreateRect("Dot" + p, pageDots, Vector2.zero, Vector2.zero).gameObject.AddComponent<Image>();

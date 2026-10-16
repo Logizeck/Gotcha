@@ -63,6 +63,7 @@ namespace Gotcha.Levels
             if (bowl != null) bowl.Dropped -= OnDropped;
             if (ClipRecorder.Instance != null && ClipRecorder.Instance.IsCapturing) ClipRecorder.Instance.Discard();
             if (SensorHub.Instance != null) SensorHub.Instance.ReleaseMic(this);
+            if (squeak != null) Destroy(squeak);
         }
 
         void Update()
@@ -114,6 +115,17 @@ namespace Gotcha.Levels
             busy = false;
         }
 
+        AudioClip squeak;
+
+        /// <summary>L'urletto del topolino (come quello del pupazzo di neve, ma acutissimo).</summary>
+        void Squeak()
+        {
+            AudioSource src = GetComponent<AudioSource>();
+            if (src == null) src = gameObject.AddComponent<AudioSource>();
+            if (squeak == null) squeak = ScreamSynth.Mouse();
+            src.PlayOneShot(squeak, 0.9f);
+        }
+
         /// <summary>Zuppa bollente: il topo la beve d'un fiato... e si carbonizza.</summary>
         IEnumerator Burnt()
         {
@@ -124,6 +136,7 @@ namespace Gotcha.Levels
             // diventa rosso fuoco e trema, fumo dalle orecchie
             Vector3 m = mouse.localPosition;
             if (bubble != null) bubble.Show("HOT HOT HOT!!!");
+            Squeak();
             if (steam != null) { steam.transform.position = mouse.position + Vector3.up * 0.7f; steam.puffsPerSecond = 14f; steam.Play(); }
             for (float k = 0f; k < 1f; k += Time.deltaTime / 1.1f)
             {

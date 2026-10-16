@@ -11,7 +11,7 @@ Livelli attuali:
 6. **Tick Tock** — segui i cavi e premi il pulsante giusto prima che il timer arrivi a zero.
 7. **Shhh!** — abbassa il volume del telefono (tasto "volume -") per calmare il gatto.
 8. **Hold On** — tieni premuti due pulsanti insieme per 5 secondi.
-9. **Buzz Off** — colpisci la vespa furiosa 10 volte.
+9. **Bug Spray** — spruzza lo scarafaggio sul muro con la bomboletta tossica prima che si svuoti.
 10. **Art Theft** — la chiave è dipinta nella natura morta... ma si può staccare.
 11. **Snowman** — dai una faccia al pupazzo di neve (Easter egg: la carota sul sedere).
 12. **Bodyguard** — disegna linee col dito per difendere il gatto dalla vespa.
@@ -27,14 +27,14 @@ Livelli attuali:
 22. **Hot Soup** — soffia per raffreddare, poi servi.
 23. **Frozen Key** — strofina il ghiaccio, pizzica la chiave, apri.
 24. **Campfire** — strofina per la scintilla, soffia piano.
-25. **Wake-up Call** — la sveglia suona e il pulsante OFF scappa: chiudilo con le staccionate e premilo.
-26. **Thirsty Plant** — fionda le gocce nel vaso.
+25. **Wake-up Call** — il pulsante OFF scappa: chiudilo con poche staccionate lunghe (inchiostro limitato) prima che si svegli il vicino.
+26. **Thirsty Plant** — fionda le gocce nel vaso, col vento (uccellino di passaggio: Easter egg).
 27. **Shell Game** — dov'è il topolino?
-28. **Sky Wire** — taglia il filo del colore del cielo.
+28. **Sky Wire** — taglia il filo indicato dall'indovinello (colore a caso).
 29. **Sunny Day** — proteggi il pupazzo con una nuvola.
 30. **Cut the Rope** — taglia al momento giusto.
 31. **Pizza Party** — taglia in quattro e servi.
-32. **Pizza Chef** — condisci come suggerisce la lavagna, inforna, taglia e servi (col peperoncino: Easter egg).
+32. **Pizza Chef** — ricetta casuale sulla lavagna: condisci, inforna, taglia e servi (col peperoncino: Easter egg).
 33. **Blow It Up** — gonfia il palloncino fino alla sagoma tratteggiata, col fiato o con 10 colpi di pompa.
 34. **Cat Eyes** — muovi gli occhi del gatto inclinando il telefono e fissa il topolino per 3 secondi.
 35. **Pancake Flip** — lancia la frittella con un colpo di polso e riprendila nella padella, 3 volte.
@@ -51,19 +51,18 @@ Livelli 41-60 — varianti più difficili delle meccaniche già collaudate:
 48. **Trap Maze 2** (labirinto nuovo con buche e laser) · 49. **Big Birthday** (7 candeline) ·
 50. **High Plant** (vaso sulla mensola) · 51. **Copycat Pro** (4-5-6 note, più veloci) · 52. **Wasp Returns** (15 colpi) ·
 53. **Marble Run 2** (da destra a sinistra, muretto più alto) · 54. **Deep Freeze** (ghiaccio più spesso) ·
-55. **Tiny Mouse** (topolino piccolo, 4.5 s) · 56. **Snooze Alarm** (pulsante più veloce, 3 staccionate) ·
+55. **Tiny Mouse** (il topolino cambia tana ogni 3 s) · 56. **Snooze Alarm** (pulsante più veloce, 3 staccionate) ·
 57. **Darker** (labirinto al buio nuovo) · 58. **Apple Rain** (7 mele, cadono più veloci) ·
-59. **Wet Wood** (più strofinio, soffio delicatissimo) · 60. **Wasp Nest** (labirinto con anelli, vespa più veloce).
+59. **Wet Wood** (pioggia: ombrello sopra il fuoco) · 60. **Wasp Nest** (labirinto con anelli, vespa più veloce).
 
-Livelli 61-100 — terza ondata (13 labirinti nuovi + varianti di tutte le altre meccaniche):
-61 Corner Star · 62 Long Nap (gatto da lasciar dormire 10 s) · 63 Short Fuse (bomba, 6 s) · 64 Copycat Maestro ·
-65 Trap Maze 3 · 66 Hold Tight (9 s) · 67 Sticky Cookie · 68 Fast Beeps (morse veloce) · 69 Pitch Black ·
-70 Shell Storm (20 scambi) · 71 Total Silence (3 s a volume zero) · 72 Bodyguard 3 · 73 Wasp Hall ·
-74 Deep Sleep (10 s) · 75 Master Code (6 cifre) · 76 Thirsty Tree (6 gocce sulla mensola) · 77 Spiral ·
-78 Heavy Safe · 79 Scalding Soup · 80 Giant Balloon (20 pompate) · 81 Trap Maze 4 · 82 Quick Wire (7 s) ·
-83 Wasp King (20 colpi) · 84 Staring Contest (6 s) · 85 Heat Wave · 86 Blackout · 87 Alarm Marathon ·
-88 Precise Pizza · 89 Glacier · 90 Upside Down · 91 Long Crank · 92 Apple Storm (8 mele) · 93 Windy Wish ·
-94 Wasp Corner · 95 Tiny Push (spinta debole) · 96 Storm Fire · 97 Trap Maze 5 · 98 Lights Out · 99 Grand Maze ·
-100 Wasp Finale.
+Livelli 61-100 — terza ondata (labirinti nuovi, livelli nuovi e varianti):
+61 Double Sting (due vespe) · 62 Bridge Builder (disegna il ponte) · 63 Short Fuse · 64 Copycat Maestro ·
+65 Trap Maze 3 · 66 Magic Rune (ricopia le rune) · 67 Sticky Cookie · 68 Five Beeps (morse a 5 suoni) ·
+69 Pitch Black (vespa nel buio) · 70 Shell Storm · 71 Total Silence (volume zero e silenzio) · 72 Bodyguard 3 (due vespe) ·
+73 Wasp Hall (due vespe) · 74 Two Doors (chiavi nascoste, ragazza o mostro) · 75 Master Code · 76 Thirsty Tree (raffiche) ·
+77 Spiral · 78 Heavy Safe · 79 Scalding Soup · 80 Giant Balloon · 81 Trap Maze 4 · 82 Quick Wire · 83 Wasp King ·
+84 Staring Contest · 85 Heat Wave · 86 Blackout · 87 Alarm Marathon · 88 Precise Pizza · 89 Glacier · 90 Upside Down ·
+91 Long Crank · 92 Apple Storm · 93 Windy Wish · 94 Wasp Corner · 95 Tiny Push · 96 Storm Fire (pioggia) ·
+97 Trap Maze 5 · 98 Lights Out · 99 Grand Maze · 100 Wasp Finale (due vespe).
 
 Istruzioni per aprire il progetto e creare l'APK: vedi [README_SETUP.md](README_SETUP.md).

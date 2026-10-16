@@ -443,7 +443,7 @@ namespace Gotcha.EditorArt
         }
 
         /// <summary>Punta della chiave dipinta nella natura morta (coordinate del quadro) e sua scala.</summary>
-        public const float StillLifeKeyX = 0.62f, StillLifeKeyY = -0.42f, StillLifeKeyScale = 0.45f;
+        public const float StillLifeKeyX = 0.38f, StillLifeKeyY = 0.5f, StillLifeKeyScale = 0.36f;
 
         /// <summary>
         /// Natura morta in cornice dorata (centro 0,0): tovaglia, fruttiera, brocca, candela... e una chiave sul tavolo,
@@ -462,7 +462,16 @@ namespace Gotcha.EditorArt
                 float n = Noise.Value(x * 6f, y * 6f) * 0.08f;
                 return Rgba.Lerp(Rgba.Hex("5A3A2E"), Rgba.Hex("2E1F1C"), Clamp((y + 0.2f) / 0.9f + n));
             });
+            // la chiave è appesa nel fondo scuro, dipinta quasi negli stessi toni (niente bordo, niente riflesso):
+            // si vede solo guardando bene. Le pennellate del fondo ci passano sopra.
+            Sdf key = KeyShape(StillLifeKeyScale, StillLifeKeyX, StillLifeKeyY);
+            if (withKey)
+                p.FillFunc(key, (x, y) => Rgba.Lerp(Rgba.Hex("7A5A40"), Rgba.Hex("5C4130"), Clamp((StillLifeKeyY + 0.08f - y) / 0.16f + Noise.Value(x * 14f, y * 14f) * 0.25f)));
+            else
+                p.Fill(key, Rgba.Hex("6E4E3C"));   // dove c'era la chiave il fondo è un po' più chiaro
             p.Hatch(canvas, Rgba.Hex("6B4A3A", 0.35f), 0.09f, 0.03f, 35f);
+            // un chiodo sopra la chiave (anche lui scuro)
+            p.Fill(Sd.Circle(StillLifeKeyX - 0.95f * StillLifeKeyScale, StillLifeKeyY + 0.17f, 0.018f), Rgba.Hex("3A2A22"));
             // tavolo con tovaglia
             Sdf table = Sd.Intersect(canvas, Sd.Box(0, -0.5f, 1f, 0.22f));
             p.FillFunc(table, (x, y) => Rgba.Lerp(Rgba.Hex("D9C8A6"), Rgba.Hex("B79E74"), Clamp((-0.3f - y) / 0.4f + Noise.Value(x * 9f, y * 9f) * 0.15f)));
@@ -481,20 +490,10 @@ namespace Gotcha.EditorArt
             Body(p, Sd.Union(Sd.Circle(0.25f, 0.02f, 0.09f), Sd.Circle(0.27f, 0.13f, 0.06f)), Rgba.Hex("B8B04A"), Rgba.Hex("857F2C"));
             for (int i = 0; i < 6; i++) p.Shape(Sd.Circle(-0.26f + (i % 3) * 0.07f, 0.05f - (i / 3) * 0.07f, 0.045f), Rgba.Hex("6B3E7A"), 0.012f);
             Body(p, Sd.Intersect(Sd.Ellipse(0, -0.2f, 0.38f, 0.16f), Sd.Box(0, -0.28f, 0.4f, 0.1f)), Rgba.Hex("C9A36A"), Rgba.Hex("9C7A45"));
-            // la chiave, dipinta come tutto il resto (ombra sul tavolo compresa)
-            Sdf key = KeyShape(StillLifeKeyScale, StillLifeKeyX, StillLifeKeyY);
-            if (withKey)
-            {
-                p.Fill(Sd.Offset(key, 0.02f, -0.025f), Rgba.Hex("8F7550", 0.6f));
-                p.FillFunc(key, (x, y) => Rgba.Lerp(Rgba.Hex("D6A84A"), Rgba.Hex("9C7430"), Clamp((StillLifeKeyY + 0.1f - y) / 0.2f + Noise.Value(x * 14f, y * 14f) * 0.2f)));
-                p.Line(Rgba.Hex("F0D58A", 0.8f), 0.012f, StillLifeKeyX - 0.25f, StillLifeKeyY + 0.015f, StillLifeKeyX - 0.06f, StillLifeKeyY + 0.015f);
-                p.Shape(key, Rgba.Clear, 0.012f);
-            }
-            else
-            {
-                p.Fill(key, Rgba.Hex("E8DCC0"));   // dove c'era la chiave la tela è rimasta chiara
-                p.Shape(key, Rgba.Clear, 0.008f);
-            }
+            // esche sul tavolo: una forchetta e un cucchiaio dorati (sembrano chiavi, ma non lo sono)
+            p.Shape(Sd.Union(Sd.Box(0.52f, -0.45f, 0.2f, 0.022f, 0.02f), Sd.Box(0.75f, -0.45f, 0.05f, 0.05f, 0.01f)), Rgba.Hex("D6A84A"), 0.012f);
+            for (int i = 0; i < 3; i++) p.Line(Rgba.Hex("D6A84A"), 0.015f, 0.8f, -0.42f + i * -0.03f, 0.88f, -0.42f + i * -0.03f);
+            p.Shape(Sd.Union(Sd.Box(-0.42f, -0.52f, 0.17f, 0.02f, 0.02f), Sd.Ellipse(-0.2f, -0.52f, 0.07f, 0.045f)), Rgba.Hex("D6A84A"), 0.012f);
             p.Shape(canvas, Rgba.Clear, 0.035f);
             return new DoodleArt(name, p);
         }

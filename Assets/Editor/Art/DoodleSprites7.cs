@@ -237,66 +237,92 @@ namespace Gotcha.EditorArt
         };
         public static readonly MazeSeg DarkMaze5Gate = new MazeSeg(1.65f, 0.50f, 2.75f, 0.50f, Rgba.Hex("FF3B4E"));
         public static readonly float[] DarkMaze5Spots = { -1.10f, 1.00f, 2.20f, 0.00f };   // chiave x,y; uscita x,y
+        /// <summary>Labirinto aperto per l'inseguimento: più strade (anelli) e qualche vicolo cieco.</summary>
         public static readonly MazeSeg[] WaspMaze3 =
         {
             new MazeSeg(-2.75f, -3.50f, 2.75f, -3.50f, NeonCyan),
             new MazeSeg(-2.75f, 3.50f, 2.75f, 3.50f, NeonCyan),
             new MazeSeg(-2.75f, -3.50f, -2.75f, 3.50f, NeonCyan),
             new MazeSeg(2.75f, -3.50f, 2.75f, 3.50f, NeonCyan),
-            new MazeSeg(-1.65f, -0.50f, -0.55f, -0.50f, NeonMagenta),
-            new MazeSeg(-2.75f, 0.50f, -1.65f, 0.50f, NeonYellow),
-            new MazeSeg(-0.55f, 0.50f, 1.65f, 0.50f, NeonMagenta),
-            new MazeSeg(-1.65f, 1.50f, -0.55f, 1.50f, NeonYellow),
-            new MazeSeg(1.65f, 1.50f, 2.75f, 1.50f, NeonMagenta),
-            new MazeSeg(-0.55f, 2.50f, 1.65f, 2.50f, NeonYellow),
-            new MazeSeg(-1.65f, -3.50f, -1.65f, -1.50f, NeonMagenta),
-            new MazeSeg(-1.65f, 0.50f, -1.65f, 1.50f, NeonYellow),
-            new MazeSeg(-0.55f, -2.50f, -0.55f, -1.50f, NeonMagenta),
-            new MazeSeg(0.55f, -2.50f, 0.55f, 0.50f, NeonYellow),
-            new MazeSeg(0.55f, 1.50f, 0.55f, 2.50f, NeonMagenta),
-            new MazeSeg(1.65f, -1.50f, 1.65f, -0.50f, NeonYellow),
+            new MazeSeg(-1.65f, -2.50f, -0.55f, -2.50f, NeonMagenta),
+            new MazeSeg(-1.65f, -1.50f, 0.55f, -1.50f, NeonYellow),
+            new MazeSeg(-0.55f, 0.50f, 0.55f, 0.50f, NeonMagenta),
+            new MazeSeg(-1.65f, 1.50f, 0.55f, 1.50f, NeonYellow),
+            new MazeSeg(-2.75f, 2.50f, -1.65f, 2.50f, NeonMagenta),
+            new MazeSeg(0.55f, 2.50f, 1.65f, 2.50f, NeonYellow),
+            new MazeSeg(-1.65f, -0.50f, -1.65f, 1.50f, NeonMagenta),
+            new MazeSeg(-0.55f, -1.50f, -0.55f, -0.50f, NeonYellow),
+            new MazeSeg(0.55f, -2.50f, 0.55f, -1.50f, NeonMagenta),
+            new MazeSeg(0.55f, -0.50f, 0.55f, 1.50f, NeonYellow),
+            new MazeSeg(0.55f, 2.50f, 0.55f, 3.50f, NeonMagenta),
+            new MazeSeg(1.65f, -1.50f, 1.65f, 2.50f, NeonYellow),
         };
+        /// <summary>Labirinto aperto per l'inseguimento: più strade (anelli) e qualche vicolo cieco.</summary>
         public static readonly MazeSeg[] WaspMaze4 =
         {
             new MazeSeg(-2.75f, -3.50f, 2.75f, -3.50f, NeonCyan),
             new MazeSeg(-2.75f, 3.50f, 2.75f, 3.50f, NeonCyan),
             new MazeSeg(-2.75f, -3.50f, -2.75f, 3.50f, NeonCyan),
             new MazeSeg(2.75f, -3.50f, 2.75f, 3.50f, NeonCyan),
-            new MazeSeg(-2.75f, -2.50f, -1.65f, -2.50f, NeonMagenta),
-            new MazeSeg(0.55f, -1.50f, 1.65f, -1.50f, NeonYellow),
-            new MazeSeg(-1.65f, -0.50f, 1.65f, -0.50f, NeonMagenta),
-            new MazeSeg(-1.65f, 0.50f, -0.55f, 0.50f, NeonYellow),
-            new MazeSeg(1.65f, 0.50f, 2.75f, 0.50f, NeonMagenta),
-            new MazeSeg(-1.65f, 1.50f, 0.55f, 1.50f, NeonYellow),
-            new MazeSeg(-1.65f, 2.50f, 2.75f, 2.50f, NeonMagenta),
-            new MazeSeg(-1.65f, -2.50f, -1.65f, -1.50f, NeonYellow),
-            new MazeSeg(-0.55f, -3.50f, -0.55f, -2.50f, NeonMagenta),
-            new MazeSeg(0.55f, -3.50f, 0.55f, -2.50f, NeonYellow),
+            new MazeSeg(-0.55f, -2.50f, 0.55f, -2.50f, NeonMagenta),
+            new MazeSeg(-1.65f, -1.50f, -0.55f, -1.50f, NeonYellow),
+            new MazeSeg(0.55f, -1.50f, 1.65f, -1.50f, NeonMagenta),
+            new MazeSeg(-0.55f, -0.50f, 0.55f, -0.50f, NeonYellow),
+            new MazeSeg(-0.55f, 0.50f, 1.65f, 0.50f, NeonMagenta),
+            new MazeSeg(-1.65f, 1.50f, 2.75f, 1.50f, NeonYellow),
+            new MazeSeg(-1.65f, 2.50f, 1.65f, 2.50f, NeonMagenta),
+            new MazeSeg(-1.65f, -0.50f, -1.65f, 0.50f, NeonYellow),
+            new MazeSeg(-0.55f, -1.50f, -0.55f, -0.50f, NeonMagenta),
+            new MazeSeg(0.55f, -2.50f, 0.55f, -1.50f, NeonYellow),
             new MazeSeg(0.55f, -0.50f, 0.55f, 0.50f, NeonMagenta),
-            new MazeSeg(1.65f, -2.50f, 1.65f, -1.50f, NeonYellow),
+            new MazeSeg(1.65f, -2.50f, 1.65f, -0.50f, NeonYellow),
         };
+        /// <summary>Labirinto aperto per l'inseguimento: più strade (anelli) e qualche vicolo cieco.</summary>
         public static readonly MazeSeg[] WaspMaze5 =
         {
             new MazeSeg(-2.75f, -3.50f, 2.75f, -3.50f, NeonCyan),
             new MazeSeg(-2.75f, 3.50f, 2.75f, 3.50f, NeonCyan),
             new MazeSeg(-2.75f, -3.50f, -2.75f, 3.50f, NeonCyan),
             new MazeSeg(2.75f, -3.50f, 2.75f, 3.50f, NeonCyan),
-            new MazeSeg(-2.75f, -2.50f, -0.55f, -2.50f, NeonMagenta),
-            new MazeSeg(1.65f, -2.50f, 2.75f, -2.50f, NeonYellow),
-            new MazeSeg(-0.55f, -1.50f, 0.55f, -1.50f, NeonMagenta),
-            new MazeSeg(-0.55f, -0.50f, 0.55f, -0.50f, NeonYellow),
-            new MazeSeg(-0.55f, 1.50f, 1.65f, 1.50f, NeonMagenta),
-            new MazeSeg(-1.65f, 2.50f, -0.55f, 2.50f, NeonYellow),
-            new MazeSeg(0.55f, 2.50f, 1.65f, 2.50f, NeonMagenta),
-            new MazeSeg(-1.65f, -2.50f, -1.65f, -0.50f, NeonYellow),
-            new MazeSeg(-1.65f, 0.50f, -1.65f, 2.50f, NeonMagenta),
-            new MazeSeg(-0.55f, 2.50f, -0.55f, 3.50f, NeonYellow),
-            new MazeSeg(0.55f, -3.50f, 0.55f, -2.50f, NeonMagenta),
-            new MazeSeg(0.55f, -0.50f, 0.55f, 0.50f, NeonYellow),
-            new MazeSeg(1.65f, -1.50f, 1.65f, 0.50f, NeonMagenta),
-            new MazeSeg(1.65f, 1.50f, 1.65f, 2.50f, NeonYellow),
+            new MazeSeg(-2.75f, -2.50f, -1.65f, -2.50f, NeonMagenta),
+            new MazeSeg(-0.55f, -2.50f, 0.55f, -2.50f, NeonYellow),
+            new MazeSeg(-1.65f, -1.50f, -0.55f, -1.50f, NeonMagenta),
+            new MazeSeg(0.55f, -1.50f, 1.65f, -1.50f, NeonYellow),
+            new MazeSeg(-2.75f, -0.50f, -1.65f, -0.50f, NeonMagenta),
+            new MazeSeg(-1.65f, 0.50f, -0.55f, 0.50f, NeonYellow),
+            new MazeSeg(1.65f, 0.50f, 2.75f, 0.50f, NeonMagenta),
+            new MazeSeg(-2.75f, 1.50f, -1.65f, 1.50f, NeonYellow),
+            new MazeSeg(-1.65f, 1.50f, -1.65f, 2.50f, NeonMagenta),
+            new MazeSeg(-0.55f, -1.50f, -0.55f, 2.50f, NeonYellow),
+            new MazeSeg(0.55f, -2.50f, 0.55f, -1.50f, NeonMagenta),
+            new MazeSeg(0.55f, -0.50f, 0.55f, 2.50f, NeonYellow),
+            new MazeSeg(1.65f, -3.50f, 1.65f, -2.50f, NeonMagenta),
+            new MazeSeg(1.65f, -1.50f, 1.65f, -0.50f, NeonYellow),
         };
 
+        /// <summary>Labirinto aperto per l'inseguimento con due vespe (livello 61).</summary>
+        public static readonly MazeSeg[] WaspMaze6 =
+        {
+            new MazeSeg(-2.75f, -3.50f, 2.75f, -3.50f, NeonCyan),
+            new MazeSeg(-2.75f, 3.50f, 2.75f, 3.50f, NeonCyan),
+            new MazeSeg(-2.75f, -3.50f, -2.75f, 3.50f, NeonCyan),
+            new MazeSeg(2.75f, -3.50f, 2.75f, 3.50f, NeonCyan),
+            new MazeSeg(-1.65f, -1.50f, -0.55f, -1.50f, NeonMagenta),
+            new MazeSeg(1.65f, -1.50f, 2.75f, -1.50f, NeonYellow),
+            new MazeSeg(-1.65f, -0.50f, 1.65f, -0.50f, NeonMagenta),
+            new MazeSeg(0.55f, 1.50f, 1.65f, 1.50f, NeonYellow),
+            new MazeSeg(1.65f, 2.50f, 2.75f, 2.50f, NeonMagenta),
+            new MazeSeg(-1.65f, -1.50f, -1.65f, -0.50f, NeonYellow),
+            new MazeSeg(-1.65f, 0.50f, -1.65f, 1.50f, NeonMagenta),
+            new MazeSeg(-0.55f, -3.50f, -0.55f, -1.50f, NeonYellow),
+            new MazeSeg(-0.55f, 0.50f, -0.55f, 2.50f, NeonMagenta),
+            new MazeSeg(0.55f, -1.50f, 0.55f, 0.50f, NeonYellow),
+            new MazeSeg(0.55f, 1.50f, 0.55f, 2.50f, NeonMagenta),
+            new MazeSeg(1.65f, -2.50f, 1.65f, -1.50f, NeonYellow),
+            new MazeSeg(1.65f, 0.50f, 1.65f, 1.50f, NeonMagenta),
+        };
+
+        public static DoodleArt WaspMaze6Neon() { return NeonMaze("maze_waspmaze6", WaspMaze6); }
         public static DoodleArt Maze3Neon() { return NeonMaze("maze_maze3", Maze3); }
         public static DoodleArt Maze4Neon() { return NeonMaze("maze_maze4", Maze4); }
         public static DoodleArt Maze5Neon() { return NeonMaze("maze_maze5", Maze5); }

@@ -266,6 +266,33 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.24 (correzioni dopo il primo giro di prove)
+- **Tutti i livelli sono sbloccati** nella selezione (`GameFlow.UnlockAllLevels`, da rimettere a `false` per il rilascio).
+- **9 Bug Spray** (nuovo): tieni il dito sullo schermo, lo spray esce verso l'alto; 1.3 s nella nuvola uccidono lo
+  scarafaggio, la bomboletta dura 7 s (`poisonNeeded`, `sprayCapacity`). La vespa con la paletta resta nei livelli 52 e 83.
+- **10**: la chiave è appesa nel fondo scuro del quadro, negli stessi toni; forchetta e cucchiaio sul tavolo fanno da esca.
+- **11**: alla fine gli occhi rientrano dal lato da cui sono usciti, con un arco, e cadono nella pozzanghera.
+- **12/46/72**: barriere controllate anche mentre si disegnano; la vespa punge solo se tra lei e il gatto non c'è una
+  linea. 72: due vespe, e le linee che non toccano il gatto vengono spinte via a ogni urto (`pushUnanchored`).
+- **14/45/67**: gravità più "vera" (28), meno attrito dell'aria; il biscotto si spezza se sbatte oltre `breakImpact`.
+- **15/49/93**: Easter egg `candle_storm` soffiando fortissimo (Editor: N; B = soffio normale).
+- **21/91**: trasformazione in Mecha con fulmini, raggiera, pezzi d'armatura in volo, lampo, GATTAI!!, atterraggio.
+- **22/79, 32**: urletto del topolino (`ScreamSynth.Mouse`). **32**: ricetta casuale (3-4 ingredienti) disegnata col gesso
+  con i nomi; esattamente quelli, niente di più. Le fette spariscono quando i topi le mangiano. Fiamme e lingua animate.
+- **25/56/87**: inchiostro limitato, staccionate più corte di 1.4 scavalcate, 25 s prima che si svegli il vicino.
+- **26/50/76**: fionda più centrale (si può tirare troppo lungo), vento (manica a vento e strisce), uccellino di
+  passaggio: Easter egg `angry_bird`. 76: raffiche di 1-4 s con pause di 2-4 s.
+- **27**: la codina sbuca solo dopo il mescolamento. **28/82**: filo e indovinello casuali tra 6 colori. **29**: naso giusto.
+- **35/42 e 38/58/92**: padella e cesto filtrati (niente tremolio; lo scossone non li sposta).
+- **Labirinti**: colori che sfumano alle giunzioni, sfera più controllabile (gravità più dolce + attrito), buche più piccole.
+- **Vespe nei labirinti** (36, 60, 61, 73, 94, 100 e 69 al buio): seguono la strada più breve lungo i corridoi
+  (`MazeChaser`); labirinti aperti con anelli e qualche vicolo cieco; 61, 73 e 100 con due vespe. 69: la vespa dorme
+  finché la luce non la tocca, e il ronzio cresce avvicinandosi.
+- **39/53/95**: la biglia si ferma nella tazza. **55/84**: il topolino cambia tana ogni 3 s (2.5 nell'84).
+- **59/96**: pioggia, ombrello da trascinare (troppo vicino brucia: Easter egg `burnt_umbrella`), il topolino congela.
+- **62 Bridge Builder**, **66 Magic Rune** (riconoscimento del disegno, `ShapeRecognizer`), **74 Two Doors**: nuovi.
+- **68 Five Beeps**: segnali da cinque suoni. **71**: a volume zero il microfono ascolta: un rumore sveglia il gatto (Editor: M).
+
 ## Livelli 61-100 e Pancake più facile (0.23)
 - 61-100: altri 13 labirinti a griglia (`DoodleSprites7.cs`, percorso verificato) e 27 varianti con parametri più
   severi (`VariantLevels2`). Gli Easter egg delle varianti (zuppa, sole, robot) sono gli stessi dell'originale.

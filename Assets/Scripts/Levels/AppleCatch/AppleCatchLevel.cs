@@ -30,8 +30,9 @@ namespace Gotcha.Levels
         readonly List<Falling> falling = new List<Falling>();
         readonly List<Transform> onTree = new List<Transform>();
         int caught, lost;
-        float cooldown, baseline;
-        bool primed, done;
+        float cooldown;
+        bool done;
+        readonly SteadyTilt steady = new SteadyTilt { shakeLevel = 8f, shakeHold = 0.5f };
         Vector3 treeHome;
 
         public override void OnLevelStart()
@@ -45,10 +46,9 @@ namespace Gotcha.Levels
         void Update()
         {
             if (done || IsFinished) return;
-            Vector3 t = SensorHub.Instance != null ? SensorHub.Instance.Tilt : Vector3.zero;
-            if (!primed) { primed = true; baseline = t.x; }
-            float bx = Mathf.Clamp((t.x - baseline) * 4.5f, -basketRange, basketRange);
-            basket.position = new Vector3(Mathf.Lerp(basket.position.x, bx, 1f - Mathf.Exp(-12f * Time.deltaTime)), basket.position.y, basket.position.z);
+            // filtrata: niente tremolio, e scuotere l'albero non sposta il cesto
+            float bx = Mathf.Clamp(steady.Update(Time.deltaTime) * 5f, -basketRange, basketRange);
+            basket.position = new Vector3(Mathf.Lerp(basket.position.x, bx, 1f - Mathf.Exp(-7f * Time.deltaTime)), basket.position.y, basket.position.z);
 
             float shake = SensorHub.Instance != null ? SensorHub.Instance.ShakeStrength : 0f;
 #if UNITY_EDITOR

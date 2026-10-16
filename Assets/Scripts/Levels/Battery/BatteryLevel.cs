@@ -39,6 +39,13 @@ namespace Gotcha.Levels
         [SerializeField] SpriteRenderer flash;
         [SerializeField] SmokeEmitter sparks;
         [SerializeField] string eggId = "mecha_robot";
+        [SerializeField] SpriteRenderer dim;          // velo scuro dietro al robot
+        [SerializeField] Transform rays;              // raggiera che gira
+        [SerializeField] Transform shockRing;
+        [SerializeField] Transform[] armor;           // pezzi d'armatura che arrivano in volo
+        [SerializeField] LineRenderer[] lightning;    // archi elettrici attorno al robot
+        [SerializeField] TextMesh banner;             // "GATTAI!!"
+        [SerializeField] AudioSource sfx;
 
         bool armed, done, cranking, cranked;
         float lastAngle;
@@ -58,6 +65,12 @@ namespace Gotcha.Levels
             if (robotMecha != null) robotMecha.SetActive(false);
             if (aura != null) aura.color = new Color(1f, 1f, 1f, 0f);
             if (flash != null) flash.color = new Color(1f, 1f, 1f, 0f);
+            if (dim != null) dim.color = new Color(0f, 0f, 0f, 0f);
+            if (rays != null) rays.gameObject.SetActive(false);
+            if (shockRing != null) shockRing.gameObject.SetActive(false);
+            if (banner != null) banner.gameObject.SetActive(false);
+            if (armor != null) foreach (Transform a in armor) if (a != null) a.gameObject.SetActive(false);
+            if (lightning != null) foreach (LineRenderer l in lightning) if (l != null) l.enabled = false;
             // si registra sempre: se parte la trasformazione, il video è pronto da condividere
             if (ClipRecorder.Instance != null) ClipRecorder.Instance.Begin();
             if (crank != null) crank.SetActive(false);
@@ -174,48 +187,183 @@ namespace Gotcha.Levels
                 yield break;
             }
             // caricatore vero: 100%... e poi sovraccarico! Il robot si evolve in un robot da battaglia
+            yield return Evolve();
+        }
+
+        Vector3 Center => robot.position + new Vector3(0f, 1.9f, 0f);
+
+        /// <summary>
+        /// Trasformazione "da anime": fulmini e tremori, il robot si solleva bianco incandescente davanti a una raggiera,
+        /// i pezzi dell'armatura arrivano in volo uno a uno (clang!), lampo, GATTAI!!, atterraggio con onda d'urto.
+        /// </summary>
+        IEnumerator Evolve()
+        {
+            SpriteRenderer onArt = robotOn != null ? robotOn.GetComponent<SpriteRenderer>() : null;
             if (robotOn != null) robotOn.SetActive(true);
             if (bubble != null) bubble.Show("100%! ...wait... MORE?!");
             Vector3 home = robotHome;
-            for (float k = 0f; k < 1.6f; k += Time.deltaTime)
+            Transform level = transform;
+            Vector3 levelHome = level.localPosition;
+
+            // 1. sovraccarico: trema sempre di più, scintille e archi elettrici
+            for (float k = 0f; k < 1.8f; k += Time.deltaTime)
             {
-                float e = k / 1.6f;
-                robot.localPosition = home + (Vector3)(Random.insideUnitCircle * 0.06f * e);   // trema sempre di più
-                if (aura != null) aura.color = new Color(0.6f, 0.95f, 1f, e * 0.9f);
-                if (aura != null) aura.transform.localScale = Vector3.one * (6f + Mathf.Sin(k * 30f) * 0.6f);
+                float e = k / 1.8f;
+                robot.localPosition = home + (Vector3)(Random.insideUnitCircle * 0.07f * e);
+                if (aura != null) { aura.color = new Color(0.6f, 0.95f, 1f, e * 0.9f); aura.transform.localScale = Vector3.one * (6f + Mathf.Sin(k * 30f) * 0.6f); }
                 if (sparks != null && k > 0.3f) sparks.Play();
+                Zap(e);
+                if (k > 1.2f) level.localPosition = levelHome + (Vector3)(Random.insideUnitCircle * 0.05f);
                 yield return null;
             }
+            level.localPosition = levelHome;
             if (bubble != null) bubble.Show("OVERCHARGE!!!");
             if (batteryUi != null) batteryUi.SetActive(false);
-            // lampo bianco: durante il lampo il robot cambia
-            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.15f) { if (flash != null) flash.color = new Color(1f, 1f, 1f, k); yield return null; }
+
+            // 2. si solleva, bianco incandescente, davanti alla raggiera; lo sfondo si oscura
+            if (rays != null) rays.gameObject.SetActive(true);
+            Vector3 up = home + Vector3.up * 1.1f;
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.8f)
+            {
+                float e = Mathf.SmoothStep(0f, 1f, k);
+                robot.localPosition = Vector3.Lerp(home, up, e) + (Vector3)(Random.insideUnitCircle * 0.03f);
+                if (dim != null) dim.color = new Color(0.05f, 0.03f, 0.12f, 0.8f * e);
+                if (rays != null) { rays.localScale = Vector3.one * Mathf.Lerp(0.2f, 1.6f, e); rays.Rotate(0, 0, 90f * Time.deltaTime); }
+                if (onArt != null) onArt.color = Color.Lerp(Color.white, new Color(2f, 2f, 2.4f), e);
+                Zap(1f);
+                yield return null;
+            }
+            if (sparks != null) sparks.Stop();
+            Zap(-1f);
+
+            // 3. i pezzi dell'armatura arrivano dai bordi e si agganciano, uno dopo l'altro
+            if (armor != null)
+                for (int i = 0; i < armor.Length; i++)
+                {
+                    Transform piece = armor[i];
+                    if (piece == null) continue;
+                    piece.gameObject.SetActive(true);
+                    float side = i % 2 == 0 ? -1f : 1f;
+                    Vector3 from = Center + new Vector3(side * 4.5f, 2.5f - i * 1.2f, 0f);
+                    Vector3 to = Center + new Vector3(side * 0.15f, 0.6f - i * 0.35f, 0f);
+                    for (float k = 0f; k < 1f; k += Time.deltaTime / 0.28f)
+                    {
+                        piece.position = Vector3.Lerp(from, to, k * k);
+                        piece.Rotate(0, 0, side * -900f * Time.deltaTime);
+                        if (rays != null) rays.Rotate(0, 0, 90f * Time.deltaTime);
+                        yield return null;
+                    }
+                    piece.rotation = Quaternion.identity;
+                    if (sparks != null) { sparks.transform.position = to; sparks.Play(); }
+                    if (sfx != null) sfx.PlayOneShot(Clang());
+                    level.localPosition = levelHome + (Vector3)(Random.insideUnitCircle * 0.08f);
+                    for (float k = 0f; k < 1f; k += Time.deltaTime / 0.12f)
+                    {
+                        piece.localScale = Vector3.one * Mathf.Lerp(1.3f, 0.2f, k);   // si fonde col corpo
+                        yield return null;
+                    }
+                    level.localPosition = levelHome;
+                    if (sparks != null) sparks.Stop();
+                    piece.gameObject.SetActive(false);
+                }
+
+            // 4. lampo bianco: durante il lampo il robot diventa un robot da battaglia
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.12f) { if (flash != null) flash.color = new Color(1f, 1f, 1f, k); yield return null; }
             if (robotOn != null) robotOn.SetActive(false);
             if (robotMecha != null) robotMecha.SetActive(true);
             home = robotHome + new Vector3(0.5f, 0f, 0f);   // il robot da battaglia è più grosso: un passo verso il centro
-            robot.localPosition = home;
-            if (sparks != null) sparks.Stop();
-            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.6f)
+            up = home + Vector3.up * 1.1f;
+            robot.localPosition = up;
+            if (banner != null) banner.gameObject.SetActive(true);
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.5f)
             {
                 if (flash != null) flash.color = new Color(1f, 1f, 1f, 1f - k);
                 if (aura != null) aura.color = new Color(1f, 0.85f, 0.4f, (1f - k) * 0.9f);
-                float pop = 1f + Mathf.Sin(k * Mathf.PI) * 0.15f;   // "TA-DA!"
-                if (robotMecha != null) robotMecha.transform.localScale = Vector3.one * pop;
+                if (banner != null) banner.transform.localScale = Vector3.one * (k < 0.4f ? Mathf.Lerp(3f, 0.85f, k / 0.4f) : Mathf.Lerp(0.85f, 1f, (k - 0.4f) / 0.6f));
+                if (rays != null) rays.Rotate(0, 0, 120f * Time.deltaTime);
                 yield return null;
             }
-            if (robotMecha != null) robotMecha.transform.localScale = Vector3.one;
-            if (bubble != null) bubble.Show("ARIGATO, MASTER!");
-            // posa da eroe: piccolo salto e atterraggio pesante
-            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.5f)
+
+            // 5. atterraggio pesante con onda d'urto
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.25f)
             {
-                robot.localPosition = home + Vector3.up * Mathf.Sin(k * Mathf.PI) * 0.4f;
+                robot.localPosition = Vector3.Lerp(up, home, k * k);
+                if (rays != null) rays.Rotate(0, 0, 120f * Time.deltaTime);
                 yield return null;
             }
             robot.localPosition = home;
-            if (sparks != null) { sparks.Play(); yield return new WaitForSeconds(0.15f); sparks.Stop(); }
-            yield return new WaitForSeconds(1.6f);
+            if (sfx != null) sfx.PlayOneShot(Clang());
+            if (shockRing != null) shockRing.gameObject.SetActive(true);
+            SpriteRenderer ring = shockRing != null ? shockRing.GetComponent<SpriteRenderer>() : null;
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.6f)
+            {
+                level.localPosition = levelHome + (Vector3)(Random.insideUnitCircle * 0.12f * (1f - k));
+                if (shockRing != null) { shockRing.position = robot.position + new Vector3(0f, 0.2f, 0f); shockRing.localScale = new Vector3(1f, 0.35f, 1f) * Mathf.Lerp(0.5f, 4.5f, k); }
+                if (ring != null) ring.color = new Color(1f, 1f, 1f, 1f - k);
+                if (rays != null) rays.Rotate(0, 0, 120f * Time.deltaTime);
+                yield return null;
+            }
+            level.localPosition = levelHome;
+            if (shockRing != null) shockRing.gameObject.SetActive(false);
+            if (bubble != null) bubble.Show("ARIGATO, MASTER!");
+            if (sparks != null) { sparks.transform.position = robot.position + new Vector3(-1.1f, 1.2f, 0f); sparks.Play(); yield return new WaitForSeconds(0.2f); sparks.Stop(); }
+            for (float k = 0f; k < 1.6f; k += Time.deltaTime)
+            {
+                if (rays != null) rays.Rotate(0, 0, 60f * Time.deltaTime);
+                yield return null;
+            }
+            // il velo scuro sparisce
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.4f)
+            {
+                if (dim != null) dim.color = new Color(0.05f, 0.03f, 0.12f, 0.8f * (1f - k));
+                if (rays != null) rays.localScale = Vector3.one * Mathf.Lerp(1.6f, 0f, k);
+                yield return null;
+            }
             if (ClipRecorder.Instance != null) ClipRecorder.Instance.Stop();
             WinWithEgg(eggId);
+        }
+
+        /// <summary>Archi elettrici a zig-zag attorno al robot (intensità 0..1; negativo = spenti).</summary>
+        void Zap(float intensity)
+        {
+            if (lightning == null) return;
+            foreach (LineRenderer lr in lightning)
+            {
+                if (lr == null) continue;
+                bool on = intensity > 0f && Random.value < 0.35f + intensity * 0.5f;
+                lr.enabled = on;
+                if (!on) continue;
+                Vector3 c = Center;
+                Vector3 a = c + (Vector3)(Random.insideUnitCircle.normalized * Random.Range(0.6f, 1.2f));
+                Vector3 b = c + (Vector3)(Random.insideUnitCircle.normalized * Random.Range(1.4f, 2.4f));
+                lr.positionCount = 6;
+                for (int i = 0; i < 6; i++)
+                {
+                    Vector3 p = Vector3.Lerp(a, b, i / 5f);
+                    if (i > 0 && i < 5) p += (Vector3)(Random.insideUnitCircle * 0.22f);
+                    lr.SetPosition(i, p);
+                }
+            }
+        }
+
+        static AudioClip clang;
+
+        /// <summary>"CLANG": colpo metallico sintetizzato (generato una volta).</summary>
+        static AudioClip Clang()
+        {
+            if (clang != null) return clang;
+            const int rate = 22050;
+            int n = rate / 2;
+            var data = new float[n];
+            for (int i = 0; i < n; i++)
+            {
+                float t = i / (float)rate;
+                float env = Mathf.Exp(-t * 9f);
+                data[i] = (Mathf.Sin(t * 2f * Mathf.PI * 523f) * 0.5f + Mathf.Sin(t * 2f * Mathf.PI * 1390f) * 0.3f + Mathf.Sin(t * 2f * Mathf.PI * 2210f) * 0.2f) * env * 0.5f;
+            }
+            clang = AudioClip.Create("clang", n, 1, rate, false);
+            clang.SetData(data, 0);
+            return clang;
         }
 
         IEnumerator HideLater(float seconds)

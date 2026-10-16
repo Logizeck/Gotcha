@@ -38,6 +38,12 @@ namespace Gotcha.Components
         [Tooltip("Facoltativo: se vuoto si usa lo shader degli sprite.")]
         public Material material;
 
+        [Tooltip("Lunghezza massima del tratto in corso (0 = libera): oltre, la linea smette di allungarsi.")]
+        public float maxStrokeLength = 0f;
+        /// <summary>Lunghezza (unità mondo) del tratto che si sta disegnando.</summary>
+        public float CurrentLength { get; private set; }
+        public bool IsDrawing => drawing != null;
+
         public bool HasStroke => strokes.Count > 0;
         /// <summary>Punti dell'ultimo tratto accettato, in coordinate locali di questo oggetto.</summary>
         public IReadOnlyList<Vector3> LastStrokePoints => lastPoints;
@@ -130,6 +136,7 @@ namespace Gotcha.Components
                 drawingLines.Add(lr);
             }
             points.Clear();
+            CurrentLength = 0f;
             AddPoint(world);
         }
 
@@ -138,6 +145,12 @@ namespace Gotcha.Components
             Vector3 local = transform.InverseTransformPoint(new Vector3(world.x, world.y, transform.position.z));
             local.z = 0f;
             if (points.Count > 0 && (points[points.Count - 1] - local).sqrMagnitude < 0.0009f) return;
+            if (points.Count > 0)
+            {
+                float seg = Vector3.Distance(transform.TransformPoint(points[points.Count - 1]), transform.TransformPoint(local));
+                if (maxStrokeLength > 0f && CurrentLength + seg > maxStrokeLength) return;   // inchiostro finito
+                CurrentLength += seg;
+            }
             points.Add(local);
             Vector3[] arr = points.ToArray();
             foreach (LineRenderer lr in drawingLines)

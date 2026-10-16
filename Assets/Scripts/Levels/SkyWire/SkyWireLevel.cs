@@ -5,9 +5,9 @@ using Gotcha.Components;
 namespace Gotcha.Levels
 {
     /// <summary>
-    /// Livello 28 — "taglia il filo del colore del cielo". Tre fili (rosso, verde, nero, in ordine casuale) collegano
-    /// la dinamite al timer. Si tagliano col dito (swipe). Il trucco: fuori dalla finestra è notte, quindi il filo
-    /// giusto è il NERO (di giorno sarebbe azzurro, ma un filo azzurro non c'è). Un taglio sbagliato, o il tempo che scade: BOOM.
+    /// Livello 28 — il filo giusto. Tre fili di colori presi a caso collegano la dinamite al timer; il biglietto dice
+    /// con un indovinello quale tagliare (anche quello scelto a caso: "il colore del cielo a mezzanotte" = nero,
+    /// "la pancia di un pupazzo di neve" = bianco...). Si tagliano col dito (swipe). Sbagliato, o tempo scaduto: BOOM.
     /// </summary>
     public class SkyWireLevel : LevelController
     {
@@ -23,23 +23,45 @@ namespace Gotcha.Levels
         [SerializeField] SpeechBubble bubble;
         [SerializeField] float seconds = 15f;
 
-        static readonly Color[] WireColors = { new Color(0.9f, 0.2f, 0.22f), new Color(0.25f, 0.78f, 0.3f), new Color(0.13f, 0.11f, 0.15f) };   // rosso, verde, nero
-        const int Black = 2;
+        [SerializeField] TextMesh note;
+
+        // rosso, verde, nero, blu, giallo, bianco
+        static readonly Color[] WireColors =
+        {
+            new Color(0.9f, 0.2f, 0.22f), new Color(0.25f, 0.78f, 0.3f), new Color(0.13f, 0.11f, 0.15f),
+            new Color(0.25f, 0.45f, 0.95f), new Color(1f, 0.85f, 0.2f), new Color(0.96f, 0.96f, 0.96f),
+        };
+        // indovinelli "sibillini", due per colore
+        static readonly string[][] Riddles =
+        {
+            new[] { "CUT THE WIRE\nAS SHY AS\nA RIPE TOMATO", "CUT THE WIRE\nTHE COLOR\nOF A STOP SIGN" },
+            new[] { "CUT THE WIRE\nOF GRASS\nAND ENVY", "CUT THE WIRE\nA FROG\nWOULD WEAR" },
+            new[] { "CUT THE WIRE\nTHE COLOR OF\nTHE SKY TONIGHT", "CUT THE WIRE\nOF A CAT\nNOBODY SEES" },
+            new[] { "CUT THE WIRE\nOF THE SEA\nAT NOON", "CUT THE WIRE\nTHE COLOR\nOF SAD MUSIC" },
+            new[] { "CUT THE WIRE\nOF A BANANA'S\nJACKET", "CUT THE WIRE\nTHE SUN\nWOULD PICK" },
+            new[] { "CUT THE WIRE\nOF A SNOWMAN'S\nBELLY", "CUT THE WIRE\nAS PALE AS\nA GHOST" },
+        };
 
         int[] colorAt = new int[3];
+        int target;
         float left;
         bool over;
 
         public override void OnLevelStart()
         {
             left = seconds;
-            // ordine dei colori casuale
-            var order = new System.Collections.Generic.List<int> { 0, 1, 2 };
+            // tre colori a caso (tutti diversi) e uno di loro è quello giusto
+            var order = new System.Collections.Generic.List<int> { 0, 1, 2, 3, 4, 5 };
             for (int i = 0; i < 3; i++)
             {
                 int j = Random.Range(0, order.Count);
                 colorAt[i] = order[j];
                 order.RemoveAt(j);
+            }
+            target = colorAt[Random.Range(0, 3)];
+            if (note != null) note.text = Riddles[target][Random.Range(0, 2)];
+            for (int i = 0; i < 3; i++)
+            {
                 Color c = WireColors[colorAt[i]];
                 if (topArt[i] != null) topArt[i].color = c;
                 if (bottomArt[i] != null) bottomArt[i].color = c;
@@ -67,7 +89,7 @@ namespace Gotcha.Levels
             if (over || IsFinished) return;
             StartCoroutine(Droop(i));
             if (sparks != null) { sparks.transform.position = cutters[i].transform.position; StartCoroutine(Burst()); }
-            if (colorAt[i] == Black) StartCoroutine(Defused());
+            if (colorAt[i] == target) StartCoroutine(Defused());
             else StartCoroutine(Boom());
         }
 
@@ -93,7 +115,7 @@ namespace Gotcha.Levels
         {
             over = true;
             if (display != null) { display.text = "--:--"; display.color = new Color(0.36f, 1f, 0.6f); }
-            if (bubble != null) bubble.Show("Phew! The sky IS black at night.");
+            if (bubble != null) bubble.Show("Phew! Riddle solved.");
             yield return new WaitForSeconds(1.8f);
             Win();
         }

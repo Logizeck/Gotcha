@@ -7,13 +7,12 @@ using Gotcha.Core;
 namespace Gotcha.Levels
 {
     /// <summary>
-    /// Livello 32 — pizza chef. Sei ciotole di ingredienti: si trascinano sulla pasta per condire la pizza. Quali
-    /// mettere lo suggerisce, senza dirlo, la lavagna sul muro: i disegnini di nonna (pomodoro, mozzarella, fungo,
-    /// oliva). Poi si trascina la pizza nel forno, si taglia in quattro (due tagli dal centro) e si dà una fetta
-    /// a ogni topolino.
-    /// - Condimenti giusti: festa. Manca qualcosa o c'è l'ananas: "Yuck!", si riprova.
-    /// - Easter egg `spicy_pizza`: col peperoncino i topi diventano paonazzi, furiosi, con gli occhi in fiamme e
-    ///   la lingua di fuori.
+    /// Livello 32 — pizza chef. Sei ciotole di ingredienti: si trascinano sulla pasta per condire la pizza. La ricetta
+    /// della nonna è sulla lavagna: 3 o 4 ingredienti scelti a caso a ogni partita, disegnati col gesso col nome sotto.
+    /// Poi si inforna, si taglia in quattro (due tagli dal centro) e si dà una fetta a ogni topolino, che la mangia.
+    /// - Esattamente la ricetta: festa. Manca qualcosa o c'è un ingrediente in più: "Yuck!", si riprova.
+    /// - Easter egg `spicy_pizza`: col peperoncino i topi strillano, diventano paonazzi e furiosi, con gli occhi in
+    ///   fiamme che divampano e la lingua penzolante.
     /// </summary>
     public class PizzaChefLevel : LevelController
     {
@@ -25,6 +24,11 @@ namespace Gotcha.Levels
         [SerializeField] Transform pizza;
         [SerializeField] float dropRadius = 1.2f;
         [SerializeField] string[] required = { "tomato", "mozzarella", "mushroom", "olive" };
+        [Header("Ricetta casuale sulla lavagna")]
+        [SerializeField] bool randomRecipe = true;
+        [SerializeField] SpriteRenderer[] recipeIcons;      // 4 posti sulla lavagna
+        [SerializeField] TextMesh[] recipeNames;
+        [SerializeField] Sprite[] chalkSprites;             // stesso ordine di RecipePool
 
         [Header("Forno")]
         [SerializeField] Collider2D ovenMouth;
@@ -58,6 +62,10 @@ namespace Gotcha.Levels
         readonly List<Vector3> trailPts = new List<Vector3>();
         readonly List<float> trailTimes = new List<float>();
         const float Radius = 1.1f;
+        static readonly string[] RecipePool = { "tomato", "mozzarella", "mushroom", "olive", "pineapple" };
+        static readonly string[] RecipeLabels = { "TOMATO", "MOZZARELLA", "MUSHROOMS", "OLIVES", "PINEAPPLE" };
+        AudioSource voice;
+        AudioClip squeak;
 
         public override void OnLevelStart()
         {
@@ -74,12 +82,48 @@ namespace Gotcha.Levels
             foreach (GameObject f in spicyFaces) if (f != null) f.SetActive(false);
             if (ovenGlow != null) ovenGlow.color = new Color(1f, 0.5f, 0.1f, 0f);
             if (cutMark != null) cutMark.enabled = false;
-            if (bubble != null) { bubble.Show("Pizza time! Grandma's recipe..."); StartCoroutine(HideLater(2.2f)); }
+            if (randomRecipe) PickRecipe();
+            ShowRecipe();
+            voice = gameObject.AddComponent<AudioSource>();
+            if (bubble != null) { bubble.Show("Pizza time! Grandma's recipe is on the board."); StartCoroutine(HideLater(2.4f)); }
             if (ClipRecorder.Instance != null) ClipRecorder.Instance.Begin();
+        }
+
+        /// <summary>3 o 4 ingredienti a caso (sempre almeno pomodoro o mozzarella); il peperoncino mai.</summary>
+        void PickRecipe()
+        {
+            var pool = new List<string>(RecipePool);
+            for (int i = pool.Count - 1; i > 0; i--) { int j = Random.Range(0, i + 1); (pool[i], pool[j]) = (pool[j], pool[i]); }
+            int n = Random.Range(3, 5);
+            var pick = pool.GetRange(0, n);
+            if (!pick.Contains("tomato") && !pick.Contains("mozzarella")) pick[n - 1] = Random.value < 0.5f ? "tomato" : "mozzarella";
+            pick.Sort((a, b) => System.Array.IndexOf(RecipePool, a).CompareTo(System.Array.IndexOf(RecipePool, b)));
+            required = pick.ToArray();
+        }
+
+        void ShowRecipe()
+        {
+            if (recipeIcons == null) return;
+            for (int i = 0; i < recipeIcons.Length; i++)
+            {
+                bool on = i < required.Length;
+                int k = on ? System.Array.IndexOf(RecipePool, required[i]) : -1;
+                if (recipeIcons[i] != null)
+                {
+                    recipeIcons[i].gameObject.SetActive(on && k >= 0);
+                    if (on && k >= 0 && chalkSprites != null && k < chalkSprites.Length) recipeIcons[i].sprite = chalkSprites[k];
+                }
+                if (recipeNames != null && i < recipeNames.Length && recipeNames[i] != null)
+                {
+                    recipeNames[i].gameObject.SetActive(on && k >= 0);
+                    if (on && k >= 0) recipeNames[i].text = RecipeLabels[k];
+                }
+            }
         }
 
         void OnDestroy()
         {
+            if (squeak != null) Destroy(squeak);
             if (bowls != null) foreach (Draggable2D b in bowls) if (b != null) b.Dropped -= OnIngredient;
             if (plates != null) foreach (DropSlot p in plates) if (p != null) p.Filled -= OnServed;
             if (ovenSlot != null) ovenSlot.Filled -= OnOvenFilled;
@@ -248,37 +292,63 @@ namespace Gotcha.Levels
         void OnServed(DropSlot plate, Draggable2D slice)
         {
             served++;
+            StartCoroutine(Munch(slice.transform, plate.transform.position + new Vector3(0f, 0.45f, 0f)));
             if (served >= plates.Length) StartCoroutine(Verdict());
+        }
+
+        /// <summary>Il topolino si mangia la fetta: rimpicciolisce verso la bocca e sparisce (così si vede la faccia).</summary>
+        static IEnumerator Munch(Transform slice, Vector3 mouth)
+        {
+            slice.GetComponent<Draggable2D>().enabled = false;
+            Vector3 from = slice.position, scale = slice.localScale;
+            yield return new WaitForSeconds(0.15f);
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.45f)
+            {
+                slice.position = Vector3.Lerp(from, mouth, k);
+                slice.localScale = scale * (1f - k) * (1f + Mathf.Sin(k * 40f) * 0.08f);   // gnam gnam
+                yield return null;
+            }
+            slice.gameObject.SetActive(false);
         }
 
         IEnumerator Verdict()
         {
             phase = Phase.Done;
-            yield return new WaitForSeconds(0.4f);
+            yield return new WaitForSeconds(0.7f);   // il tempo di finire l'ultima fetta
             if (added.Contains("chili"))
             {
-                // EASTER EGG: piccantissima! paonazzi, furiosi, occhi in fiamme, lingua di fuori
+                // EASTER EGG: piccantissima! strillano, paonazzi, furiosi, occhi in fiamme, lingua penzolante
                 if (bubble != null) bubble.Show("HOT!!! MAMMA MIAAA!!!");
+                StartCoroutine(Squeaks());
                 foreach (GameObject f in spicyFaces) if (f != null) f.SetActive(true);
-                for (float k = 0f; k < 2f; k += Time.deltaTime)
+                if (steam != null) { steam.puffsPerSecond = 18f; steam.transform.position = pizzaHome() + Vector3.up * 0.6f; steam.Play(); }
+                var bases = new Vector3[miceArt.Length];
+                for (int i = 0; i < miceArt.Length; i++) if (miceArt[i] != null) bases[i] = miceArt[i].transform.parent.localPosition;
+                for (float k = 0f; k < 2.6f; k += Time.deltaTime)
                 {
                     float t = Mathf.Clamp01(k / 0.6f);
-                    foreach (SpriteRenderer m in miceArt)
-                        if (m != null)
-                        {
-                            m.color = Color.Lerp(Color.white, new Color(0.85f, 0.25f, 0.45f), t);
-                            m.transform.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(k * 30f + m.GetInstanceID()) * 9f);   // tremano dalla rabbia
-                        }
+                    for (int i = 0; i < miceArt.Length; i++)
+                    {
+                        SpriteRenderer m = miceArt[i];
+                        if (m == null) continue;
+                        m.color = Color.Lerp(Color.white, new Color(0.85f, 0.25f, 0.45f), t);
+                        m.transform.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(k * 30f + i * 1.7f) * 9f);   // tremano dalla rabbia
+                        m.transform.parent.localPosition = bases[i] + Vector3.up * Mathf.Abs(Mathf.Sin(k * 9f + i)) * 0.12f;   // saltellano
+                        AnimateSpicy(i < spicyFaces.Length ? spicyFaces[i] : null, k + i * 0.37f, t);
+                    }
                     yield return null;
                 }
+                if (steam != null) steam.Stop();
                 yield return new WaitForSeconds(0.6f);
                 if (ClipRecorder.Instance != null) ClipRecorder.Instance.Stop();
                 FailWithEgg(eggId);
                 yield break;
             }
             if (ClipRecorder.Instance != null) ClipRecorder.Instance.Discard();
-            bool ok = !added.Contains("pineapple");
-            foreach (string r in required) if (!added.Contains(r)) ok = false;
+            bool missing = false, extra = false;
+            foreach (string r in required) if (!added.Contains(r)) missing = true;
+            foreach (string a in added) if (System.Array.IndexOf(required, a) < 0) extra = true;
+            bool ok = !missing && !extra;
             if (ok)
             {
                 if (hearts != null) hearts.Play();
@@ -289,9 +359,46 @@ namespace Gotcha.Levels
             }
             else
             {
-                if (bubble != null) bubble.Show(added.Contains("pineapple") ? "PINEAPPLE?! Yuck!" : "Hmm... something's missing.");
+                string why = extra && added.Contains("pineapple") && System.Array.IndexOf(required, "pineapple") < 0 ? "PINEAPPLE?! Yuck!"
+                    : extra ? "Yuck! That's not on the board!" : "Hmm... something's missing.";
+                if (bubble != null) bubble.Show(why);
                 yield return new WaitForSeconds(1.6f);
                 Fail();
+            }
+        }
+
+        /// <summary>Fiamme negli occhi che divampano e tremolano, lingua che penzola e sventola, vena che pulsa.</summary>
+        static void AnimateSpicy(GameObject face, float time, float grow)
+        {
+            if (face == null) return;
+            foreach (Transform part in face.transform)
+            {
+                if (part.name == "FireEye")
+                {
+                    float flick = 1f + Mathf.Sin(time * 27f) * 0.18f + Mathf.PerlinNoise(time * 9f, part.localPosition.x * 10f) * 0.35f;
+                    part.localScale = new Vector3(1.5f * (1f - (flick - 1f) * 0.4f), 1.5f * flick * Mathf.Lerp(0.3f, 1.25f, grow), 1f);
+                    part.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(time * 13f + part.localPosition.x * 20f) * 10f);
+                }
+                else if (part.name == "Tongue")
+                {
+                    part.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(time * 14f) * 22f);
+                    part.localScale = new Vector3(1.3f, 1.3f * (1f + Mathf.Abs(Mathf.Sin(time * 7f)) * 0.45f) * grow, 1f);
+                }
+                else if (part.name == "Anger")
+                    part.localScale = Vector3.one * (1f + Mathf.Abs(Mathf.Sin(time * 10f)) * 0.4f);
+            }
+        }
+
+        /// <summary>Quattro urletti acuti (come il pupazzo di neve, ma da topolino), uno dopo l'altro.</summary>
+        IEnumerator Squeaks()
+        {
+            if (voice == null) yield break;
+            if (squeak == null) squeak = ScreamSynth.Mouse();
+            for (int i = 0; i < 4; i++)
+            {
+                voice.pitch = Random.Range(0.9f, 1.15f);
+                voice.PlayOneShot(squeak, 0.7f);
+                yield return new WaitForSeconds(Random.Range(0.12f, 0.25f));
             }
         }
 

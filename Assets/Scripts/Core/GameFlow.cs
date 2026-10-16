@@ -14,6 +14,9 @@ namespace Gotcha.Core
     {
         public static GameFlow Instance { get; private set; }
 
+        /// <summary>Build di prova: tutti i livelli giocabili dalla selezione (il progresso vero resta salvato).</summary>
+        public const bool UnlockAllLevels = true;
+
         [SerializeField] LevelCatalog catalog;
         [SerializeField] Transform levelHost;
 

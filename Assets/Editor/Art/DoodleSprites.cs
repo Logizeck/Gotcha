@@ -234,25 +234,39 @@ namespace Gotcha.EditorArt
             foreach (MazeRing r in MazeRings) { MazeRing rr = r; tubes.Add((x, y) => RingPathDistance(rr, x, y)); colors.Add(r.color); }
             foreach (MazeBlock b in MazeBlocks) { MazeBlock bb = b; tubes.Add((x, y) => BlockDistance(bb, x, y)); colors.Add(b.color); }
             Sdf all = Sd.Box(0, 0, 3.1f, 3.8f);
-            for (int i = 0; i < tubes.Count; i++)   // prima tutti gli aloni
+            // colore mescolato tra i tubi vicini: alle giunzioni i colori sfumano invece di tagliarsi di netto
+            Rgba Blend(float x, float y, out float dmin)
             {
-                var dist = tubes[i]; Rgba c = colors[i];
-                p.FillFunc(all, (x, y) =>
+                dmin = float.MaxValue;
+                var d = new float[tubes.Count];
+                for (int i = 0; i < d.Length; i++) { d[i] = tubes[i](x, y); dmin = Math.Min(dmin, d[i]); }
+                float r = 0f, g = 0f, b = 0f, ws = 0f;
+                for (int i = 0; i < d.Length; i++)
                 {
-                    float d = dist(x, y) - MazeTubeRadius;
-                    return d > glowReach ? Rgba.Clear : c.WithAlpha((float)Math.Exp(-Math.Max(0f, d) * 20f) * 0.6f);
-                });
+                    float w = (float)Math.Exp(-(d[i] - dmin) * 8f);
+                    if (w < 0.002f) continue;
+                    r += colors[i].r * w; g += colors[i].g * w; b += colors[i].b * w; ws += w;
+                }
+                return new Rgba(r / ws, g / ws, b / ws, 1f);
             }
-            for (int i = 0; i < tubes.Count; i++)   // poi i tubi
+            p.FillFunc(all, (x, y) =>   // alone (un solo strato)
             {
-                var dist = tubes[i]; Rgba c = colors[i];
-                p.FillFunc((x, y) => dist(x, y) - MazeTubeRadius, (x, y) =>
-                {
-                    float t = Clamp(1f - dist(x, y) / MazeTubeRadius);   // 0 sul bordo, 1 al centro
-                    Rgba core = Rgba.Lerp(Rgba.Lerp(c, Rgba.White, 0.15f), Rgba.White, Clamp((t - 0.45f) / 0.45f));
-                    return Rgba.Lerp(Rgba.Lerp(c, Ink, 0.15f), core, Clamp(t * 4f));
-                });
-            }
+                Rgba c = Blend(x, y, out float dmin);
+                float d = dmin - MazeTubeRadius;
+                return d > glowReach ? Rgba.Clear : c.WithAlpha((float)Math.Exp(-Math.Max(0f, d) * 20f) * 0.6f);
+            });
+            p.FillFunc((x, y) =>   // tubi
+            {
+                float dmin = float.MaxValue;
+                foreach (var t in tubes) dmin = Math.Min(dmin, t(x, y));
+                return dmin - MazeTubeRadius;
+            }, (x, y) =>
+            {
+                Rgba c = Blend(x, y, out float dmin);
+                float t = Clamp(1f - dmin / MazeTubeRadius);   // 0 sul bordo, 1 al centro
+                Rgba core = Rgba.Lerp(Rgba.Lerp(c, Rgba.White, 0.15f), Rgba.White, Clamp((t - 0.45f) / 0.45f));
+                return Rgba.Lerp(Rgba.Lerp(c, Ink, 0.15f), core, Clamp(t * 4f));
+            });
             return new DoodleArt("maze_neon", p);
         }
 
@@ -920,13 +934,20 @@ namespace Gotcha.EditorArt
         }
 
         /// <summary>Tasto con il codice disegnato (punti e linee).</summary>
-        public static DoodleArt MorseKey(int index)
+        public static readonly string[] MorseCodes5 = { "..--.", "-.-.-", ".-..-", "--.-.", "-...-" };
+
+        /// <summary>Tasto largo per i segnali da cinque suoni (variante del livello 5).</summary>
+        public static DoodleArt MorseKey5(int index) { return MorseKey(index, true); }
+
+        public static DoodleArt MorseKey(int index) { return MorseKey(index, false); }
+
+        static DoodleArt MorseKey(int index, bool five)
         {
-            var p = new DoodlePainter(-0.8f, -0.55f, 0.8f, 0.55f, 120) { Ink = 0.055f };
-            Sdf key = Sd.Box(0, 0, 0.72f, 0.46f, 0.18f);
+            var p = five ? new DoodlePainter(-1.02f, -0.55f, 1.02f, 0.55f, 120) { Ink = 0.055f } : new DoodlePainter(-0.8f, -0.55f, 0.8f, 0.55f, 120) { Ink = 0.055f };
+            Sdf key = Sd.Box(0, 0, five ? 0.94f : 0.72f, 0.46f, 0.18f);
             Body(p, key, Rgba.Hex("FFF3D6"), Rgba.Hex("E2CFA6"));
-            string code = MorseCodes[index];
-            const float dot = 0.08f, dash = 0.36f, gap = 0.1f;
+            string code = five ? MorseCodes5[index] : MorseCodes[index];
+            float dot = five ? 0.065f : 0.08f, dash = five ? 0.27f : 0.36f, gap = five ? 0.075f : 0.1f;
             float total = 0f;
             foreach (char c in code) total += (c == '.' ? dot * 2f : dash) + gap;
             total -= gap;
@@ -936,7 +957,7 @@ namespace Gotcha.EditorArt
                 if (c == '.') { p.Fill(Sd.Circle(x + dot, 0, dot), Ink); x += dot * 2f + gap; }
                 else { p.Fill(Sd.Capsule(x + 0.06f, 0, x + dash - 0.06f, 0, 0.06f), Ink); x += dash + gap; }
             }
-            return new DoodleArt("morse_" + index, p);
+            return new DoodleArt((five ? "morse5_" : "morse_") + index, p);
         }
 
         // ---------- Livello 7: la bomba ----------

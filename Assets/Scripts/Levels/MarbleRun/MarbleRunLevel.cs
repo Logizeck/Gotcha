@@ -134,7 +134,13 @@ namespace Gotcha.Levels
         IEnumerator Score()
         {
             done = true;
-            marble.bodyType = RigidbodyType2D.Kinematic;
+            marble.bodyType = RigidbodyType2D.Kinematic;   // ferma nella tazza: niente più discesa
+#if UNITY_6000_0_OR_NEWER
+            marble.linearVelocity = Vector2.zero;
+#else
+            marble.velocity = Vector2.zero;
+#endif
+            marble.angularVelocity = 0f;
             if (confetti != null) confetti.Play();
             if (bubble != null) bubble.Show("Hole in one!");
             yield return new WaitForSeconds(1.5f);

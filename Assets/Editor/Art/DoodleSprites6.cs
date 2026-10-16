@@ -74,25 +74,29 @@ namespace Gotcha.EditorArt
         };
         public static readonly MazeSeg DarkGate2 = new MazeSeg(-1.65f, 2.50f, -1.65f, 3.50f, Rgba.Hex("FF3B4E"));
         public const float DarkKey2X = 2.20f, DarkKey2Y = 3.00f, DarkExit2X = -2.20f, DarkExit2Y = 3.00f;
-        /// <summary>Vespa 2: labirinto con qualche anello per seminarla.</summary>
+        /// <summary>Labirinto aperto per l'inseguimento: più strade (anelli) e qualche vicolo cieco.</summary>
         public static readonly MazeSeg[] WaspMaze2 =
         {
             new MazeSeg(-2.75f, -3.50f, 2.75f, -3.50f, NeonCyan),
             new MazeSeg(-2.75f, 3.50f, 2.75f, 3.50f, NeonCyan),
             new MazeSeg(-2.75f, -3.50f, -2.75f, 3.50f, NeonCyan),
             new MazeSeg(2.75f, -3.50f, 2.75f, 3.50f, NeonCyan),
-            new MazeSeg(-0.55f, -2.50f, 1.65f, -2.50f, NeonMagenta),
-            new MazeSeg(-1.65f, -1.50f, 1.65f, -1.50f, NeonYellow),
-            new MazeSeg(-1.65f, -0.50f, 1.65f, -0.50f, NeonMagenta),
-            new MazeSeg(1.65f, 0.50f, 2.75f, 0.50f, NeonYellow),
-            new MazeSeg(-2.75f, 1.50f, -1.65f, 1.50f, NeonMagenta),
-            new MazeSeg(0.55f, 1.50f, 1.65f, 1.50f, NeonYellow),
-            new MazeSeg(-1.65f, 2.50f, -0.55f, 2.50f, NeonMagenta),
-            new MazeSeg(0.55f, 2.50f, 1.65f, 2.50f, NeonYellow),
-            new MazeSeg(-1.65f, -3.50f, -1.65f, -2.50f, NeonMagenta),
-            new MazeSeg(-0.55f, 0.50f, -0.55f, 1.50f, NeonYellow),
-            new MazeSeg(0.55f, 0.50f, 0.55f, 1.50f, NeonMagenta),
-            new MazeSeg(1.65f, -2.50f, 1.65f, -1.50f, NeonYellow),
+            new MazeSeg(-2.75f, -2.50f, -1.65f, -2.50f, NeonMagenta),
+            new MazeSeg(-0.55f, -2.50f, 0.55f, -2.50f, NeonYellow),
+            new MazeSeg(-1.65f, -1.50f, -0.55f, -1.50f, NeonMagenta),
+            new MazeSeg(0.55f, -1.50f, 1.65f, -1.50f, NeonYellow),
+            new MazeSeg(-0.55f, -0.50f, 0.55f, -0.50f, NeonMagenta),
+            new MazeSeg(-2.75f, 0.50f, -1.65f, 0.50f, NeonYellow),
+            new MazeSeg(0.55f, 0.50f, 1.65f, 0.50f, NeonMagenta),
+            new MazeSeg(-1.65f, 1.50f, 0.55f, 1.50f, NeonYellow),
+            new MazeSeg(-1.65f, -0.50f, -1.65f, 0.50f, NeonMagenta),
+            new MazeSeg(-1.65f, 1.50f, -1.65f, 2.50f, NeonYellow),
+            new MazeSeg(-0.55f, -1.50f, -0.55f, 0.50f, NeonMagenta),
+            new MazeSeg(-0.55f, 2.50f, -0.55f, 3.50f, NeonYellow),
+            new MazeSeg(0.55f, -2.50f, 0.55f, -1.50f, NeonMagenta),
+            new MazeSeg(0.55f, 1.50f, 0.55f, 2.50f, NeonYellow),
+            new MazeSeg(1.65f, -3.50f, 1.65f, -2.50f, NeonMagenta),
+            new MazeSeg(1.65f, -1.50f, 1.65f, -0.50f, NeonYellow),
             new MazeSeg(1.65f, 1.50f, 1.65f, 2.50f, NeonMagenta),
         };
 

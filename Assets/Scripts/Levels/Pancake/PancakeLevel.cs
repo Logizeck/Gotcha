@@ -37,8 +37,8 @@ namespace Gotcha.Levels
         State state = State.Resting;
         int flips;
         bool rawIsUp = true;
-        float vy, vx, spin, peak, chargeTime, rest, baselineX;
-        bool primed;
+        float vy, vx, spin, peak, chargeTime, rest;
+        readonly SteadyTilt steady = new SteadyTilt();
 
         public override void OnLevelStart()
         {
@@ -51,10 +51,9 @@ namespace Gotcha.Levels
         {
             if (state == State.Over || IsFinished) return;
             // la padella segue l'inclinazione (rispetto a come tieni il telefono all'inizio)
-            Vector3 t = SensorHub.Instance != null ? SensorHub.Instance.Tilt : Vector3.zero;
-            if (!primed) { primed = true; baselineX = t.x; }
-            float target = Mathf.Clamp((t.x - baselineX) * 4f, -panRange, panRange);
-            pan.position = new Vector3(Mathf.Lerp(pan.position.x, target, 1f - Mathf.Exp(-12f * Time.deltaTime)), pan.position.y, pan.position.z);
+            // filtrata: niente tremolio, e il colpo per lanciare non sposta la padella
+            float target = Mathf.Clamp(steady.Update(Time.deltaTime) * 4.5f, -panRange, panRange);
+            pan.position = new Vector3(Mathf.Lerp(pan.position.x, target, 1f - Mathf.Exp(-7f * Time.deltaTime)), pan.position.y, pan.position.z);
 
             float shake = SensorHub.Instance != null ? SensorHub.Instance.ShakeStrength : 0f;
 #if UNITY_EDITOR

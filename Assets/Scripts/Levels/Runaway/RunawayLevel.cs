@@ -7,9 +7,10 @@ namespace Gotcha.Levels
 {
     /// <summary>
     /// Livello 25 — la sveglia. Suona a tutto volume e il suo pulsante OFF è saltato giù e scappa per la stanza:
-    /// gironzola e, se il dito tocca vicino, schiva. Col dito si disegnano staccionate (massimo 4, la più vecchia
-    /// sparisce) contro cui il pulsante sbatte: chiudilo in un angolo e premilo. Il pulsante torna sulla sveglia
-    /// e finalmente silenzio.
+    /// gironzola e, se il dito tocca vicino, schiva. Col dito si disegnano staccionate contro cui il pulsante sbatte,
+    /// ma: l'inchiostro è poco (la barra in alto; cancellando una staccionata vecchia torna indietro), le staccionate
+    /// corte il pulsante le scavalca con un saltello, e dopo un po' il vicino si sveglia e si arrabbia (fallito).
+    /// Bisogna chiuderlo in un angolo con poche staccionate lunghe e ben piazzate, poi premerlo.
     /// </summary>
     public class RunawayLevel : LevelController
     {
@@ -28,12 +29,20 @@ namespace Gotcha.Levels
         [SerializeField] float bodyRadius = 0.4f;
         [SerializeField] Vector2 boundsMin = new Vector2(-2.35f, -3.9f);
         [SerializeField] Vector2 boundsMax = new Vector2(2.35f, 2.4f);
+        [Header("Rompicapo")]
+        [SerializeField] float timeLimit = 25f;
+        [SerializeField] TextMesh timerText;
+        [SerializeField] float inkBudget = 7.5f;
+        [SerializeField] Transform inkBar;            // scala x 0..1
+        [SerializeField] float hopShorterThan = 1.4f; // staccionate più corte di così le scavalca
 
         Vector2 dir, target;
         float retarget, dash, squash, cornered, ringTimer;
         Camera cam;
         Vector3 visualScale, clockHome;
         bool done;
+        float timeLeft, hopTimer;
+        readonly System.Collections.Generic.Dictionary<Transform, float> lengths = new System.Collections.Generic.Dictionary<Transform, float>();
 
         public override void OnLevelStart()
         {
@@ -50,6 +59,28 @@ namespace Gotcha.Levels
                 alarm.Play();
             }
             if (bubble != null) bubble.Show("RIIIIING!");
+            timeLeft = timeLimit;
+        }
+
+        /// <summary>Inchiostro già usato dalle staccionate finite (quelle cancellate lo restituiscono).</summary>
+        float InkUsed()
+        {
+            float used = 0f;
+            if (pen == null) return 0f;
+            foreach (Transform stroke in pen.transform)
+                if (stroke.GetComponent<EdgeCollider2D>() != null) used += Length(stroke);
+            return used;
+        }
+
+        float Length(Transform stroke)
+        {
+            if (lengths.TryGetValue(stroke, out float l)) return l;
+            EdgeCollider2D e = stroke.GetComponent<EdgeCollider2D>();
+            if (e == null) return float.MaxValue;   // ancora in disegno: barriera piena
+            l = 0f;
+            for (int i = 1; i < e.points.Length; i++) l += Vector2.Distance(stroke.TransformPoint(e.points[i - 1]), stroke.TransformPoint(e.points[i]));
+            lengths[stroke] = l;
+            return l;
         }
 
         void OnDestroy() { if (alarm != null && alarm.clip != null) Destroy(alarm.clip); }
@@ -61,6 +92,14 @@ namespace Gotcha.Levels
             if (clock != null) clock.localPosition = clockHome + new Vector3(Mathf.Sin(Time.time * 70f) * 0.03f, Mathf.Abs(Mathf.Sin(Time.time * 35f)) * 0.04f, 0f);
             ringTimer -= Time.deltaTime;
             if (ringTimer <= 0f && bubble != null) { ringTimer = 2.4f; bubble.Show(Random.value < 0.5f ? "RIIIIING!" : "DRIIIIN!"); }
+
+            // inchiostro e tempo
+            float left = Mathf.Max(0f, inkBudget - InkUsed());
+            if (pen != null) pen.maxStrokeLength = Mathf.Max(0.05f, left);
+            if (inkBar != null) inkBar.localScale = new Vector3(Mathf.Clamp01((left - (pen != null && pen.IsDrawing ? pen.CurrentLength : 0f)) / inkBudget), 1f, 1f);
+            timeLeft -= Time.deltaTime;
+            if (timerText != null) timerText.text = "NEIGHBOR WAKES IN " + Mathf.CeilToInt(Mathf.Max(0f, timeLeft));
+            if (timeLeft <= 0f) { StartCoroutine(Neighbor()); return; }
 
             Vector2 pos = button.position;
             if (PointerInput.AnyTouchBegan() && !PointerInput.IsOverUi() && PointerInput.TryGetPrimary(out Vector2 sp, out _, out _))
@@ -93,7 +132,9 @@ namespace Gotcha.Levels
             float run = step.magnitude / Mathf.Max(Time.deltaTime, 0.0001f);
             if (legs != null) legs.localScale = new Vector3(step.x < 0f ? -1f : 1f, 1f + Mathf.Sin(Time.time * 30f) * 0.15f * Mathf.Clamp01(run), 1f);
             float shake = cornered > 0f ? Mathf.Sin(Time.time * 60f) * 0.04f : 0f;   // trema, intrappolato
-            visual.localPosition = new Vector3(shake, 0f, 0f);
+            hopTimer -= Time.deltaTime;
+            float hop = hopTimer > 0f ? Mathf.Sin((1f - hopTimer / 0.35f) * Mathf.PI) * 0.5f : 0f;   // saltello sopra la staccionata
+            visual.localPosition = new Vector3(shake, hop, 0f);
             squash -= Time.deltaTime;
             visual.localScale = Vector3.Lerp(visual.localScale, squash > 0f ? new Vector3(visualScale.x * 1.15f, visualScale.y * 0.7f, 1f) : visualScale, 20f * Time.deltaTime);
         }
@@ -102,7 +143,37 @@ namespace Gotcha.Levels
         {
             if (pen == null) return false;
             Vector2 next = pos + step;
-            return StrokeBarrier.Resolve(pen.transform, pos, ref next, bodyRadius, pen.colliderRadius, out _);
+            if (!StrokeBarrier.Resolve(pen.transform, pos, ref next, bodyRadius, pen.colliderRadius, out _, out Transform stroke)) return false;
+            // staccionata troppo corta: hop! la scavalca
+            if (stroke != null && Length(stroke) < hopShorterThan)
+            {
+                if (hopTimer <= 0f) { hopTimer = 0.35f; if (bubble != null && Random.value < 0.4f) bubble.Show("Hop!", true); }
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>Tempo scaduto: il vicino bussa sul muro e urla. Fallito.</summary>
+        IEnumerator Neighbor()
+        {
+            done = true;
+            if (timerText != null) timerText.text = "";
+            Transform room = transform;
+            Vector3 home = room.localPosition;
+            for (int i = 0; i < 3; i++)
+            {
+                if (bubble != null) bubble.Show(i < 2 ? "BANG! BANG!" : "SHUT IT OFF!!!", true);
+                for (float k = 0f; k < 0.35f; k += Time.deltaTime)
+                {
+                    room.localPosition = home + (Vector3)(Random.insideUnitCircle * 0.1f);
+                    yield return null;
+                }
+                room.localPosition = home;
+                yield return new WaitForSeconds(0.25f);
+            }
+            if (alarm != null) alarm.Stop();
+            yield return new WaitForSeconds(0.5f);
+            Fail();
         }
 
         /// <summary>Prova qualche direzione libera; false se le staccionate lo chiudono da ogni parte.</summary>
