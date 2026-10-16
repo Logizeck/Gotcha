@@ -13,13 +13,13 @@ namespace Gotcha.Levels
     {
         [SerializeField] Transform acrobat;            // pivot ai piedi
         [SerializeField] Transform startPoint, endPoint;
-        [SerializeField] float crossSeconds = 16f;
-        [SerializeField] float instability = 2.4f;     // quanto in fretta cade se pende
-        [SerializeField] float control = 7f;           // quanto conta l'inclinazione del telefono
-        [SerializeField] float damping = 1.6f;
-        [SerializeField] Vector2 gustEvery = new Vector2(2f, 4f);
-        [SerializeField] float gustKick = 1.1f;
-        [SerializeField] float fallAngle = 50f;
+        [SerializeField] float crossSeconds = 13f;
+        [SerializeField] float instability = 1.2f;     // quanto in fretta cade se pende
+        [SerializeField] float control = 10f;           // quanto conta l'inclinazione del telefono
+        [SerializeField] float damping = 2.4f;
+        [SerializeField] Vector2 gustEvery = new Vector2(3f, 5f);
+        [SerializeField] float gustKick = 0.55f;
+        [SerializeField] float fallAngle = 60f;
         [SerializeField] SmokeEmitter splash;
         [SerializeField] SpeechBubble bubble;
 
@@ -29,7 +29,7 @@ namespace Gotcha.Levels
 
         public override void OnLevelStart()
         {
-            angle = Random.Range(-4f, 4f) * Mathf.Deg2Rad;
+            angle = Random.Range(-2f, 2f) * Mathf.Deg2Rad;
             gust = Random.Range(gustEvery.x, gustEvery.y);
             if (splash != null) splash.Stop();
             if (bubble != null) { bubble.Show("Keep me balanced!"); StartCoroutine(HideLater(1.8f)); }
@@ -59,7 +59,7 @@ namespace Gotcha.Levels
             angVel += acc * dt;
             angle += angVel * dt;
             // cammina solo se è abbastanza dritto
-            if (Mathf.Abs(angle) < 20f * Mathf.Deg2Rad) progress = Mathf.Min(1f, progress + dt / crossSeconds);
+            if (Mathf.Abs(angle) < 28f * Mathf.Deg2Rad) progress = Mathf.Min(1f, progress + dt / crossSeconds);
             Place();
             if (Mathf.Abs(angle) * Mathf.Rad2Deg > fallAngle) { StartCoroutine(Fall()); return; }
             if (progress >= 1f) StartCoroutine(Made());

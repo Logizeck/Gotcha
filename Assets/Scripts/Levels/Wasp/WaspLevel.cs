@@ -35,6 +35,8 @@ namespace Gotcha.Levels
         [SerializeField] float attackEveryMin = 2.5f;
         [SerializeField] float attackEveryMax = 4.5f;
         [SerializeField] float attackScale = 3.2f;
+        [Tooltip("Punture che si possono prendere: alla successiva il livello è perso (0 = infinite). Colpire la vespa mentre si lancia la ferma.")]
+        [SerializeField] int maxStings = 0;
 
         [Header("Paletta")]
         [SerializeField] Transform swatter;           // pivot all'impugnatura, rete a +swatterReach
@@ -45,7 +47,7 @@ namespace Gotcha.Levels
         Camera cam;
         State state;
         Vector2 target;
-        int hits;
+        int hits, stings;
         float flash, stun, nextAttack;
         bool hasSwatter, swinging;
         Vector3 swatterGroundPos;
@@ -140,8 +142,15 @@ namespace Gotcha.Levels
                 yield return null;
             }
             // puntura!
+            stings++;
             if (stingFlash != null) StartCoroutine(Flash());
-            if (bubble != null) { bubble.Show("OUCH!"); StartCoroutine(HideBubble(0.9f)); }
+            bool tooMany = maxStings > 0 && stings >= maxStings;
+            if (bubble != null)
+            {
+                bubble.Show(tooMany ? "OUCH! OUCH! That's it, I'm out!" : maxStings > 0 ? "OUCH! One more and I'm done!" : "OUCH!");
+                if (!tooMany) StartCoroutine(HideBubble(0.9f));
+            }
+            if (tooMany) { state = State.Falling; StartCoroutine(StungOut()); yield break; }
             Vector3 shakeFrom = transform.localPosition;
             for (float k = 0f; k < 1f; k += Time.deltaTime / 0.3f)
             {
@@ -161,6 +170,13 @@ namespace Gotcha.Levels
             Face(flipX, 1f);
             if (state == State.Attacking) state = State.Flying;
             nextAttack = Time.time + Random.Range(attackEveryMin, attackEveryMax);
+        }
+
+        IEnumerator StungOut()
+        {
+            if (buzz != null) buzz.Stop();
+            yield return new WaitForSeconds(1.4f);
+            Fail();   // si perde una vita e si ricomincia il livello
         }
 
         IEnumerator Flash()

@@ -45,12 +45,12 @@ Livelli attuali:
 40. **Copycat** — ripeti le sequenze di luci e note del gatto (3, 4, 5 note).
 
 Livelli 41-60 — varianti più difficili delle meccaniche già collaudate:
-41. **Zig Zag** (labirinto nuovo) · 42. **Pancake Tower** (4 giri) · 43. **Shell Shock** (più scambi, più veloci) ·
+41. **Zig Zag** (labirinto con cancelli mobili) · 42. **Pancake Tower** (4 giri) · 43. **Shell Shock** (più scambi, più veloci) ·
 44. **Code Breaker** (codice rosso/blu a 5 cifre) · 45. **Top Shelf** (barattolo più in alto, specchiato) ·
 46. **Bodyguard 2** (vespa più veloce, 2 barriere) · 47. **Big Balloon** (14 pompate, 3 s di attesa) ·
 48. **Trap Maze 2** (labirinto nuovo con buche e laser) · 49. **Big Birthday** (7 candeline) ·
 50. **High Plant** (vaso sulla mensola) · 51. **Copycat Pro** (4-5-6 note, più veloci) · 52. **Wasp Returns** (15 colpi) ·
-53. **Marble Run 2** (da destra a sinistra, muretto più alto) · 54. **Deep Freeze** (ghiaccio più spesso) ·
+53. **Marble Run 2** (da destra a sinistra, muretto più alto) · 54. **Laser Pointer** (specchi e raggio laser per svegliare il gatto) ·
 55. **Tiny Mouse** (il topolino cambia tana ogni 3 s) · 56. **Snooze Alarm** (pulsante più veloce, 3 staccionate) ·
 57. **Darker** (labirinto al buio nuovo) · 58. **Apple Rain** (6 mele, cadono un po' più veloci) ·
 59. **Wet Wood** (pioggia: ombrello sopra il fuoco) · 60. **Flashlight** (il dito è una torcia: trova l'interruttore senza svegliare i pipistrelli).
@@ -58,17 +58,17 @@ Livelli 41-60 — varianti più difficili delle meccaniche già collaudate:
 Livelli 61-100 — terza ondata (ogni meccanica compare al massimo 3 volte; dall'85 in poi sono tutte nuove):
 61 Double Sting (due vespe) · 62 Bridge Builder (disegna il ponte) · 63 Short Fuse · 64 Copycat Maestro ·
 65 Trap Maze 3 · 66 Magic Rune (ricopia le rune) · 67 Foggy Mirror (soffia per appannare lo specchio e leggere il codice) ·
-68 Five Beeps (morse a 5 suoni) · 69 Pitch Black (vespa nel buio) · 70 Shell Storm · 71 Total Silence (volume zero e silenzio) ·
+68 Five Beeps (morse a 5 suoni) · 69 Pitch Black (vespa nel buio) · 70 Shell Storm · 71 DJ Mouse (tocca a tempo di musica) ·
 72 Bodyguard 3 (due vespe) · 73 Wasp Hall (due vespe) · 74 Two Doors (chiavi nascoste, ragazza o mostro) · 75 Master Code ·
-76 Thirsty Tree (raffiche) · 77 Spiral · 78 Heavy Safe · 79 Scalding Soup · 80 Giant Balloon ·
-81 Tightrope (tieni in equilibrio il funambolo inclinando al contrario) · 82 Quick Wire · 83 Wasp King · 84 Staring Contest ·
+76 Thirsty Tree (raffiche) · 77 Plumber (ruota i tubi) · 78 Fake Coin (bilancia, due pesate) · 79 Spot It (5 differenze) · 80 Counting Sheep (conta le pecore) ·
+81 Tightrope (tieni in equilibrio il funambolo inclinando al contrario) · 82 Shadow Play (ruota e ingrandisci con due dita) · 83 Wasp King · 84 Staring Contest ·
 85 Snowman on Ice (segui l'ombra dell'albero mentre il sole si sposta) · 86 Paper Plane (picchiata, salita e soffio negli anelli) ·
 87 Safe Cracker (gira la manopola e ascolta il CLUNK) · 88 Sing, Birdie (l'uccellino vola all'altezza della tua voce) ·
-89 Coffee Time (versa fino alla riga) · 90 Domino (la tessera alta non sta sotto la mensola) ·
+89 Slide Puzzle (ritratto del gatto a tasselli) · 90 Domino (la tessera alta non sta sotto la mensola) ·
 91 Mirror Path (comandi allo specchio, poi anche su/giù) · 92 Magnet Fishing (calamita, scuoti via i rottami, piranha) ·
-93 Cuckoo Clock (indovinello e lancette) · 94 Fireflies (lucciole sì, occhi del lupo no) · 95 Cake Tower (torta a strati) ·
+93 Cuckoo Clock (indovinello e lancette) · 94 Fireflies (lucciole sì, occhi del lupo no) · 95 Cheating Cat (memory, il gatto scambia le carte) ·
 96 Bubble Count (numeri scritti in modi diversi, il 6 capovolto) · 97 Sneaky Mouse (torcia del cane e ombre dei mobili) ·
-98 Bowling (swipe curvo per aggirare il cono) · 99 Whack-a-Mole (mai la talpa con il cappellino) · 100 The Trophy (scuoti, soffia, lucida).
+98 Traffic Jam (libera il furgone rosso) · 99 Whack-a-Mole (mai la talpa con il cappellino) · 100 The End? (prendi il topolino nascosto nei titoli di coda).
 
 Free to play: si gioca gratis; nel **negozio** (SHOP) si possono comprare **1 ora di vite infinite (0,99 €)** e
 **niente pubblicità per sempre (4,99 €)**. Vedi README_SETUP.md per la configurazione degli acquisti.

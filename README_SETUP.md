@@ -266,6 +266,22 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.28
+- **Labirinti arcobaleno**: tutte le pareti al neon hanno una tinta che scorre in diagonale (`DoodleSprites.Rainbow`).
+- **41 Zig Zag**: tre cancelli rosa che si aprono e si chiudono da soli (`Components/SlidingGate`).
+- **52 Wasp Returns**: due punture = livello perso (si perde una vita e si ricomincia); colpire la vespa mentre si
+  lancia blocca la puntura; la velocità cresce di +0.1 a colpo invece di +0.3 (`maxStings`, `speedPerHit`).
+- **81 Tightrope** più equilibrato (meno instabile, raffiche più deboli, si cade a 60°). **86**: gli anelli attraversati
+  diventano verdi. **91** sentiero più largo e comandi più lenti. **94** lucciole di tre colori (il barattolo ne vuole
+  uno alla volta, colore sbagliato = ne scappa una), lampeggi brevi, occhi del lupo che fanno l'occhiolino.
+- Livelli nuovi (script in `Assets/Scripts/Levels/V28`, scene in `Assets/Editor/GotchaLevels28.cs`, disegni in
+  `DoodleSprites11.cs`): 54 Laser Pointer (specchi) · 71 DJ Mouse (ritmo a 128 bpm) · 77 Plumber (tubi) ·
+  78 Fake Coin (bilancia) · 79 Spot It (differenze casuali) · 80 Counting Sheep (egg `fell_asleep`) ·
+  82 Shadow Play (due dita: ruota e scala; Editor: Q/E, Z/X) · 89 Slide Puzzle · 95 Cheating Cat (memory) ·
+  98 Traffic Jam (puzzle verificato, 22 mosse) · 100 The End? (titoli di coda, egg `credits_skip`).
+- Tolti: Deep Freeze, Total Silence, Spiral, Heavy Safe, Scalding Soup, Giant Balloon, Quick Wire, Coffee Time,
+  Cake Tower, Bowling, The Trophy (e i loro Easter egg `coffee_cat`, `polish_maniac`).
+
 ## Versione 0.27 (musica per tipo di livello)
 - Brani in `Assets/Audio/Music` (loop a 128 bpm): **Title** nel menu all'apertura (e quando si torna al titolo),
   **Dungeon** per labirinti e livelli con chiavi, **Animals** per animali e natura, **Kitchen** per i livelli col cibo,

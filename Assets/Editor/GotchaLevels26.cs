@@ -159,6 +159,7 @@ public static partial class GotchaProjectBuilder
         SetField(level, "plane", plane);
         SetArray(level, "rings", rings.ToArray());
         SetField(level, "breathBar", breath);
+        SetField(level, "doneSprite", sprites["hoop_done"]);
         SetField(level, "bubble", bubble);
         return SaveLevel(root, "PaperPlane");
     }
@@ -284,47 +285,6 @@ public static partial class GotchaProjectBuilder
         return SaveLevel(root, "SafeCrack");
     }
 
-    // ---------- 89: il caffè ----------
-
-    static GameObject BuildCoffeeLevel()
-    {
-        var root = new GameObject("Level_Coffee");
-        CoffeeLevel level = root.AddComponent<CoffeeLevel>();
-        Art(root.transform, "Kitchen", "kitchen_bg", -20, false);
-        Transform pot = Child(root.transform, "Pot", new Vector2(-1.5f, 0.4f)).transform;
-        Art(pot, "Art", "coffee_pot", 6);
-        Transform spout = Child(pot, "Spout", new Vector2(0.84f, 0.57f)).transform;
-        Transform mug = Child(root.transform, "Mug", new Vector2(1.0f, -2.0f)).transform;
-        Art(mug, "Back", "mug_back", 3, false);
-        Transform inner = Child(mug, "Inner", new Vector2(0, 0.08f)).transform;
-        Transform fill = Child(inner, "Fill", Vector2.zero).transform;
-        Bar(fill, "Coffee", new Vector2(0, 0.46f), new Vector2(0.8f, 0.92f), new Color(0.38f, 0.22f, 0.12f), 4);
-        Transform line = Child(inner, "Line", new Vector2(0, 0.6f)).transform;
-        Bar(line, "Mark", Vector2.zero, new Vector2(0.95f, 0.035f), new Color(1f, 0.3f, 0.3f), 6);
-        Art(mug, "Front", "mug_front", 5, false);
-        GameObject cat = Child(root.transform, "Cat", new Vector2(-1.75f, -2.3f));
-        cat.transform.localScale = Vector3.one * 0.6f;
-        Art(cat.transform, "Art", "cat", 2);
-        GameObject zzz = Art(cat.transform, "Zzz", "zzz", 3, true, new Vector2(0.9f, 1.2f)).gameObject;
-        GameObject eyes = Art(cat.transform, "Eyes", "cat_eyes", 3, false).gameObject;
-        BoxCollider2D catCol = cat.AddComponent<BoxCollider2D>();
-        catCol.size = new Vector2(3f, 2f);
-
-        SetField(level, "pot", pot);
-        SetField(level, "spout", spout);
-        SetField(level, "mug", mug);
-        SetField(level, "fill", fill);
-        SetField(level, "line", line);
-        SetField(level, "cat", catCol);
-        SetField(level, "catSleep", zzz);
-        SetField(level, "catAwake", eyes);
-        SetField(level, "dropSprite", sprites["drop"]);
-        SetFloat(level, "mugHeight", 0.92f);
-        SetFloat(level, "mugWidth", 0.8f);
-        SetField(level, "bubble", SmallBubble(root.transform, new Vector2(0, 3.1f)));
-        return SaveLevel(root, "Coffee");
-    }
-
     // ---------- 90: il domino ----------
 
     static GameObject BuildDominoLevel()
@@ -394,9 +354,9 @@ public static partial class GotchaProjectBuilder
         var path = new List<Transform>();
         var v3 = new Vector3[pts.Length];
         for (int i = 0; i < pts.Length; i++) { path.Add(Child(root.transform, "P" + i, pts[i]).transform); v3[i] = pts[i]; }
-        StaticLine(root.transform, "Fence", v3, 0.74f, new Color(1f, 0.85f, 0.2f), 1);
-        StaticLine(root.transform, "Edge", v3, 0.66f, InkColor, 2);
-        StaticLine(root.transform, "Path", v3, 0.6f, new Color(0.93f, 0.84f, 0.66f), 3);
+        StaticLine(root.transform, "Fence", v3, 1.04f, new Color(1f, 0.85f, 0.2f), 1);
+        StaticLine(root.transform, "Edge", v3, 0.96f, InkColor, 2);
+        StaticLine(root.transform, "Path", v3, 0.9f, new Color(0.93f, 0.84f, 0.66f), 3);
         Transform mouse = Child(root.transform, "Mouse", pts[0]).transform;
         mouse.localScale = Vector3.one * 0.35f;
         Art(mouse, "Art", "mouse", 10);
@@ -498,7 +458,7 @@ public static partial class GotchaProjectBuilder
             eyes.Add(e);
         }
         var flies = new List<Transform>();
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 12; i++)
         {
             Transform f = Child(root.transform, "Firefly" + i, Vector2.zero).transform;
             Art(f, "Bug", "firefly", 6, false);
@@ -512,9 +472,10 @@ public static partial class GotchaProjectBuilder
         Art(jar, "Art", "jar", 8);
         SpriteRenderer jarGlow = Art(jar, "Glow", "glow", 9, false).GetComponent<SpriteRenderer>();
         jarGlow.transform.localScale = Vector3.one * 1.6f;
-        TextMesh counter = Label(root.transform, new Vector2(-1.0f, 2.9f), 12, "0 / 6", 0.06f);
+        TextMesh counter = Label(root.transform, new Vector2(-1.2f, 2.9f), 12, "0 / 6", 0.06f);
         counter.color = Color.white;
         GameObject wolf = Art(root.transform, "Wolf", "wolf", 20).gameObject;
+        TextMesh wanted = Label(root.transform, new Vector2(0.9f, 2.9f), 12, "CATCH: YELLOW", 0.05f);
 
         SetArray(level, "flies", flies.ToArray());
         SetArray(level, "eyes", eyes.ToArray());
@@ -522,31 +483,10 @@ public static partial class GotchaProjectBuilder
         SetField(level, "jarGlow", jarGlow);
         SetField(level, "counter", counter);
         SetField(level, "wolf", wolf);
+        SetField(level, "wantedLabel", wanted);
         Tune(level, "areaMin", new Vector2(-2.4f, -2.6f));
         SetField(level, "bubble", SmallBubble(root.transform, new Vector2(0.8f, 3.6f)));
         return SaveLevel(root, "Fireflies");
-    }
-
-    // ---------- 95: la torta a piani ----------
-
-    static GameObject BuildCakeStackLevel()
-    {
-        var root = new GameObject("Level_CakeStack");
-        CakeStackLevel level = root.AddComponent<CakeStackLevel>();
-        Art(root.transform, "Party", "party_bg", -20, false);
-        Transform plate = Child(root.transform, "Plate", new Vector2(0, -3.1f)).transform;
-        Art(plate, "Art", "plate", 3, false);
-        SpriteRenderer template = Art(root.transform, "LayerTemplate", "plain", 5, false).GetComponent<SpriteRenderer>();
-        template.gameObject.SetActive(false);
-        Transform cherry = Art(root.transform, "Cherry", "cherry", 40);
-        TextMesh counter = Label(root.transform, new Vector2(1.9f, 3.6f), 12, "0 / 8", 0.06f);
-
-        SetField(level, "layerTemplate", template);
-        SetField(level, "plate", plate);
-        SetField(level, "cherry", cherry);
-        SetField(level, "counter", counter);
-        SetField(level, "bubble", SmallBubble(root.transform, new Vector2(-0.6f, 3.4f)));
-        return SaveLevel(root, "CakeStack");
     }
 
     // ---------- 96: le bolle numerate ----------
@@ -623,48 +563,6 @@ public static partial class GotchaProjectBuilder
         return SaveLevel(root, "Sneaky");
     }
 
-    // ---------- 98: il bowling ----------
-
-    static GameObject BuildBowlingLevel()
-    {
-        var root = new GameObject("Level_Bowling");
-        BowlingLevel level = root.AddComponent<BowlingLevel>();
-        Art(root.transform, "Lane", "lane_bg", -20, false);
-        GameObject ballGo = Child(root.transform, "Ball", new Vector2(0, -3.2f));
-        Art(ballGo.transform, "Art", "bowling_ball", 6);
-        Rigidbody2D ball = ballGo.AddComponent<Rigidbody2D>();
-        ball.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
-        ballGo.AddComponent<CircleCollider2D>().radius = 0.28f;
-        GameObject area = Child(root.transform, "ThrowArea", new Vector2(0, -3.3f));
-        BoxCollider2D throwArea = area.AddComponent<BoxCollider2D>();
-        throwArea.size = new Vector2(3.4f, 1.8f);
-        throwArea.isTrigger = true;
-        var pins = new List<Rigidbody2D>();
-        for (int r = 0; r < 3; r++)
-            for (int i = 0; i <= r; i++)
-            {
-                GameObject p = Child(root.transform, "Pin", new Vector2((i - r * 0.5f) * 0.46f, 2.2f + r * 0.42f));
-                Art(p.transform, "Art", "pin_top", 5, false);
-                Rigidbody2D rb = p.AddComponent<Rigidbody2D>();
-                p.AddComponent<CircleCollider2D>().radius = 0.15f;
-                pins.Add(rb);
-            }
-        GameObject cone = Child(root.transform, "Cone", new Vector2(0, 0.2f));
-        Art(cone.transform, "Art", "traffic_cone", 5);
-        cone.AddComponent<CircleCollider2D>().radius = 0.33f;
-        Child(root.transform, "BackWall", new Vector2(0, 3.75f)).AddComponent<BoxCollider2D>().size = new Vector2(3.6f, 0.2f);
-        TextMesh info = Label(root.transform, new Vector2(-1.9f, -1.0f), 12, "", 0.045f);
-        info.color = Color.white;
-        info.transform.localRotation = Quaternion.Euler(0, 0, 90f);
-
-        SetField(level, "ball", ball);
-        SetArray(level, "pins", pins.ToArray());
-        SetField(level, "throwArea", throwArea);
-        SetField(level, "info", info);
-        SetField(level, "bubble", SmallBubble(root.transform, new Vector2(0, 1.3f)));
-        return SaveLevel(root, "Bowling");
-    }
-
     // ---------- 99: acchiappa la talpa ----------
 
     static GameObject BuildWhackLevel()
@@ -703,39 +601,5 @@ public static partial class GotchaProjectBuilder
         return SaveLevel(root, "Whack");
     }
 
-    // ---------- 100: il trofeo ----------
-
-    static GameObject BuildTrophyLevel()
-    {
-        var root = new GameObject("Level_Trophy");
-        TrophyLevel level = root.AddComponent<TrophyLevel>();
-        Art(root.transform, "Room", "room_bg", -20, false);
-        Bar(root.transform, "Shelf", new Vector2(1.1f, 2.45f), new Vector2(2.4f, 0.14f), new Color(0.55f, 0.36f, 0.22f), 3);
-        Bar(root.transform, "Shelf2", new Vector2(-1.3f, 0.9f), new Vector2(2.0f, 0.14f), new Color(0.55f, 0.36f, 0.22f), 3);
-        Transform trophy = Child(root.transform, "Trophy", new Vector2(1.3f, 2.52f)).transform;
-        trophy.localScale = Vector3.one * 0.8f;
-        Art(trophy, "Art", "trophy", 5, false);
-        SpriteRenderer dust = Art(trophy, "Dust", "trophy_dust", 6, false).GetComponent<SpriteRenderer>();
-        SpriteRenderer shine = Art(trophy, "Shine", "trophy_shine", 7, false).GetComponent<SpriteRenderer>();
-        SmokeEmitter cloud = Emitter(trophy, "DustCloud", new Vector2(0, 0.8f), "puff", 25f, 1.2f, 0.8f, 0.6f, 0.8f, new Color(0.7f, 0.68f, 0.6f, 0.7f), 8);
-        Art(root.transform, "Pillow", "pillow", 3, true, new Vector2(-0.8f, -2.75f));
-        Transform landing = Child(root.transform, "Landing", new Vector2(-0.8f, -2.55f)).transform;
-        SmokeEmitter confetti = Emitter(root.transform, "Confetti", new Vector2(0, 2.0f), "confetti", 40f, 2f, -1.2f, 2.6f, 1.1f, new Color(1f, 0.85f, 0.35f), 45);
-        TextMesh end = Label(root.transform, new Vector2(0, 0.6f), 50, "THE END", 0.2f);
-        end.color = new Color(1f, 0.8f, 0.2f);
-        TextMesh step = Label(root.transform, new Vector2(0, -3.75f), 12, "", 0.055f);
-        step.color = Color.white;
-
-        SetField(level, "trophy", trophy);
-        SetField(level, "landing", landing);
-        SetField(level, "dust", dust);
-        SetField(level, "shine", shine);
-        SetField(level, "dustCloud", cloud);
-        SetField(level, "confetti", confetti);
-        SetField(level, "theEnd", end);
-        SetField(level, "step", step);
-        SetField(level, "bubble", SmallBubble(root.transform, new Vector2(-0.6f, 3.4f)));
-        return SaveLevel(root, "Trophy");
-    }
 }
 #endif

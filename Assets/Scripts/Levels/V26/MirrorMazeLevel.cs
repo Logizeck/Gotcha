@@ -15,10 +15,10 @@ namespace Gotcha.Levels
         [SerializeField] Transform mouse;
         [SerializeField] Transform[] path;
         [SerializeField] int flipAt = 3;              // dal tratto flipAt in poi anche l'asse verticale è invertito
-        [SerializeField] float halfWidth = 0.3f;
+        [SerializeField] float halfWidth = 0.45f;
         [SerializeField] TextMesh sign;
         [SerializeField] SpeechBubble bubble;
-        [SerializeField] float sensitivity = 1f;
+        [SerializeField] float sensitivity = 0.75f;
 
         Vector2 lastFinger;
         bool holding, done, flipped;

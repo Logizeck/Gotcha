@@ -15,6 +15,7 @@ namespace Gotcha.Levels
         [SerializeField] Transform plane;
         [SerializeField] Transform[] rings;
         [SerializeField] Transform breathBar;
+        [SerializeField] Sprite doneSprite;           // anello attraversato (verde)
         [SerializeField] SpeechBubble bubble;
         [SerializeField] float startSpeed = 2.6f, minSpeed = 1.1f, maxSpeed = 5f;
         [SerializeField] float pitchRate = 140f;      // gradi al secondo a telefono ben inclinato
@@ -66,10 +67,19 @@ namespace Gotcha.Levels
                 passed[i] = true;
                 count++;
                 SpriteRenderer sr = rings[i].GetComponent<SpriteRenderer>();
-                if (sr != null) sr.color = new Color(1f, 0.85f, 0.3f);
+                if (sr != null && doneSprite != null) sr.sprite = doneSprite;
+                Sfx.Play(this, "ding", 0.4f);
+                StartCoroutine(Pop(rings[i]));
                 if (count >= rings.Length) { StartCoroutine(Landed()); return; }
             }
             if (p.y < groundY) StartCoroutine(Crash());
+        }
+
+        static IEnumerator Pop(Transform t)
+        {
+            Vector3 s = t.localScale;
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.25f) { t.localScale = s * (1f + Mathf.Sin(k * Mathf.PI) * 0.35f); yield return null; }
+            t.localScale = s;
         }
 
         IEnumerator Crash()

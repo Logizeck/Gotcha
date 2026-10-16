@@ -247,7 +247,7 @@ namespace Gotcha.EditorArt
                     if (w < 0.002f) continue;
                     r += colors[i].r * w; g += colors[i].g * w; b += colors[i].b * w; ws += w;
                 }
-                return new Rgba(r / ws, g / ws, b / ws, 1f);
+                return Rainbow(x, y);   // pareti arcobaleno (come tutti i labirinti)
             }
             p.FillFunc(all, (x, y) =>   // alone (un solo strato)
             {

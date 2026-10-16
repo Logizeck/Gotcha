@@ -147,12 +147,15 @@ namespace Gotcha.EditorArt
         }
 
         /// <summary>Anello da attraversare (centro 0,0, diametro 0.9) visto di taglio.</summary>
-        public static DoodleArt Hoop()
+        public static DoodleArt Hoop() { return Hoop(false); }
+
+        /// <summary>Anello: arancione da attraversare, verde quando è stato attraversato.</summary>
+        public static DoodleArt Hoop(bool done)
         {
             var p = new DoodlePainter(-0.35f, -0.55f, 0.35f, 0.55f, 150) { Ink = 0.035f };
-            p.Shape(Sd.Subtract(Sd.Ellipse(0, 0, 0.27f, 0.47f), Sd.Ellipse(0, 0, 0.15f, 0.36f)), Rgba.Hex("FF7A3D"), 0.03f);
+            p.Shape(Sd.Subtract(Sd.Ellipse(0, 0, 0.27f, 0.47f), Sd.Ellipse(0, 0, 0.15f, 0.36f)), done ? Rgba.Hex("5DE07A") : Rgba.Hex("FF7A3D"), 0.03f);
             p.Line(Rgba.White.WithAlpha(0.6f), 0.03f, -0.18f, 0.25f, -0.12f, 0.35f);
-            return new DoodleArt("hoop", p);
+            return new DoodleArt(done ? "hoop_done" : "hoop", p);
         }
 
         /// <summary>Tubo verde: bocca in alto in y=0, il corpo scende per 7 unità (si capovolge per quelli in alto).</summary>

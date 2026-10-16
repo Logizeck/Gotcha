@@ -88,14 +88,28 @@ namespace Gotcha.EditorArt
             return new Rgba(r / wsum, g / wsum, b / wsum, 1f);
         }
 
+        /// <summary>
+        /// Colore arcobaleno delle pareti dei labirinti: la tinta scorre in diagonale sul labirinto (dal basso a sinistra
+        /// all'alto a destra fa un giro completo dello spettro), così ogni corridoio ha un colore diverso e sfumato.
+        /// </summary>
+        public static Rgba Rainbow(float x, float y)
+        {
+            float h = (x * 0.55f + y * 0.8f) / 7.2f + 0.5f;
+            h -= (float)Math.Floor(h);
+            float k(float n) { float t = (n + h * 6f) % 6f; return 1f - Math.Max(0f, Math.Min(Math.Min(t, 4f - t), 1f)); }
+            const float sat = 0.82f;   // pastello acceso: resta "neon" senza bruciare
+            return new Rgba(1f - sat * (1f - k(5f)), 1f - sat * (1f - k(3f)), 1f - sat * (1f - k(1f)), 1f);
+        }
+
         /// <summary>Stessi tubi al neon del livello 2 (nucleo chiaro, corpo colorato, alone) per una lista di segmenti.</summary>
-        static void NeonTubes(DoodlePainter p, Sdf area, IList<MazeSeg> segs)
+        static void NeonTubes(DoodlePainter p, Sdf area, IList<MazeSeg> segs, bool rainbow = false)
         {
             const float glowReach = 0.17f;
             // alone: un solo strato, col colore mescolato (alle giunzioni non si sommano due aloni di colori diversi)
             p.FillFunc(area, (x, y) =>
             {
                 Rgba c = BlendedTube(segs, x, y, out float dmin);
+                if (rainbow) c = Rainbow(x, y);
                 float d = dmin - MazeTubeRadius;
                 return d > glowReach ? Rgba.Clear : c.WithAlpha((float)Math.Exp(-Math.Max(0f, d) * 20f) * 0.6f);
             });
@@ -107,6 +121,7 @@ namespace Gotcha.EditorArt
             }, (x, y) =>
             {
                 Rgba c = BlendedTube(segs, x, y, out float dmin);
+                if (rainbow) c = Rainbow(x, y);
                 float t = Clamp(1f - dmin / MazeTubeRadius);
                 Rgba core = Rgba.Lerp(Rgba.Lerp(c, Rgba.White, 0.15f), Rgba.White, Clamp((t - 0.45f) / 0.45f));
                 return Rgba.Lerp(Rgba.Lerp(c, Ink, 0.15f), core, Clamp(t * 4f));
@@ -116,7 +131,7 @@ namespace Gotcha.EditorArt
         static DoodleArt NeonMaze(string name, IList<MazeSeg> segs)
         {
             var p = new DoodlePainter(-3.0f, -3.75f, 3.0f, 3.75f, 150) { Wobble = 0f };
-            NeonTubes(p, Sd.Box(0, 0, 3.05f, 3.8f), segs);
+            NeonTubes(p, Sd.Box(0, 0, 3.05f, 3.8f), segs, true);   // pareti arcobaleno
             return new DoodleArt(name, p);
         }
 
