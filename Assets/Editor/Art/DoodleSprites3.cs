@@ -293,16 +293,6 @@ namespace Gotcha.EditorArt
         public static DoodleArt PlantDry() { return Plant("plant_dry", false); }
         public static DoodleArt PlantBloom() { return Plant("plant_bloom", true); }
 
-        /// <summary>Bicchierone d'acqua aperto in alto (interno x ±0.45, fondo -0.7, bordo 0.7).</summary>
-        public static DoodleArt Glass()
-        {
-            var p = new DoodlePainter(-0.6f, -0.85f, 0.6f, 0.85f, 120) { Ink = 0.04f };
-            Sdf glass = Sd.Subtract(Sd.Box(0, 0, 0.52f, 0.76f, 0.08f), Sd.Box(0, 0.08f, 0.45f, 0.78f, 0.05f));
-            p.Fill(Sd.Box(0, 0, 0.5f, 0.74f, 0.08f), Rgba.Hex("D6F1FF", 0.25f));
-            p.Shape(glass, Rgba.Hex("BDEBFF", 0.85f));
-            p.Fill(Sd.Box(-0.33f, 0.1f, 0.03f, 0.45f, 0.03f), Rgba.White.WithAlpha(0.6f));
-            return new DoodleArt("glass", p);
-        }
 
         // ---------- Livello 27: il gioco delle tre scatole ----------
 

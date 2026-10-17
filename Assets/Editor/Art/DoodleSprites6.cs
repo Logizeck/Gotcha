@@ -103,6 +103,5 @@ namespace Gotcha.EditorArt
         public static DoodleArt Maze2Neon() { return NeonMaze("maze_2", Warped(Maze2, Maze2Warp)); }
         public static DoodleArt TrapMaze2Neon() { return NeonMaze("maze_trap2", Warped(TrapMaze2, Trap2Warp)); }
         public static DoodleArt DarkMaze2Neon() { return NeonMaze("maze_dark2", Warped(DarkMaze2, Dark2Warp)); }
-        public static DoodleArt WaspMaze2Neon() { return NeonMaze("maze_wasp2", WaspMaze2); }
     }
 }

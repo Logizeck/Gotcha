@@ -1406,22 +1406,6 @@ namespace Gotcha.EditorArt
 
         // ---------- Livello 11: la chiave nel quadro ----------
 
-        /// <summary>Quadro con la carta da parati dipinta e un chiodo: la chiave (oggetto vero) è appesa lì (centro 0,0).</summary>
-        public static DoodleArt KeyPainting()
-        {
-            var p = new DoodlePainter(-0.85f, -0.7f, 0.85f, 0.95f, 110) { Ink = 0.05f };
-            p.InkLine(0.025f, -0.45f, 0.6f, 0f, 0.88f, 0.45f, 0.6f);   // cordino
-            p.Shape(Sd.Circle(0, 0.88f, 0.04f), Rgba.Hex("B7BCC9"), 0.02f);
-            Sdf frame = Sd.Box(0, 0, 0.78f, 0.62f, 0.05f);
-            Body(p, frame, Gold, GoldShade);
-            Sdf canvas = Sd.Box(0, 0, 0.62f, 0.47f);
-            p.FillFunc(canvas, (x, y) => Rgba.Lerp(Rgba.Hex("FFF3D6"), Rgba.Hex("F2D7A6"), Clamp((0.4f - y) / 0.9f)));
-            p.Hatch(canvas, Rgba.Hex("E8C58A", 0.6f), 0.18f, 0.05f, 0f);
-            p.Shape(Sd.Circle(0, 0.3f, 0.035f), Rgba.Hex("8D93A6"), 0.02f);   // chiodo dipinto
-            p.Line(Rgba.Hex("C9A36A"), 0.02f, -0.58f, -0.42f, 0.58f, -0.42f);
-            p.Shape(canvas, Rgba.Clear, 0.035f);
-            return new DoodleArt("key_painting", p);
-        }
 
         // ---------- Livello 13: le lampade ----------
 

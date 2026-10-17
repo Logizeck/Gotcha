@@ -158,15 +158,6 @@ namespace Gotcha.EditorArt
             return new DoodleArt(done ? "hoop_done" : "hoop", p);
         }
 
-        /// <summary>Tubo verde: bocca in alto in y=0, il corpo scende per 7 unità (si capovolge per quelli in alto).</summary>
-        public static DoodleArt Pipe()
-        {
-            var p = new DoodlePainter(-0.48f, -7f, 0.48f, 0.08f, 60) { Ink = 0.05f };
-            Body(p, Sd.Box(0, -3.6f, 0.33f, 3.6f), Rgba.Hex("6FD15A"), Rgba.Hex("3E9A35"));
-            Body(p, Sd.Box(0, -0.2f, 0.42f, 0.2f, 0.04f), Rgba.Hex("7FE068"), Rgba.Hex("3E9A35"));
-            p.Line(Rgba.White.WithAlpha(0.45f), 0.06f, -0.2f, -0.5f, -0.2f, -6.8f);
-            return new DoodleArt("pipe", p);
-        }
 
         public static DoodleArt PaperPlane()
         {

@@ -266,6 +266,19 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Pulizia e spazio (0.29)
+- Tolti dal catalogo dei disegni ~45 sprite non più usati (labirinti e oggetti dei livelli sostituiti) e i loro dati;
+  tolti gli script mai usati (`EasterEggTrigger`, `SensorCondition`).
+- Il builder ora **cancella da solo** le cartelle di `Assets/Levels` dei livelli non più nel catalogo e i PNG di
+  `Assets/Art/Generated` che non sono più disegnati (`RemoveStaleAssets`).
+- Texture su Android compresse **ASTC 4x4** (8 bit/pixel invece di 32): APK e memoria delle texture ~4 volte più piccoli.
+- Musica in **OGG** invece di WAV nella repository (15,6 MB → 1,8 MB; nel gioco viene comunque ricompressa in Vorbis).
+- Build Android: stripping del codice "Medium" + `stripEngineCode`; `Assets/link.xml` protegge gli assembly caricati
+  per nome (store IAP) e il codice del gioco.
+- Le cartelle generate (`Assets/Art/Generated`, `Levels`, `Prefabs`, `Materials`, `Scenes`) sono in `.gitignore`.
+- Consiglio per la pubblicazione: caricare su Play un **App Bundle (.aab)**: ogni telefono scarica solo il codice della
+  sua architettura (ARM64 o ARMv7).
+
 ## Versione 0.29
 - **Titolo**: sfondo nero e logo "G!" al neon arcobaleno fatto come un labirinto (`DoodleSprites12.cs`,
   `UI/TitleLogo.cs`): due palline cromate ci rotolano dentro inclinando il telefono (frecce nell'Editor).

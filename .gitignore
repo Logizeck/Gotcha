@@ -11,3 +11,15 @@
 *.sln
 *.apk
 *.aab
+
+# generati dal builder (Gotcha! → Build): non vanno nella repository
+/Assets/Art/Generated/
+/Assets/Art/Generated.meta
+/Assets/Levels/
+/Assets/Levels.meta
+/Assets/Prefabs/
+/Assets/Prefabs.meta
+/Assets/Materials/
+/Assets/Materials.meta
+/Assets/Scenes/
+/Assets/Scenes.meta

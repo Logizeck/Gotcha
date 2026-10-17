@@ -7,35 +7,7 @@ namespace Gotcha.EditorArt
     {
         // ---------- 85: il pupazzo sul ghiaccio ----------
 
-        /// <summary>Lago ghiacciato tra le colline innevate, cielo chiaro (coordinate del livello; ghiaccio sotto y = -1.6).</summary>
-        public static DoodleArt IceLake()
-        {
-            var p = new DoodlePainter(-4.5f, -7f, 4.5f, 7f, 50) { Ink = 0.06f };
-            p.FillFunc(Sd.Box(0, 0, 4.6f, 7.1f), (x, y) => Rgba.Lerp(Rgba.Hex("FFE7C2"), Rgba.Hex("8FCDF2"), Clamp((y + 1f) / 7f)));
-            Body(p, Sd.Union(Sd.Ellipse(-2.8f, -1.4f, 3f, 1.1f), Sd.Ellipse(2.7f, -1.3f, 2.8f, 1.2f)), Rgba.White, Rgba.Hex("D3E6F2"));
-            p.FillFunc(Sd.Box(0, -4.6f, 4.6f, 3.0f), (x, y) => Rgba.Lerp(Rgba.Hex("BFE6F7"), Rgba.Hex("E6F6FD"), Clamp((y + 7f) / 5.4f)));
-            p.Shape(Sd.Box(0, -4.6f, 4.6f, 3.0f), Rgba.Clear, 0.05f);
-            for (int i = 0; i < 9; i++)
-            {
-                float x = -3.8f + i * 0.95f, y = -2.4f - (i % 3) * 1.1f;
-                p.Line(Rgba.White.WithAlpha(0.8f), 0.04f, x, y, x + 0.6f, y + 0.12f);
-            }
-            return new DoodleArt("ice_lake_bg", p);
-        }
 
-        /// <summary>Abete alto con la neve sui rami (base del tronco in 0,0).</summary>
-        public static DoodleArt Pine()
-        {
-            var p = new DoodlePainter(-1.3f, -0.1f, 1.3f, 3.6f, 80) { Ink = 0.05f };
-            Body(p, Sd.Box(0, 0.35f, 0.17f, 0.4f, 0.04f), Rgba.Hex("8A5A3B"), Rgba.Hex("5E3A22"));
-            for (int i = 0; i < 3; i++)
-            {
-                float b = 0.7f + i * 0.85f, w = 1.2f - i * 0.3f;
-                Body(p, Sd.Polygon(-w, b, w, b, 0, b + 1.3f), Leaf, LeafShade);
-                p.Shape(Sd.Polygon(-w * 0.55f, b + 0.6f, w * 0.55f, b + 0.6f, 0, b + 1.3f), Rgba.White, 0.03f);
-            }
-            return new DoodleArt("pine", p);
-        }
 
         /// <summary>Pupazzetto di neve con sciarpa (base in 0,0, alto 1.3).</summary>
         public static DoodleArt SnowBuddy()
@@ -51,17 +23,6 @@ namespace Gotcha.EditorArt
             return new DoodleArt("snow_buddy", p);
         }
 
-        /// <summary>Ombra morbida (ellisse larga 1, alta 0.4, centro 0,0): si allunga con la scala x.</summary>
-        public static DoodleArt Shade()
-        {
-            var p = new DoodlePainter(-0.55f, -0.25f, 0.55f, 0.25f, 100) { Wobble = 0f };
-            p.FillFunc(Sd.Ellipse(0, 0, 0.5f, 0.2f), (x, y) =>
-            {
-                float r = (float)Math.Sqrt(x * x / 0.25f + y * y / 0.04f);
-                return Rgba.Hex("2B4A6B").WithAlpha(0.45f * Clamp((1f - r) * 4f));
-            });
-            return new DoodleArt("shade", p);
-        }
 
         // ---------- 87: lo scassinatore ----------
 
@@ -83,38 +44,7 @@ namespace Gotcha.EditorArt
 
         // ---------- 89: il caffè ----------
 
-        /// <summary>Caffettiera di profilo, beccuccio a destra (in 0.78,0.55), perno sul manico a sinistra (0,0).</summary>
-        public static DoodleArt CoffeePot()
-        {
-            var p = new DoodlePainter(-0.45f, -0.7f, 1.0f, 0.95f, 130) { Ink = 0.045f };
-            p.Shape(Sd.Subtract(Sd.Circle(0.0f, 0.05f, 0.33f), Sd.Circle(0.0f, 0.05f, 0.2f)), Rgba.Hex("2B2133"), 0.03f);   // manico
-            Body(p, Sd.Polygon(0.45f, 0.35f, 0.82f, 0.62f, 0.86f, 0.52f, 0.55f, 0.15f), Rgba.Hex("D9DEE6"), Rgba.Hex("9AA1B4"));   // beccuccio
-            Body(p, Sd.Box(0.3f, -0.05f, 0.33f, 0.55f, 0.12f), Rgba.Hex("E8433F"), Rgba.Hex("B92E2A"));
-            Body(p, Sd.Box(0.3f, 0.6f, 0.25f, 0.08f, 0.04f), Rgba.Hex("2B2133"), Rgba.Hex("1A1420"));
-            p.Fill(Sd.Circle(0.3f, 0.75f, 0.07f), Rgba.Hex("2B2133"));
-            p.Line(Rgba.White.WithAlpha(0.5f), 0.04f, 0.1f, -0.4f, 0.1f, 0.3f);
-            return new DoodleArt("coffee_pot", p);
-        }
 
-        /// <summary>Tazza: interno da x -0.4 a 0.4, fondo a y 0.08, bordo a y 1.0 (base in 0,0). Il caffè è una barra a parte.</summary>
-        public static DoodleArt Mug(bool front)
-        {
-            var p = new DoodlePainter(-0.75f, -0.08f, 0.6f, 1.12f, 130) { Ink = 0.045f };
-            Sdf cup = Sd.Box(0, 0.52f, 0.47f, 0.5f, 0.1f);
-            if (!front)
-            {
-                p.Shape(Sd.Subtract(Sd.Circle(-0.47f, 0.55f, 0.25f), Sd.Circle(-0.47f, 0.55f, 0.13f)), Rgba.Hex("6FC3F2"), 0.03f);
-                p.Fill(Sd.Box(0, 0.55f, 0.4f, 0.47f), Rgba.Hex("FFFFFF", 0.35f));
-                p.Shape(cup, Rgba.Clear, 0.045f);
-            }
-            else
-            {
-                // solo il vetro davanti: bordi e riflessi, lascia vedere il caffè
-                p.Shape(Sd.Subtract(cup, Sd.Box(0, 0.55f, 0.4f, 0.47f)), Rgba.Hex("6FC3F2"), 0.045f);
-                p.Line(Rgba.White.WithAlpha(0.6f), 0.04f, -0.3f, 0.25f, -0.3f, 0.85f);
-            }
-            return new DoodleArt(front ? "mug_front" : "mug_back", p);
-        }
 
         // ---------- 90: il domino ----------
 
@@ -277,13 +207,6 @@ namespace Gotcha.EditorArt
 
         // ---------- 95: la torta ----------
 
-        public static DoodleArt Plate()
-        {
-            var p = new DoodlePainter(-1.7f, -0.25f, 1.7f, 0.12f, 100) { Ink = 0.045f };
-            Body(p, Sd.Box(0, -0.06f, 1.6f, 0.1f, 0.08f), Rgba.White, Rgba.Hex("D6E0E8"));
-            Body(p, Sd.Box(0, -0.18f, 0.6f, 0.06f, 0.03f), Rgba.Hex("D6E0E8"), Rgba.Hex("AEBBC8"));
-            return new DoodleArt("plate", p);
-        }
 
         public static DoodleArt Cherry()
         {
@@ -376,51 +299,9 @@ namespace Gotcha.EditorArt
 
         // ---------- 98: il bowling ----------
 
-        /// <summary>Pista vista dall'alto: legno chiaro tra x -1.5 e 1.5, canaline scure ai lati (coordinate del livello).</summary>
-        public static DoodleArt Lane()
-        {
-            var p = new DoodlePainter(-4.5f, -7f, 4.5f, 7f, 50) { Ink = 0.06f };
-            p.Fill(Sd.Box(0, 0, 4.6f, 7.1f), Rgba.Hex("2B2133"));
-            p.Fill(Sd.Box(0, 0, 1.85f, 7.1f), Rgba.Hex("4A4060"));
-            p.FillFunc(Sd.Box(0, 0, 1.5f, 7.1f), (x, y) =>
-            {
-                float f = x / 0.25f - (float)Math.Floor(x / 0.25f);
-                return f < 0.06f ? Rgba.Hex("C99A5E") : Rgba.Lerp(Rgba.Hex("E8C08A"), Rgba.Hex("F2D2A2"), Noise.Value((float)Math.Floor(x / 0.25f) * 3f, y * 0.3f));
-            });
-            p.Shape(Sd.Box(0, 0, 1.5f, 7.1f), Rgba.Clear, 0.05f);
-            for (int i = -2; i <= 2; i++) p.Fill(Sd.Polygon(i * 0.45f, -1.6f, i * 0.45f - 0.1f, -1.85f, i * 0.45f + 0.1f, -1.85f), Rgba.Hex("8E5FD1"));   // frecce
-            p.Line(Rgba.Hex("E8433F"), 0.05f, -1.5f, -2.6f, 1.5f, -2.6f);   // linea di lancio
-            return new DoodleArt("lane_bg", p);
-        }
 
-        public static DoodleArt BowlingBall()
-        {
-            var p = new DoodlePainter(-0.32f, -0.32f, 0.32f, 0.32f, 160) { Ink = 0.035f };
-            Body(p, Sd.Circle(0, 0, 0.28f), Rgba.Hex("3E6FE0"), Rgba.Hex("2A4FAE"));
-            foreach (var h in new[] { (-0.07f, 0.1f), (0.07f, 0.1f), (0f, -0.04f) }) p.Fill(Sd.Circle(h.Item1, h.Item2, 0.035f), Rgba.Hex("1A1420"));
-            return new DoodleArt("bowling_ball", p);
-        }
 
-        /// <summary>Birillo visto dall'alto (cerchio bianco con la fascia rossa, centro 0,0, raggio 0.15).</summary>
-        public static DoodleArt PinTop()
-        {
-            var p = new DoodlePainter(-0.2f, -0.2f, 0.2f, 0.2f, 180) { Ink = 0.025f };
-            Body(p, Sd.Circle(0, 0, 0.16f), Rgba.White, Rgba.Hex("D6E0E8"));
-            p.Shape(Sd.Subtract(Sd.Circle(0, 0, 0.1f), Sd.Circle(0, 0, 0.065f)), Rgba.Hex("E8433F"), 0.01f);
-            p.Fill(Sd.Circle(0, 0, 0.04f), Rgba.White);
-            return new DoodleArt("pin_top", p);
-        }
 
-        /// <summary>Cono stradale "NON TOCCARE" visto dall'alto (centro 0,0, raggio 0.35).</summary>
-        public static DoodleArt TrafficCone()
-        {
-            var p = new DoodlePainter(-0.42f, -0.42f, 0.42f, 0.42f, 150) { Ink = 0.035f };
-            p.Shape(Sd.Box(0, 0, 0.36f, 0.36f, 0.06f), Rgba.Hex("FF8A2E"), 0.03f);
-            Body(p, Sd.Circle(0, 0, 0.25f), Rgba.Hex("FF8A2E"), Rgba.Hex("D2601A"));
-            p.Shape(Sd.Subtract(Sd.Circle(0, 0, 0.18f), Sd.Circle(0, 0, 0.11f)), Rgba.White, 0.015f);
-            p.Fill(Sd.Circle(0, 0, 0.05f), Rgba.Hex("2B2133"));
-            return new DoodleArt("traffic_cone", p);
-        }
 
         // ---------- 99: acchiappa la talpa ----------
 
@@ -495,13 +376,5 @@ namespace Gotcha.EditorArt
             return new DoodleArt(layer == 0 ? "trophy" : layer == 1 ? "trophy_dust" : "trophy_shine", p);
         }
 
-        /// <summary>Cuscino morbido (centro 0,0, largo 1.8).</summary>
-        public static DoodleArt Pillow()
-        {
-            var p = new DoodlePainter(-1.0f, -0.4f, 1.0f, 0.4f, 110) { Ink = 0.045f };
-            Body(p, Sd.Box(0, 0, 0.88f, 0.28f, 0.22f), Rgba.Hex("FF8FB0"), Rgba.Hex("E2668C"));
-            foreach (float s in new[] { -1f, 1f }) p.Shape(Sd.Circle(s * 0.88f, 0.22f * s, 0.06f), Rgba.Hex("FF8FB0"), 0.02f);
-            return new DoodleArt("pillow", p);
-        }
     }
 }

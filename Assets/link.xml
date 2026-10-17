@@ -1,0 +1,7 @@
+<!-- Con lo stripping del codice attivo, questi assembly restano interi: lo store IAP viene caricato per nome
+     (StoreManager usa Type.GetType), e il codice del gioco usa un po' di reflection nel builder e nei salvataggi. -->
+<linker>
+  <assembly fullname="Gotcha.Iap" preserve="all"/>
+  <assembly fullname="Gotcha.StoreCore" preserve="all"/>
+  <assembly fullname="Assembly-CSharp" preserve="all"/>
+</linker>

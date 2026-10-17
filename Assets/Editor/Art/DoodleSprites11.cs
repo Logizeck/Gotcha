@@ -137,19 +137,6 @@ namespace Gotcha.EditorArt
 
         // ---------- 98: l'ingorgo ----------
 
-        /// <summary>Auto vista dall'alto, orizzontale (centro 0,0), lunga "cells" celle da 0.9.</summary>
-        public static DoodleArt Car(int cells, string color, string name)
-        {
-            float hl = cells * 0.45f - 0.06f;
-            var p = new DoodlePainter(-hl - 0.08f, -0.42f, hl + 0.08f, 0.42f, 110) { Ink = 0.04f };
-            Rgba c = Rgba.Hex(color);
-            Body(p, Sd.Box(0, 0, hl, 0.36f, 0.14f), c, Rgba.Lerp(c, Ink, 0.3f));
-            p.Shape(Sd.Box(hl - 0.42f, 0, 0.13f, 0.28f, 0.05f), Rgba.Hex("BFE6F7"), 0.02f);   // parabrezza (davanti a destra)
-            p.Shape(Sd.Box(-hl + 0.25f, 0, 0.08f, 0.26f, 0.04f), Rgba.Hex("BFE6F7"), 0.02f);
-            if (cells == 3) p.Shape(Sd.Box(-0.3f, 0, hl - 0.6f, 0.26f, 0.05f), Rgba.Lerp(c, Rgba.White, 0.2f), 0.02f);   // cassone del camion
-            foreach (float sy in new[] { -1f, 1f }) p.Fill(Sd.Box(hl - 0.02f, sy * 0.25f, 0.04f, 0.06f), Rgba.Hex("FFF27A"));
-            return new DoodleArt(name, p);
-        }
 
         // ---------- 71: il topo DJ ----------
 

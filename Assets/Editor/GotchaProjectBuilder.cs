@@ -31,7 +31,7 @@ public static partial class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 31;
+    const int BuilderVersion = 32;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -58,6 +58,8 @@ public static partial class GotchaProjectBuilder
         try
         {
             List<DoodleArt> arts = DoodleCatalog.All();
+            drawnSprites.Clear();
+            foreach (DoodleArt a in arts) drawnSprites.Add(a.Name);
             for (int i = 0; i < arts.Count; i++)
             {
                 EditorUtility.DisplayProgressBar("Gotcha!", "Disegno " + arts[i].Name, i / (float)arts.Count);
@@ -206,6 +208,7 @@ public static partial class GotchaProjectBuilder
         AssetDatabase.SaveAssets();
 
         BuildScene(catalog);
+        RemoveStaleAssets(levels);
         ConfigurePlayer();
         File.WriteAllText(VersionFile, BuilderVersion.ToString());
         Debug.Log("[Gotcha] Scena e livelli generati. Apri " + ScenePath + " e premi Play.");
@@ -530,7 +533,7 @@ public static partial class GotchaProjectBuilder
     /// <summary>Colonna sonora: importata compressa (Vorbis) per non appesantire l'APK.</summary>
     static AudioClip Soundtrack()
     {
-        const string path = "Assets/Audio/Soundtrack.wav";
+        const string path = "Assets/Audio/Soundtrack.ogg";
         var importer = AssetImporter.GetAtPath(path) as AudioImporter;
         if (importer == null) { Debug.LogWarning("[Gotcha] Colonna sonora non trovata in " + path); return null; }
         AudioImporterSampleSettings settings = importer.defaultSampleSettings;
@@ -587,7 +590,7 @@ public static partial class GotchaProjectBuilder
     /// <summary>Brano di sottofondo in Assets/Audio/Music (compresso Vorbis, caricato in memoria per loop senza buchi).</summary>
     static AudioClip Music(string name)
     {
-        string path = "Assets/Audio/Music/" + name + ".wav";
+        string path = "Assets/Audio/Music/" + name + ".ogg";
         var importer = AssetImporter.GetAtPath(path) as AudioImporter;
         if (importer == null) { Debug.LogWarning("[Gotcha] Musica non trovata: " + path); return null; }
         AudioImporterSampleSettings settings = importer.defaultSampleSettings;
@@ -611,14 +614,9 @@ public static partial class GotchaProjectBuilder
     /// </summary>
     static MusicTrack MusicFor(string folder)
     {
-        string[] dungeon = { "KeyDoor", "Maze", "TrapMaze", "DarkMaze", "WaspMaze", "ArtTheft", "FrozenKey", "Maze2", "TrapMaze2",
-            "DarkMaze2", "FrozenKey2", "WaspMaze6", "TrapMaze3", "DarkMaze3", "WaspMaze3", "TwoDoors", "Maze4", "MirrorMaze", "Magnet" };
-        string[] animals = { "Idle", "Volume", "Roach", "Snowman", "Defend", "Bedtime", "Campfire", "Plant", "Shell", "Sunny", "CatEyes",
-            "Copycat", "Shell2", "Defend2", "Plant2", "Copycat2", "Wasp", "Wasp2", "CatEyes2", "Campfire2", "Flashlight", "Bridge", "Copycat3",
-            "Shell3", "Defend3", "Plant3", "Tightrope", "Wasp3", "CatEyes3", "SnowmanSled", "ScreamBird", "Fireflies",
-            "Sneaky", "Whack", "Laser", "Rhythm", "Pipes", "Slide", "WhereMouse", "Carousel" };
-        string[] kitchen = { "Apple", "Cookie", "Birthday", "Soup", "Rope", "Pizza", "PizzaChef", "Pancake", "AppleCatch", "Pancake2",
-            "Cookie2", "Birthday2", "AppleCatch2", "Soup2", "Coffee", "CakeStack" };
+        string[] dungeon = { "KeyDoor", "Maze", "TrapMaze", "DarkMaze", "WaspMaze", "ArtTheft", "FrozenKey", "Maze2", "TrapMaze2", "DarkMaze2", "WaspMaze6", "TrapMaze3", "DarkMaze3", "WaspMaze3", "TwoDoors", "MirrorMaze", "Magnet" };
+        string[] animals = { "Idle", "Volume", "Roach", "Snowman", "Defend", "Bedtime", "Campfire", "Plant", "Shell", "Sunny", "CatEyes", "Copycat", "Shell2", "Defend2", "Plant2", "Copycat2", "Wasp2", "CatEyes2", "Campfire2", "Flashlight", "Bridge", "Copycat3", "Shell3", "Defend3", "Plant3", "Tightrope", "Wasp3", "CatEyes3", "Fireflies", "Sneaky", "Whack", "Laser", "Rhythm", "Pipes", "Slide", "WhereMouse", "Carousel" };
+        string[] kitchen = { "Apple", "Cookie", "Birthday", "Soup", "Rope", "Pizza", "PizzaChef", "Pancake", "AppleCatch", "Pancake2", "Cookie2", "Birthday2", "AppleCatch2" };
         if (folder == "Credits") return MusicTrack.Title;   // il finale suona il tema del titolo
         if (System.Array.IndexOf(dungeon, folder) >= 0) return MusicTrack.Dungeon;
         if (System.Array.IndexOf(animals, folder) >= 0) return MusicTrack.Animals;
@@ -4756,6 +4754,9 @@ public static partial class GotchaProjectBuilder
         // 64 bit obbligatorio: molti telefoni recenti rifiutano gli APK solo a 32 bit
         PlayerSettings.SetScriptingBackend(BuildTargetGroup.Android, ScriptingImplementation.IL2CPP);
         PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64 | AndroidArchitecture.ARMv7;
+        // codice C# non usato tolto dalla build (Assets/link.xml protegge ciò che si carica per nome, es. lo store IAP)
+        PlayerSettings.SetManagedStrippingLevel(BuildTargetGroup.Android, ManagedStrippingLevel.Medium);
+        PlayerSettings.stripEngineCode = true;
         AssetDatabase.SaveAssets();
         EnsureLegacyInput();
     }
@@ -4784,6 +4785,29 @@ public static partial class GotchaProjectBuilder
 
     // ---------- Sprite doodle ----------
 
+    static readonly HashSet<string> drawnSprites = new HashSet<string>();
+
+    /// <summary>
+    /// Pulizia: toglie dal progetto i livelli che non sono più nel catalogo (cartelle in Assets/Levels) e i disegni
+    /// che non sono più nel catalogo dei disegni (Assets/Art/Generated). Le varianti sono copie "spacchettate" dei
+    /// livelli base, quindi anche le cartelle delle sole basi (es. Wasp) si possono togliere senza rompere niente.
+    /// </summary>
+    static void RemoveStaleAssets(List<LevelDefinition> levels)
+    {
+        var keep = new HashSet<string>();
+        foreach (LevelDefinition d in levels)
+            if (d != null) keep.Add(Path.GetFileName(Path.GetDirectoryName(AssetDatabase.GetAssetPath(d))));
+        int removed = 0;
+        foreach (string dir in AssetDatabase.GetSubFolders(LevelDir))
+            if (!keep.Contains(Path.GetFileName(dir)) && AssetDatabase.DeleteAsset(dir)) removed++;
+        foreach (string guid in AssetDatabase.FindAssets("t:Texture2D", new[] { SpriteDir }))
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            if (!drawnSprites.Contains(Path.GetFileNameWithoutExtension(path)) && AssetDatabase.DeleteAsset(path)) removed++;
+        }
+        if (removed > 0) Debug.Log("[Gotcha] Pulizia: tolti " + removed + " livelli/disegni non più usati.");
+    }
+
     static void MakeSprite(DoodleArt art)
     {
         DoodlePainter p = art.Painter;
@@ -4809,7 +4833,15 @@ public static partial class GotchaProjectBuilder
         importer.spriteBorder = Vector4.one * art.Border;
         importer.alphaIsTransparency = true;
         importer.mipmapEnabled = false;
-        importer.textureCompression = TextureImporterCompression.Uncompressed;   // linee nette, niente artefatti
+        // Editor e PC: senza compressione. Android: ASTC 4x4 (8 bit per pixel invece di 32): l'APK e la memoria
+        // occupata dalle texture si riducono di 4 volte, e a blocchi 4x4 le linee del doodle restano nette.
+        importer.textureCompression = TextureImporterCompression.Uncompressed;
+        var android = importer.GetPlatformTextureSettings("Android");
+        android.overridden = true;
+        android.format = TextureImporterFormat.ASTC_4x4;
+        android.maxTextureSize = 2048;
+        android.compressionQuality = 100;
+        importer.SetPlatformTextureSettings(android);
         var settings = new TextureImporterSettings();
         importer.ReadTextureSettings(settings);
         settings.spriteMeshType = SpriteMeshType.FullRect;   // necessario per il 9-slice e per lo shader della sfera
