@@ -12,17 +12,17 @@ public static partial class GotchaProjectBuilder
     /// <summary>I livelli di Toni, nell'ordine in cui compaiono (uno ogni 25). Quelli nuovi si aggiungono in fondo.</summary>
     static List<LevelDefinition> ToniLevels() => new List<LevelDefinition>
     {
-        Define("Toni1", "toni_button", "MOVE, TONI!",
-            "Press the button. Toni is a very good boy... and very, very heavy. What does a dog love more than lying down?",
-            BuildToniButtonLevel()),
-        Define("Toni2", "toni_photo", "SAY CHEESE!",
-            "Toni only looks at treats. A good pet photographer knows exactly where to hold one.",
-            BuildToniPhotoLevel(), "toni_unicorn"),
-        Define("Toni3", "toni_fridge", "WAKE UP, TONI!",
-            "Alarm clocks don't work on pugs. Which sound makes EVERY dog jump out of bed?",
-            BuildToniFridgeLevel(), "toni_toot"),
+        Define("Toni1", "toni_stuck", "STUCK!",
+            "Toni tried the cat flap. Bad idea. Pushing alone won't do... something slippery from the kitchen, maybe?",
+            BuildToniStuckLevel(), "toni_toot"),
+        Define("Toni2", "toni_tug", "TUG OF WAR",
+            "The house key is missing and Toni looks VERY innocent. Pull the sock out... gently! Yank it and he pulls back.",
+            BuildToniTugLevel(), "toni_tug"),
+        Define("Toni3", "toni_hide", "WHERE'S TONI?",
+            "Toni is hiding... and snoring. Move your finger around the room and listen (and feel): the closer, the louder.",
+            BuildToniHideLevel()),
         Define("Toni4", "toni_cake", "TONI'S BIRTHDAY",
-            "Toni has to blow out his candle... but pugs can't blow. Maybe he can do something else with his nose?",
+            "Toni has to blow out his candle... but pugs can't blow. That peacock feather looks ticklish... and his nose is RIGHT there.",
             BuildToniCakeLevel()),
     };
 
@@ -116,126 +116,145 @@ public static partial class GotchaProjectBuilder
         return pug;
     }
 
-    static TapButton RoundButton(Transform parent, string name, Vector2 pos, float scale, string text, int order)
+    static Draggable2D Prop(Transform parent, string name, string sprite, Vector2 pos, float scale, Vector2 colliderSize, Vector2 colliderOffset, int order, float rot = 0f)
     {
         GameObject go = Child(parent, name, pos);
         go.transform.localScale = Vector3.one * scale;
-        Transform art = Art(go.transform, "Art", "big_button", order);
-        go.AddComponent<BoxCollider2D>().size = new Vector2(1.9f, 1.05f);
-        TapButton b = go.AddComponent<TapButton>();
-        b.visual = art;
-        b.id = name;
-        if (!string.IsNullOrEmpty(text)) Label(parent, pos + new Vector2(0f, -0.62f * scale - 0.15f), order + 1, text, 0.045f).color = new Color(1f, 0.93f, 0.75f);
-        return b;
+        go.transform.localRotation = Quaternion.Euler(0, 0, rot);
+        var box = go.AddComponent<BoxCollider2D>();
+        box.size = colliderSize;
+        box.offset = colliderOffset;
+        Draggable2D d = go.AddComponent<Draggable2D>();
+        d.itemId = name.ToLowerInvariant();
+        d.returnOnMiss = true;
+        Art(go.transform, "Art", sprite, order);
+        return d;
     }
 
-    // ---------- 25: MOVE, TONI! ----------
+    // ---------- 25: STUCK! ----------
 
-    static GameObject BuildToniButtonLevel()
+    static GameObject BuildToniStuckLevel()
     {
         var root = new GameObject("Level_Toni1");
-        ToniButtonLevel level = root.AddComponent<ToniButtonLevel>();
+        ToniStuckLevel level = root.AddComponent<ToniStuckLevel>();
         Art(root.transform, "Room", "room_bg", -20, false);
-        TapButton button = RoundButton(root.transform, "Button", new Vector2(-0.4f, -2.55f), 1.3f, "PRESS ME", 0);
-        Bar(root.transform, "Rug", new Vector2(-0.3f, -2.75f), new Vector2(4.2f, 0.12f), new Color(0.85f, 0.45f, 0.4f, 0.5f), -5);
-        ToniPug toni = ToniRig(root.transform, new Vector2(-0.3f, -1.75f), 1.25f, root.transform);
-        Transform ball = Child(root.transform, "Ball", new Vector2(1.9f, -3.2f)).transform;
-        Art(ball, "Art", "toni_ball", 8, false);
+        // fuori, a destra del muro: cielo, sole, prato e un cespuglio
+        Bar(root.transform, "Sky", new Vector2(1.8f, 1.5f), new Vector2(2.8f, 13f), new Color(0.62f, 0.82f, 0.98f), -18);
+        Bar(root.transform, "Grass", new Vector2(1.8f, -3.7f), new Vector2(2.8f, 3.4f), new Color(0.5f, 0.8f, 0.4f), -17);
+        Art(root.transform, "Sun", "sun", -16, true, new Vector2(2.1f, 3.0f)).localScale = Vector3.one * 0.6f;
+        Art(root.transform, "Bush", "bush", -16, true, new Vector2(2.2f, -2.2f));
+        Transform wall = Art(root.transform, "Wall", "wall_section", 8, false, new Vector2(0.4f, 0f));
+        ToniPug toni = ToniRig(root.transform, new Vector2(0.15f, -2.59f), 1.2f, root.transform);
+        Transform flap = Child(root.transform, "Flap", new Vector2(0.64f, -1.52f)).transform;
+        flap.localRotation = Quaternion.Euler(0, 0, 55f);
+        Art(flap, "Art", "dog_flap", 9, false);
+
+        // il tavolino con le "soluzioni"
+        Bar(root.transform, "Table", new Vector2(-1.6f, -0.65f), new Vector2(2.0f, 0.12f), new Color(0.55f, 0.36f, 0.22f), 2);
+        foreach (float x in new[] { -2.45f, -0.75f }) Bar(root.transform, "Leg", new Vector2(x, -1.15f), new Vector2(0.1f, 0.9f), new Color(0.45f, 0.29f, 0.18f), 1);
+        Draggable2D butter = Prop(root.transform, "Butter", "butter", new Vector2(-2.15f, -0.45f), 0.9f, new Vector2(1f, 0.5f), new Vector2(0f, 0.04f), 10);
+        Draggable2D bone = Prop(root.transform, "Bone", "bone", new Vector2(-1.5f, -0.48f), 0.55f, new Vector2(1.1f, 0.5f), Vector2.zero, 10);
+        Draggable2D feather = Prop(root.transform, "Feather", "feather", new Vector2(-1.15f, -0.45f), 0.55f, new Vector2(1.75f, 0.75f), new Vector2(0.55f, 0.22f), 10, 15f);
+
+        SmokeEmitter shine = Emitter(root.transform, "Shine", Vector2.zero, "puff", 6f, 0.7f, 0.4f, 0.4f, 0.18f, new Color(1f, 0.95f, 0.5f, 0.9f), 12);
+        SmokeEmitter toot = Emitter(root.transform, "Toot", Vector2.zero, "puff", 30f, 1.4f, 0.2f, 0.4f, 0.6f, new Color(0.6f, 0.85f, 0.35f, 0.85f), 12);
+        toot.sideDrift = -1.5f;
 
         SetField(level, "toni", toni);
-        SetField(level, "button", button);
-        SetField(level, "ball", ball);
+        SetField(level, "wall", wall);
+        SetField(level, "flap", flap);
+        SetField(level, "butter", butter);
+        SetField(level, "bone", bone);
+        SetField(level, "feather", feather);
+        SetField(level, "shine", shine);
+        SetField(level, "toot", toot);
         return SaveLevel(root, "Toni1");
     }
 
-    // ---------- 50: SAY CHEESE! ----------
+    // ---------- 50: TUG OF WAR ----------
 
-    static GameObject BuildToniPhotoLevel()
+    static GameObject BuildToniTugLevel()
     {
         var root = new GameObject("Level_Toni2");
-        ToniPhotoLevel level = root.AddComponent<ToniPhotoLevel>();
+        ToniTugLevel level = root.AddComponent<ToniTugLevel>();
         Art(root.transform, "Room", "room_bg", -20, false);
-        Bar(root.transform, "Backdrop", new Vector2(-0.95f, 0.2f), new Vector2(3.6f, 4.6f), new Color(0.72f, 0.86f, 0.95f), -15);
-        Bar(root.transform, "BackdropFloor", new Vector2(-0.95f, -2.3f), new Vector2(3.6f, 0.6f), new Color(0.66f, 0.8f, 0.9f), -14);
-        Bar(root.transform, "Shelf", new Vector2(-1.9f, 1.25f), new Vector2(1.4f, 0.12f), new Color(0.55f, 0.36f, 0.22f), 1);
-        Transform jar = Child(root.transform, "Jar", new Vector2(-1.9f, 1.85f)).transform;
-        Art(jar, "Art", "treat_jar", 2);
-        Fit(Label(jar, new Vector2(0f, 0.08f), 3, "TREATS", 0.03f), 0.48f, 0.2f);
-        Art(root.transform, "Cushion", "pug_cushion", 1, true, new Vector2(-1.0f, -1.4f)).localScale = Vector3.one * 1.15f;
-        ToniPug toni = ToniRig(root.transform, new Vector2(-1.0f, -1.4f), 1.15f, root.transform);
-
-        Transform cam = Child(root.transform, "Camera", new Vector2(1.75f, -0.9f)).transform;
-        Art(cam, "Art", "photo_camera", 6);
-        Transform lens = Child(cam, "Lens", new Vector2(-0.74f, 0.15f)).transform;
-
-        var boneGo = Child(root.transform, "Bone", new Vector2(-1.9f, 2.4f));
-        boneGo.transform.localScale = Vector3.one * 0.8f;
-        boneGo.AddComponent<CircleCollider2D>().radius = 0.45f;
-        Draggable2D bone = boneGo.AddComponent<Draggable2D>();
-        bone.itemId = "bone";
-        bone.returnOnMiss = false;
-        Art(boneGo.transform, "Art", "bone", 9);
-
-        TapButton shutter = RoundButton(root.transform, "Shutter", new Vector2(1.2f, -3.6f), 0.75f, "SNAP!", 10);
-        TextMesh film = Label(root.transform, new Vector2(-0.4f, 3.35f), 12, "FILM: 4", 0.05f);
-        SpriteRenderer flash = Bar(root.transform, "Flash", Vector2.zero, new Vector2(12f, 16f), new Color(1f, 1f, 1f, 0f), 95);
-
-        Transform polaroid = Child(root.transform, "Polaroid", new Vector2(0f, 0.7f)).transform;
-        polaroid.localScale = Vector3.one * 1.5f;
-        Art(polaroid, "Art", "polaroid", 75, false);
-        Transform slot = Child(polaroid, "Photo", new Vector2(0.1f, 0.12f)).transform;
-        TextMesh caption = Fit(Label(polaroid, new Vector2(0f, -0.78f), 77, "", 0.035f), 1.5f, 0.3f);
+        Label(root.transform, new Vector2(0f, 3.2f), 12, "WHERE ARE MY KEYS?!", 0.05f);
+        Art(root.transform, "Cushion", "pug_cushion", 1, true, new Vector2(0.9f, -2.0f)).localScale = Vector3.one * 1.3f;
+        ToniPug toni = ToniRig(root.transform, new Vector2(0.9f, -2.0f), 1.3f, root.transform);
+        var items = new List<Transform>();
+        foreach (var it in new[] { ("sock", 1.0f), ("fish", 1.1f), ("toni_ball", 1.1f), ("coin", 1.2f), ("bell", 0.7f), ("sausages", 0.75f), ("cheese_wedge", 1.0f), ("key", 0.6f) })
+        {
+            Transform t = Child(root.transform, "Item_" + it.Item1, new Vector2(0f, -2.3f)).transform;
+            t.localScale = Vector3.one * it.Item2;
+            Art(t, "Art", it.Item1, 6);
+            items.Add(t);
+        }
+        LineRenderer rope = Line(root.transform, "Rope", 0.035f, new Color(0.96f, 0.95f, 0.9f), 5);
 
         SetField(level, "toni", toni);
-        SetField(level, "bone", bone);
-        SetField(level, "jar", jar);
-        SetField(level, "lens", lens);
-        SetField(level, "shutter", shutter);
-        SetField(level, "flash", flash);
-        SetField(level, "polaroid", polaroid);
-        SetField(level, "photoSlot", slot);
-        SetField(level, "caption", caption);
-        SetField(level, "filmLabel", film);
+        SetArray(level, "items", items.ToArray());
+        SetField(level, "rope", rope);
         return SaveLevel(root, "Toni2");
     }
 
-    // ---------- 75: WAKE UP, TONI! ----------
+    // ---------- 75: WHERE'S TONI? ----------
 
-    static GameObject BuildToniFridgeLevel()
+    static GameObject BuildToniHideLevel()
     {
         var root = new GameObject("Level_Toni3");
-        ToniFridgeLevel level = root.AddComponent<ToniFridgeLevel>();
-        Art(root.transform, "Kitchen", "kitchen_bg", -20, false);
-        Art(root.transform, "Cushion", "pug_cushion", 1, true, new Vector2(-1.2f, -2.4f)).localScale = Vector3.one * 1.1f;
-        ToniPug toni = ToniRig(root.transform, new Vector2(-1.2f, -2.4f), 1.1f, root.transform);
+        ToniHideLevel level = root.AddComponent<ToniHideLevel>();
+        Art(root.transform, "Room", "room_bg", -20, false);
+        Art(root.transform, "Window", "window_frame", -10, false, new Vector2(1.35f, 1.1f)).localScale = Vector3.one * 0.8f;
 
-        Transform fridge = Child(root.transform, "Fridge", new Vector2(1.5f, -0.9f)).transform;
-        Art(fridge, "Body", "fridge_body", 3, false);
-        Transform glow = Art(fridge, "Light", "glow", 4, false, new Vector2(0f, 0.8f));
-        glow.localScale = Vector3.one * 2.2f;
-        Transform sausages = Art(fridge, "Sausages", "sausages", 5, true, new Vector2(0.1f, 0.15f));
-        Transform hinge = Child(fridge, "Hinge", new Vector2(0.8f, 0f)).transform;
-        Art(hinge, "Door", "fridge_door", 7, false);
+        var spots = new List<TapButton>();
+        var arts = new List<Transform>();
+        var gags = new List<GameObject>();
+        var toniAt = new List<Vector2>();
+        void Spot(string name, string sprite, Vector2 pos, Vector2 scale, Vector2 size, Vector2 offset, Vector2 toniPos, System.Action<Transform> gag)
+        {
+            GameObject go = Child(root.transform, name, pos);
+            Transform art = Art(go.transform, "Art", sprite, 6, false);
+            art.localScale = new Vector3(scale.x, scale.y, 1f);
+            art.localPosition = Vector3.Scale(art.localPosition, new Vector3(scale.x, scale.y, 1f));
+            var box = go.AddComponent<BoxCollider2D>();
+            box.size = size;
+            box.offset = offset;
+            TapButton tb = go.AddComponent<TapButton>();
+            tb.id = name;
+            tb.visual = Child(go.transform, "PressDummy", Vector2.zero).transform;   // si alza con la sua animazione
+            GameObject g = Child(root.transform, name + "Gag", pos + new Vector2(0f, 0.1f));
+            gag(g.transform);
+            spots.Add(tb);
+            arts.Add(art);
+            gags.Add(g);
+            toniAt.Add(toniPos);
+        }
+        Spot("Sofa", "sofa", new Vector2(-1.1f, -2.2f), new Vector2(1.1f, 1.1f), new Vector2(2.7f, 1.3f), Vector2.zero, new Vector2(-1.1f, -1.55f), g =>
+        {
+            for (int i = 0; i < 3; i++) Art(g, "Sock", "sock", 7, true, new Vector2(-0.5f + i * 0.45f, 0.1f)).localRotation = Quaternion.Euler(0, 0, -30f + i * 30f);
+        });
+        Spot("Box", "box", new Vector2(1.25f, -3.1f), Vector2.one, new Vector2(1.2f, 1.1f), Vector2.zero, new Vector2(1.25f, -2.6f), g =>
+            Art(g, "Mouse", "mouse", 7, true).localScale = Vector3.one * 0.5f);
+        Spot("Basket", "basket", new Vector2(-1.2f, -4.1f), new Vector2(0.85f, 0.85f), new Vector2(1.6f, 1.2f), new Vector2(0f, 0.45f), new Vector2(-1.2f, -3.4f), g =>
+            Art(g, "Cat", "cat", 7, true, new Vector2(0f, 0.4f)).localScale = Vector3.one * 0.45f);
+        Spot("Curtain", "curtain", new Vector2(2.1f, 0.6f), new Vector2(1f, 1.3f), new Vector2(1.1f, 3f), new Vector2(0f, -1.35f), new Vector2(1.5f, -1.95f), g =>
+            Art(g, "Wasp", "wasp", 7, true, new Vector2(-0.3f, -0.6f)).localScale = Vector3.one * 0.6f);
 
-        GameObject alarmGo = Child(root.transform, "Alarm", new Vector2(0.45f, -3.4f));
-        alarmGo.transform.localScale = Vector3.one * 0.75f;
-        Transform alarmArt = Art(alarmGo.transform, "Art", "alarm_clock", 8);
-        alarmGo.AddComponent<CircleCollider2D>().radius = 0.6f;
-        TapButton alarm = alarmGo.AddComponent<TapButton>();
-        alarm.visual = alarmArt;
-        alarm.id = "alarm";
-        Label(root.transform, new Vector2(-1.9f, 2.9f), 12, "7:00 - WALK TIME!", 0.04f);
-
-        SmokeEmitter toot = Emitter(root.transform, "Toot", Vector2.zero, "puff", 14f, 1.6f, 0.35f, 0.45f, 0.6f, new Color(0.6f, 0.85f, 0.35f, 0.8f), 30);
+        ToniPug toni = ToniRig(root.transform, Vector2.zero, 0.85f, root.transform);
+        foreach (SpriteRenderer sr in toni.GetComponentsInChildren<SpriteRenderer>(true)) sr.sortingOrder += 6;   // davanti al nascondiglio
 
         SetField(level, "toni", toni);
-        SetField(level, "fridge", fridge);
-        SetField(level, "hinge", hinge);
-        SetField(level, "fridgeLight", glow.GetComponent<SpriteRenderer>());
-        SetField(level, "sausages", sausages);
-        SetField(level, "alarm", alarm);
-        SetField(level, "alarmArt", alarmArt);
-        SetField(level, "toot", toot);
+        SetArray(level, "spots", spots.ToArray());
+        SetArray(level, "spotArt", arts.ToArray());
+        SetArray(level, "gags", gags.ToArray());
+        var so = new SerializedObject(level);
+        SerializedProperty ta = so.FindProperty("toniAt");
+        ta.arraySize = toniAt.Count;
+        for (int i = 0; i < toniAt.Count; i++) ta.GetArrayElementAtIndex(i).vector2Value = toniAt[i];
+        so.ApplyModifiedPropertiesWithoutUndo();
+        SpeechBubble bubble = Bubble(root.transform, new Vector2(0f, 3.1f));
+        bubble.transform.localScale = Vector3.one * 0.5f;
+        SetField(level, "bubble", bubble);
         return SaveLevel(root, "Toni3");
     }
 
@@ -260,13 +279,14 @@ public static partial class GotchaProjectBuilder
         hat.localScale = Vector3.one * 1.4f;
         hat.localRotation = Quaternion.Euler(0, 0, 18f);
 
-        Transform vase = Art(root.transform, "Vase", "vase", 3, true, new Vector2(2.15f, -0.2f));
-        vase.localScale = Vector3.one * 0.6f;
+        Transform vase = Art(root.transform, "Vase", "vase", 10, true, new Vector2(2.45f, -1.0f));
+        vase.localScale = Vector3.one * 0.8f;
+        // piuma di pavone nel vaso: l'occhio colorato in alto (è la punta che fa il solletico), il gambo nel vaso
         var featherGo = Child(root.transform, "Feather", new Vector2(1.75f, 0.35f));
-        featherGo.transform.localRotation = Quaternion.Euler(0, 0, 40f);
+        featherGo.transform.localRotation = Quaternion.Euler(0, 0, -83f);
         var box = featherGo.AddComponent<BoxCollider2D>();
-        box.offset = new Vector2(0.55f, 0.26f);
-        box.size = new Vector2(1.3f, 0.5f);
+        box.offset = new Vector2(0.55f, 0.22f);
+        box.size = new Vector2(1.75f, 0.75f);
         Draggable2D feather = featherGo.AddComponent<Draggable2D>();
         feather.itemId = "feather";
         feather.returnOnMiss = true;

@@ -266,6 +266,21 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.33
+- **Blind Stopwatch**: tolleranza portata a 0,25 s (almeno 2 decimi, più il ritardo del tocco).
+- **Nuovi livelli di Toni** (25, 50, 75; il 100 dello starnuto resta):
+  - **25 STUCK!**: Toni è incastrato nella gattaiola, testa in giardino e sedere in casa (zampe che pedalano). Spingerlo
+    (trascina il sedere verso il muro) non basta: osso (si agita), piuma (ride) o **burro** (spalmato, una spinta e
+    SCHLUPP!). Easter egg `toni_toot`: 8 spinte senza burro e parte a razzo.
+  - **50 TUG OF WAR**: le chiavi sono sparite; dal muso di Toni pende un calzino. Tirandolo PIANO escono uno dopo
+    l'altro pesce, pallina, moneta, campanello, salsicce, formaggio... e la chiave. Uno strattone e Toni tira indietro.
+    Easter egg `toni_tug`: 5 strattoni e si rimangia tutto (*BURP*).
+  - **75 WHERE'S TONI?**: nascondino tra divano, scatolone, cesto e tenda. Toni russa: muovendo il dito il russare è
+    più forte e fitto vicino a lui (e il telefono vibra), e il nascondiglio giusto "respira". Ogni posto sbagliato ha
+    una sorpresa; dopo un errore Toni può cambiare posto; 4 errori e vince lui. Nuovo suono `Sfx` "snore".
+  - Tolti i livelli del pulsante, della foto e del frigo (e i loro disegni).
+- **100**: la piuma ora è una **piuma di pavone** (occhio colorato = la punta che fa il solletico) infilata nel vaso.
+
 ## Versione 0.32
 - **Blocco al livello 25 risolto**: quando Toni raggiungeva la pallina ancora in movimento, l'inseguimento girava
   all'infinito senza mai cedere il fotogramma (il gioco si bloccava). Ora Toni avanza un fotogramma alla volta

@@ -18,7 +18,7 @@ namespace Gotcha.Levels
         [SerializeField] TextMesh tries;
         [SerializeField] Transform hand;
         [SerializeField] SpeechBubble bubble;
-        [SerializeField] float tolerance = 0.12f, visibleFor = 2f;
+        [SerializeField] float tolerance = 0.25f, visibleFor = 2f;   // almeno 2 decimi, più il ritardo del tocco
         [SerializeField] int attempts = 3;
         [SerializeField] string eggId = "speedrun";
 
