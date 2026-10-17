@@ -70,6 +70,10 @@ Livelli 61-100 — terza ondata (ogni meccanica compare al massimo 3 volte; dall
 96 Bubble Count (numeri scritti in modi diversi, il 6 capovolto) · 97 Sneaky Mouse (torcia del cane e ombre dei mobili) ·
 98 Blind Stopwatch (ferma il cronometro a occhi chiusi) · 99 Whack-a-Mole (mai la talpa con il cappellino) · 100 The End? (prendi il topolino nascosto nei titoli di coda).
 
+Livello bonus dopo i titoli di coda:
+101. **Achoo!** — il carlino nero dorme con la chiave appesa al collare: non svegliarlo (alla terza volta è finita).
+     Gira la pepiera sopra il suo naso e scuotila: ETCIÙ! La chiave vola via (Easter egg: scoppiagli la bolla al naso).
+
 Free to play: si gioca gratis; nel **negozio** (SHOP) si possono comprare **1 ora di vite infinite (0,99 €)** e
 **niente pubblicità per sempre (4,99 €)**. Vedi README_SETUP.md per la configurazione degli acquisti.
 

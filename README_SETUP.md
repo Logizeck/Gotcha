@@ -279,6 +279,21 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Consiglio per la pubblicazione: caricare su Play un **App Bundle (.aab)**: ogni telefono scarica solo il codice della
   sua architettura (ARM64 o ARMv7).
 
+## Versione 0.30 (il carlino)
+- **Carlino nero** riutilizzabile: prefab `Assets/Prefabs/Pug.prefab` con `Components/PugRig.cs`. È disegnato a pezzi
+  (`DoodleSprites15.cs`: corpo, coda, testa, orecchie a bottone, occhi, occhi chiusi, bocca aperta, lingua, bolla al
+  naso) con le stesse coordinate (origine tra le zampe a terra), e animato da codice senza Animator.
+  `PugRig.Play(mode)`: **Idle** (respira, sbatte le palpebre), **Sleep** (occhi chiusi, punta della lingua, bolla di
+  moccio che si gonfia e scoppia, Zzz), **Bark** (WOOF! a ripetizione: testa che scatta, bocca aperta, orecchie che
+  sbattono, coda a mille), **Stare** (ti fissa con la testa inclinata e la lingua di lato che dondola), **Sneeze**
+  (prende fiato strizzando gli occhi, poi ETCIÙ! con goccioline che volano ad arco; finisce in Stare). Eventi
+  `Barked` e `Sneezed`. Suoni sintetizzati nuovi in `Sfx`: `woof` e `achoo`.
+- **101 Achoo!** (`Levels/V30/PugLevel.cs`, `GotchaLevels30.cs`), dopo i titoli di coda: la chiave è appesa al collare
+  del carlino che dorme. Toccarlo lo sveglia (abbaia due volte e ti fissa, poi si riaddormenta); alla terza volta si
+  perde. Si prende la pepiera dalla mensola (si gira col tappo in giù), la si tiene sopra il naso e la si scuote
+  (scuotendo il telefono o agitando il dito) per circa un secondo: starnuto, la chiave vola sul pavimento e si porta
+  alla porta. Easter egg `snot_pop`: toccare la bolla al naso quando è bella gonfia.
+
 ## Versione 0.29
 - **Titolo**: sfondo nero e logo "G!" al neon arcobaleno fatto come un labirinto (`DoodleSprites12.cs`,
   `UI/TitleLogo.cs`): due palline cromate ci rotolano dentro inclinando il telefono (frecce nell'Editor).
