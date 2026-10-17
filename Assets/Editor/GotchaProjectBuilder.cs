@@ -31,7 +31,7 @@ public static partial class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 32;
+    const int BuilderVersion = 33;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -84,7 +84,7 @@ public static partial class GotchaProjectBuilder
                 "No buttons here: the phone itself moves the ball. Reach the glowing star.",
                 BuildMazeLevel()),
             Define("Idle", "do_nothing", "BIG RED BUTTON",
-                "A hungry cat never sleeps. Is there anything to eat around here?",
+                "A hungry pug never sleeps. Is there anything to eat around here?",
                 BuildIdleLevel()),
             Define("Apple", "slice_apple", "SLICE IT!",
                 "No knife? No problem. A quick finger is sharp enough.",
@@ -123,8 +123,9 @@ public static partial class GotchaProjectBuilder
                 "Candles don't like wind. Your phone has a microphone...",
                 BuildBirthdayLevel(), "candle_storm"),
             Define("TrapMaze", "trap_maze", "TRAP MAZE",
-                "Same old maze? Mind the holes... and the lasers keep a rhythm.",
-                BuildTrapMazeLevel(warp: DoodleSprites.TrapWarp)),
+                "A round maze: go around the rings to the star in the middle. Mind the holes... and the lasers keep a rhythm.",
+                BuildTrapMazeLevel("TrapMaze", "maze_trap", DoodleSprites.CircleTrapMaze(), DoodleSprites.CircleTrapPits, new float[0],
+                    Vector2.zero, MazeWarp.None, DoodleSprites.CircleTrapLasers, new Vector2(0f, -2.27f))),
             Define("DarkMaze", "dark_maze", "IN THE DARK",
                 "Who turned off the lights? Every locked gate has a key somewhere.",
                 BuildDarkMazeLevel(warp: DoodleSprites.DarkWarp)),
@@ -132,7 +133,7 @@ public static partial class GotchaProjectBuilder
                 "That painting is stuck to the wall. Maybe a good shake would help?",
                 BuildSafeLevel(keyPrefab, doorPrefab)),
             Define("Bedtime", "bedtime", "BEDTIME",
-                "A sleepy cat needs darkness, silence... and nobody poking it.",
+                "A sleepy pug needs darkness, silence... and nobody poking it.",
                 BuildBedtimeLevel()),
             Define("Rocket", "lift_off", "LIFT OFF",
                 "Rockets need fuel. And launch buttons are always protected.",
@@ -979,12 +980,27 @@ public static partial class GotchaProjectBuilder
         cat.SetParent(root.transform, false);
         cat.localPosition = new Vector3(0, -1.5f, 0);
         cat.localScale = Vector3.one * 1.35f;
-        Transform catArt = Art(cat, "Art", "cat", 2);
+        // il carlino: corpo, coda che scodinzola, occhioni con le pupille che seguono l'osso, bocca e lingua
+        Transform tail = Child(cat, "Tail", new Vector2(0.98f, 0.36f)).transform;
+        Art(tail, "Art", "pug_tail", 1, false);
+        Transform catArt = Art(cat, "Art", "pug", 2);
         var breathe = catArt.gameObject.AddComponent<Pulse>();   // respira piano
         breathe.amount = 0.025f;
         breathe.speed = 2.2f;
-        GameObject eyes = Art(cat, "EyesOpen", "cat_eyes", 3, false).gameObject;
-        GameObject alert = Art(cat, "Alert", "alert", 4, true, new Vector2(-0.7f, 1.05f)).gameObject;
+        GameObject eyes = Art(cat, "EyesOpen", "pug_eyes", 3, false).gameObject;
+        var pupils = new List<Transform>();
+        Vector2[] eyeCenters = { new Vector2(DoodleSprites.PugEyeLX, DoodleSprites.PugEyeY), new Vector2(DoodleSprites.PugEyeRX, DoodleSprites.PugEyeY) };
+        foreach (Vector2 e in eyeCenters)
+        {
+            Transform pupil = Child(eyes.transform, "Pupil", Vector2.zero).transform;
+            pupil.localPosition = e - (Vector2)eyes.transform.localPosition;   // le pupille sono figlie degli occhi
+            Art(pupil, "Art", "pug_pupil", 4, false);
+            pupils.Add(pupil);
+        }
+        GameObject mouthOpen = Art(cat, "MouthOpen", "pug_mouth_open", 4, false).gameObject;
+        GameObject tongue = Art(cat, "Tongue", "pug_tongue", 4, false).gameObject;
+        SmokeEmitter crumbs = Emitter(root.transform, "Crumbs", Vector2.zero, "puff", 26f, 0.5f, -1.2f, 0.25f, 0.25f, new Color(1f, 0.95f, 0.8f), 12);
+        GameObject alert = Art(cat, "Alert", "alert", 4, true, new Vector2(-0.7f, 1.1f)).gameObject;
 
         var zzzGo = new GameObject("Zzz");
         zzzGo.transform.SetParent(cat, false);
@@ -1015,18 +1031,20 @@ public static partial class GotchaProjectBuilder
         hearts.growth = 0.4f;
         hearts.tint = Color.white;
 
-        // Il pesce del quadro: va dato al gatto
-        var fishGo = new GameObject("Fish");
+        // L'osso del quadro: va dato al carlino
+        var fishGo = new GameObject("Bone");
         fishGo.transform.SetParent(root.transform, false);
         fishGo.transform.localPosition = new Vector3(-1.6f, 2.25f, 0);
-        fishGo.AddComponent<CircleCollider2D>().radius = 0.35f;
+        fishGo.transform.localRotation = Quaternion.Euler(0, 0, 20f);
+        fishGo.transform.localScale = Vector3.one * 0.8f;
+        fishGo.AddComponent<CircleCollider2D>().radius = 0.45f;
         Draggable2D fish = fishGo.AddComponent<Draggable2D>();
-        fish.itemId = "fish";
+        fish.itemId = "bone";
         fish.returnOnMiss = false;
-        Art(fishGo.transform, "Art", "fish", 5);
+        Art(fishGo.transform, "Art", "bone", 5);
 
         SpeechBubble meow = Bubble(root.transform, new Vector2(-0.1f, 0.3f));
-        meow.catVoice = true;   // il gatto miagola quando parla
+        meow.catVoice = false;   // il carlino abbaia (Sfx "woof")
         meow.transform.localScale = Vector3.one * 0.55f;
 
         // Il pulsantone: un'esca, toccarlo sveglia il gatto
@@ -1045,6 +1063,16 @@ public static partial class GotchaProjectBuilder
         SetField(level, "zzz", zzz);
         SetField(level, "hearts", hearts);
         SetField(level, "button", button);
+        SetArray(level, "pupils", pupils.ToArray());
+        SetField(level, "mouthOpen", mouthOpen);
+        SetField(level, "tongue", tongue);
+        SetField(level, "tail", tail);
+        SetField(level, "crumbs", crumbs);
+        var so = new SerializedObject(level);
+        SerializedProperty ec = so.FindProperty("eyeCenters");
+        ec.arraySize = 2;
+        for (int i = 0; i < 2; i++) ec.GetArrayElementAtIndex(i).vector2Value = eyeCenters[i];
+        so.ApplyModifiedPropertiesWithoutUndo();
         return SavePrefab(root, LevelDir + "/Idle/Level_Idle.prefab");
     }
 
@@ -1552,6 +1580,9 @@ public static partial class GotchaProjectBuilder
         SetField(level, "crack", crack);
         SetField(level, "bubble", bubble);
         SetField(level, "hiss", hiss);
+        SetField(level, "cough", Emitter(roach, "Cough", new Vector2(0f, 0.35f), "puff", 10f, 0.6f, 0.6f, 0.15f, 0.25f, new Color(0.55f, 0.85f, 0.4f, 0.8f), 14));
+        SetField(level, "dust", Emitter(roach, "Dust", new Vector2(0f, -0.4f), "puff", 14f, 0.4f, -0.2f, 0.1f, 0.2f, new Color(0.85f, 0.78f, 0.65f, 0.7f), 9));
+        SetField(level, "soul", Emitter(root.transform, "Soul", Vector2.zero, "puff", 6f, 1.4f, 1.2f, 0.05f, 0.45f, new Color(1f, 1f, 1f, 0.6f), 40));
         return SavePrefab(root, LevelDir + "/Roach/Level_Roach.prefab");
     }
 
@@ -1931,7 +1962,7 @@ public static partial class GotchaProjectBuilder
     }
 
     static GameObject BuildTrapMazeLevel(string folder = "TrapMaze", string neon = "maze_trap", DoodleSprites.MazeSeg[] segs = null,
-        float[] pp = null, float[] lz = null, Vector2? goalAt = null, MazeWarp warp = MazeWarp.None)
+        float[] pp = null, float[] lz = null, Vector2? goalAt = null, MazeWarp warp = MazeWarp.None, float[] laserSegs = null, Vector2? ballAt = null)
     {
         segs = DoodleSprites.Warped(segs ?? DoodleSprites.TrapMaze, warp);
         pp = DoodleSprites.WarpPairs(pp ?? DoodleSprites.TrapPits, warp);
@@ -1958,11 +1989,15 @@ public static partial class GotchaProjectBuilder
             pits.Add(pit);
         }
 
+        // laser: verticali (x, y1, y2) oppure segmenti qualsiasi (x1, y1, x2, y2)
+        var ends = new List<(Vector2, Vector2)>();
+        if (laserSegs != null) for (int i = 0; i + 3 < laserSegs.Length; i += 4) ends.Add((new Vector2(laserSegs[i], laserSegs[i + 1]), new Vector2(laserSegs[i + 2], laserSegs[i + 3])));
+        else for (int i = 0; i + 2 < lz.Length; i += 3) ends.Add((new Vector2(lz[i], lz[i + 1]), new Vector2(lz[i], lz[i + 2])));
         var lasers = new List<LaserBeam>();
-        for (int i = 0; i < lz.Length; i += 3)
+        for (int i = 0; i < ends.Count; i++)
         {
             // estremi del laser deformati come le pareti: il raggio resta teso tra i due muri (anche se inclinato)
-            Vector2 la = Warp(warp, new Vector2(lz[i], lz[i + 1])), lb = Warp(warp, new Vector2(lz[i], lz[i + 2]));
+            Vector2 la = Warp(warp, ends[i].Item1), lb = Warp(warp, ends[i].Item2);
             float len = Vector2.Distance(la, lb);
             var go = new GameObject("Laser");
             go.transform.SetParent(maze, false);
@@ -1984,7 +2019,7 @@ public static partial class GotchaProjectBuilder
         }
 
         MazeGoal(maze, Warp(warp, goalAt ?? new Vector2(-2.2f, 2.6f)));
-        Rigidbody2D ball = MazeBall(maze, Warp(warp, new Vector2(-2.2f, -3.0f)));
+        Rigidbody2D ball = MazeBall(maze, Warp(warp, ballAt ?? new Vector2(-2.2f, -3.0f)));
         SmokeEmitter sparks = Sparks(root.transform, "Sparks", new Color(1f, 0.45f, 0.3f));
         SpeechBubble bubble = Bubble(root.transform, new Vector2(1.5f, -4.45f));
         bubble.transform.localScale = Vector3.one * 0.5f;
@@ -2249,17 +2284,25 @@ public static partial class GotchaProjectBuilder
         bulb.color = new Color(1f, 0.95f, 0.6f, 1f);
         bulb.transform.localScale = Vector3.one * 0.7f;
 
-        // gatto assonnato sul cuscino
-        var cat = new GameObject("Cat").transform;
+        // carlino assonnato sul cuscino
+        var cat = new GameObject("Pug").transform;
         cat.SetParent(root.transform, false);
         cat.localPosition = new Vector3(-0.55f, -2.85f, 0);
         cat.localScale = Vector3.one * 1.1f;
-        Transform catArt = Art(cat, "Art", "cat", 2);
+        Art(Child(cat, "Tail", new Vector2(0.98f, 0.36f)).transform, "Art", "pug_tail", 1, false);
+        Transform catArt = Art(cat, "Art", "pug", 2);
         Pulse breathe = catArt.gameObject.AddComponent<Pulse>();
         breathe.amount = 0.02f;
         breathe.speed = 1.8f;
-        GameObject eyesOpen = Art(cat, "EyesOpen", "cat_eyes", 3, false).gameObject;
-        GameObject eyesHalf = Art(cat, "EyesHalf", "cat_face_3", 3, false).gameObject;
+        GameObject eyesOpen = Art(cat, "EyesOpen", "pug_eyes", 3, false).gameObject;
+        GameObject eyesHalf = Art(cat, "EyesHalf", "pug_eyes_half", 3, false).gameObject;
+        foreach (GameObject eyeSet in new[] { eyesOpen, eyesHalf })
+            foreach (float ex in new[] { DoodleSprites.PugEyeLX, DoodleSprites.PugEyeRX })
+            {
+                // pupille che guardano in basso, verso la luce e lo stereo (assonnate)
+                Transform pupil = Art(eyeSet.transform, "Pupil", "pug_pupil", 4, false);
+                pupil.position = cat.TransformPoint(new Vector2(ex + 0.02f, DoodleSprites.PugEyeY - (eyeSet == eyesHalf ? 0.06f : 0.02f)));
+            }
         eyesHalf.SetActive(false);
         var zzzGo = new GameObject("Zzz");
         zzzGo.transform.SetParent(cat, false);
@@ -2281,7 +2324,7 @@ public static partial class GotchaProjectBuilder
         dark.color = new Color(0.02f, 0.02f, 0.08f, 0f);
 
         SpeechBubble bubble = Bubble(root.transform, new Vector2(0.3f, -0.9f));
-        bubble.catVoice = true;   // il gatto miagola quando parla
+        bubble.catVoice = false;   // il carlino
         bubble.transform.localScale = Vector3.one * 0.55f;
 
         SetField(level, "lampSwitch", lampSwitch);
@@ -3255,6 +3298,7 @@ public static partial class GotchaProjectBuilder
         }
 
         var plates = new List<DropSlot>();
+        var mice = new List<Transform>();
         foreach (Vector2 m in new[] { new Vector2(-2.0f, 2.0f), new Vector2(2.0f, 2.0f), new Vector2(-2.0f, -2.85f), new Vector2(2.0f, -2.85f) })
         {
             var mouse = new GameObject("Mouse").transform;
@@ -3262,6 +3306,7 @@ public static partial class GotchaProjectBuilder
             mouse.localPosition = m;
             mouse.localScale = Vector3.one * 0.8f;
             Art(mouse, "Art", "mouse", 4);
+            mice.Add(mouse);
             var plate = new GameObject("Plate");
             plate.transform.SetParent(root.transform, false);
             plate.transform.localPosition = m + new Vector2(0, -0.35f);
@@ -3281,6 +3326,8 @@ public static partial class GotchaProjectBuilder
         SetField(level, "cutMark", cutMark);
         SetArray(level, "slices", slices.ToArray());
         SetArray(level, "plates", plates.ToArray());
+        SetArray(level, "mice", mice.ToArray());
+        SetField(level, "crumbs", Emitter(root.transform, "Crumbs", Vector2.zero, "puff", 30f, 0.45f, -1.0f, 0.2f, 0.22f, new Color(1f, 0.8f, 0.45f), 14));
         SetField(level, "hearts", hearts);
         SetField(level, "bubble", bubble);
         SetField(level, "trail", trail);

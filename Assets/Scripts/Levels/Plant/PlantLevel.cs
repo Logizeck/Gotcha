@@ -23,7 +23,7 @@ namespace Gotcha.Levels
         [SerializeField] Collider2D potZone;
         [SerializeField] float groundY = -3.1f;
         [SerializeField] float maxPull = 1.4f;
-        [SerializeField] float power = 6.8f;
+        [SerializeField] float power = 7.4f;
         [SerializeField] float grabRadius = 0.8f;
         [SerializeField] Transform plantDry;
         [SerializeField] GameObject plantBloom;
@@ -49,8 +49,8 @@ namespace Gotcha.Levels
         [SerializeField] Transform bird;
         [SerializeField] GameObject birdUp, birdDown, birdAngry;
         [SerializeField] SpeechBubble birdBubble;
-        [SerializeField] Vector2 birdEvery = new Vector2(5f, 9f);
-        [SerializeField] float birdSpeed = 1.7f;
+        [SerializeField] Vector2 birdEvery = new Vector2(3.5f, 6.5f);
+        [SerializeField] float birdSpeed = 1.3f;
         [SerializeField] string eggId = "angry_bird";
 
         int next, absorbed;
@@ -141,26 +141,60 @@ namespace Gotcha.Levels
                 current.AddForce(Vector2.right * wind * current.mass);
         }
 
+        float birdClock, hoverLeft, glideLeft;
+        bool hovered;
+
+        /// <summary>
+        /// L'uccellino attraversa il cielo più basso (a portata di fionda): sbatte le ali e sale a ogni battito, plana
+        /// scendendo piano, si inclina come un vero uccello e a metà strada si ferma un attimo a mezz'aria (sbattendo
+        /// forte le ali): è il momento buono per colpirlo.
+        /// </summary>
         void UpdateBird()
         {
             if (bird == null) return;
+            float dt = Time.deltaTime;
             if (!birdFlying)
             {
-                birdTimer -= Time.deltaTime;
+                birdTimer -= dt;
                 if (birdTimer > 0f) return;
                 birdFlying = true;
+                hovered = false;
+                glideLeft = 0f;
                 birdDir = Random.value < 0.5f ? 1f : -1f;
-                bird.position = new Vector3(-3.6f * birdDir, Random.Range(1.0f, 2.6f), 0f);
-                bird.localScale = new Vector3(birdDir, 1f, 1f);
+                bird.position = new Vector3(-3.6f * birdDir, Random.Range(0.3f, 1.4f), 0f);
                 bird.gameObject.SetActive(true);
             }
+            birdClock += dt;
             Vector3 b = bird.position;
-            b.x += birdDir * birdSpeed * Time.deltaTime;
-            b.y += Mathf.Sin(Time.time * 3f) * 0.3f * Time.deltaTime;
+            bool flapping;
+            float vx = birdDir * birdSpeed, vy;
+            if (!hovered && Mathf.Abs(b.x) < 0.9f) { hovered = true; hoverLeft = 1.4f; }
+            if (hoverLeft > 0f)
+            {
+                hoverLeft -= dt;
+                vx *= 0.08f;                                  // quasi fermo, ali a mille
+                vy = Mathf.Sin(birdClock * 14f) * 0.25f;
+                flapping = true;
+            }
+            else
+            {
+                if (glideLeft <= 0f && Random.value < dt * 0.6f) glideLeft = Random.Range(0.5f, 0.9f);
+                glideLeft -= dt;
+                flapping = glideLeft <= 0f;
+                // battito: spinta in su quando le ali scendono; planata: scende piano
+                vy = flapping ? Mathf.Sin(birdClock * 14f) * 0.9f : -0.35f;
+            }
+            b.x += vx * dt;
+            b.y = Mathf.Clamp(b.y + vy * dt, 0.0f, 1.8f);
             bird.position = b;
-            bool up = Mathf.Repeat(Time.time * 7f, 1f) < 0.5f;
+            bool up = flapping ? Mathf.Repeat(birdClock * (hoverLeft > 0f ? 4.5f : 2.2f), 1f) < 0.5f : true;
             if (birdUp != null) birdUp.SetActive(up);
             if (birdDown != null) birdDown.SetActive(!up);
+            // si inclina nella direzione del moto, e si "gonfia" un po' a ogni battito
+            float tilt = Mathf.Clamp(vy * 12f, -15f, 15f) * birdDir;
+            bird.localRotation = Quaternion.Euler(0, 0, tilt);
+            float puff = 1f + (up ? 0.04f : -0.02f);
+            bird.localScale = new Vector3(birdDir * puff, puff, 1f);
             if (Mathf.Abs(b.x) > 3.7f)
             {
                 birdFlying = false;
@@ -284,7 +318,7 @@ namespace Gotcha.Levels
         {
             flyTime += Time.deltaTime;
             Vector2 p = current.position;
-            if (birdFlying && bird != null && Vector2.Distance(p, bird.position) < 0.42f) { StartCoroutine(BirdHit()); return; }
+            if (birdFlying && bird != null && Vector2.Distance(p, bird.position) < 0.6f) { StartCoroutine(BirdHit()); return; }
             if (potZone.OverlapPoint(p)) { StartCoroutine(Absorbed()); return; }
             if (p.y < groundY || Mathf.Abs(p.x) > 3.6f || flyTime > 4f) StartCoroutine(Missed(p));
         }

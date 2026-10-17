@@ -266,6 +266,20 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.30
+- **3**: il gatto diventa un **carlino** e il pesce un **osso**. Le pupille (a parte, `pug_pupil`) seguono sempre l'osso:
+  nel quadro, mentre lo trascini, per terra; senza osso seguono il dito. Morso animato: accucciata, bocca spalancata,
+  scatto in avanti "GNAM!", tre morsi scuotendo la testa con le briciole (l'osso si accorcia), deglutizione, leccata
+  di baffi, coda che scodinzola, cuoricini, poi crolla addormentato. Abbaia (`Sfx` "woof").
+- **19**: carlino al posto del gatto (occhi aperti/assonnati con le pupille, coda).
+- **9**: scarafaggio più vivo: dondola e si schiaccia a ogni passo, si ferma ad annusare, trema e tossisce nella
+  nuvola, la bomboletta vibra; muore barcollando, si ribalta, scalcia e ne esce l'animella.
+- **16**: labirinto con trappole **circolare**: tre cerchi concentrici con i varchi alternati e due muri radiali, buche
+  appoggiate alle pareti e laser di traverso nei corridoi; stella al centro (percorso verificato).
+- **26**: l'uccellino vola più basso e più piano, sbatte le ali salendo, plana, si inclina e a metà schermo si ferma a
+  mezz'aria per un attimo; fionda più potente e bersaglio più grande.
+- **31**: ogni topolino mangia la sua fetta a morsi (briciole, guance piene) finché la fetta sparisce.
+
 ## Pulizia e spazio (0.29)
 - Tolti dal catalogo dei disegni ~45 sprite non più usati (labirinti e oggetti dei livelli sostituiti) e i loro dati;
   tolti gli script mai usati (`EasterEggTrigger`, `SensorCondition`).

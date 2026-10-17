@@ -7,7 +7,8 @@ namespace Gotcha.Levels
 {
     /// <summary>
     /// Livello 31 — pizza per quattro. 1) Taglia la pizza in 4 con due tagli che passano dal centro (un taglio
-    /// storto non vale: "Not fair!"); 2) trascina una fetta a ognuno dei 4 topolini affamati.
+    /// storto non vale: "Not fair!"); 2) trascina una fetta a ognuno dei 4 topolini affamati, che la mangiano
+    /// a morsi (la fetta si accorcia, briciole, guance piene) finché non sparisce.
     /// </summary>
     public class PizzaLevel : LevelController
     {
@@ -18,6 +19,8 @@ namespace Gotcha.Levels
         [SerializeField] LineRenderer cutMark;
         [SerializeField] Transform[] slices;         // 4 spicchi (apice al centro), attivati dopo i tagli
         [SerializeField] DropSlot[] plates;          // davanti ai 4 topolini
+        [SerializeField] Transform[] mice;           // stesso ordine dei piatti
+        [SerializeField] SmokeEmitter crumbs;
         [SerializeField] SmokeEmitter hearts;
         [SerializeField] SpeechBubble bubble;
         [SerializeField] LineRenderer trail;
@@ -25,7 +28,7 @@ namespace Gotcha.Levels
         Camera cam;
         Vector2 start;
         bool tracking, done;
-        int cuts, served;
+        int cuts, served, eaten;
         float firstAngle;
         readonly System.Collections.Generic.List<Vector3> trailPts = new System.Collections.Generic.List<Vector3>();
         readonly System.Collections.Generic.List<float> trailTimes = new System.Collections.Generic.List<float>();
@@ -37,6 +40,7 @@ namespace Gotcha.Levels
             foreach (DropSlot p in plates) p.Filled += OnServed;
             if (cutMark != null) cutMark.enabled = false;
             if (hearts != null) hearts.Stop();
+            if (crumbs != null) crumbs.Stop();
             if (bubble != null) { bubble.Show("Pizza for four, please!"); StartCoroutine(HideLater(2f)); }
         }
 
@@ -110,7 +114,50 @@ namespace Gotcha.Levels
         {
             served++;
             slice.transform.rotation = Quaternion.Euler(0, 0, -45f);
-            if (served >= plates.Length) StartCoroutine(Party());
+            int i = System.Array.IndexOf(plates, plate);
+            StartCoroutine(Eat(i >= 0 && mice != null && i < mice.Length ? mice[i] : null, slice.transform));
+        }
+
+        /// <summary>Il topolino si avvicina, addenta la fetta a piccoli morsi (con le briciole) e alla fine si pulisce i baffi.</summary>
+        IEnumerator Eat(Transform mouse, Transform slice)
+        {
+            Vector3 s0 = slice.localScale, home = mouse != null ? mouse.localPosition : Vector3.zero, ms = mouse != null ? mouse.localScale : Vector3.one;
+            yield return new WaitForSeconds(0.2f);
+            for (int bite = 0; bite < 5; bite++)
+            {
+                // il topolino si sporge e morde
+                for (float k = 0f; k < 1f; k += Time.deltaTime / 0.16f)
+                {
+                    if (mouse != null)
+                    {
+                        mouse.localPosition = home + Vector3.down * Mathf.Sin(k * Mathf.PI) * 0.12f;
+                        mouse.localScale = new Vector3(ms.x * (1f + Mathf.Sin(k * Mathf.PI) * 0.06f), ms.y * (1f - Mathf.Sin(k * Mathf.PI) * 0.06f), ms.z);
+                    }
+                    yield return null;
+                }
+                Sfx.Play(this, "tick", 0.6f);
+                if (crumbs != null) { crumbs.transform.position = slice.position; crumbs.Play(); }
+                float left = 1f - (bite + 1) / 5f;
+                slice.localScale = s0 * Mathf.Max(0.05f, left);
+                slice.position += Vector3.up * 0.04f;   // la fetta "si avvicina" alla bocca
+                yield return new WaitForSeconds(0.12f);
+                if (crumbs != null) crumbs.Stop();
+            }
+            slice.gameObject.SetActive(false);
+            // guance piene: gonfio e soddisfatto
+            if (mouse != null)
+            {
+                for (float k = 0f; k < 1f; k += Time.deltaTime / 0.35f)
+                {
+                    mouse.localScale = ms * (1f + Mathf.Sin(k * Mathf.PI) * 0.12f);
+                    mouse.localPosition = home + Vector3.up * Mathf.Sin(k * Mathf.PI) * 0.15f;
+                    yield return null;
+                }
+                mouse.localScale = ms;
+                mouse.localPosition = home;
+            }
+            eaten++;
+            if (eaten >= plates.Length) StartCoroutine(Party());
         }
 
         IEnumerator Party()

@@ -135,7 +135,7 @@ namespace Gotcha.EditorArt
             return new DoodleArt(name, p);
         }
 
-        public static DoodleArt TrapMazeNeon() { return NeonMaze("maze_trap", Warped(TrapMaze, TrapWarp)); }
+        public static DoodleArt TrapMazeNeon() { return NeonMaze("maze_trap", CircleTrapMaze()); }   // livello 16: cerchi concentrici
         public static DoodleArt DarkMazeNeon() { return NeonMaze("maze_dark", Warped(DarkMaze, DarkWarp)); }
 
         /// <summary>Cancello al neon rosso (orizzontale, lungo 1, centro 0,0: si ruota e si scala nel builder).</summary>

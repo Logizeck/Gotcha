@@ -73,6 +73,54 @@ namespace Gotcha.EditorArt
             return r;
         }
 
+        // ---------- Livello 16: labirinto con trappole circolare ----------
+
+        static void Arc(List<MazeSeg> l, float r, float a0, float a1)
+        {
+            int n = Math.Max(1, (int)(Math.Abs(a1 - a0) / 4f));
+            for (int i = 0; i < n; i++)
+            {
+                double t0 = (a0 + (a1 - a0) * i / n) * Math.PI / 180, t1 = (a0 + (a1 - a0) * (i + 1) / n) * Math.PI / 180;
+                l.Add(new MazeSeg(r * (float)Math.Cos(t0), r * (float)Math.Sin(t0), r * (float)Math.Cos(t1), r * (float)Math.Sin(t1), NeonCyan));
+            }
+        }
+
+        static void Radial(List<MazeSeg> l, float a, float r0, float r1)
+        {
+            float c = (float)Math.Cos(a * Math.PI / 180), s = (float)Math.Sin(a * Math.PI / 180);
+            l.Add(new MazeSeg(r0 * c, r0 * s, r1 * c, r1 * s, NeonCyan));
+        }
+
+        /// <summary>
+        /// Tre cerchi concentrici: il bordo (r 2.7), un anello (r 1.85) aperto in alto e uno (r 1.0) aperto in basso,
+        /// con due muri radiali che obbligano a fare il giro lungo. Si parte in basso nel corridoio esterno, la stella è
+        /// al centro. Percorso verificato con le buche (la sfera passa tra buca e parete).
+        /// </summary>
+        public static MazeSeg[] CircleTrapMaze()
+        {
+            var l = new List<MazeSeg>();
+            Arc(l, 2.7f, 0f, 360f);
+            Arc(l, 1.85f, 102f, 438f);   // varco in alto (78°-102°)
+            Arc(l, 1.0f, -70f, 250f);    // varco in basso (250°-290°)
+            Radial(l, 300f, 1.85f, 2.7f);   // il corridoio esterno si percorre a sinistra
+            Radial(l, 135f, 1.0f, 1.85f);   // quello interno a destra
+            return l.ToArray();
+        }
+
+        static float[] Polar(params float[] ar)
+        {
+            var r = new float[ar.Length];
+            for (int i = 0; i < ar.Length; i += 2) { r[i] = ar[i + 1] * (float)Math.Cos(ar[i] * Math.PI / 180); r[i + 1] = ar[i + 1] * (float)Math.Sin(ar[i] * Math.PI / 180); }
+            return r;
+        }
+
+        /// <summary>Buche (x,y) appoggiate a una parete, alternando lato.</summary>
+        public static readonly float[] CircleTrapPits = Concat(Polar(225f, 1.95f, 185f, 2.6f, 140f, 1.95f, 45f, 1.75f, 10f, 1.1f, 330f, 1.75f), new[] { 0.42f, 0.3f });
+        /// <summary>Laser come segmenti x1,y1,x2,y2: uno per corridoio, di traverso.</summary>
+        public static readonly float[] CircleTrapLasers = { -2.62f, 0f, -1.93f, 0f, 1.08f, 0f, 1.77f, 0f };
+
+        static float[] Concat(float[] a, float[] b) { var r = new float[a.Length + b.Length]; a.CopyTo(r, 0); b.CopyTo(r, a.Length); return r; }
+
         // labirinto -> deformazione (usata sia per il disegno sia dal builder per i collider)
         public const MazeWarp Maze2Warp = MazeWarp.ZigZag, TrapWarp = MazeWarp.Wave, Trap2Warp = MazeWarp.Swirl,
             Trap3Warp = MazeWarp.Bubble, DarkWarp = MazeWarp.Slant, Dark2Warp = MazeWarp.SwirlBack;

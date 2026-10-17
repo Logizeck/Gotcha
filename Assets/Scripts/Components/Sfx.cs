@@ -28,6 +28,7 @@ namespace Gotcha.Components
                 case "bonk": c = Make(kind, 0.15f, t => Mathf.Sin(t * 2f * Mathf.PI * Mathf.Lerp(220f, 90f, t / 0.15f)) * Mathf.Exp(-t * 25f)); break;
                 case "ding": c = Make(kind, 1.2f, t => (Mathf.Sin(t * 2f * Mathf.PI * 1320f) + Mathf.Sin(t * 2f * Mathf.PI * 1980f) * 0.4f) * Mathf.Exp(-t * 3f) * 0.6f); break;
                 case "buzz": c = Make(kind, 0.35f, t => Mathf.Sign(Mathf.Sin(t * 2f * Mathf.PI * 110f)) * 0.35f * Mathf.Exp(-t * 4f)); break;
+                case "woof": c = Make(kind, 0.22f, t => (Mathf.Sin(t * 2f * Mathf.PI * Mathf.Lerp(330f, 180f, t / 0.22f)) + Noise(t) * 0.35f) * Mathf.Min(1f, t * 60f) * Mathf.Exp(-t * 9f)); break;
                 case "whoosh": c = Make(kind, 0.4f, t => Noise(t) * Mathf.Sin(t / 0.4f * Mathf.PI) * 0.5f); break;
                 default: c = Make(kind, 0.1f, t => Mathf.Sin(t * 2f * Mathf.PI * 660f) * Mathf.Exp(-t * 30f)); break;
             }

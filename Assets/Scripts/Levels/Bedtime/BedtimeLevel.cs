@@ -91,7 +91,7 @@ namespace Gotcha.Levels
             // ultimo passo: nessun tocco per qualche secondo
             if (PointerInput.AnyTouchBegan() && !PointerInput.IsOverUi())
             {
-                if (still > 0.6f && bubble != null) { bubble.Show("Mrr?"); StartCoroutine(HideLater(0.9f)); }
+                if (still > 0.6f && bubble != null) { bubble.Show("Wuff?"); StartCoroutine(HideLater(0.9f)); }
                 still = 0f;
                 if (zzz != null) zzz.Stop();
                 // il tocco sull'abat-jour lo gestisce OnLamp: qui conta solo che il gatto si è svegliato
@@ -107,7 +107,7 @@ namespace Gotcha.Levels
             if (catEyesHalf != null) catEyesHalf.SetActive(false);
             if (stereo != null) stereo.Stop();
             if (MusicPlayer.Instance != null) MusicPlayer.Instance.Unduck(this);
-            if (bubble != null) bubble.Show("Purrr...");
+            if (bubble != null) bubble.Show("Zzz... *snort*");
             yield return new WaitForSeconds(1.6f);
             Win();
         }
