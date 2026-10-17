@@ -281,8 +281,8 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 
 ## Versione 0.30 (il carlino)
 - **Carlino nero** riutilizzabile: prefab `Assets/Prefabs/Pug.prefab` con `Components/PugRig.cs`. È disegnato a pezzi
-  (`DoodleSprites15.cs`: corpo, coda, testa, orecchie a bottone, occhi, occhi chiusi, bocca aperta, lingua, bolla al
-  naso) con le stesse coordinate (origine tra le zampe a terra), e animato da codice senza Animator.
+  (`DoodleSprites15.cs`: corpo con catena d'argento e targhetta "TONI", coda, testa, orecchie a bottone, occhi,
+  occhi chiusi, bocca aperta, lingua, bolla al naso) con le stesse coordinate (origine tra le zampe a terra), e animato da codice senza Animator.
   `PugRig.Play(mode)`: **Idle** (respira, sbatte le palpebre), **Sleep** (occhi chiusi, punta della lingua, bolla di
   moccio che si gonfia e scoppia, Zzz), **Bark** (WOOF! a ripetizione: testa che scatta, bocca aperta, orecchie che
   sbattono, coda a mille), **Stare** (ti fissa con la testa inclinata e la lingua di lato che dondola), **Sneeze**

@@ -116,7 +116,7 @@ public static partial class GotchaProjectBuilder
         SpeechBubble pugBubble = SmallBubble(root.transform, new Vector2(0.35f, 0.05f));
         SetField(rig, "bubble", pugBubble);
 
-        GameObject key = Instance(keyPrefab, root.transform, new Vector2(-0.9f, -2.79f));
+        GameObject key = Instance(keyPrefab, root.transform, new Vector2(-0.58f, -2.69f));   // appesa alla catena, accanto alla targhetta
         key.name = "Key";
         key.transform.localScale = Vector3.one * 0.45f;
         key.transform.localRotation = Quaternion.Euler(0, 0, -90f);   // appesa per l'anello, punta in giù

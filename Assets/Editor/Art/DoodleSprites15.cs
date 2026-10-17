@@ -12,7 +12,7 @@ namespace Gotcha.EditorArt
         static readonly Rgba PugFur = Rgba.Hex("3D3A4A"), PugShade = Rgba.Hex("2A2735"), PugDeep = Rgba.Hex("1C1A24");
         static readonly Rgba PugLight = Rgba.Hex("6A6582"), PugInk = Rgba.Hex("120F18");
         static readonly Rgba PugTongue = Rgba.Hex("FF8FAB"), PugTongueLine = Rgba.Hex("D9567A");
-        static readonly Rgba PugRed = Rgba.Hex("E8433F"), PugRedShade = Rgba.Hex("B92E2A");
+        static readonly Rgba Silver = Rgba.Hex("DDE2EA"), SilverShade = Rgba.Hex("8D93A6");
 
         // posizione degli occhi (il sinistro è in -PugEyeX)
         public const float PugEyeX = 0.34f, PugEyeY = 1.61f, PugEyeR = 0.165f;
@@ -67,7 +67,15 @@ namespace Gotcha.EditorArt
             p.Fill(Sd.Ellipse(-0.035f, 1.415f, 0.065f, 0.018f), Rgba.White.WithAlpha(0.45f));
         }
 
-        /// <summary>Corpo seduto: un'unica sagoma con zampe, cosce e piedi, e il collare con l'anello (la coda è a parte).</summary>
+        /// <summary>Maglia d'argento: contorno sottile (quello normale, su pezzi così piccoli, li farebbe sembrare neri).</summary>
+        static void SilverLink(DoodlePainter p, Sdf s)
+        {
+            p.Fill(s, Silver);
+            p.Fill(Sd.Crescent(s, -0.008f, 0.01f), SilverShade);
+            p.Shape(s, Rgba.Clear, 0.012f);
+        }
+
+        /// <summary>Corpo seduto: un'unica sagoma con zampe, cosce e piedi, e la catena d'argento con la targhetta TONI (la coda è a parte).</summary>
         public static DoodleArt PugBody()
         {
             var p = PugPainter(-0.95f, -0.12f, 0.95f, 1.35f);
@@ -95,15 +103,39 @@ namespace Gotcha.EditorArt
             foreach (var t in new[] { (-0.14f, 0.66f), (0.02f, 0.72f), (0.15f, 0.62f), (-0.04f, 0.56f) })
                 p.Line(PugLight.WithAlpha(0.6f), 0.016f, t.Item1 - 0.03f, t.Item2 + 0.04f, t.Item1, t.Item2, t.Item1 + 0.03f, t.Item2 + 0.04f);
 
-            // collare rosso con borchie e anello (ci si appende la medaglietta o, nel livello 101, la chiave)
-            Sdf collar = Sd.Intersect(Sd.Subtract(Sd.Ellipse(0, 0.98f, 0.56f, 0.27f), Sd.Ellipse(0, 1.07f, 0.6f, 0.27f)), Sd.Box(0, 0.9f, 0.6f, 0.3f));
-            Body(p, collar, PugRed, PugRedShade, null, -0.03f, 0.04f);
-            foreach (float x in new[] { -0.38f, -0.2f, 0.2f, 0.38f })
+            // catena d'argento (maglie alternate: una vista di piatto, una di taglio) con la targhetta "TONI"
+            float ChainY(float x) => 0.98f - 0.27f * (float)Math.Sqrt(Math.Max(0f, 1f - x * x / (0.56f * 0.56f))) + 0.035f;
+            int link = 0;
+            for (float x = -0.5f; x <= 0.501f; x += 0.066f, link++)
             {
-                float y = 0.98f - 0.27f * (float)Math.Sqrt(Math.Max(0f, 1f - x * x / (0.56f * 0.56f))) + 0.04f;
-                p.Shape(Sd.Circle(x, y, 0.022f), Gold, 0.015f);
+                float y = ChainY(x), slope = (ChainY(x + 0.01f) - ChainY(x - 0.01f)) / 0.02f;
+                float deg = (float)(Math.Atan(slope) * 180.0 / Math.PI);
+                if (link % 2 == 0)
+                {
+                    Sdf ring = Sd.Rotate(Sd.Subtract(Sd.Ellipse(x, y, 0.05f, 0.034f), Sd.Ellipse(x, y, 0.024f, 0.011f)), x, y, deg);
+                    SilverLink(p, ring);
+                }
+                else
+                {
+                    Sdf edge = Sd.Rotate(Sd.Box(x, y, 0.046f, 0.014f, 0.014f), x, y, deg);
+                    SilverLink(p, edge);
+                }
+                p.Fill(Sd.Circle(x - 0.012f, y + 0.014f, 0.007f), Rgba.White.WithAlpha(0.85f));
             }
-            p.Shape(Sd.Subtract(Sd.Circle(0, 0.69f, 0.055f), Sd.Circle(0, 0.69f, 0.028f)), Gold, 0.02f);
+            // anello e targhetta
+            SilverLink(p, Sd.Subtract(Sd.Circle(0, 0.7f, 0.042f), Sd.Circle(0, 0.7f, 0.02f)));
+            Sdf tag = Sd.Box(0, 0.55f, 0.17f, 0.11f, 0.05f);
+            p.Fill(tag, Silver);
+            p.Fill(Sd.Crescent(tag, -0.02f, 0.025f), SilverShade);
+            p.Shape(tag, Rgba.Clear, 0.03f);
+            p.Line(Rgba.White.WithAlpha(0.8f), 0.014f, -0.13f, 0.63f, 0.06f, 0.63f);
+            Rgba engraved = Rgba.Hex("4A4F5E");
+            const float lw = 0.02f, top = 0.6f, bot = 0.49f;
+            p.Line(engraved, lw, -0.135f, top, -0.065f, top);                                  // T
+            p.Line(engraved, lw, -0.1f, top, -0.1f, bot);
+            p.Fill(Sd.Subtract(Sd.Ellipse(-0.025f, 0.545f, 0.034f, 0.055f), Sd.Ellipse(-0.025f, 0.545f, 0.014f, 0.036f)), engraved);   // O
+            p.Line(engraved, lw, 0.03f, bot, 0.03f, top, 0.085f, bot, 0.085f, top);            // N
+            p.Line(engraved, lw, 0.125f, bot, 0.125f, top);                                    // I
             return new DoodleArt("pug_body", p);
         }
 
