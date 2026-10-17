@@ -71,8 +71,6 @@ namespace Gotcha.Levels
             if (banner != null) banner.gameObject.SetActive(false);
             if (armor != null) foreach (Transform a in armor) if (a != null) a.gameObject.SetActive(false);
             if (lightning != null) foreach (LineRenderer l in lightning) if (l != null) l.enabled = false;
-            // si registra sempre: se parte la trasformazione, il video è pronto da condividere
-            if (ClipRecorder.Instance != null) ClipRecorder.Instance.Begin();
             if (crank != null) crank.SetActive(false);
             if (skipButton != null) skipButton.Pressed += OnSkip;
             if (bolt != null) bolt.SetActive(false);
@@ -84,7 +82,6 @@ namespace Gotcha.Levels
         void OnDestroy()
         {
             if (skipButton != null) skipButton.Pressed -= OnSkip;
-            if (ClipRecorder.Instance != null && ClipRecorder.Instance.IsCapturing) ClipRecorder.Instance.Discard();
         }
 
         void OnSkip(TapButton b)
@@ -171,7 +168,6 @@ namespace Gotcha.Levels
             if (skipButton != null) skipButton.gameObject.SetActive(false);
             if (byHand)
             {
-                if (ClipRecorder.Instance != null) ClipRecorder.Instance.Discard();
                 // acceso a manovella: funziona, ma che tristezza
                 if (robotSad != null) robotSad.SetActive(true);
                 if (bubble != null) bubble.Show("Meh... tastes like hamster wheel. :(");
@@ -319,7 +315,6 @@ namespace Gotcha.Levels
                 if (rays != null) rays.localScale = Vector3.one * Mathf.Lerp(1.6f, 0f, k);
                 yield return null;
             }
-            if (ClipRecorder.Instance != null) ClipRecorder.Instance.Stop();
             WinWithEgg(eggId);
         }
 

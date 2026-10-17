@@ -86,7 +86,6 @@ namespace Gotcha.Levels
             ShowRecipe();
             voice = gameObject.AddComponent<AudioSource>();
             if (bubble != null) { bubble.Show("Pizza time! Grandma's recipe is on the board."); StartCoroutine(HideLater(2.4f)); }
-            if (ClipRecorder.Instance != null) ClipRecorder.Instance.Begin();
         }
 
         /// <summary>3 o 4 ingredienti a caso (sempre almeno pomodoro o mozzarella); il peperoncino mai.</summary>
@@ -128,7 +127,6 @@ namespace Gotcha.Levels
             if (plates != null) foreach (DropSlot p in plates) if (p != null) p.Filled -= OnServed;
             if (ovenSlot != null) ovenSlot.Filled -= OnOvenFilled;
             if (ovenButton != null) ovenButton.Pressed -= OnOvenTapped;
-            if (ClipRecorder.Instance != null && ClipRecorder.Instance.IsCapturing) ClipRecorder.Instance.Discard();
         }
 
         // ---------- 1. condimenti ----------
@@ -340,11 +338,9 @@ namespace Gotcha.Levels
                 }
                 if (steam != null) steam.Stop();
                 yield return new WaitForSeconds(0.6f);
-                if (ClipRecorder.Instance != null) ClipRecorder.Instance.Stop();
                 FailWithEgg(eggId);
                 yield break;
             }
-            if (ClipRecorder.Instance != null) ClipRecorder.Instance.Discard();
             bool missing = false, extra = false;
             foreach (string r in required) if (!added.Contains(r)) missing = true;
             foreach (string a in added) if (System.Array.IndexOf(required, a) < 0) extra = true;

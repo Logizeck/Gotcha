@@ -60,13 +60,10 @@ namespace Gotcha.Levels
             if (blush != null) blush.color = new Color(1f, 1f, 1f, 0f);
             if (mouthO != null) mouthO.gameObject.SetActive(false);
             if (bubble != null) bubble.Hide();
-            // registra sempre gli ultimi secondi: se parte l'Easter egg, il video è pronto da condividere
-            if (ClipRecorder.Instance != null) ClipRecorder.Instance.Begin();
         }
 
         void OnDestroy()
         {
-            if (ClipRecorder.Instance != null && ClipRecorder.Instance.IsCapturing) ClipRecorder.Instance.Discard();
             if (items != null) foreach (Draggable2D d in items) if (d != null) d.Dropped -= OnItemDropped;
             if (mouthPen != null) mouthPen.StrokeFinished -= OnMouthDrawn;
         }
@@ -173,7 +170,6 @@ namespace Gotcha.Levels
         IEnumerator WinRoutine()
         {
             LockInput();
-            if (ClipRecorder.Instance != null) ClipRecorder.Instance.Discard();
             if (bubble != null) bubble.Show("Yay!");
             Vector3 start = snowman.localPosition;
             for (int hop = 0; hop < 2; hop++)
@@ -233,7 +229,6 @@ namespace Gotcha.Levels
                 if (mouthO == null || !mouthO.gameObject.activeSelf) meltdown.mouthO = null;   // niente bocca disegnata: niente "O"
                 yield return meltdown.Play(eyes, attached);
             }
-            if (ClipRecorder.Instance != null) ClipRecorder.Instance.Stop();   // il video si può condividere
             FailWithEgg(eggId);
         }
 

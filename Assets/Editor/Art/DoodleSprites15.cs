@@ -2,17 +2,17 @@ using System;
 
 namespace Gotcha.EditorArt
 {
-    /// <summary>Il carlino (livelli 3 e 19) e il suo osso.</summary>
+    /// <summary>Toni, il carlino dei livelli multipli di 25, e il suo osso.</summary>
     public static partial class DoodleSprites
     {
         static readonly Rgba PugFawn = Rgba.Hex("E9C590"), PugShade = Rgba.Hex("C99A60"), PugMask = Rgba.Hex("3B302C");
         public const float PugEyeLX = -0.9f, PugEyeRX = -0.54f, PugEyeY = 0.47f, PugEyeR = 0.105f;
         public const float PugMouthX = -0.72f, PugMouthY = 0.13f;
 
-        /// <summary>Carlino che dorme acciambellato sul cuscino (stesso ingombro del gatto: testa a sinistra).</summary>
-        public static DoodleArt Pug()
+        /// <summary>Il cuscino blu di Toni (va sotto "toni_lie").</summary>
+        public static DoodleArt PugCushion()
         {
-            var p = new DoodlePainter(-1.6f, -0.95f, 1.6f, 1.15f, 130) { Ink = 0.05f };
+            var p = new DoodlePainter(-1.6f, -0.95f, 1.6f, -0.1f, 130) { Ink = 0.05f };
             Sdf cushion = Sd.Box(0, -0.45f, 1.35f, 0.3f, 0.26f);
             foreach (float x in new[] { -1.32f, 1.32f })
             {
@@ -22,22 +22,49 @@ namespace Gotcha.EditorArt
             Body(p, cushion, Rgba.Hex("4FA3E0"), Rgba.Hex("2F7DB5"));
             p.Line(Rgba.Hex("A8D8FF"), 0.02f, -1.1f, -0.45f, 1.1f, -0.45f);
             foreach (float x in new[] { -0.6f, 0f, 0.6f }) p.Shape(Sd.Circle(x, -0.45f, 0.035f), Rgba.Hex("A8D8FF"), 0.02f);
+            return new DoodleArt("pug_cushion", p);
+        }
+
+        /// <summary>
+        /// Toni, il carlino: sdraiato ("toni_lie") o in piedi ("toni_stand"), col collare rosso e la medaglietta.
+        /// Testa a sinistra; occhi, bocca e lingua sono sovrapposizioni con le stesse coordinate.
+        /// </summary>
+        public static DoodleArt Toni(bool standing)
+        {
+            var p = new DoodlePainter(-1.25f, standing ? -0.95f : -0.45f, 1.2f, 0.85f, 130) { Ink = 0.05f };
+            if (standing)
+                foreach (float x in new[] { -0.32f, -0.05f, 0.55f, 0.82f })
+                {
+                    // zampette corte e tozze, quelle dietro un po' più scure
+                    Rgba c = x > 0.3f ? PugShade : PugFawn;
+                    p.Shape(Sd.Capsule(x, -0.05f, x - 0.02f, -0.72f, 0.12f), c, 0.035f);
+                    p.Shape(Sd.Ellipse(x - 0.06f, -0.78f, 0.15f, 0.08f), c, 0.035f);
+                    for (int k = -1; k <= 1; k++) p.InkLine(0.012f, x - 0.06f + k * 0.05f, -0.74f, x - 0.06f + k * 0.05f, -0.82f);
+                }
             // corpo cicciotto con le pieghe
             Sdf body = Sd.Ellipse(0.15f, 0.08f, 0.95f, 0.47f);
             Body(p, body, PugFawn, PugShade, null, -0.08f, 0.1f);
             for (int i = 0; i < 3; i++) p.Line(PugShade, 0.03f, 0.25f + i * 0.22f, 0.5f, 0.3f + i * 0.22f, 0.3f);
-            // zampe posteriori e anteriori
-            p.Shape(Sd.Ellipse(0.75f, -0.2f, 0.22f, 0.12f), PugFawn, 0.035f);
-            foreach (float x in new[] { -0.5f, -0.22f })
+            if (!standing)
             {
-                p.Shape(Sd.Ellipse(x, -0.24f, 0.14f, 0.08f), PugFawn, 0.035f);
-                for (int k = -1; k <= 1; k++) p.InkLine(0.012f, x - 0.1f, -0.24f + k * 0.03f, x - 0.13f, -0.24f + k * 0.03f);
+                // zampe posteriori e anteriori ripiegate
+                p.Shape(Sd.Ellipse(0.75f, -0.2f, 0.22f, 0.12f), PugFawn, 0.035f);
+                foreach (float x in new[] { -0.5f, -0.22f })
+                {
+                    p.Shape(Sd.Ellipse(x, -0.24f, 0.14f, 0.08f), PugFawn, 0.035f);
+                    for (int k = -1; k <= 1; k++) p.InkLine(0.012f, x - 0.1f, -0.24f + k * 0.03f, x - 0.13f, -0.24f + k * 0.03f);
+                }
             }
+            // collare rosso con la medaglietta dorata
+            p.Shape(Sd.Capsule(-0.4f, 0.0f, -0.24f, 0.62f, 0.075f), Rgba.Hex("E8233F"), 0.03f);
+            p.InkLine(0.012f, -0.37f, 0.1f, -0.26f, 0.52f);
             // testa tonda con le orecchie nere ripiegate
             foreach (float s in new[] { -1f, 1f })
                 Body(p, Sd.Rotate(Sd.Ellipse(-0.72f + s * 0.4f, 0.68f, 0.14f, 0.1f), -0.72f + s * 0.4f, 0.68f, s * -35f), PugMask, Rgba.Hex("1E1816"));
             Sdf head = Sd.Ellipse(-0.72f, 0.38f, 0.46f, 0.42f);
             Body(p, head, PugFawn, PugShade, null, -0.05f, 0.06f);
+            p.Shape(Sd.Circle(-0.36f, -0.06f, 0.085f), Rgba.Hex("FFC83A"), 0.025f);   // medaglietta
+            p.Fill(Sd.Circle(-0.38f, -0.04f, 0.02f), Rgba.White.WithAlpha(0.7f));
             // rughe sulla fronte
             p.Line(PugShade, 0.03f, -0.84f, 0.68f, -0.76f, 0.72f, -0.66f, 0.68f, -0.58f, 0.72f);
             p.Line(PugShade, 0.025f, -0.8f, 0.6f, -0.72f, 0.63f, -0.64f, 0.6f);
@@ -50,7 +77,7 @@ namespace Gotcha.EditorArt
             // occhi chiusi (si coprono con gli occhi aperti quando è sveglio)
             foreach (float ex in new[] { PugEyeLX, PugEyeRX })   // occhi chiusi beati: archetti all'ingiù
                 p.InkLine(0.026f, ex - 0.09f, PugEyeY + 0.02f, ex - 0.05f, PugEyeY - 0.02f, ex, PugEyeY - 0.035f, ex + 0.05f, PugEyeY - 0.02f, ex + 0.09f, PugEyeY + 0.02f);
-            return new DoodleArt("pug", p);
+            return new DoodleArt(standing ? "toni_stand" : "toni_lie", p);
         }
 
         /// <summary>Coda arricciata (attacco in 0,0): si scodinzola ruotandola.</summary>

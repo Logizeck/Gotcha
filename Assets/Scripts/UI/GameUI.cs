@@ -21,12 +21,11 @@ namespace Gotcha.UI
         public static bool TitleShown => current != null && current.titlePanel != null && current.titlePanel.activeSelf;
 
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.30";
+        public const string Version = "0.31";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
         [SerializeField] Sprite heartSprite;     // cuori delle vite
-        [SerializeField] Sprite logoSprite;      // logo della schermata del titolo
 
         // Palette "doodle": inchiostro scuro, corallo, verde acqua, carta
         static readonly Color Accent = new Color(1f, 0.36f, 0.42f);
@@ -147,13 +146,17 @@ namespace Gotcha.UI
                 resultBody.text = lives > 0 ? "Not quite. Try again.\nLives left: " + lives : "Not quite...\nand you're out of lives!";
             }
             resultButton.text = solved ? "NEXT" : "RETRY";
-            // video da condividere (es. il pupazzo che si scioglie)
+            // Easter egg: il video degli ultimi secondi (con l'audio) è pronto da condividere, e vale una vita
             bool clip = !string.IsNullOrEmpty(eggId) && ClipRecorder.Instance != null && ClipRecorder.Instance.HasClip;
             shareButton.gameObject.SetActive(clip);
-            shareLabel.text = "SHARE VIDEO";
+            shareLabel.text = ShareLabel();
             shareButton.interactable = true;
+            if (clip) resultBody.text += "\nShare the video: +1 life!";
             resultPanel.SetActive(true);
         }
+
+        static string ShareLabel() =>
+            ClipRecorder.Instance != null && ClipRecorder.Instance.RewardClaimed ? "SHARE AGAIN" : "SHARE VIDEO +1 LIFE";
 
         void ShareClip()
         {
@@ -165,7 +168,14 @@ namespace Gotcha.UI
                 : "I just found a secret in Gotcha! Can you find it too? #GotchaGame";
             ClipRecorder.Instance.Share(msg, ok =>
             {
-                shareLabel.text = ok ? "SHARE AGAIN" : "SHARE FAILED";
+                // la vita extra si guadagna una volta per ogni video condiviso (il menu di condivisione si è aperto)
+                if (ok && !ClipRecorder.Instance.RewardClaimed && flow.Lives != null)
+                {
+                    ClipRecorder.Instance.RewardClaimed = true;
+                    flow.Lives.GrantLife();
+                    resultBody.text = resultBody.text.Replace("Share the video: +1 life!", "Thanks for sharing: +1 life!");
+                }
+                shareLabel.text = ok ? ShareLabel() : "SHARE FAILED";
                 shareButton.interactable = true;
             });
         }

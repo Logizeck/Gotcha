@@ -84,6 +84,7 @@ namespace Gotcha.Core
         public void StopLevel()
         {
             Paused = false;
+            if (ClipRecorder.Instance != null) ClipRecorder.Instance.Discard();
             if (current == null) return;
             current.Finished -= OnFinished;
             Destroy(current.gameObject);
@@ -131,12 +132,19 @@ namespace Gotcha.Core
             }
             current.Finished += OnFinished;
             current.OnLevelStart();
+            // si registra sempre: se salta fuori un Easter egg, il video (con l'audio) è già pronto da condividere
+            if (ClipRecorder.Instance != null) ClipRecorder.Instance.Begin();
             LevelStarted?.Invoke(CurrentDefinition, index);
         }
 
         void OnFinished(LevelResult result, string eggId)
         {
             lastResult = result;
+            if (ClipRecorder.Instance != null)
+            {
+                if (string.IsNullOrEmpty(eggId)) ClipRecorder.Instance.Discard();
+                else ClipRecorder.Instance.Stop();   // la clip resta pronta per la condivisione
+            }
             Ads.RegisterLevelResult(result == LevelResult.Solved);
             if (result == LevelResult.Solved) SaveData.UnlockUpTo(CurrentIndex + 1);
             if (!string.IsNullOrEmpty(eggId)) SaveData.AddEasterEgg(eggId);

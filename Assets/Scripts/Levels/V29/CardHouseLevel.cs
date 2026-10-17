@@ -71,7 +71,7 @@ namespace Gotcha.Levels
                 Sfx.Play(this, "tick", 0.6f);
                 swayVel += (Random.value < 0.5f ? -1f : 1f) * (placeKick + (gust > 0f ? gustKick : 0f)) * height;
                 if (gust > 0f && bubble != null) { bubble.Show("Whoa, the wind!", true); StartCoroutine(HideLater(0.8f)); }
-                if (placed >= cards.Length) StartCoroutine(Finished());
+                if (placed >= cards.Length) StartCoroutine(AllPlaced());
             }
         }
 
@@ -82,7 +82,7 @@ namespace Gotcha.Levels
             c.localPosition = to;
         }
 
-        IEnumerator Finished()
+        IEnumerator AllPlaced()
         {
             yield return new WaitForSeconds(1.5f);   // deve restare in piedi ancora un attimo
             if (done) yield break;

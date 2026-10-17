@@ -31,7 +31,7 @@ public static partial class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 33;
+    const int BuilderVersion = 34;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -84,7 +84,7 @@ public static partial class GotchaProjectBuilder
                 "No buttons here: the phone itself moves the ball. Reach the glowing star.",
                 BuildMazeLevel()),
             Define("Idle", "do_nothing", "BIG RED BUTTON",
-                "A hungry pug never sleeps. Is there anything to eat around here?",
+                "A hungry cat never sleeps. Is there anything to eat around here?",
                 BuildIdleLevel()),
             Define("Apple", "slice_apple", "SLICE IT!",
                 "No knife? No problem. A quick finger is sharp enough.",
@@ -133,7 +133,7 @@ public static partial class GotchaProjectBuilder
                 "That painting is stuck to the wall. Maybe a good shake would help?",
                 BuildSafeLevel(keyPrefab, doorPrefab)),
             Define("Bedtime", "bedtime", "BEDTIME",
-                "A sleepy pug needs darkness, silence... and nobody poking it.",
+                "A sleepy cat needs darkness, silence... and nobody poking it.",
                 BuildBedtimeLevel()),
             Define("Rocket", "lift_off", "LIFT OFF",
                 "Rockets need fuel. And launch buttons are always protected.",
@@ -202,6 +202,7 @@ public static partial class GotchaProjectBuilder
         };
         levels.AddRange(VariantLevels());   // 41-60: dopo i livelli originali, i cui prefab servono da base
         levels.AddRange(VariantLevels2());  // 61-100
+        InsertToniLevels(levels);           // Toni il carlino a 25, 50, 75, 100: gli altri scalano avanti (104 livelli)
 
         LevelCatalog catalog = LoadOrCreate<LevelCatalog>(LevelDir + "/LevelCatalog.asset");
         catalog.levels = levels;
@@ -280,7 +281,6 @@ public static partial class GotchaProjectBuilder
         SetField(ui, "roundedSprite", sprites["ui_panel"]);
         SetField(ui, "heartSprite", sprites["heart"]);
         // logo della schermata del titolo: il PNG originale se importato come sprite, altrimenti l'icona disegnata
-        SetField(ui, "logoSprite", AssetDatabase.LoadAssetAtPath<Sprite>(CustomIconPath) ?? sprites["app_icon"]);
 
         EditorSceneManager.SaveScene(scene, ScenePath);
         EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
@@ -616,7 +616,7 @@ public static partial class GotchaProjectBuilder
     static MusicTrack MusicFor(string folder)
     {
         string[] dungeon = { "KeyDoor", "Maze", "TrapMaze", "DarkMaze", "WaspMaze", "ArtTheft", "FrozenKey", "Maze2", "TrapMaze2", "DarkMaze2", "WaspMaze6", "TrapMaze3", "DarkMaze3", "WaspMaze3", "TwoDoors", "MirrorMaze", "Magnet" };
-        string[] animals = { "Idle", "Volume", "Roach", "Snowman", "Defend", "Bedtime", "Campfire", "Plant", "Shell", "Sunny", "CatEyes", "Copycat", "Shell2", "Defend2", "Plant2", "Copycat2", "Wasp2", "CatEyes2", "Campfire2", "Flashlight", "Bridge", "Copycat3", "Shell3", "Defend3", "Plant3", "Tightrope", "Wasp3", "CatEyes3", "Fireflies", "Sneaky", "Whack", "Laser", "Rhythm", "Pipes", "Slide", "WhereMouse", "Carousel" };
+        string[] animals = { "Idle", "Volume", "Roach", "Snowman", "Defend", "Bedtime", "Campfire", "Plant", "Shell", "Sunny", "CatEyes", "Copycat", "Shell2", "Defend2", "Plant2", "Copycat2", "Wasp2", "CatEyes2", "Campfire2", "Flashlight", "Bridge", "Copycat3", "Shell3", "Defend3", "Plant3", "Tightrope", "Wasp3", "CatEyes3", "Fireflies", "Sneaky", "Whack", "Laser", "Rhythm", "Pipes", "Slide", "WhereMouse", "Carousel", "Toni1", "Toni2", "Toni3", "Toni4" };
         string[] kitchen = { "Apple", "Cookie", "Birthday", "Soup", "Rope", "Pizza", "PizzaChef", "Pancake", "AppleCatch", "Pancake2", "Cookie2", "Birthday2", "AppleCatch2" };
         if (folder == "Credits") return MusicTrack.Title;   // il finale suona il tema del titolo
         if (System.Array.IndexOf(dungeon, folder) >= 0) return MusicTrack.Dungeon;
@@ -980,27 +980,12 @@ public static partial class GotchaProjectBuilder
         cat.SetParent(root.transform, false);
         cat.localPosition = new Vector3(0, -1.5f, 0);
         cat.localScale = Vector3.one * 1.35f;
-        // il carlino: corpo, coda che scodinzola, occhioni con le pupille che seguono l'osso, bocca e lingua
-        Transform tail = Child(cat, "Tail", new Vector2(0.98f, 0.36f)).transform;
-        Art(tail, "Art", "pug_tail", 1, false);
-        Transform catArt = Art(cat, "Art", "pug", 2);
+        Transform catArt = Art(cat, "Art", "cat", 2);
         var breathe = catArt.gameObject.AddComponent<Pulse>();   // respira piano
         breathe.amount = 0.025f;
         breathe.speed = 2.2f;
-        GameObject eyes = Art(cat, "EyesOpen", "pug_eyes", 3, false).gameObject;
-        var pupils = new List<Transform>();
-        Vector2[] eyeCenters = { new Vector2(DoodleSprites.PugEyeLX, DoodleSprites.PugEyeY), new Vector2(DoodleSprites.PugEyeRX, DoodleSprites.PugEyeY) };
-        foreach (Vector2 e in eyeCenters)
-        {
-            Transform pupil = Child(eyes.transform, "Pupil", Vector2.zero).transform;
-            pupil.localPosition = e - (Vector2)eyes.transform.localPosition;   // le pupille sono figlie degli occhi
-            Art(pupil, "Art", "pug_pupil", 4, false);
-            pupils.Add(pupil);
-        }
-        GameObject mouthOpen = Art(cat, "MouthOpen", "pug_mouth_open", 4, false).gameObject;
-        GameObject tongue = Art(cat, "Tongue", "pug_tongue", 4, false).gameObject;
-        SmokeEmitter crumbs = Emitter(root.transform, "Crumbs", Vector2.zero, "puff", 26f, 0.5f, -1.2f, 0.25f, 0.25f, new Color(1f, 0.95f, 0.8f), 12);
-        GameObject alert = Art(cat, "Alert", "alert", 4, true, new Vector2(-0.7f, 1.1f)).gameObject;
+        GameObject eyes = Art(cat, "EyesOpen", "cat_eyes", 3, false).gameObject;
+        GameObject alert = Art(cat, "Alert", "alert", 4, true, new Vector2(-0.7f, 1.05f)).gameObject;
 
         var zzzGo = new GameObject("Zzz");
         zzzGo.transform.SetParent(cat, false);
@@ -1031,20 +1016,18 @@ public static partial class GotchaProjectBuilder
         hearts.growth = 0.4f;
         hearts.tint = Color.white;
 
-        // L'osso del quadro: va dato al carlino
-        var fishGo = new GameObject("Bone");
+        // Il pesce del quadro: va dato al gatto
+        var fishGo = new GameObject("Fish");
         fishGo.transform.SetParent(root.transform, false);
         fishGo.transform.localPosition = new Vector3(-1.6f, 2.25f, 0);
-        fishGo.transform.localRotation = Quaternion.Euler(0, 0, 20f);
-        fishGo.transform.localScale = Vector3.one * 0.8f;
-        fishGo.AddComponent<CircleCollider2D>().radius = 0.45f;
+        fishGo.AddComponent<CircleCollider2D>().radius = 0.35f;
         Draggable2D fish = fishGo.AddComponent<Draggable2D>();
-        fish.itemId = "bone";
+        fish.itemId = "fish";
         fish.returnOnMiss = false;
-        Art(fishGo.transform, "Art", "bone", 5);
+        Art(fishGo.transform, "Art", "fish", 5);
 
         SpeechBubble meow = Bubble(root.transform, new Vector2(-0.1f, 0.3f));
-        meow.catVoice = false;   // il carlino abbaia (Sfx "woof")
+        meow.catVoice = true;   // il gatto miagola quando parla
         meow.transform.localScale = Vector3.one * 0.55f;
 
         // Il pulsantone: un'esca, toccarlo sveglia il gatto
@@ -1063,16 +1046,6 @@ public static partial class GotchaProjectBuilder
         SetField(level, "zzz", zzz);
         SetField(level, "hearts", hearts);
         SetField(level, "button", button);
-        SetArray(level, "pupils", pupils.ToArray());
-        SetField(level, "mouthOpen", mouthOpen);
-        SetField(level, "tongue", tongue);
-        SetField(level, "tail", tail);
-        SetField(level, "crumbs", crumbs);
-        var so = new SerializedObject(level);
-        SerializedProperty ec = so.FindProperty("eyeCenters");
-        ec.arraySize = 2;
-        for (int i = 0; i < 2; i++) ec.GetArrayElementAtIndex(i).vector2Value = eyeCenters[i];
-        so.ApplyModifiedPropertiesWithoutUndo();
         return SavePrefab(root, LevelDir + "/Idle/Level_Idle.prefab");
     }
 
@@ -2284,25 +2257,17 @@ public static partial class GotchaProjectBuilder
         bulb.color = new Color(1f, 0.95f, 0.6f, 1f);
         bulb.transform.localScale = Vector3.one * 0.7f;
 
-        // carlino assonnato sul cuscino
-        var cat = new GameObject("Pug").transform;
+        // gatto assonnato sul cuscino
+        var cat = new GameObject("Cat").transform;
         cat.SetParent(root.transform, false);
         cat.localPosition = new Vector3(-0.55f, -2.85f, 0);
         cat.localScale = Vector3.one * 1.1f;
-        Art(Child(cat, "Tail", new Vector2(0.98f, 0.36f)).transform, "Art", "pug_tail", 1, false);
-        Transform catArt = Art(cat, "Art", "pug", 2);
+        Transform catArt = Art(cat, "Art", "cat", 2);
         Pulse breathe = catArt.gameObject.AddComponent<Pulse>();
         breathe.amount = 0.02f;
         breathe.speed = 1.8f;
-        GameObject eyesOpen = Art(cat, "EyesOpen", "pug_eyes", 3, false).gameObject;
-        GameObject eyesHalf = Art(cat, "EyesHalf", "pug_eyes_half", 3, false).gameObject;
-        foreach (GameObject eyeSet in new[] { eyesOpen, eyesHalf })
-            foreach (float ex in new[] { DoodleSprites.PugEyeLX, DoodleSprites.PugEyeRX })
-            {
-                // pupille che guardano in basso, verso la luce e lo stereo (assonnate)
-                Transform pupil = Art(eyeSet.transform, "Pupil", "pug_pupil", 4, false);
-                pupil.position = cat.TransformPoint(new Vector2(ex + 0.02f, DoodleSprites.PugEyeY - (eyeSet == eyesHalf ? 0.06f : 0.02f)));
-            }
+        GameObject eyesOpen = Art(cat, "EyesOpen", "cat_eyes", 3, false).gameObject;
+        GameObject eyesHalf = Art(cat, "EyesHalf", "cat_face_3", 3, false).gameObject;
         eyesHalf.SetActive(false);
         var zzzGo = new GameObject("Zzz");
         zzzGo.transform.SetParent(cat, false);
@@ -2324,7 +2289,7 @@ public static partial class GotchaProjectBuilder
         dark.color = new Color(0.02f, 0.02f, 0.08f, 0f);
 
         SpeechBubble bubble = Bubble(root.transform, new Vector2(0.3f, -0.9f));
-        bubble.catVoice = false;   // il carlino
+        bubble.catVoice = true;   // il gatto miagola quando parla
         bubble.transform.localScale = Vector3.one * 0.55f;
 
         SetField(level, "lampSwitch", lampSwitch);
@@ -4550,8 +4515,6 @@ public static partial class GotchaProjectBuilder
             Define(n, id, title, hint, BuildDarkMazeLevel(n, "maze_" + n.ToLowerInvariant(), segs, gate, new Vector2(spots[0], spots[1]), new Vector2(spots[2], spots[3]), wasps));
         LevelDefinition Sting(string n, string id, string title, string hint, DoodleSprites.MazeSeg[] segs, Vector2 ball, Vector2 goal, Vector2[] wasps, float speed) =>
             Define(n, id, title, hint, BuildWaspMazeLevel(n, "maze_" + n.ToLowerInvariant(), segs, goal, ball, wasps, speed));
-        LevelDefinition Tilt(string n, string id, string title, string hint, DoodleSprites.MazeSeg[] segs, Vector2 ball, Vector2 goal) =>
-            Define(n, id, title, hint, BuildGridMaze(n, "maze_" + n.ToLowerInvariant(), segs, ball, goal));
 
         return new List<LevelDefinition>
         {

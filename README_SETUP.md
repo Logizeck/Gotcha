@@ -266,6 +266,28 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.31
+- **Toni il carlino**: ogni 25 livelli c'è un livello di Toni (25, 50, 75, 100). I livelli che erano in quelle posizioni
+  e tutti i successivi scalano avanti: ora i livelli sono **104** (vecchi 25-48 → 26-49, 49-72 → 51-74,
+  73-96 → 76-99, 97-100 → 101-104; "THE END?" resta l'ultimo). Il carlino compare solo nei livelli di Toni.
+  - **25 MOVE, TONI!**: Toni è sdraiato sul pulsante e non si sposta (spingerlo non serve). Bisogna lanciare la
+    sua pallina lontano: lui la rincorre, e mentre è via il pulsante è libero.
+  - **50 SAY CHEESE!**: foto a Toni che guarda nell'obiettivo. Lui guarda solo i biscottini: va appoggiato sopra la
+    macchina fotografica. 4 pose; vicino alla bocca se lo mangia; sbatte le palpebre. Easter egg `toni_unicorn`:
+    biscotto in equilibrio sulla testa.
+  - **75 WAKE UP, TONI!**: sveglia, tocchi e scossoni non lo svegliano; aprire il frigo sì (trascina la porta).
+    Easter egg `toni_toot`: suonare la sveglia 5 volte.
+  - **100 TONI'S BIRTHDAY**: un carlino non sa soffiare: solletico al naso con la piuma finché starnutisce, la
+    candela si spegne e la torta finisce spiaccicata sullo schermo (Toni la lecca via).
+  - Codice: `Levels/Toni/ToniPug.cs` (sguardo, coda, pose sdraiato/in piedi, corsa, morso) e un controller per
+    livello; costruzione in `Editor/GotchaLevelsToni.cs`; disegni in `DoodleSprites15.cs` e `DoodleSprites16.cs`.
+- **3** e **19**: torna il gatto (col pesce nel livello 3), come prima della 0.30.
+- **Video degli Easter egg con audio**: ogni livello viene registrato (buffer circolare degli ultimi 14 secondi,
+  avviato da `GameFlow`), quindi la condivisione è offerta per **ogni** Easter egg. Il suono del gioco (musica ed
+  effetti) viene preso dall'`AudioListener` (`ClipAudioTap`) e messo nel MP4 come traccia AAC da `GotchaVideo.java`.
+  Condividere il video regala **una vita** (una volta per video). Nell'Editor la clip viene salvata come immagini +
+  `audio.wav` in `persistentDataPath/clip_frames`.
+
 ## Versione 0.30
 - **3**: il gatto diventa un **carlino** e il pesce un **osso**. Le pupille (a parte, `pug_pupil`) seguono sempre l'osso:
   nel quadro, mentre lo trascini, per terra; senza osso seguono il dito. Morso animato: accucciata, bocca spalancata,

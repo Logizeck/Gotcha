@@ -56,12 +56,10 @@ namespace Gotcha.Levels
             if (melter.drips != null) melter.drips.Stop();
             if (melter.steam != null) melter.steam.Stop();
             if (bubble != null) { bubble.Show("It's sooo hot!"); StartCoroutine(HideLater(2f)); }
-            if (ClipRecorder.Instance != null) ClipRecorder.Instance.Begin();
         }
 
         void OnDestroy()
         {
-            if (ClipRecorder.Instance != null && ClipRecorder.Instance.IsCapturing) ClipRecorder.Instance.Discard();
         }
 
         void Update()
@@ -112,7 +110,6 @@ namespace Gotcha.Levels
                 yield return null;
                 for (float t = 0f; t < 10f && meltdown.Running; t += Time.deltaTime) yield return null;
             }
-            if (ClipRecorder.Instance != null) ClipRecorder.Instance.Stop();
             FailWithEgg(eggId);
         }
 
@@ -137,7 +134,6 @@ namespace Gotcha.Levels
             if (melter.body != null) melter.body.color = Color.white;
             if (mouthO != null) mouthO.gameObject.SetActive(false);
             if (mouthSmile != null) mouthSmile.gameObject.SetActive(true);
-            if (ClipRecorder.Instance != null) ClipRecorder.Instance.Discard();
             if (bubble != null) bubble.Show("Ahh... nice and cold!");
             yield return new WaitForSeconds(1.5f);
             Win();

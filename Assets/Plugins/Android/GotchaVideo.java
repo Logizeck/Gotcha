@@ -23,25 +23,43 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
- * Codifica in MP4 (H.264) i fotogrammi catturati dal gioco e li condivide.
- * Uso da Unity (C#): begin(path, w, h, fps) → addJpeg(bytes) per ogni fotogramma → finish() → share(...).
+ * Codifica in MP4 (H.264 + audio AAC) i fotogrammi e il suono catturati dal gioco e li condivide.
+ * Uso da Unity (C#): begin(path, w, h, fps) → addJpeg(bytes) per ogni fotogramma → addAudio(pcm, rate, canali)
+ * (facoltativo) → finish() → share(...).
  * I fotogrammi arrivano come JPEG già dritti (li comprime Unity), qui vengono convertiti in YUV 4:2:0.
+ * L'audio è PCM 16 bit little-endian interlacciato. I campioni codificati restano in memoria (pochi MB per
+ * una clip di 14 secondi) e vengono scritti nel file solo alla fine, quando entrambe le tracce sono pronte.
  */
 public class GotchaVideo {
     private static final String MIME = "video/avc";
+    private static final String AUDIO_MIME = "audio/mp4a-latm";
+
+    /** Un pezzo già codificato, in attesa di essere scritto nel file. */
+    private static final class Sample {
+        final byte[] data;
+        final long pts;
+        final int flags;
+        final boolean audio;
+        Sample(byte[] data, long pts, int flags, boolean audio) { this.data = data; this.pts = pts; this.flags = flags; this.audio = audio; }
+    }
 
     private final MediaCodec codec;
-    private final MediaMuxer muxer;
+    private final String path;
     private final MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
     private final int width, height, fps;
-    private int track = -1;
-    private boolean muxerStarted;
+    private final List<Sample> samples = new ArrayList<>();
+    private MediaFormat videoFormat, audioFormat;
     private long frameIndex;
     private int[] argb;
 
     private GotchaVideo(String path, int width, int height, int fps) throws Exception {
+        this.path = path;
         this.width = width;
         this.height = height;
         this.fps = fps;
@@ -53,8 +71,6 @@ public class GotchaVideo {
         codec = MediaCodec.createEncoderByType(MIME);
         codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
         codec.start();
-        new File(path).delete();
-        muxer = new MediaMuxer(path, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
     }
 
     /** Inizia un nuovo video. Larghezza e altezza devono essere multipli di 16. */
@@ -83,23 +99,115 @@ public class GotchaVideo {
             codec.queueInputBuffer(index, 0, width * height * 3 / 2, pts, 0);
             frameIndex++;
         }
-        drain(false);
+        drainVideo(false);
     }
 
-    /** Chiude il file video. */
+    /**
+     * Aggiunge la colonna sonora (PCM 16 bit little-endian, canali interlacciati, 1 o 2 canali).
+     * Va chiamato una volta sola, prima di finish(). Se l'encoder AAC non c'è, il video resta muto.
+     */
+    public void addAudio(byte[] pcm, int sampleRate, int channels) {
+        MediaCodec aac = null;
+        try {
+            MediaFormat format = MediaFormat.createAudioFormat(AUDIO_MIME, sampleRate, channels);
+            format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
+            format.setInteger(MediaFormat.KEY_BIT_RATE, 128_000);
+            format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 16 * 1024);
+            aac = MediaCodec.createEncoderByType(AUDIO_MIME);
+            aac.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+            aac.start();
+            MediaCodec.BufferInfo ai = new MediaCodec.BufferInfo();
+            int frameBytes = 2 * channels;
+            int offset = 0;
+            boolean inputDone = false, outputDone = false;
+            long guard = System.currentTimeMillis() + 20_000;
+            while (!outputDone && System.currentTimeMillis() < guard) {
+                if (!inputDone) {
+                    int in = aac.dequeueInputBuffer(10_000);
+                    if (in >= 0) {
+                        ByteBuffer buf = aac.getInputBuffer(in);
+                        long pts = (offset / frameBytes) * 1_000_000L / sampleRate;
+                        if (offset >= pcm.length || buf == null) {
+                            aac.queueInputBuffer(in, 0, 0, pts, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
+                            inputDone = true;
+                        } else {
+                            buf.clear();
+                            int n = Math.min(buf.remaining(), pcm.length - offset);
+                            n -= n % frameBytes;
+                            buf.put(pcm, offset, n);
+                            aac.queueInputBuffer(in, 0, n, pts, 0);
+                            offset += n;
+                        }
+                    }
+                }
+                int out = aac.dequeueOutputBuffer(ai, 10_000);
+                if (out == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+                    audioFormat = aac.getOutputFormat();
+                } else if (out >= 0) {
+                    ByteBuffer data = aac.getOutputBuffer(out);
+                    boolean config = (ai.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0;
+                    if (!config && ai.size > 0 && data != null) samples.add(new Sample(copy(data, ai), ai.presentationTimeUs, ai.flags, true));
+                    aac.releaseOutputBuffer(out, false);
+                    if ((ai.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) outputDone = true;
+                }
+            }
+        } catch (Exception e) {
+            audioFormat = null;   // niente audio: il video si salva lo stesso
+            removeAudioSamples();
+        } finally {
+            if (aac != null) {
+                try { aac.stop(); } catch (Exception ignored) { }
+                aac.release();
+            }
+        }
+    }
+
+    private void removeAudioSamples() {
+        for (int i = samples.size() - 1; i >= 0; i--) if (samples.get(i).audio) samples.remove(i);
+    }
+
+    private static byte[] copy(ByteBuffer data, MediaCodec.BufferInfo bi) {
+        byte[] b = new byte[bi.size];
+        data.position(bi.offset);
+        data.limit(bi.offset + bi.size);
+        data.get(b);
+        return b;
+    }
+
+    /** Chiude il video e scrive il file MP4 (video + audio, in ordine di tempo). */
     public void finish() {
         int index = codec.dequeueInputBuffer(50_000);
         if (index >= 0) {
             long pts = frameIndex * 1_000_000L / fps;
             codec.queueInputBuffer(index, 0, 0, pts, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
         }
-        drain(true);
+        drainVideo(true);
         try { codec.stop(); } catch (Exception ignored) { }
         codec.release();
-        if (muxerStarted) {
-            try { muxer.stop(); } catch (Exception ignored) { }
+        if (videoFormat == null) return;
+
+        MediaMuxer muxer = null;
+        try {
+            new File(path).delete();
+            muxer = new MediaMuxer(path, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+            int videoTrack = muxer.addTrack(videoFormat);
+            int audioTrack = audioFormat != null ? muxer.addTrack(audioFormat) : -1;
+            muxer.start();
+            Collections.sort(samples, new Comparator<Sample>() {
+                @Override public int compare(Sample a, Sample b) { return Long.compare(a.pts, b.pts); }
+            });
+            MediaCodec.BufferInfo bi = new MediaCodec.BufferInfo();
+            for (Sample sm : samples) {
+                if (sm.audio && audioTrack < 0) continue;
+                bi.set(0, sm.data.length, sm.pts, sm.flags & ~MediaCodec.BUFFER_FLAG_END_OF_STREAM);
+                muxer.writeSampleData(sm.audio ? audioTrack : videoTrack, ByteBuffer.wrap(sm.data), bi);
+            }
+            muxer.stop();
+        } catch (Exception ignored) {
+        } finally {
+            if (muxer != null) muxer.release();
+            samples.clear();
         }
-        muxer.release();
     }
 
     private void fillYuv(Image image) {
@@ -126,7 +234,7 @@ public class GotchaVideo {
 
     private static int clamp(int v) { return v < 0 ? 0 : Math.min(255, v); }
 
-    private void drain(boolean endOfStream) {
+    private void drainVideo(boolean endOfStream) {
         while (true) {
             int index = codec.dequeueOutputBuffer(info, endOfStream ? 20_000 : 0);
             if (index == MediaCodec.INFO_TRY_AGAIN_LATER) {
@@ -134,19 +242,13 @@ public class GotchaVideo {
                 continue;
             }
             if (index == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
-                track = muxer.addTrack(codec.getOutputFormat());
-                muxer.start();
-                muxerStarted = true;
+                videoFormat = codec.getOutputFormat();
                 continue;
             }
             if (index < 0) continue;
             ByteBuffer data = codec.getOutputBuffer(index);
-            if ((info.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) info.size = 0;
-            if (info.size > 0 && muxerStarted && data != null) {
-                data.position(info.offset);
-                data.limit(info.offset + info.size);
-                muxer.writeSampleData(track, data, info);
-            }
+            boolean config = (info.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0;
+            if (!config && info.size > 0 && data != null) samples.add(new Sample(copy(data, info), info.presentationTimeUs, info.flags, false));
             codec.releaseOutputBuffer(index, false);
             if ((info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) return;
         }

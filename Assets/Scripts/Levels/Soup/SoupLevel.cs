@@ -55,13 +55,11 @@ namespace Gotcha.Levels
             if (fire != null) fire.Stop();
             if (blackSmoke != null) blackSmoke.Stop();
             if (burnGlow != null) burnGlow.color = new Color(1f, 0.5f, 0.1f, 0f);
-            if (ClipRecorder.Instance != null) ClipRecorder.Instance.Begin();
         }
 
         void OnDestroy()
         {
             if (bowl != null) bowl.Dropped -= OnDropped;
-            if (ClipRecorder.Instance != null && ClipRecorder.Instance.IsCapturing) ClipRecorder.Instance.Discard();
             if (SensorHub.Instance != null) SensorHub.Instance.ReleaseMic(this);
             if (squeak != null) Destroy(squeak);
         }
@@ -167,7 +165,6 @@ namespace Gotcha.Levels
             if (bubble != null) bubble.Show("...a bit hot.");
             yield return new WaitForSeconds(1.8f);
             if (blackSmoke != null) blackSmoke.Stop();
-            if (ClipRecorder.Instance != null) ClipRecorder.Instance.Stop();
             FailWithEgg(eggId);
         }
 
@@ -175,7 +172,6 @@ namespace Gotcha.Levels
         {
             done = true;
             bowl.enabled = false;
-            if (ClipRecorder.Instance != null) ClipRecorder.Instance.Discard();
             if (hearts != null) hearts.Play();
             if (bubble != null) bubble.Show("Slurp! Yum!");
             yield return new WaitForSeconds(1.6f);
