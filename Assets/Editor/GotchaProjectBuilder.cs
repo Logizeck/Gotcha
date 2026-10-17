@@ -31,7 +31,7 @@ public static partial class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 34;
+    const int BuilderVersion = 35;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -202,7 +202,9 @@ public static partial class GotchaProjectBuilder
         };
         levels.AddRange(VariantLevels());   // 41-60: dopo i livelli originali, i cui prefab servono da base
         levels.AddRange(VariantLevels2());  // 61-100
-        InsertToniLevels(levels);           // Toni il carlino a 25, 50, 75, 100: gli altri scalano avanti (104 livelli)
+        // I livelli nuovi di ogni aggiornamento vanno in coda (qui sopra, in fondo a VariantLevels2 o in una lista
+        // nuova): non c'è un livello finale fisso. Toni occupa sempre le posizioni multiple di 25.
+        levels = PlaceToniLevels(levels, ToniLevels());
 
         LevelCatalog catalog = LoadOrCreate<LevelCatalog>(LevelDir + "/LevelCatalog.asset");
         catalog.levels = levels;
@@ -934,14 +936,15 @@ public static partial class GotchaProjectBuilder
         bubbleGo.transform.SetParent(parent, false);
         bubbleGo.transform.localPosition = pos;
         Art(bubbleGo.transform, "Art", "bubble", 60);
-        TextMesh text = Label(bubbleGo.transform, new Vector2(0, 0.07f), 61);
+        TextMesh text = Label(bubbleGo.transform, new Vector2(0, 0.07f), 61, fit: false);   // il fumetto si adatta da solo
         SpeechBubble bubble = bubbleGo.AddComponent<SpeechBubble>();
         bubble.text = text;
         bubble.maxTextWidth = 2.5f;
         return bubble;
     }
 
-    static TextMesh Label(Transform parent, Vector2 pos, int order, string value = "", float characterSize = 0.05f)
+    /// <summary>Etichetta di testo. Ha sempre un TextMeshFit: non esce mai dallo schermo; con Fit() anche dal suo riquadro.</summary>
+    static TextMesh Label(Transform parent, Vector2 pos, int order, string value = "", float characterSize = 0.05f, bool fit = true)
     {
         var textGo = new GameObject("Text");
         textGo.transform.SetParent(parent, false);
@@ -960,7 +963,17 @@ public static partial class GotchaProjectBuilder
         text.alignment = TextAlignment.Center;
         text.color = InkColor;
         textGo.GetComponent<MeshRenderer>().sortingOrder = order;
+        if (fit) textGo.AddComponent<TextMeshFit>();
         return text;
+    }
+
+    /// <summary>Tiene il testo dentro un riquadro (coordinate del genitore dell'etichetta).</summary>
+    static TextMesh Fit(TextMesh t, float maxWidth, float maxHeight = 0f)
+    {
+        TextMeshFit f = t.GetComponent<TextMeshFit>() ?? t.gameObject.AddComponent<TextMeshFit>();
+        f.maxWidth = maxWidth;
+        f.maxHeight = maxHeight;
+        return t;
     }
 
     // ---------- Livello 4: non fare niente ----------
@@ -1193,7 +1206,7 @@ public static partial class GotchaProjectBuilder
         timer.transform.SetParent(bomb.transform, false);
         timer.transform.localPosition = new Vector3(0, 1.35f, 0);
         Art(timer.transform, "Art", "timer_box", 5);
-        TextMesh display = Label(timer.transform, new Vector2(0, 0.04f), 6, "10.0", 0.06f);
+        TextMesh display = Fit(Label(timer.transform, new Vector2(0, 0.04f), 6, "10.0", 0.06f), 1.3f, 0.6f);
         display.color = new Color(1f, 0.2f, 0.2f);
         var terminal = new GameObject("Terminal").transform;
         terminal.SetParent(timer.transform, false);
@@ -1383,7 +1396,7 @@ public static partial class GotchaProjectBuilder
         box.localPosition = new Vector3(0, 1.5f, 0);
         box.localScale = Vector3.one * 1.4f;
         Art(box, "Art", "timer_box", 5);
-        TextMesh display = Label(box, new Vector2(0, 0.04f), 6, "5.0", 0.06f);
+        TextMesh display = Fit(Label(box, new Vector2(0, 0.04f), 6, "5.0", 0.06f), 1.3f, 0.6f);
         display.color = new Color(1f, 0.2f, 0.2f);
 
         Transform left = HoldButton(root.transform, "BlueButton", "blue_button", new Vector2(-1.5f, -3.3f), out Collider2D leftCol);
@@ -2085,7 +2098,7 @@ public static partial class GotchaProjectBuilder
         safe.localScale = Vector3.one * 0.7f;
         GameObject closed = Art(safe, "Closed", "safe", 1).gameObject;
         GameObject open = Art(safe, "Open", "safe_open", 1).gameObject;
-        TextMesh safeDisplay = Label(closed.transform, new Vector2(0, 0.68f), 2, "_ _ _", 0.05f);
+        TextMesh safeDisplay = Fit(Label(closed.transform, new Vector2(0, 0.68f), 2, "_ _ _", 0.05f), 1.1f, 0.35f);
         BoxCollider2D safeArea = safe.gameObject.AddComponent<BoxCollider2D>();
         safeArea.size = new Vector2(1.9f, 2.1f);
 
@@ -2105,7 +2118,7 @@ public static partial class GotchaProjectBuilder
         back.localRotation = Quaternion.Euler(0, 0, -6f);
         back.localScale = Vector3.one * 0.72f;
         Art(back, "Art", "painting_back", 3);
-        TextMesh note = Label(back, new Vector2(0, -0.17f), 4, "000", 0.08f);
+        TextMesh note = Fit(Label(back, new Vector2(0, -0.17f), 4, "000", 0.08f), 1.5f, 0.8f);
         note.transform.localRotation = Quaternion.Euler(0, 0, -4f);
 
         var dustGo = new GameObject("Dust");
@@ -2135,7 +2148,7 @@ public static partial class GotchaProjectBuilder
         SpriteRenderer screen = Art(keypad, "Screen", "plain", 32, false, new Vector2(0, 3.05f)).GetComponent<SpriteRenderer>();
         screen.transform.localScale = new Vector3(3.4f, 0.85f, 1f);
         screen.color = new Color(0.06f, 0.23f, 0.16f);
-        TextMesh display = Label(keypad, new Vector2(0, 3.05f), 33, "_ _ _", 0.13f);
+        TextMesh display = Fit(Label(keypad, new Vector2(0, 3.05f), 33, "_ _ _", 0.13f), 3.1f, 0.75f);
         var digits = new List<TapButton>();
         for (int n = 0; n <= 9; n++)
         {
@@ -2518,7 +2531,7 @@ public static partial class GotchaProjectBuilder
             lr.numCapVertices = 2;
             bolts.Add(lr);
         }
-        TextMesh banner = Label(root.transform, new Vector2(0.2f, 2.9f), 40, "GATTAI!!", 0.16f);
+        TextMesh banner = Label(root.transform, new Vector2(0.2f, 2.9f), 40, "GATTAI!!", 0.12f);   // già animato in scala: dimensione che sta nello schermo
         banner.color = new Color(1f, 0.85f, 0.25f);
         AudioSource sfx = root.AddComponent<AudioSource>();
         sfx.playOnAwake = false;
@@ -2769,7 +2782,7 @@ public static partial class GotchaProjectBuilder
         visual.SetParent(button, false);
         Art(visual, "Art", "big_button", 6);
         Art(visual, "Face", "button_face", 7, true, new Vector2(0, 0.02f));
-        TextMesh off = Label(visual, new Vector2(0, -0.2f), 7, "OFF", 0.07f);
+        TextMesh off = Fit(Label(visual, new Vector2(0, -0.2f), 7, "OFF", 0.07f), 1.2f, 0.45f);
         off.color = Color.white;
         var legs = new GameObject("Legs").transform;
         legs.SetParent(button, false);
@@ -3041,7 +3054,7 @@ public static partial class GotchaProjectBuilder
         Transform dyn = Art(bomb, "Dynamite", "dynamite", 5, true, new Vector2(0, -3.0f));
         dyn.localScale = Vector3.one * 0.9f;
         Art(bomb, "Timer", "timer_box", 6, true, new Vector2(0, 0.6f));
-        TextMesh display = Label(bomb, new Vector2(0, 0.62f), 7, "00:15", 0.09f);
+        TextMesh display = Fit(Label(bomb, new Vector2(0, 0.62f), 7, "00:15", 0.09f), 1.2f, 0.45f);
 
         var cutters = new List<SwipeCutter>();
         var tops = new List<Transform>();
@@ -3075,7 +3088,7 @@ public static partial class GotchaProjectBuilder
         note.localPosition = new Vector3(-1.45f, 2.45f, 0);
         note.localRotation = Quaternion.Euler(0, 0, 4f);
         Art(note, "Art", "sticky_note", 3);
-        TextMesh noteText = Label(note, new Vector2(0, -0.05f), 4, "CUT THE WIRE\nTHE COLOR OF\nTHE SKY!", 0.036f);
+        TextMesh noteText = Fit(Label(note, new Vector2(0, -0.05f), 4, "CUT THE WIRE\nTHE COLOR OF\nTHE SKY!", 0.036f), 1.6f, 1.0f);
         noteText.lineSpacing = 0.85f;
 
         GameObject boom = Art(root.transform, "Boom", "boom", 50, true, new Vector2(0, -1.4f)).gameObject;
@@ -3309,7 +3322,7 @@ public static partial class GotchaProjectBuilder
         Transform board = Art(root.transform, "Chalkboard", "chalkboard", -5, true, new Vector2(-1.35f, 2.4f));
         board.localScale = Vector3.one * 0.95f;
         // ricetta (casuale) sulla lavagna: 4 posti, disegno a gesso + nome
-        TextMesh recipeTitle = Label(board, new Vector2(0f, 0.68f), -3, "GRANDMA'S PIZZA", 0.035f);
+        TextMesh recipeTitle = Fit(Label(board, new Vector2(0f, 0.68f), -3, "GRANDMA'S PIZZA", 0.035f), 2.3f, 0.35f);
         recipeTitle.color = new Color(0.95f, 0.95f, 0.9f);
         var recipeIcons = new List<SpriteRenderer>();
         var recipeNames = new List<TextMesh>();
@@ -3320,7 +3333,7 @@ public static partial class GotchaProjectBuilder
             recipeIcons.Add(icon.GetComponent<SpriteRenderer>());
             TextMesh n = Label(board, at + new Vector2(0f, -0.4f), -3, "", 0.024f);
             n.color = new Color(0.95f, 0.95f, 0.9f);
-            n.gameObject.AddComponent<TextMeshFit>().maxWidth = 0.52f;
+            Fit(n, 0.52f);
             recipeNames.Add(n);
         }
 
@@ -3421,7 +3434,7 @@ public static partial class GotchaProjectBuilder
                     Art(bowl.transform, "Content", "top_" + ids[k], 9, false, new Vector2(q[0], q[1])).localScale = Vector3.one * 1.35f;
             string[] names = { "TOMATO", "MOZZARELLA", "MUSHROOMS", "OLIVES", "CHILI", "PINEAPPLE" };
             TextMesh name = Label(bowl.transform, new Vector2(0, -0.45f), 9, names[k], 0.03f);
-            name.gameObject.AddComponent<TextMeshFit>().maxWidth = 0.86f;
+            Fit(name, 0.86f);
             bowl.AddComponent<BoxCollider2D>().size = new Vector2(0.88f, 0.7f);
             Draggable2D d = bowl.AddComponent<Draggable2D>();
             d.itemId = ids[k];
@@ -3778,7 +3791,7 @@ public static partial class GotchaProjectBuilder
         SpriteRenderer screen = Art(keypad, "Screen", "plain", 32, false, new Vector2(0, 3.05f)).GetComponent<SpriteRenderer>();
         screen.transform.localScale = new Vector3(3.4f, 0.85f, 1f);
         screen.color = new Color(0.06f, 0.23f, 0.16f);
-        display = Label(keypad, new Vector2(0, 3.05f), 33, "_ _ _ _", 0.13f);
+        display = Fit(Label(keypad, new Vector2(0, 3.05f), 33, "_ _ _ _", 0.13f), 3.1f, 0.75f);
         var list = new List<TapButton>();
         for (int n = 0; n <= 9; n++)
         {
@@ -4671,7 +4684,7 @@ public static partial class GotchaProjectBuilder
             Define("Whack", "whack_a_mole", "WHACK-A-MOLE",
                 "Bonk the angry moles (gold = 3). Never the party moles!",
                 BuildWhackLevel(), "cat_bonk"),
-            Define("Credits", "the_end", "THE END?",
+            Define("Credits", "the_end", "ROLLING CREDITS",
                 "The credits are rolling... but someone is hiding behind the names. Catch him three times!",
                 BuildCreditsLevel(), "credits_skip"),
         };

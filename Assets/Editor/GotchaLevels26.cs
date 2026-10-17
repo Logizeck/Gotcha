@@ -82,8 +82,13 @@ public static partial class GotchaProjectBuilder
         mirror.localScale = Vector3.one * 0.9f;
         Art(mirror, "Art", "mirror", 2, false);
         SpriteRenderer fog = Art(mirror, "Fog", "mirror_fog", 3, false).GetComponent<SpriteRenderer>();
-        TextMesh code = Label(mirror, new Vector2(0.05f, -0.05f), 4, "0000", 0.17f);
-        code.transform.localRotation = Quaternion.Euler(0, 0, 8f);
+        // il codice è scritto col dito sulla condensa: tratti tondi e storti, sempre dentro il vetro
+        FingerText code = Child(mirror, "Code", new Vector2(0.05f, -0.05f)).AddComponent<FingerText>();
+        code.transform.localRotation = Quaternion.Euler(0, 0, 6f);
+        code.box = new Vector2(1.8f, 2.2f);
+        code.sortingOrder = 4;
+        code.material = StrokeMaterial();
+        code.Text = "0000";
 
         GameObject cabinet = Child(root.transform, "Cabinet", new Vector2(1.75f, 0.9f));
         cabinet.transform.localScale = Vector3.one * 0.85f;
@@ -358,7 +363,7 @@ public static partial class GotchaProjectBuilder
         cuckoo.localScale = Vector3.one * 0.5f;
         Art(cuckoo, "Art", "bird_up", 7);
         Bar(root.transform, "Note", new Vector2(0, -2.35f), new Vector2(4.8f, 1.25f), new Color(1f, 0.96f, 0.6f), 3);
-        TextMesh riddle = Label(root.transform, new Vector2(0, -2.35f), 4, "", 0.05f);
+        TextMesh riddle = Fit(Label(root.transform, new Vector2(0, -2.35f), 4, "", 0.05f), 5f, 1.5f);
         TapButton set = SwitchButton(root.transform, "SetButton", "big_button", new Vector2(0, -3.75f));
         set.transform.localScale = Vector3.one * 0.6f;
 

@@ -266,6 +266,21 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.32
+- **Blocco al livello 25 risolto**: quando Toni raggiungeva la pallina ancora in movimento, l'inseguimento girava
+  all'infinito senza mai cedere il fotogramma (il gioco si bloccava). Ora Toni avanza un fotogramma alla volta
+  (`ToniPug.StepToward`).
+- **Toni è tutto beige**: orecchie e muso beige più scuro; neri restano solo naso e occhi.
+- **Nessun livello finale fisso**: i titoli di coda ("ROLLING CREDITS") sono un livello normale e i livelli nuovi di
+  ogni aggiornamento si aggiungono dopo. Toni va sempre nelle posizioni multiple di 25 (`PlaceToniLevels`): per il
+  125 basta aggiungere un livello in `ToniLevels()` (se manca, il builder lo segnala). Finiti tutti i livelli: "You
+  solved every level... for now! New levels arrive with every update."
+- **Testi sempre al loro posto**: ogni etichetta ha `TextMeshFit` (non esce mai dallo schermo) e quelle dentro un
+  oggetto hanno il loro riquadro (`Fit(label, larghezza, altezza)`): biglietto, display di timer/bomba/cassaforte/
+  tastierino/cronometro, retro del quadro, pulsante OFF, lavagna, polaroid, barattolo.
+- **Scritte col dito**: `FingerText` disegna lettere e cifre a tratti tondi e storti (Catmull-Rom, spessore che
+  varia) e le fa stare sempre nel riquadro. Usata sullo specchio appannato (codice ed Easter egg "BRUSH YOUR TEETH!").
+
 ## Versione 0.31
 - **Toni il carlino**: ogni 25 livelli c'è un livello di Toni (25, 50, 75, 100). I livelli che erano in quelle posizioni
   e tutti i successivi scalano avanti: ora i livelli sono **104** (vecchi 25-48 → 26-49, 49-72 → 51-74,

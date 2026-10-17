@@ -9,25 +9,44 @@ using Gotcha.Levels;
 /// <summary>I livelli di Toni, il carlino: uno ogni 25 (25, 50, 75, 100).</summary>
 public static partial class GotchaProjectBuilder
 {
-    /// <summary>Mette un livello di Toni in ogni posizione multipla di 25; i livelli che erano lì scalano avanti.</summary>
-    static void InsertToniLevels(List<LevelDefinition> levels)
+    /// <summary>I livelli di Toni, nell'ordine in cui compaiono (uno ogni 25). Quelli nuovi si aggiungono in fondo.</summary>
+    static List<LevelDefinition> ToniLevels() => new List<LevelDefinition>
     {
-        var toni = new[]
+        Define("Toni1", "toni_button", "MOVE, TONI!",
+            "Press the button. Toni is a very good boy... and very, very heavy. What does a dog love more than lying down?",
+            BuildToniButtonLevel()),
+        Define("Toni2", "toni_photo", "SAY CHEESE!",
+            "Toni only looks at treats. A good pet photographer knows exactly where to hold one.",
+            BuildToniPhotoLevel(), "toni_unicorn"),
+        Define("Toni3", "toni_fridge", "WAKE UP, TONI!",
+            "Alarm clocks don't work on pugs. Which sound makes EVERY dog jump out of bed?",
+            BuildToniFridgeLevel(), "toni_toot"),
+        Define("Toni4", "toni_cake", "TONI'S BIRTHDAY",
+            "Toni has to blow out his candle... but pugs can't blow. Maybe he can do something else with his nose?",
+            BuildToniCakeLevel()),
+    };
+
+    /// <summary>
+    /// Intreccia i livelli normali con quelli di Toni: Toni va in ogni posizione multipla di 25 (25, 50, 75, ...), i
+    /// normali riempiono il resto nel loro ordine. Se servisse un livello di Toni che non c'è ancora, il builder lo
+    /// segnala e prosegue con i livelli normali.
+    /// </summary>
+    static List<LevelDefinition> PlaceToniLevels(List<LevelDefinition> regular, List<LevelDefinition> toni)
+    {
+        var all = new List<LevelDefinition>();
+        int r = 0, t = 0;
+        while (r < regular.Count)
         {
-            Define("Toni1", "toni_button", "MOVE, TONI!",
-                "Press the button. Toni is a very good boy... and very, very heavy. What does a dog love more than lying down?",
-                BuildToniButtonLevel()),
-            Define("Toni2", "toni_photo", "SAY CHEESE!",
-                "Toni only looks at treats. A good pet photographer knows exactly where to hold one.",
-                BuildToniPhotoLevel(), "toni_unicorn"),
-            Define("Toni3", "toni_fridge", "WAKE UP, TONI!",
-                "Alarm clocks don't work on pugs. Which sound makes EVERY dog jump out of bed?",
-                BuildToniFridgeLevel(), "toni_toot"),
-            Define("Toni4", "toni_cake", "TONI'S BIRTHDAY",
-                "Toni has to blow out his candle... but pugs can't blow. Maybe he can do something else with his nose?",
-                BuildToniCakeLevel()),
-        };
-        for (int i = 0; i < toni.Length; i++) levels.Insert(Mathf.Min(levels.Count, 24 + i * 25), toni[i]);
+            if ((all.Count + 1) % 25 == 0)
+            {
+                if (t < toni.Count) { all.Add(toni[t++]); continue; }
+                Debug.LogWarning("[Gotcha] Manca un livello di Toni per la posizione " + (all.Count + 1) + ": aggiungilo in ToniLevels().");
+            }
+            all.Add(regular[r++]);
+        }
+        // un livello di Toni pronto per la prossima casella resta in fondo solo se cade proprio lì
+        if (t < toni.Count && (all.Count + 1) % 25 == 0) all.Add(toni[t++]);
+        return all;
     }
 
     /// <summary>Toni completo: pose, occhi con le pupille, bocca, lingua, coda; fumetto ed effetti sotto "fx".</summary>
@@ -141,7 +160,7 @@ public static partial class GotchaProjectBuilder
         Bar(root.transform, "Shelf", new Vector2(-1.9f, 1.25f), new Vector2(1.4f, 0.12f), new Color(0.55f, 0.36f, 0.22f), 1);
         Transform jar = Child(root.transform, "Jar", new Vector2(-1.9f, 1.85f)).transform;
         Art(jar, "Art", "treat_jar", 2);
-        Label(jar, new Vector2(0f, 0.08f), 3, "TREATS", 0.03f);
+        Fit(Label(jar, new Vector2(0f, 0.08f), 3, "TREATS", 0.03f), 0.48f, 0.2f);
         Art(root.transform, "Cushion", "pug_cushion", 1, true, new Vector2(-1.0f, -1.4f)).localScale = Vector3.one * 1.15f;
         ToniPug toni = ToniRig(root.transform, new Vector2(-1.0f, -1.4f), 1.15f, root.transform);
 
@@ -165,7 +184,7 @@ public static partial class GotchaProjectBuilder
         polaroid.localScale = Vector3.one * 1.5f;
         Art(polaroid, "Art", "polaroid", 75, false);
         Transform slot = Child(polaroid, "Photo", new Vector2(0.1f, 0.12f)).transform;
-        TextMesh caption = Label(polaroid, new Vector2(0f, -0.78f), 77, "", 0.035f);
+        TextMesh caption = Fit(Label(polaroid, new Vector2(0f, -0.78f), 77, "", 0.035f), 1.5f, 0.3f);
 
         SetField(level, "toni", toni);
         SetField(level, "bone", bone);

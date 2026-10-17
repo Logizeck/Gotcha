@@ -5,7 +5,7 @@ namespace Gotcha.EditorArt
     /// <summary>Toni, il carlino dei livelli multipli di 25, e il suo osso.</summary>
     public static partial class DoodleSprites
     {
-        static readonly Rgba PugFawn = Rgba.Hex("E9C590"), PugShade = Rgba.Hex("C99A60"), PugMask = Rgba.Hex("3B302C");
+        static readonly Rgba PugFawn = Rgba.Hex("E9C590"), PugShade = Rgba.Hex("C99A60"), PugMask = Rgba.Hex("D2A26A");
         public const float PugEyeLX = -0.9f, PugEyeRX = -0.54f, PugEyeY = 0.47f, PugEyeR = 0.105f;
         public const float PugMouthX = -0.72f, PugMouthY = 0.13f;
 
@@ -60,7 +60,7 @@ namespace Gotcha.EditorArt
             p.InkLine(0.012f, -0.37f, 0.1f, -0.26f, 0.52f);
             // testa tonda con le orecchie nere ripiegate
             foreach (float s in new[] { -1f, 1f })
-                Body(p, Sd.Rotate(Sd.Ellipse(-0.72f + s * 0.4f, 0.68f, 0.14f, 0.1f), -0.72f + s * 0.4f, 0.68f, s * -35f), PugMask, Rgba.Hex("1E1816"));
+                Body(p, Sd.Rotate(Sd.Ellipse(-0.72f + s * 0.4f, 0.68f, 0.14f, 0.1f), -0.72f + s * 0.4f, 0.68f, s * -35f), PugShade, Rgba.Hex("A87A48"));
             Sdf head = Sd.Ellipse(-0.72f, 0.38f, 0.46f, 0.42f);
             Body(p, head, PugFawn, PugShade, null, -0.05f, 0.06f);
             p.Shape(Sd.Circle(-0.36f, -0.06f, 0.085f), Rgba.Hex("FFC83A"), 0.025f);   // medaglietta
@@ -68,7 +68,7 @@ namespace Gotcha.EditorArt
             // rughe sulla fronte
             p.Line(PugShade, 0.03f, -0.84f, 0.68f, -0.76f, 0.72f, -0.66f, 0.68f, -0.58f, 0.72f);
             p.Line(PugShade, 0.025f, -0.8f, 0.6f, -0.72f, 0.63f, -0.64f, 0.6f);
-            // muso nero (la maschera del carlino)
+            // muso beige un po' più scuro (Toni è tutto beige: neri solo naso e occhi)
             p.Shape(Sd.Ellipse(PugMouthX, 0.2f, 0.25f, 0.17f), PugMask, 0.03f);
             p.Fill(Sd.Ellipse(PugMouthX, 0.27f, 0.1f, 0.06f), Rgba.Hex("120D0C"));               // naso
             p.Fill(Sd.Circle(PugMouthX - 0.03f, 0.29f, 0.018f), Rgba.White.WithAlpha(0.6f));

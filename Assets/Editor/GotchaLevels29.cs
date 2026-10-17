@@ -148,7 +148,7 @@ public static partial class GotchaProjectBuilder
         Transform hand = Child(watch, "Hand", Vector2.zero).transform;
         Bar(hand, "Needle", new Vector2(0, 0.5f), new Vector2(0.05f, 1.0f), new Color(0.9f, 0.2f, 0.2f), 4);
         Art(watch, "Pin", "led", 5, false).localScale = Vector3.one * 0.3f;
-        TextMesh display = Label(watch, new Vector2(0, -0.55f), 6, "0.00", 0.09f);
+        TextMesh display = Fit(Label(watch, new Vector2(0, -0.55f), 6, "0.00", 0.09f), 1.5f, 0.6f);
         TextMesh goal = Label(root.transform, new Vector2(0, 3.2f), 12, "", 0.07f);
         goal.color = Color.white;
         TextMesh tries = Label(root.transform, new Vector2(0, -1.6f), 12, "", 0.05f);

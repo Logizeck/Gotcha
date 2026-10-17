@@ -6,7 +6,8 @@ using Gotcha.Core;
 namespace Gotcha.Levels
 {
     /// <summary>
-    /// Livello 100 — THE END? Partono i titoli di coda... ma il topolino non vuole che il gioco finisca: si nasconde
+    /// ROLLING CREDITS (livello 104 nella 0.32, non è la fine: i nuovi livelli arrivano dopo). Partono i titoli
+    /// di coda... ma il topolino non vuole che il gioco finisca: si nasconde
     /// dietro i nomi e sbuca per un attimo. Prendilo 3 volte prima che i titoli finiscano. Easter egg `credits_skip`:
     /// premere SKIP. Non si saltano i titoli di coda del TUO gioco.
     /// </summary>
@@ -16,7 +17,7 @@ namespace Gotcha.Levels
         [SerializeField] TextMesh[] lines;
         [SerializeField] Transform mouse;             // sbuca dietro una riga
         [SerializeField] TapButton skip;
-        [SerializeField] GameObject finale;           // "THE REAL END" + trofeo
+        [SerializeField] GameObject finale;           // "MORE LEVELS SOON!" + trofeo
         [SerializeField] SmokeEmitter confetti;
         [SerializeField] TextMesh counter;
         [SerializeField] SpeechBubble bubble;

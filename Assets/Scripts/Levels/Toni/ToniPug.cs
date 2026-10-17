@@ -151,22 +151,35 @@ namespace Gotcha.Levels
         /// <summary>Di corsa fino a x (coordinate locali del genitore), a saltelli, girandosi dalla parte giusta.</summary>
         public IEnumerator RunTo(float x, float speed = 3.2f)
         {
+            while (!StepToward(x, speed)) yield return null;
+            Land();
+        }
+
+        /// <summary>
+        /// Un fotogramma di corsa verso x (per inseguire un bersaglio che si muove). Restituisce true se è arrivato.
+        /// Chi lo usa in un ciclo deve fare yield a ogni giro, anche quando è già arrivato.
+        /// </summary>
+        public bool StepToward(float x, float speed = 3.2f)
+        {
             Stand(true);
             Vector3 p = transform.localPosition;
-            float y0 = GroundY;
+            if (Mathf.Abs(p.x - x) <= 0.02f) return true;
             Face(x > p.x);
             Wag = 1f;
-            while (Mathf.Abs(transform.localPosition.x - x) > 0.02f)
-            {
-                hop += Time.deltaTime * 14f;
-                p.x = Mathf.MoveTowards(p.x, x, speed * Time.deltaTime);
-                p.y = y0 + Mathf.Abs(Mathf.Sin(hop)) * 0.13f;
-                transform.localPosition = p;
-                transform.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(hop) * 6f);
-                if (Mathf.Sin(hop) * Mathf.Sin(hop - Time.deltaTime * 14f) < 0f) Sfx.Play(this, "tick", 0.35f);
-                yield return null;
-            }
-            p.y = y0;
+            hop += Time.deltaTime * 14f;
+            p.x = Mathf.MoveTowards(p.x, x, speed * Time.deltaTime);
+            p.y = GroundY + Mathf.Abs(Mathf.Sin(hop)) * 0.13f;
+            transform.localPosition = p;
+            transform.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(hop) * 6f);
+            if (Mathf.Sin(hop) * Mathf.Sin(hop - Time.deltaTime * 14f) < 0f) Sfx.Play(this, "tick", 0.35f);
+            return Mathf.Abs(p.x - x) <= 0.02f;
+        }
+
+        /// <summary>Fine corsa: zampe a terra, dritto.</summary>
+        public void Land()
+        {
+            Vector3 p = transform.localPosition;
+            p.y = GroundY;
             transform.localPosition = p;
             transform.localRotation = Quaternion.identity;
         }

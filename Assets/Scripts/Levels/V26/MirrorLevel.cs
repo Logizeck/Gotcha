@@ -14,7 +14,7 @@ namespace Gotcha.Levels
     public class MirrorLevel : LevelController
     {
         [SerializeField] SpriteRenderer fog;
-        [SerializeField] TextMesh code;
+        [SerializeField] FingerText code;   // scritto col dito sullo specchio
         [SerializeField] Collider2D cabinetArea;
         [SerializeField] GameObject cabinetClosed, cabinetOpen;
         [SerializeField] GameObject keypad;
@@ -38,7 +38,7 @@ namespace Gotcha.Levels
             cam = Camera.main;
             secret = "";
             for (int i = 0; i < 4; i++) secret += (char)('0' + Random.Range(0, 10));
-            code.text = secret;
+            code.Text = secret;
             keypad.SetActive(false);
             cabinetOpen.SetActive(false);
             foreach (TapButton k in keys) k.Pressed += OnKey;
@@ -53,7 +53,7 @@ namespace Gotcha.Levels
         {
             fog.color = new Color(1f, 1f, 1f, misty * 0.85f);
             // le cifre sono "pulite" dal dito: si vedono come segni più scuri nella condensa
-            code.color = new Color(ink.r, ink.g, ink.b, misty * 0.95f);
+            code.Color = new Color(ink.r, ink.g, ink.b, misty * 0.95f);
         }
 
         void Update()
@@ -116,8 +116,7 @@ namespace Gotcha.Levels
             done = true;
             if (steam != null) steam.Stop();
             misty = 1f;
-            code.text = "BRUSH\nYOUR\nTEETH!";
-            code.characterSize *= 0.6f;
+            code.Text = "BRUSH\nYOUR\nTEETH!";   // si rimpicciolisce da sola per stare nel vetro
             Apply();
             if (bubble != null) bubble.Show("...the mirror has opinions.");
             yield return new WaitForSeconds(2.2f);

@@ -161,13 +161,13 @@ namespace Gotcha.Levels
             float timeout = Time.time + 6f;
             while (Time.time < timeout)
             {
-                float target = toni.transform.parent.InverseTransformPoint(ball.position).x + (ball.position.x > toni.transform.position.x ? -0.9f : 0.9f);
-                if (holding) target = toni.transform.localPosition.x;
-                if (Mathf.Abs(toni.transform.localPosition.x - target) < 0.08f && !holding && vel.sqrMagnitude < 1f) break;
-                IEnumerator run = toni.RunTo(target, 3.4f);
-                float stepUntil = Time.time + 0.12f;
-                while (Time.time < stepUntil && run.MoveNext()) yield return run.Current;
+                float target = holding ? toni.transform.localPosition.x
+                    : toni.transform.parent.InverseTransformPoint(ball.position).x + (ball.position.x > toni.transform.position.x ? -0.9f : 0.9f);
+                bool arrived = toni.StepToward(target, 3.4f);
+                if (arrived && !holding && vel.sqrMagnitude < 1f) break;
+                yield return null;   // sempre: anche fermo ad aspettare la pallina, un fotogramma alla volta
             }
+            toni.Land();
             if (!holding)
             {
                 carried = true;

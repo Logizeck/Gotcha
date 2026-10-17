@@ -21,7 +21,7 @@ namespace Gotcha.UI
         public static bool TitleShown => current != null && current.titlePanel != null && current.titlePanel.activeSelf;
 
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.31";
+        public const string Version = "0.32";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
@@ -755,7 +755,7 @@ namespace Gotcha.UI
             RectTransform doneCard;
             completedPanel = CreateOverlay("CompletedPanel", out doneCard);
             AddHeader(doneCard, "YOU DID IT!");
-            Text doneBody = CreateText(doneCard, "All levels solved.\nMore coming soon!", 52, Ink, FontStyle.Normal);
+            Text doneBody = CreateText(doneCard, "You solved every level... for now!\nNew levels arrive with every update.", 52, Ink, FontStyle.Normal);
             Place(doneBody.transform, new Vector2(0.08f, 0.3f), new Vector2(0.92f, 0.7f));
             Place(CreateButton(doneCard, "TITLE SCREEN", Accent, () =>
             {
