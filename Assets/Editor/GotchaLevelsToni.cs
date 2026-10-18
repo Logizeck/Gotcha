@@ -274,9 +274,11 @@ public static partial class GotchaProjectBuilder
         Label(root.transform, new Vector2(0f, 3.0f), 12, "HAPPY BIRTHDAY TONI!", 0.05f);
 
         ToniPug toni = ToniRig(root.transform, new Vector2(1.1f, -2.35f), 1.25f, root.transform);
-        Transform hat = Art(toni.transform, "Hat", "tiny_hat_red", 6, false, new Vector2(-0.55f, 0.72f));
-        hat.localScale = Vector3.one * 1.4f;
-        hat.localRotation = Quaternion.Euler(0, 0, 18f);
+        // cappellino: perno sulla sua base, appoggiato in cima alla testa (tra le orecchie), un po' di sbieco
+        Transform hat = Child(toni.transform, "Hat", new Vector2(-0.74f, 0.76f)).transform;
+        hat.localScale = Vector3.one * 1.3f;
+        hat.localRotation = Quaternion.Euler(0, 0, 12f);
+        Art(hat, "Art", "tiny_hat_red", 6, false);
 
         Transform vase = Art(root.transform, "Vase", "vase", 10, true, new Vector2(2.45f, -1.0f));
         vase.localScale = Vector3.one * 0.8f;

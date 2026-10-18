@@ -18,6 +18,10 @@ public static partial class GotchaProjectBuilder
         return h;
     }
 
+    // cappellino in testa al topolino (coordinate di Fitted: testa del disegno "mouse" in -0.08, 0.5 → -0.08, 0.35;
+    // il cappellino largo 0.75 ha la base 0.23 sotto il suo centro)
+    static readonly Vector2 MouseHatAt = new Vector2(-0.08f, 0.58f);
+
     // ---------- 80: dov'è il topolino? ----------
 
     static GameObject BuildWhereMouseLevel()
@@ -41,13 +45,13 @@ public static partial class GotchaProjectBuilder
                 if (target == null && n == 77)
                 {
                     target = Fitted(crowd, "Target", "mouse", at, 0.34f, 5);
-                    Fitted(target, "Hat", "tiny_hat_red", new Vector2(-0.6f, 1.2f), 1.1f, 6);
+                    Fitted(target, "Hat", "tiny_hat_red", MouseHatAt, 0.75f, 6);
                     continue;
                 }
                 if (kind < 14)
                 {
                     Transform m = Fitted(crowd, "Mouse", "mouse", at, 0.34f, 5);
-                    if (kind < 8) Fitted(m, "Hat", "tiny_hat_blue", new Vector2(-0.6f, 1.2f), 1.1f, 6);
+                    if (kind < 8) Fitted(m, "Hat", "tiny_hat_blue", MouseHatAt, 0.75f, 6);
                     decoys.Add(m);
                     continue;
                 }

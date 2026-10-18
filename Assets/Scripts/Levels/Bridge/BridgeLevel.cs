@@ -9,6 +9,7 @@ namespace Gotcha.Levels
     /// Livello 62 — il ponte. Il topolino è su una rupe, il formaggio sull'altra, in mezzo il burrone col fiume.
     /// Col dito si disegna un ponte (inchiostro poco: la barra in alto), poi GO: il topolino cammina dritto.
     /// Se il ponte non arriva, ha un buco o è troppo ripido... splash nel fiume: fallito. Arriva al formaggio: vinto.
+    /// I piccoli dislivelli del disegno non sono un problema: il topolino li supera con un saltello.
     /// </summary>
     public class BridgeLevel : LevelController
     {
@@ -22,6 +23,9 @@ namespace Gotcha.Levels
         [SerializeField] float walkSpeed = 1.1f;
         [SerializeField] float walkForce = 14f;
         [SerializeField] float fallBelow = -3.3f;
+        [Tooltip("Gradino massimo che il topolino supera con un saltello (unità di gioco).")]
+        [SerializeField] float hopHeight = 0.28f;
+        [SerializeField] float hopCooldown = 0.3f;
         [SerializeField] SmokeEmitter splash;
         [SerializeField] SmokeEmitter hearts;
         [SerializeField] SpeechBubble bubble;
@@ -64,6 +68,7 @@ namespace Gotcha.Levels
             mouse.bodyType = RigidbodyType2D.Dynamic;
             lastPos = mouse.position;
             lastFixed = mouse.position.x;
+            progressX = mouse.position.x;
             if (bubble != null) bubble.Hide();
         }
 
@@ -78,14 +83,17 @@ namespace Gotcha.Levels
                 return;
             }
             // passettini
+            hopTimer -= Time.deltaTime;
             step += Time.deltaTime * 14f;
             if (mouseVisual != null) mouseVisual.localPosition = visualHome + Vector3.up * Mathf.Abs(Mathf.Sin(step)) * 0.05f;
             Vector2 p = mouse.position;
             if (p.y < fallBelow) { StartCoroutine(Splash()); return; }
             if (p.x > cheese.position.x - 0.35f) { StartCoroutine(Yum()); return; }
-            stuck = (p - lastPos).magnitude < 0.004f ? stuck + Time.deltaTime : 0f;
+            // bloccato = non avanza in orizzontale (i saltelli sul posto non contano come progresso)
+            if (p.x > progressX + 0.05f) { progressX = p.x; stuck = 0f; }
+            else stuck += Time.deltaTime;
             lastPos = p;
-            if (stuck > 1.5f) StartCoroutine(TooSteep());
+            if (stuck > 2f) StartCoroutine(TooSteep());
         }
 
         void FixedUpdate()
@@ -95,9 +103,31 @@ namespace Gotcha.Levels
             float vx = (mouse.position.x - lastFixed) / Time.fixedDeltaTime;
             lastFixed = mouse.position.x;
             if (vx < walkSpeed) mouse.AddForce(Vector2.right * walkForce * mouse.mass);
+            // un gradino o un dislivello lo ferma: saltello di qualche pixel e riprova
+            bool grounded = Mathf.Abs(Velocity.y) < 0.25f;
+            blocked = vx < 0.15f && grounded ? blocked + Time.fixedDeltaTime : 0f;
+            if (blocked > 0.12f && hopTimer <= 0f)
+            {
+                float g = Mathf.Abs(Physics2D.gravity.y) * mouse.gravityScale;
+                Velocity = new Vector2(walkSpeed * 0.8f, Mathf.Sqrt(2f * g * hopHeight));
+                hopTimer = hopCooldown;
+                blocked = 0f;
+                Sfx.Play(this, "pop", 0.3f);
+            }
         }
 
-        float lastFixed;
+        float lastFixed, blocked, hopTimer, progressX = float.MinValue;
+
+        Vector2 Velocity
+        {
+#if UNITY_6000_0_OR_NEWER
+            get => mouse.linearVelocity;
+            set => mouse.linearVelocity = value;
+#else
+            get => mouse.velocity;
+            set => mouse.velocity = value;
+#endif
+        }
 
         IEnumerator Splash()
         {

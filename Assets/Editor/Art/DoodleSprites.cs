@@ -758,10 +758,27 @@ namespace Gotcha.EditorArt
         /// <summary>Cuoricino.</summary>
         public static DoodleArt Heart()
         {
-            var p = new DoodlePainter(-0.24f, -0.24f, 0.24f, 0.22f, 120) { Ink = 0.035f };
-            Sdf heart = Sd.Union(Sd.Circle(-0.08f, 0.06f, 0.1f), Sd.Circle(0.08f, 0.06f, 0.1f), Sd.Polygon(-0.17f, 0.02f, 0.17f, 0.02f, 0, -0.18f));
+            var p = new DoodlePainter(-0.24f, -0.25f, 0.24f, 0.2f, 400) { Ink = 0.035f };   // alta risoluzione: è anche il cuore delle vite
+            // cuore classico: due lobi tondi e due lati dritti TANGENTI ai lobi fino alla punta (niente "cono gelato")
+            const float a = 0.088f, b = 0.06f, r = 0.1f, tip = -0.205f;
+            float[] Tangent(float sx)
+            {
+                // dei due punti di tangenza dalla punta, quello più esterno (lontano dall'asse)
+                double cx = sx * a, dx = 0 - cx, dy = tip - b, d = Math.Sqrt(dx * dx + dy * dy);
+                double wx = dx / d, wy = dy / d, ac = Math.Acos(r / d);
+                float[] best = null;
+                foreach (double th in new[] { ac, -ac })
+                {
+                    double ex = wx * Math.Cos(th) - wy * Math.Sin(th), ey = wx * Math.Sin(th) + wy * Math.Cos(th);
+                    var pt = new[] { (float)(cx + r * ex), (float)(b + r * ey) };
+                    if (best == null || Math.Abs(pt[0]) > Math.Abs(best[0])) best = pt;
+                }
+                return best;
+            }
+            float[] L = Tangent(-1f), R = Tangent(1f);
+            Sdf heart = Sd.Union(Sd.Circle(-a, b, r), Sd.Circle(a, b, r), Sd.Polygon(0f, tip, R[0], R[1], a, b, -a, b, L[0], L[1]));
             Body(p, heart, Rgba.Hex("FF5C8A"), Rgba.Hex("D93D6B"), null, -0.02f, 0.03f);
-            p.Fill(Sd.Circle(-0.1f, 0.09f, 0.025f), Rgba.White.WithAlpha(0.8f));
+            p.Fill(Sd.Rotate(Sd.Ellipse(-0.1f, 0.09f, 0.035f, 0.022f), -0.1f, 0.09f, 35f), Rgba.White.WithAlpha(0.8f));
             return new DoodleArt("heart", p);
         }
 

@@ -266,6 +266,14 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.36
+- **Cuori** ridisegnati: due lobi tondi e lati dritti tangenti fino alla punta (prima sembravano un cono gelato con
+  due palline); sprite ad alta risoluzione, è anche il cuore delle vite.
+- **64 BRIDGE BUILDER**: il topolino supera i piccoli dislivelli del ponte con un saltello (fino a 0,28 unità); si
+  arrende solo se non avanza per 2 secondi.
+- **83 WHERE'S MOUSE?**: i cappellini (rosso e blu) stanno sulla testa dei topolini, tra le orecchie.
+- **100 TONI'S BIRTHDAY**: il cappellino di Toni appoggia in cima alla testa (perno sulla base del cappello).
+
 ## Versione 0.35
 - **Toni è un carlino NERO**: pelo antracite, orecchie e muso scuri, pieghe, bocca, unghie e occhi chiusi disegnati
   in grigio chiaro per farli vedere; resta il collare rosso.
