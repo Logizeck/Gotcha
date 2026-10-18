@@ -45,6 +45,12 @@ namespace Gotcha.Levels
         [SerializeField] Transform[] armor;           // pezzi d'armatura che arrivano in volo
         [SerializeField] LineRenderer[] lightning;    // archi elettrici attorno al robot
         [SerializeField] TextMesh banner;             // "GATTAI!!"
+        [SerializeField] Transform bannerJp;          // 合体！ sotto la scritta
+        [Header("Luci della trasformazione")]
+        [SerializeField] SpriteRenderer pillar;       // colonna di luce dal cielo
+        [SerializeField] SpriteRenderer streak;       // lampo orizzontale da obiettivo
+        [SerializeField] SmokeEmitter stars;          // stelline luccicanti
+        [SerializeField] Transform glint;             // scintilla "ting!" sulla visiera
         [SerializeField] AudioSource sfx;
 
         bool armed, done, cranking, cranked;
@@ -56,6 +62,7 @@ namespace Gotcha.Levels
 
         public override void OnLevelStart()
         {
+            if (bannerJp != null) jpScale = bannerJp.localScale;
             cam = Camera.main;
             if (robot != null) robotHome = robot.localPosition;
             bool plugged = SensorHub.Instance != null && SensorHub.Instance.IsCharging;
@@ -69,6 +76,11 @@ namespace Gotcha.Levels
             if (rays != null) rays.gameObject.SetActive(false);
             if (shockRing != null) shockRing.gameObject.SetActive(false);
             if (banner != null) banner.gameObject.SetActive(false);
+            if (bannerJp != null) bannerJp.gameObject.SetActive(false);
+            if (pillar != null) pillar.color = new Color(1f, 1f, 1f, 0f);
+            if (streak != null) streak.color = new Color(1f, 1f, 1f, 0f);
+            if (stars != null) stars.Stop();
+            if (glint != null) glint.gameObject.SetActive(false);
             if (armor != null) foreach (Transform a in armor) if (a != null) a.gameObject.SetActive(false);
             if (lightning != null) foreach (LineRenderer l in lightning) if (l != null) l.enabled = false;
             if (crank != null) crank.SetActive(false);
@@ -209,10 +221,12 @@ namespace Gotcha.Levels
                 if (aura != null) { aura.color = new Color(0.6f, 0.95f, 1f, e * 0.9f); aura.transform.localScale = Vector3.one * (6f + Mathf.Sin(k * 30f) * 0.6f); }
                 if (sparks != null && k > 0.3f) sparks.Play();
                 Zap(e);
+                PulseRing(k, e);   // anelli di energia che si allargano a ritmo
                 if (k > 1.2f) level.localPosition = levelHome + (Vector3)(Random.insideUnitCircle * 0.05f);
                 yield return null;
             }
             level.localPosition = levelHome;
+            if (shockRing != null) shockRing.gameObject.SetActive(false);
             if (bubble != null) bubble.Show("OVERCHARGE!!!");
             if (batteryUi != null) batteryUi.SetActive(false);
 
@@ -227,6 +241,9 @@ namespace Gotcha.Levels
                 if (rays != null) { rays.localScale = Vector3.one * Mathf.Lerp(0.2f, 1.6f, e); rays.Rotate(0, 0, 90f * Time.deltaTime); }
                 if (onArt != null) onArt.color = Color.Lerp(Color.white, new Color(2f, 2f, 2.4f), e);
                 Zap(1f);
+                // la colonna di luce scende dal cielo sul robot
+                Pillar(e, k);
+                RainbowRays();
                 yield return null;
             }
             if (sparks != null) sparks.Stop();
@@ -252,14 +269,20 @@ namespace Gotcha.Levels
                     piece.rotation = Quaternion.identity;
                     if (sparks != null) { sparks.transform.position = to; sparks.Play(); }
                     if (sfx != null) sfx.PlayOneShot(Clang());
+                    if (stars != null) { stars.transform.position = to; stars.Play(); }
+                    if (flash != null) flash.color = new Color(0.8f, 0.95f, 1f, 0.45f);   // piccolo lampo a ogni aggancio
                     level.localPosition = levelHome + (Vector3)(Random.insideUnitCircle * 0.08f);
                     for (float k = 0f; k < 1f; k += Time.deltaTime / 0.12f)
                     {
                         piece.localScale = Vector3.one * Mathf.Lerp(1.3f, 0.2f, k);   // si fonde col corpo
+                        if (flash != null) flash.color = new Color(0.8f, 0.95f, 1f, 0.45f * (1f - k));
+                        Pillar(1f, Time.time);
+                        RainbowRays();
                         yield return null;
                     }
                     level.localPosition = levelHome;
                     if (sparks != null) sparks.Stop();
+                    if (stars != null) stars.Stop();
                     piece.gameObject.SetActive(false);
                 }
 
@@ -271,14 +294,25 @@ namespace Gotcha.Levels
             up = home + Vector3.up * 1.1f;
             robot.localPosition = up;
             if (banner != null) banner.gameObject.SetActive(true);
+            if (bannerJp != null) { bannerJp.gameObject.SetActive(true); bannerJp.localScale = Vector3.zero; }
+            if (stars != null && banner != null) { stars.transform.position = banner.transform.position; stars.Play(); }
+            if (streak != null) streak.transform.position = Center;
+            Haptics.Heavy();
             for (float k = 0f; k < 1f; k += Time.deltaTime / 0.5f)
             {
                 if (flash != null) flash.color = new Color(1f, 1f, 1f, 1f - k);
                 if (aura != null) aura.color = new Color(1f, 0.85f, 0.4f, (1f - k) * 0.9f);
                 if (banner != null) banner.transform.localScale = Vector3.one * (k < 0.4f ? Mathf.Lerp(3f, 0.85f, k / 0.4f) : Mathf.Lerp(0.85f, 1f, (k - 0.4f) / 0.6f));
+                // il sottotitolo giapponese arriva subito dopo, con un piccolo rimbalzo
+                if (bannerJp != null) bannerJp.localScale = jpScale * (k < 0.3f ? 0f : k < 0.7f ? Mathf.Lerp(0f, 1.15f, (k - 0.3f) / 0.4f) : Mathf.Lerp(1.15f, 1f, (k - 0.7f) / 0.3f));
+                // lampo orizzontale da obiettivo che si allunga e svanisce
+                if (streak != null) { streak.color = new Color(1f, 1f, 1f, 1f - k); streak.transform.localScale = new Vector3(Mathf.Lerp(0.3f, 2.2f, k), 1f + (1f - k), 1f); }
+                Pillar(1f - k * 0.5f, Time.time);
+                RainbowRays();
                 if (rays != null) rays.Rotate(0, 0, 120f * Time.deltaTime);
                 yield return null;
             }
+            if (streak != null) streak.color = new Color(1f, 1f, 1f, 0f);
 
             // 5. atterraggio pesante con onda d'urto
             for (float k = 0f; k < 1f; k += Time.deltaTime / 0.25f)
@@ -301,6 +335,8 @@ namespace Gotcha.Levels
             }
             level.localPosition = levelHome;
             if (shockRing != null) shockRing.gameObject.SetActive(false);
+            if (stars != null) stars.Stop();
+            StartCoroutine(Glint());
             if (bubble != null) bubble.Show("ARIGATO, MASTER!");
             if (sparks != null) { sparks.transform.position = robot.position + new Vector3(-1.1f, 1.2f, 0f); sparks.Play(); yield return new WaitForSeconds(0.2f); sparks.Stop(); }
             for (float k = 0f; k < 1.6f; k += Time.deltaTime)
@@ -313,9 +349,56 @@ namespace Gotcha.Levels
             {
                 if (dim != null) dim.color = new Color(0.05f, 0.03f, 0.12f, 0.8f * (1f - k));
                 if (rays != null) rays.localScale = Vector3.one * Mathf.Lerp(1.6f, 0f, k);
+                Pillar(0.5f * (1f - k), Time.time);
                 yield return null;
             }
             WinWithEgg(eggId);
+        }
+
+        Vector3 jpScale = Vector3.one;
+
+        /// <summary>Anello di energia azzurro che si allarga e svanisce, tre volte al secondo, più forte col sovraccarico.</summary>
+        void PulseRing(float t, float intensity)
+        {
+            if (shockRing == null) return;
+            shockRing.gameObject.SetActive(true);
+            float f = (t * 2.2f) % 1f;
+            shockRing.position = Center;
+            shockRing.localScale = Vector3.one * Mathf.Lerp(0.3f, 2.6f, f);
+            SpriteRenderer r = shockRing.GetComponent<SpriteRenderer>();
+            if (r != null) r.color = new Color(0.55f, 0.95f, 1f, (1f - f) * intensity);
+        }
+
+        /// <summary>Colonna di luce dietro al robot: si accende con "a" e pulsa.</summary>
+        void Pillar(float a, float t)
+        {
+            if (pillar == null) return;
+            pillar.transform.position = new Vector3(robot.position.x, robot.position.y + 2.8f, pillar.transform.position.z);
+            pillar.color = new Color(1f, 1f, 1f, Mathf.Clamp01(a) * (0.75f + 0.25f * Mathf.Sin(t * 25f)));
+            pillar.transform.localScale = new Vector3(1.4f + 0.25f * Mathf.Sin(t * 13f), 1.7f, 1f);
+        }
+
+        /// <summary>La raggiera cambia colore come un arcobaleno.</summary>
+        void RainbowRays()
+        {
+            if (rays == null) return;
+            SpriteRenderer r = rays.GetComponent<SpriteRenderer>();
+            if (r != null) r.color = Color.HSVToRGB(Time.time * 0.6f % 1f, 0.45f, 1f);
+        }
+
+        /// <summary>"Ting!": scintilla a quattro punte che brilla sulla visiera del robot da battaglia.</summary>
+        IEnumerator Glint()
+        {
+            if (glint == null) yield break;
+            glint.gameObject.SetActive(true);
+            Sfx.Play(this, "ding", 0.7f);
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.5f)
+            {
+                glint.localScale = Vector3.one * Mathf.Sin(k * Mathf.PI) * 1.6f;
+                glint.localRotation = Quaternion.Euler(0, 0, k * 90f);
+                yield return null;
+            }
+            glint.gameObject.SetActive(false);
         }
 
         /// <summary>Archi elettrici a zig-zag attorno al robot (intensità 0..1; negativo = spenti).</summary>

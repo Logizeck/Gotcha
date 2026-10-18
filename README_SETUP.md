@@ -266,6 +266,14 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.37
+- **21 LOW BATTERY (Easter egg Mecha Mode)**: sotto "GATTAI!!" compare il sottotitolo giapponese **合体！**
+  (disegnato a pennellate, `gattai_jp`: il font del gioco non ha i caratteri giapponesi), con un piccolo rimbalzo.
+  Nuove luci nella trasformazione: anelli di energia che pulsano durante il sovraccarico, colonna di luce dal cielo
+  (`light_pillar`), raggiera che cambia colore come un arcobaleno, piccolo lampo e stelline a ogni pezzo d'armatura,
+  lampo orizzontale da obiettivo (`light_streak`) al momento del lampo bianco, pioggia di stelline sulla scritta e
+  scintilla "ting!" sulla visiera del robot da battaglia dopo l'atterraggio (con vibrazione forte al lampo).
+
 ## Versione 0.36
 - **Cuori** ridisegnati: due lobi tondi e lati dritti tangenti fino alla punta (prima sembravano un cono gelato con
   due palline); sprite ad alta risoluzione, è anche il cuore delle vite.

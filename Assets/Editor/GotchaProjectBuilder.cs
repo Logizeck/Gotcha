@@ -31,7 +31,7 @@ public static partial class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 39;
+    const int BuilderVersion = 40;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -2534,6 +2534,21 @@ public static partial class GotchaProjectBuilder
         }
         TextMesh banner = Label(root.transform, new Vector2(0.2f, 2.9f), 40, "GATTAI!!", 0.12f);   // già animato in scala: dimensione che sta nello schermo
         banner.color = new Color(1f, 0.85f, 0.25f);
+        // sottotitolo giapponese 合体！ appena sotto (disegnato: il font non ha i caratteri giapponesi)
+        Transform bannerJp = Art(root.transform, "BannerJp", "gattai_jp", 40, false, new Vector2(0.2f, 2.12f));
+        bannerJp.localScale = Vector3.one * 0.7f;
+        // luci: colonna dal cielo, lampo orizzontale, stelline, scintilla sulla visiera
+        SpriteRenderer pillar = Art(root.transform, "LightPillar", "light_pillar", 3, false, new Vector2(-0.85f, 0.5f)).GetComponent<SpriteRenderer>();
+        SpriteRenderer streak = Art(root.transform, "LightStreak", "light_streak", 56, false).GetComponent<SpriteRenderer>();
+        SmokeEmitter stars = Emitter(root.transform, "Stars", Vector2.zero, "sparkle_star", 18f, 0.7f, 0.4f, 1.4f, 0.7f, Color.white, 41);
+        stars.spinRange = 180f;
+        stars.growth = 0.2f;
+        Transform glint = Art(robot, "Glint", "sparkle_star", 8, false, new Vector2(0.12f, 2.66f));
+        SetField(level, "bannerJp", bannerJp);
+        SetField(level, "pillar", pillar);
+        SetField(level, "streak", streak);
+        SetField(level, "stars", stars);
+        SetField(level, "glint", glint);
         AudioSource sfx = root.AddComponent<AudioSource>();
         sfx.playOnAwake = false;
         SetField(level, "dim", dim);
