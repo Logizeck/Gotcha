@@ -5,7 +5,8 @@ using Gotcha.Store;
 namespace Gotcha.Core
 {
     /// <summary>
-    /// Acquisti in-app del gioco free-to-play: 1 ora di vite infinite (0,99 €) e niente pubblicità per sempre (4,99 €).
+    /// Acquisti in-app del gioco free-to-play: 1 ora di vite infinite (0,99 €), niente pubblicità per sempre (4,99 €),
+    /// pacchetti di hint (3 a 0,39 €, 15 a 1,49 €).
     /// Sul telefono usa Unity IAP se il pacchetto è installato (assembly Gotcha.Iap); altrimenti un negozio simulato
     /// che nell'Editor "compra" subito (per le prove) e in una build vera risponde "non disponibile".
     /// </summary>
@@ -44,7 +45,13 @@ namespace Gotcha.Core
         {
             string p = store != null ? store.LocalizedPrice(productId) : null;
             if (!string.IsNullOrEmpty(p)) return p;
-            return productId == Products.RemoveAds ? "4,99 €" : "0,99 €";
+            switch (productId)
+            {
+                case Products.RemoveAds: return "4,99 €";
+                case Products.Hints3: return "0,39 €";
+                case Products.Hints15: return "1,49 €";
+                default: return "0,99 €";
+            }
         }
 
         public void Buy(string productId, Action<bool, string> onDone)
@@ -65,6 +72,8 @@ namespace Gotcha.Core
             {
                 SaveData.AdsRemoved = true;
             }
+            else if (productId == Products.Hints3) HintWallet.Add(3);
+            else if (productId == Products.Hints15) HintWallet.Add(15);
             Changed?.Invoke();
         }
 

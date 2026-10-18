@@ -29,6 +29,8 @@ namespace Gotcha.Store
             var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
             builder.AddProduct(Products.InfiniteLives1h, ProductType.Consumable);
             builder.AddProduct(Products.RemoveAds, ProductType.NonConsumable);
+            builder.AddProduct(Products.Hints3, ProductType.Consumable);
+            builder.AddProduct(Products.Hints15, ProductType.Consumable);
             UnityPurchasing.Initialize(this, builder);
         }
 

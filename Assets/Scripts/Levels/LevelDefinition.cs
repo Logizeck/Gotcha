@@ -11,6 +11,8 @@ namespace Gotcha.Levels
         public string levelId;
         public string title;
         [TextArea] public string hint;
+        [Tooltip("I 3 suggerimenti (il primo è uguale a hint): ognuno costa un hint del portafoglio del giocatore.")]
+        [TextArea] public string[] hints;
         public GameObject prefab;   // prefab con un LevelController sulla radice
         [Tooltip("Id dell'Easter egg nascosto nel livello (vuoto = nessuno): nel menu il livello ha un colore speciale.")]
         public string easterEggId;

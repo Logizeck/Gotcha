@@ -30,7 +30,7 @@ namespace Gotcha.Levels
         [SerializeField] Vector2 boundsMin = new Vector2(-2.35f, -3.9f);
         [SerializeField] Vector2 boundsMax = new Vector2(2.35f, 2.4f);
         [Header("Rompicapo")]
-        [SerializeField] float timeLimit = 25f;
+        [SerializeField] float timeLimit = 8f;   // il vicino si sveglia presto: bisogna essere rapidi
         [SerializeField] TextMesh timerText;
         [SerializeField] float inkBudget = 7.5f;
         [SerializeField] Transform inkBar;            // scala x 0..1

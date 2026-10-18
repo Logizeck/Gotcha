@@ -31,7 +31,7 @@ public static partial class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 36;
+    const int BuilderVersion = 37;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -231,6 +231,7 @@ public static partial class GotchaProjectBuilder
         def.hint = hint;
         def.prefab = prefab;
         def.easterEggId = easterEgg;
+        def.hints = LevelHints.For(id, hint);   // 3 suggerimenti: spinta, più preciso, soluzione
         def.music = MusicFor(folder);
         EditorUtility.SetDirty(def);
         return def;
@@ -2816,7 +2817,7 @@ public static partial class GotchaProjectBuilder
         bubble.transform.localScale = Vector3.one * 0.55f;
 
         // tempo prima che si svegli il vicino e barra dell'inchiostro
-        TextMesh timer = Label(root.transform, new Vector2(0, 3.0f), 30, "NEIGHBOR WAKES IN 25", 0.06f);
+        TextMesh timer = Label(root.transform, new Vector2(0, 3.0f), 30, "NEIGHBOR WAKES IN 8", 0.06f);
         timer.color = InkColor;
         TextMesh inkLabel = Label(root.transform, new Vector2(-1.75f, 2.6f), 30, "INK", 0.05f);
         inkLabel.color = InkColor;
@@ -4139,6 +4140,7 @@ public static partial class GotchaProjectBuilder
                 Variant("Runaway", "Runaway2", go =>
                 {
                     Tune(Level(go), "speed", 3.0f);
+                    Tune(Level(go), "timeLimit", 5f);   // il secondo: 5 secondi
                     go.GetComponentInChildren<StrokeDrawer>(true).maxStrokes = 3;
                 })),
             Define("DarkMaze2", "darker", "DARKER",

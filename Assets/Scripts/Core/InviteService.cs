@@ -36,6 +36,13 @@ namespace Gotcha.Core
 
         public static string InviteLink => StoreUrl + "&referrer=utm_source%3Dinvite%26utm_content%3D" + MyCode;
 
+        /// <summary>
+        /// Link personale per scaricare il gioco, da mettere nei video condivisi: contiene il codice di chi condivide
+        /// (unico per giocatore) e il segreto trovato, così un domani il server può premiare chi porta nuovi giocatori.
+        /// </summary>
+        public static string ShareLink(string eggId) =>
+            StoreUrl + "&referrer=utm_source%3Dshare%26utm_content%3D" + MyCode + "%26utm_campaign%3D" + Uri.EscapeDataString(eggId ?? "");
+
         public static void Share()
         {
             string text = "Can you beat me at Gotcha!? Every level is a trick. Download it: " + InviteLink;

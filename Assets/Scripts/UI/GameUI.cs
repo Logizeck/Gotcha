@@ -21,7 +21,7 @@ namespace Gotcha.UI
         public static bool TitleShown => current != null && current.titlePanel != null && current.titlePanel.activeSelf;
 
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.33";
+        public const string Version = "0.34";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
@@ -49,6 +49,11 @@ namespace Gotcha.UI
         bool menuFromTitle, resetArmed;
         Text hintBody, menuEggs, resultTitle, resultBody, resultButton, musicLabel, shareLabel;
         Button shareButton;
+        // hint a pagamento, premio per la condivisione degli Easter egg
+        Text hintWalletLabel, hintRevealLabel, shopHints3Label, shopHints15Label;
+        Button hintRevealButton;
+        GameObject rewardPanel;
+        string lastEggId;
         RectTransform pagesContent;
         PagerSwipe pager;
         RectTransform pageDots;
@@ -76,6 +81,7 @@ namespace Gotcha.UI
             flow.LevelFinished += OnLevelFinished;
             flow.GameCompleted += OnGameCompleted;
             flow.OutOfLives += OnOutOfLives;
+            HintWallet.Changed += RefreshHint;
             ShowTitle();
         }
 
@@ -93,6 +99,7 @@ namespace Gotcha.UI
             flow.LevelFinished -= OnLevelFinished;
             flow.GameCompleted -= OnGameCompleted;
             flow.OutOfLives -= OnOutOfLives;
+            HintWallet.Changed -= RefreshHint;
             if (flow.Lives != null) flow.Lives.Changed -= OnLivesChanged;
         }
 
@@ -107,7 +114,8 @@ namespace Gotcha.UI
             if (shopPanel.activeSelf) RefreshShop();
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                if (shopPanel.activeSelf) CloseShop();
+                if (rewardPanel.activeSelf) { }   // il premio va scelto
+                else if (shopPanel.activeSelf) CloseShop();
                 else if (livesPanel.activeSelf) CloseLives();
                 else if (settingsPanel.activeSelf) CloseSettings();
                 else if (hintPanel.activeSelf) CloseOverlay(hintPanel);
@@ -138,46 +146,52 @@ namespace Gotcha.UI
 
             bool solved = result == LevelResult.Solved;
             resultTitle.text = solved ? "SOLVED!" : "GOTCHA!";
-            if (solved) resultBody.text = string.IsNullOrEmpty(eggId) ? "Nice one." : "Solved... AND you found a secret!\nEaster eggs: " + SaveData.EasterEggCount;
-            else if (!string.IsNullOrEmpty(eggId)) resultBody.text = "You found a secret!\nEaster eggs: " + SaveData.EasterEggCount;
+            lastEggId = eggId;
+            string secret = string.IsNullOrEmpty(eggId) ? "" : "\"" + EasterEggs.Name(eggId) + "\"";
+            if (solved) resultBody.text = string.IsNullOrEmpty(eggId) ? "Nice one." : "Solved... AND you found the secret\n" + secret + "!";
+            else if (!string.IsNullOrEmpty(eggId)) resultBody.text = "Secret found:\n" + secret + "!";
             else
             {
                 int lives = flow.Lives != null ? flow.Lives.Lives : 1;
                 resultBody.text = lives > 0 ? "Not quite. Try again.\nLives left: " + lives : "Not quite...\nand you're out of lives!";
             }
             resultButton.text = solved ? "NEXT" : "RETRY";
-            // Easter egg: il video degli ultimi secondi (con l'audio) è pronto da condividere, e vale una vita
+            // Easter egg: il video degli ultimi secondi (con l'audio) è pronto, e condividerlo vale un premio
             bool clip = !string.IsNullOrEmpty(eggId) && ClipRecorder.Instance != null && ClipRecorder.Instance.HasClip;
             shareButton.gameObject.SetActive(clip);
             shareLabel.text = ShareLabel();
             shareButton.interactable = true;
-            if (clip) resultBody.text += "\nShare the video: +1 life!";
+            if (clip) resultBody.text += EasterEggs.RewardClaimed(eggId) ? "\nShow it to your friends!" : "\nShare the video: 15 min of infinite lives or 5 hints!";
             resultPanel.SetActive(true);
         }
 
-        static string ShareLabel() =>
-            ClipRecorder.Instance != null && ClipRecorder.Instance.RewardClaimed ? "SHARE AGAIN" : "SHARE VIDEO +1 LIFE";
+        string ShareLabel() => EasterEggs.RewardClaimed(lastEggId) ? "SHARE VIDEO" : "SHARE VIDEO + REWARD";
 
         void ShareClip()
         {
             if (ClipRecorder.Instance == null || ClipRecorder.Instance.IsSharing) return;
             shareButton.interactable = false;
             shareLabel.text = "PREPARING...";
-            string msg = flow.CurrentDefinition != null && flow.CurrentDefinition.easterEggId == "mecha_robot"
-                ? "My robot just evolved into a battle mech in Gotcha! #GotchaGame"
-                : "I just found a secret in Gotcha! Can you find it too? #GotchaGame";
-            ClipRecorder.Instance.Share(msg, ok =>
+            // nome del segreto + link personale per scaricare il gioco
+            ClipRecorder.Instance.Share(EasterEggs.ShareText(lastEggId), ok =>
             {
-                // la vita extra si guadagna una volta per ogni video condiviso (il menu di condivisione si è aperto)
-                if (ok && !ClipRecorder.Instance.RewardClaimed && flow.Lives != null)
+                // il premio si sceglie una volta per ogni segreto (il menu di condivisione si è aperto)
+                if (ok && !EasterEggs.RewardClaimed(lastEggId))
                 {
-                    ClipRecorder.Instance.RewardClaimed = true;
-                    flow.Lives.GrantLife();
-                    resultBody.text = resultBody.text.Replace("Share the video: +1 life!", "Thanks for sharing: +1 life!");
+                    EasterEggs.MarkRewardClaimed(lastEggId);
+                    rewardPanel.SetActive(true);
                 }
                 shareLabel.text = ok ? ShareLabel() : "SHARE FAILED";
                 shareButton.interactable = true;
             });
+        }
+
+        void ClaimReward(bool infiniteLives)
+        {
+            if (infiniteLives) { if (flow.Lives != null) flow.Lives.GrantInfinite(EasterEggs.RewardInfiniteSeconds); }
+            else HintWallet.Add(EasterEggs.RewardHints);
+            rewardPanel.SetActive(false);
+            resultBody.text = infiniteLives ? "Thanks for sharing!\n15 minutes of infinite lives." : "Thanks for sharing!\n+" + EasterEggs.RewardHints + " hints.";
         }
 
         void OnGameCompleted()
@@ -191,10 +205,48 @@ namespace Gotcha.UI
         void OpenHint()
         {
             if (flow.CurrentDefinition == null || resultPanel.activeSelf) return;
-            hintBody.text = flow.CurrentDefinition.hint;
+            RefreshHint();
             menuPanel.SetActive(false);
             hintPanel.SetActive(true);
             flow.Paused = true;
+        }
+
+        string[] CurrentHints()
+        {
+            LevelDefinition def = flow.CurrentDefinition;
+            if (def == null) return new string[0];
+            return def.hints != null && def.hints.Length > 0 ? def.hints : new[] { def.hint };
+        }
+
+        /// <summary>Suggerimenti già sbloccati, saldo e pulsante: prossimo hint, oppure pubblicità se il saldo è a zero.</summary>
+        void RefreshHint()
+        {
+            if (hintBody == null || flow.CurrentDefinition == null) return;
+            string[] hints = CurrentHints();
+            int shown = Mathf.Min(HintWallet.Revealed(flow.CurrentDefinition.levelId), hints.Length);
+            var sb = new System.Text.StringBuilder();
+            for (int i = 0; i < shown; i++) sb.Append(i > 0 ? "\n\n" : "").Append(i + 1).Append(") ").Append(hints[i]);
+            hintBody.text = shown == 0 ? "Stuck? This level has " + hints.Length + " hints,\nfrom a little nudge to the solution." : sb.ToString();
+            hintWalletLabel.text = "Your hints: " + HintWallet.Balance;
+            bool more = shown < hints.Length;
+            hintRevealButton.gameObject.SetActive(more);
+            if (!more) hintWalletLabel.text += "   (that was the solution!)";
+            else if (HintWallet.Balance > 0) hintRevealLabel.text = "SHOW HINT " + (shown + 1) + "/" + hints.Length + "  (-1)";
+            else hintRevealLabel.text = "WATCH AD: +1 HINT";
+            hintRevealButton.interactable = true;
+        }
+
+        void RevealHint()
+        {
+            LevelDefinition def = flow.CurrentDefinition;
+            if (def == null) return;
+            if (HintWallet.Balance > 0) { HintWallet.TryReveal(def.levelId, CurrentHints().Length); RefreshHint(); return; }
+            hintRevealButton.interactable = false;
+            flow.Ads.ShowRewarded(ok =>
+            {
+                if (ok) HintWallet.Add(1);
+                RefreshHint();
+            });
         }
 
         // ---------- Schermata del titolo ----------
@@ -254,7 +306,7 @@ namespace Gotcha.UI
         void CloseShop()
         {
             shopPanel.SetActive(false);
-            if (!titlePanel.activeSelf && !menuPanel.activeSelf && !livesPanel.activeSelf) flow.Paused = false;
+            if (!titlePanel.activeSelf && !menuPanel.activeSelf && !livesPanel.activeSelf && !hintPanel.activeSelf) flow.Paused = false;
         }
 
         void RefreshShop()
@@ -265,6 +317,8 @@ namespace Gotcha.UI
             shopLivesLabel.text = (inf ? "+1 HOUR MORE" : "1 HOUR OF INFINITE LIVES") + "   " + st.Price(Products.InfiniteLives1h);
             shopAdsLabel.text = st.AdsRemoved ? "NO ADS: THANK YOU!" : "NO ADS FOREVER   " + st.Price(Products.RemoveAds);
             shopAdsButton.interactable = !st.AdsRemoved;
+            shopHints3Label.text = "3 HINTS   " + st.Price(Products.Hints3);
+            shopHints15Label.text = "15 HINTS   " + st.Price(Products.Hints15);
         }
 
         void Buy(string productId)
@@ -647,11 +701,17 @@ namespace Gotcha.UI
 
             // Hint
             RectTransform hintCard;
-            hintPanel = CreateOverlay("HintPanel", out hintCard);
-            AddHeader(hintCard, "HINT");
-            hintBody = CreateText(hintCard, "", 52, Ink, FontStyle.Normal);
-            Place(hintBody.transform, new Vector2(0.08f, 0.3f), new Vector2(0.92f, 0.78f));
-            Place(CreateButton(hintCard, "OK", Accent, () => CloseOverlay(hintPanel)).transform, new Vector2(0.25f, 0.06f), new Vector2(0.75f, 0.24f));
+            hintPanel = CreateOverlay("HintPanel", out hintCard, 1250);
+            AddHeader(hintCard, "HINTS");
+            hintBody = CreateText(hintCard, "", 46, Ink, FontStyle.Normal);
+            Place(hintBody.transform, new Vector2(0.08f, 0.44f), new Vector2(0.92f, 0.84f));
+            hintWalletLabel = CreateText(hintCard, "", 40, Ink, FontStyle.Normal);
+            Place(hintWalletLabel.transform, new Vector2(0.08f, 0.37f), new Vector2(0.92f, 0.43f));
+            hintRevealButton = CreateButton(hintCard, "", Accent, RevealHint);
+            hintRevealLabel = hintRevealButton.GetComponentInChildren<Text>();
+            Place(hintRevealButton.transform, new Vector2(0.1f, 0.26f), new Vector2(0.9f, 0.36f));
+            Place(CreateButton(hintCard, "GET MORE HINTS", new Color(0.95f, 0.7f, 0.15f), OpenShop).transform, new Vector2(0.15f, 0.15f), new Vector2(0.85f, 0.24f));
+            Place(CreateButton(hintCard, "OK", Dark, () => CloseOverlay(hintPanel)).transform, new Vector2(0.3f, 0.04f), new Vector2(0.7f, 0.13f));
 
             // Menu
             RectTransform menuCard;
@@ -702,20 +762,26 @@ namespace Gotcha.UI
 
             // Negozio (sopra a tutto: si apre anche dal pannello delle vite)
             RectTransform shopCard;
-            shopPanel = CreateOverlay("ShopPanel", out shopCard, 1150);
+            shopPanel = CreateOverlay("ShopPanel", out shopCard, 1450);
             AddHeader(shopCard, "SHOP");
             Text pitch = CreateText(shopCard, "Gotcha! is free.\nWant a little boost?", 46, Ink, FontStyle.Normal);
-            Place(pitch.transform, new Vector2(0.08f, 0.68f), new Vector2(0.92f, 0.82f));
+            Place(pitch.transform, new Vector2(0.08f, 0.76f), new Vector2(0.92f, 0.86f));
             Button lives = CreateButton(shopCard, "", Accent, () => Buy(Products.InfiniteLives1h));
             shopLivesLabel = lives.GetComponentInChildren<Text>();
-            Place(lives.transform, new Vector2(0.08f, 0.52f), new Vector2(0.92f, 0.64f));
+            Place(lives.transform, new Vector2(0.08f, 0.64f), new Vector2(0.92f, 0.73f));
             shopAdsButton = CreateButton(shopCard, "", Dark, () => Buy(Products.RemoveAds));
             shopAdsLabel = shopAdsButton.GetComponentInChildren<Text>();
-            Place(shopAdsButton.transform, new Vector2(0.08f, 0.37f), new Vector2(0.92f, 0.49f));
+            Place(shopAdsButton.transform, new Vector2(0.08f, 0.53f), new Vector2(0.92f, 0.62f));
+            Button hints3 = CreateButton(shopCard, "", new Color(0.95f, 0.7f, 0.15f), () => Buy(Products.Hints3));
+            shopHints3Label = hints3.GetComponentInChildren<Text>();
+            Place(hints3.transform, new Vector2(0.08f, 0.42f), new Vector2(0.92f, 0.51f));
+            Button hints15 = CreateButton(shopCard, "", new Color(0.95f, 0.7f, 0.15f), () => Buy(Products.Hints15));
+            shopHints15Label = hints15.GetComponentInChildren<Text>();
+            Place(hints15.transform, new Vector2(0.08f, 0.31f), new Vector2(0.92f, 0.4f));
             shopStatus = CreateText(shopCard, "", 40, Ink, FontStyle.Normal);
-            Place(shopStatus.transform, new Vector2(0.08f, 0.27f), new Vector2(0.92f, 0.35f));
-            Place(CreateButton(shopCard, "RESTORE PURCHASES", EggColor, RestorePurchases).transform, new Vector2(0.2f, 0.16f), new Vector2(0.8f, 0.24f));
-            Place(CreateButton(shopCard, "BACK", Dark, CloseShop).transform, new Vector2(0.3f, 0.05f), new Vector2(0.7f, 0.13f));
+            Place(shopStatus.transform, new Vector2(0.08f, 0.23f), new Vector2(0.92f, 0.29f));
+            Place(CreateButton(shopCard, "RESTORE PURCHASES", EggColor, RestorePurchases).transform, new Vector2(0.2f, 0.13f), new Vector2(0.8f, 0.21f));
+            Place(CreateButton(shopCard, "BACK", Dark, CloseShop).transform, new Vector2(0.3f, 0.03f), new Vector2(0.7f, 0.11f));
 
             // Vite: attesa, pubblicità con premio, invito
             RectTransform livesCard;
@@ -750,6 +816,15 @@ namespace Gotcha.UI
             });
             resultButton = next.GetComponentInChildren<Text>();
             Place(next.transform, new Vector2(0.25f, 0.06f), new Vector2(0.75f, 0.24f));
+
+            // Premio per aver condiviso il video di un Easter egg: a scelta
+            RectTransform rewardCard;
+            rewardPanel = CreateOverlay("RewardPanel", out rewardCard, 900);
+            AddHeader(rewardCard, "THANKS FOR SHARING!");
+            Text rewardBody = CreateText(rewardCard, "Pick your reward:", 50, Ink, FontStyle.Normal);
+            Place(rewardBody.transform, new Vector2(0.08f, 0.6f), new Vector2(0.92f, 0.75f));
+            Place(CreateButton(rewardCard, "15 MIN INFINITE LIVES", Accent, () => ClaimReward(true)).transform, new Vector2(0.08f, 0.38f), new Vector2(0.92f, 0.52f));
+            Place(CreateButton(rewardCard, EasterEggs.RewardHints + " HINTS", new Color(0.95f, 0.7f, 0.15f), () => ClaimReward(false)).transform, new Vector2(0.08f, 0.18f), new Vector2(0.92f, 0.32f));
 
             // Fine gioco
             RectTransform doneCard;

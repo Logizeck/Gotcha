@@ -266,6 +266,21 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.34
+- **Hint a consumo**: ogni livello ha **3 suggerimenti** (`LevelDefinition.hints`, scritti in `Editor/LevelHints.cs`):
+  una spinta, uno più preciso, la soluzione. Ognuno costa **1 hint** (`HintWallet`, saldo firmato come le vite);
+  si parte con 5 e **non si ricaricano**: +1 guardando una pubblicità, pacchetti nel negozio (**3 hint 0,39 €**,
+  **15 hint 1,49 €**: prodotti consumabili `gotcha.hints_3` e `gotcha.hints_15`, da creare anche su Google Play),
+  oppure come premio per la condivisione. Un suggerimento sbloccato resta visibile per quel livello.
+- **Easter egg con nome** (`Core/EasterEggs.cs`): il nome compare quando lo trovi e nel messaggio di condivisione.
+  Ogni livello è registrato (video con audio), quindi dopo ogni segreto si può condividere il video; il testo
+  contiene il **link personale** per scaricare il gioco (`InviteService.ShareLink`: codice unico del giocatore +
+  segreto). La prima condivisione di ogni segreto fa scegliere il premio: **15 minuti di vite infinite** o **5 hint**.
+- **Sveglia**: il vicino si sveglia dopo **8 secondi** in WAKE-UP CALL e **5 secondi** in SNOOZE ALARM.
+- **Elenco livelli in Excel**: `python Tools/levels_xlsx.py` crea `Gotcha_livelli.xlsx` (numero, immagine, nome,
+  soluzione, 3 hint, Easter egg con nome e come sbloccarlo; dati in `Tools/levels.json`). Per i veri screenshot:
+  in Unity menu **Gotcha > Screenshot di tutti i livelli** (salva `Screenshots/level_###.png`), poi rilanciare lo script.
+
 ## Versione 0.33
 - **Blind Stopwatch**: tolleranza portata a 0,25 s (almeno 2 decimi, più il ritardo del tocco).
 - **Nuovi livelli di Toni** (25, 50, 75; il 100 dello starnuto resta):

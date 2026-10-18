@@ -1,0 +1,1666 @@
+[
+ {
+  "folder": "KeyDoor",
+  "id": "key_door",
+  "title": "PINCH & OPEN",
+  "hint": "That key is far too big for the lock. Can you change its size?",
+  "egg": "",
+  "n": 1,
+  "desc": "Rimpicciolisci la chiave col pizzico e apri la porta.",
+  "hints": [
+   "That key is far too big for the lock. Can you change its size?",
+   "Use two fingers on the key.",
+   "Pinch the key smaller, then drag it into the lock."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Maze",
+  "id": "tilt_maze",
+  "title": "TILT MAZE",
+  "hint": "No buttons here: the phone itself moves the ball. Reach the glowing star.",
+  "egg": "",
+  "n": 2,
+  "desc": "Inclina il telefono e porta la sfera alla stella (inclinazione).",
+  "hints": [
+   "No buttons here: the phone itself moves the ball. Reach the glowing star.",
+   "Hold the phone like a tray and lean it.",
+   "Tilt the phone gently: the ball rolls downhill. Lead it to the star."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Idle",
+  "id": "do_nothing",
+  "title": "BIG RED BUTTON",
+  "hint": "A hungry cat never sleeps. Is there anything to eat around here?",
+  "egg": "",
+  "n": 3,
+  "desc": "Dai il pesce al gatto, poi lascialo dormire senza toccare nulla: il pulsante è un'esca.",
+  "hints": [
+   "A hungry cat never sleeps. Is there anything to eat around here?",
+   "The painting isn't just a painting.",
+   "Drag the fish from the painting to the cat, then don't touch anything for 5 seconds."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Apple",
+  "id": "slice_apple",
+  "title": "SLICE IT!",
+  "hint": "No knife? No problem. A quick finger is sharp enough.",
+  "egg": "",
+  "n": 4,
+  "desc": "Taglia la mela con un colpo di dito.",
+  "hints": [
+   "No knife? No problem. A quick finger is sharp enough.",
+   "Swipe, don't tap.",
+   "Swipe fast across the whole apple, from one side to the other."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Morse",
+  "id": "beep_code",
+  "title": "BEEP BEEP",
+  "hint": "Listen carefully. Short and long... Tap the radio to hear it again.",
+  "egg": "",
+  "n": 5,
+  "desc": "Ascolta il codice Morse della radio e premi il tasto giusto (audio).",
+  "hints": [
+   "Listen carefully. Short and long... Tap the radio to hear it again.",
+   "Short beep = dot, long beep = dash.",
+   "Write down the short/long pattern and press the button with the same Morse code."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Bomb",
+  "id": "defuse",
+  "title": "TICK TOCK",
+  "hint": "Follow the wires. Only one of them really goes to the timer.",
+  "egg": "",
+  "n": 6,
+  "desc": "Disinnesca la bomba prima che scada il tempo.",
+  "hints": [
+   "Follow the wires. Only one of them really goes to the timer.",
+   "Trace each wire with your eyes from the timer.",
+   "Cut only the wire that actually reaches the timer box."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Volume",
+  "id": "shush",
+  "title": "SHHH!",
+  "hint": "That music is way too loud for a cat. Maybe your phone can do something about it.",
+  "egg": "",
+  "n": 7,
+  "desc": "Fai dormire il vicino abbassando il volume del telefono a zero (tasti volume).",
+  "hints": [
+   "That music is way too loud for a cat. Maybe your phone can do something about it.",
+   "Your phone has volume buttons.",
+   "Press the phone's volume DOWN button until the music is off."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Hold",
+  "id": "hold_both",
+  "title": "HOLD ON",
+  "hint": "One finger is not enough. Keep both pressed until the timer runs out.",
+  "egg": "",
+  "n": 8,
+  "desc": "Tieni premuti insieme i due pulsanti fino a fine conto.",
+  "hints": [
+   "One finger is not enough. Keep both pressed until the timer runs out.",
+   "Use two fingers at the same time.",
+   "Keep one finger on each button until the countdown ends. Don't lift them!"
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Roach",
+  "id": "bug_spray",
+  "title": "BUG SPRAY",
+  "hint": "Hold your finger down to spray up. The can won't last forever!",
+  "egg": "",
+  "n": 9,
+  "desc": "Uno scarafaggio cammina sul muro: spruzzalo con lo spray tossico prima che la bomboletta si svuoti.",
+  "hints": [
+   "Hold your finger down to spray up. The can won't last forever!",
+   "Spray where the roach is going, not where it is.",
+   "Keep your finger pressed to spray and follow the roach until it stops moving."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "ArtTheft",
+  "id": "art_theft",
+  "title": "ART THEFT",
+  "hint": "Locked again? Some paintings are more realistic than they look.",
+  "egg": "",
+  "n": 10,
+  "desc": "La chiave è nascosta nel quadro: trovala e apri la porta.",
+  "hints": [
+   "Locked again? Some paintings are more realistic than they look.",
+   "Look closely at the painting.",
+   "The key in the painting is real: drag it out and into the door."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Snowman",
+  "id": "snowman",
+  "title": "SNOWMAN",
+  "hint": "Give the snowman a happy face. Eyes and nose go on the head... and the smile? Draw it in the snow!",
+  "egg": "snowman_butt",
+  "n": 11,
+  "desc": "Completa il pupazzo di neve (occhi, naso, sorriso) senza farlo sciogliere.",
+  "hints": [
+   "Give the snowman a happy face. Eyes and nose go on the head... and the smile? Draw it in the snow!",
+   "Coal for the eyes, carrot for the nose.",
+   "Put the coal eyes and carrot nose on the head, then draw a smile on its face with your finger."
+  ],
+  "eggName": "Carrot Bum",
+  "eggHow": "Invece che sul naso, lascia la carota sul sedere del pupazzo: arrossisce dalla vergogna e si scioglie."
+ },
+ {
+  "folder": "Defend",
+  "id": "defend_cat",
+  "title": "BODYGUARD",
+  "hint": "Draw walls with your finger. The wasp hates walls.",
+  "egg": "",
+  "n": 12,
+  "desc": "Disegna barriere per proteggere il gatto dalla vespa per 10 secondi.",
+  "hints": [
+   "Draw walls with your finger. The wasp hates walls.",
+   "Walls between the wasp and the cat.",
+   "Draw short walls around the cat, on the wasp's side, and keep it out for 10 seconds."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Lamps",
+  "id": "you_won",
+  "title": "LIGHTS ON",
+  "hint": "Red ink under red light is hard to read... what if both lights were on?",
+  "egg": "",
+  "n": 13,
+  "desc": "Accendi le due lampade per leggere la scritta.",
+  "hints": [
+   "Red ink under red light is hard to read... what if both lights were on?",
+   "Each lamp hides something.",
+   "Switch on BOTH lamps: the hidden words appear."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Cookie",
+  "id": "cookie_jar",
+  "title": "COOKIE JAR",
+  "hint": "That cookie won't come out by itself. Maybe turn the world upside down?",
+  "egg": "",
+  "n": 14,
+  "desc": "Inclina il barattolo e fai rotolare il biscotto fino al topolino; se cade troppo forte si rompe (inclinazione).",
+  "hints": [
+   "That cookie won't come out by itself. Maybe turn the world upside down?",
+   "Tip the jar by tilting the phone.",
+   "Turn the phone upside down slowly so the cookie rolls out gently to the mouse."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Birthday",
+  "id": "birthday",
+  "title": "MAKE A WISH",
+  "hint": "Candles don't like wind. Your phone has a microphone...",
+  "egg": "candle_storm",
+  "n": 15,
+  "desc": "Spegni le candeline soffiando; troppo forte e volano via. (microfono)",
+  "hints": [
+   "Candles don't like wind. Your phone has a microphone...",
+   "Blow on the microphone.",
+   "Blow steadily at the bottom of the phone to put out every candle."
+  ],
+  "eggName": "Hurricane Wish",
+  "eggHow": "Soffia FORTISSIMO nel microfono: le candeline (fiamme comprese) volano via dalla torta."
+ },
+ {
+  "folder": "TrapMaze",
+  "id": "trap_maze",
+  "title": "TRAP MAZE",
+  "hint": "A round maze: go around the rings to the star in the middle. Mind the holes... and the lasers keep a rhythm.",
+  "egg": "",
+  "n": 16,
+  "desc": "Labirinto con buche e laser a tempo (inclinazione).",
+  "hints": [
+   "A round maze: go around the rings to the star in the middle. Mind the holes... and the lasers keep a rhythm.",
+   "The gaps in the rings alternate top and bottom.",
+   "Tilt around the rings through the gaps, wait for the lasers to switch off, avoid the holes."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "DarkMaze",
+  "id": "dark_maze",
+  "title": "IN THE DARK",
+  "hint": "Who turned off the lights? Every locked gate has a key somewhere.",
+  "egg": "",
+  "n": 17,
+  "desc": "Labirinto al buio: prendi la chiave, poi raggiungi il cancello (inclinazione).",
+  "hints": [
+   "Who turned off the lights? Every locked gate has a key somewhere.",
+   "The light follows the ball.",
+   "Find the key first (it opens the gate), then roll through the gate to the star."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Safe",
+  "id": "hidden_safe",
+  "title": "HIDDEN SAFE",
+  "hint": "That painting is stuck to the wall. Maybe a good shake would help?",
+  "egg": "",
+  "n": 18,
+  "desc": "Scuoti il telefono per far cadere il quadro, leggi il codice e apri la cassaforte (scuotimento).",
+  "hints": [
+   "That painting is stuck to the wall. Maybe a good shake would help?",
+   "Shake the phone.",
+   "Shake the phone to drop the painting, read the code on its back, type it on the safe."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Bedtime",
+  "id": "bedtime",
+  "title": "BEDTIME",
+  "hint": "A sleepy cat needs darkness, silence... and nobody poking it.",
+  "egg": "",
+  "n": 19,
+  "desc": "Spegni la luce, azzera il volume e lascia dormire il gatto (volume).",
+  "hints": [
+   "A sleepy cat needs darkness, silence... and nobody poking it.",
+   "Light, sound... and hands off.",
+   "Switch off the lamp, turn the phone volume to zero, then don't touch for a few seconds."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Rocket",
+  "id": "lift_off",
+  "title": "LIFT OFF",
+  "hint": "Rockets need fuel. And launch buttons are always protected.",
+  "egg": "",
+  "n": 20,
+  "desc": "Fai il pieno al razzo, alza la protezione e lancia.",
+  "hints": [
+   "Rockets need fuel. And launch buttons are always protected.",
+   "Fuel first.",
+   "Drag the fuel can to the rocket, flip up the cover, then press the launch button."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Battery",
+  "id": "low_battery",
+  "title": "LOW BATTERY",
+  "hint": "Robots run on electricity. So does your phone...",
+  "egg": "mecha_robot",
+  "n": 21,
+  "desc": "Ricarica il robot: caricatore vero o dinamo a manovella. (caricatore)",
+  "hints": [
+   "Robots run on electricity. So does your phone...",
+   "The robot wants a charger... or a workout.",
+   "Plug your phone into a real charger, or spin the crank until the battery is full."
+  ],
+  "eggName": "Mecha Mode",
+  "eggHow": "Collega il telefono a un caricatore vero: il robot si ricarica e si trasforma in un mecha da battaglia."
+ },
+ {
+  "folder": "Soup",
+  "id": "hot_soup",
+  "title": "HOT SOUP",
+  "hint": "Careful, it's boiling! How do you cool soup down?",
+  "egg": "hot_soup",
+  "n": 22,
+  "desc": "Raffredda la zuppa soffiando, poi dalla al topolino. (microfono)",
+  "hints": [
+   "Careful, it's boiling! How do you cool soup down?",
+   "Blow on it like real soup.",
+   "Blow into the microphone until the thermometer is low, then give the soup to the mouse."
+  ],
+  "eggName": "Toasted Mouse",
+  "eggHow": "Dai la zuppa al topolino quando è ancora bollente (senza soffiare): diventa rosso, fuma e prende fuoco."
+ },
+ {
+  "folder": "FrozenKey",
+  "id": "frozen_key",
+  "title": "FROZEN KEY",
+  "hint": "Ice melts with a little friction. And that key looks huge...",
+  "egg": "",
+  "n": 23,
+  "desc": "Strofina il ghiaccio, rimpicciolisci la chiave e apri la porta.",
+  "hints": [
+   "Ice melts with a little friction. And that key looks huge...",
+   "Rub the ice quickly.",
+   "Rub the ice block with your finger until it melts, pinch the key smaller, open the door."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Campfire",
+  "id": "campfire",
+  "title": "CAMPFIRE",
+  "hint": "Rub the stick to make a spark, then blow... gently!",
+  "egg": "",
+  "n": 24,
+  "desc": "Strofina il bastoncino per la scintilla, poi soffia piano (microfono).",
+  "hints": [
+   "Rub the stick to make a spark, then blow... gently!",
+   "Rub, then blow... softly.",
+   "Rub the stick fast for a spark, then blow GENTLY into the microphone."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Toni1",
+  "id": "toni_stuck",
+  "title": "STUCK!",
+  "hint": "Toni tried the cat flap. Bad idea. Pushing alone won't do... something slippery from the kitchen, maybe?",
+  "egg": "toni_toot",
+  "n": 25,
+  "desc": "Spalma il burro sul sedere di Toni, poi spingilo verso il muro. 8 spinte senza burro = egg.",
+  "hints": [
+   "Toni tried the cat flap. Bad idea. Pushing alone won't do... something slippery from the kitchen, maybe?",
+   "Try the things on the table on Toni's back end.",
+   "Drag the butter onto Toni's bottom, then drag him toward the wall."
+  ],
+  "eggName": "Toni Rocket",
+  "eggHow": "Spingi Toni 8 volte SENZA il burro: la pressione trova un'altra uscita (PRRRT!) e parte a razzo."
+ },
+ {
+  "folder": "Runaway",
+  "id": "alarm_clock",
+  "title": "WAKE-UP CALL",
+  "hint": "Little ink: short fences get hopped over. Corner the OFF button before the neighbor wakes up!",
+  "egg": "",
+  "n": 26,
+  "desc": "Il pulsante OFF della sveglia scappa: chiudilo con staccionate (inchiostro limitato, salta quelle corte) prima che si svegli il vicino.",
+  "hints": [
+   "Little ink: short fences get hopped over. Corner the OFF button before the neighbor wakes up!",
+   "Fences must be long enough.",
+   "Draw long fences to trap the OFF button in a corner, then tap it."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Plant",
+  "id": "thirsty_plant",
+  "title": "THIRSTY PLANT",
+  "hint": "Pull the drop back, aim, mind the wind... and let go!",
+  "egg": "angry_bird",
+  "n": 27,
+  "desc": "Fionda: 5 gocce su 10 nel vaso, con il vento. Colpisci l'uccello di passaggio.",
+  "hints": [
+   "Pull the drop back, aim, mind the wind... and let go!",
+   "Watch the windsock before you shoot.",
+   "Pull back and release when the wind is calm; land 5 drops in the pot."
+  ],
+  "eggName": "Angry Bird",
+  "eggHow": "Colpisci con una goccia della fionda l'uccellino che ogni tanto attraversa il cielo."
+ },
+ {
+  "folder": "Shell",
+  "id": "shell_game",
+  "title": "SHELL GAME",
+  "hint": "Keep your eyes on the box with the mouse.",
+  "egg": "",
+  "n": 28,
+  "desc": "Segui la scatola col topolino; la codina sbuca solo a mescolamento finito.",
+  "hints": [
+   "Keep your eyes on the box with the mouse.",
+   "Never look away from that box.",
+   "Follow the box with the mouse until it stops, then tap it."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "SkyWire",
+  "id": "sky_wire",
+  "title": "SKY WIRE",
+  "hint": "Read the note. Then look out of the window.",
+  "egg": "",
+  "n": 29,
+  "desc": "Taglia il filo indicato dall'indovinello sul biglietto (colore a caso).",
+  "hints": [
+   "Read the note. Then look out of the window.",
+   "The answer is a colour.",
+   "The sky is the colour in the riddle: cut the wire of that colour."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Sunny",
+  "id": "sunny_day",
+  "title": "SUNNY DAY",
+  "hint": "Snowmen hate the sun. Could a cloud help?",
+  "egg": "sun_melt",
+  "n": 30,
+  "desc": "Copri il sole con la nuvola finché tramonta.",
+  "hints": [
+   "Snowmen hate the sun. Could a cloud help?",
+   "Keep the sun covered.",
+   "Drag the cloud over the sun and keep it there until the sun sets."
+  ],
+  "eggName": "Meltdown",
+  "eggHow": "Lascia il sole scoperto troppo a lungo: il pupazzo urla e si scioglie del tutto."
+ },
+ {
+  "folder": "Rope",
+  "id": "cut_rope",
+  "title": "CUT THE ROPE",
+  "hint": "Cut one rope, wait for the swing, then cut the other.",
+  "egg": "",
+  "n": 31,
+  "desc": "Taglia le corde al momento giusto per far arrivare il biscotto.",
+  "hints": [
+   "Cut one rope, wait for the swing, then cut the other.",
+   "Timing is everything.",
+   "Cut one rope, wait until the candy swings toward the mouse, cut the other."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Pizza",
+  "id": "pizza_party",
+  "title": "PIZZA PARTY",
+  "hint": "Four friends, four slices. Cut right through the middle!",
+  "egg": "",
+  "n": 32,
+  "desc": "Taglia la pizza in quattro e dai una fetta a ogni topolino.",
+  "hints": [
+   "Four friends, four slices. Cut right through the middle!",
+   "Two cuts are enough.",
+   "Swipe once across and once down through the centre, then drag a slice to each mouse."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "PizzaChef",
+  "id": "pizza_chef",
+  "title": "PIZZA CHEF",
+  "hint": "Grandma's recipe is on the chalkboard: exactly those, nothing more!",
+  "egg": "spicy_pizza",
+  "n": 33,
+  "desc": "Segui la ricetta (casuale) disegnata sulla lavagna, inforna, taglia e servi.",
+  "hints": [
+   "Grandma's recipe is on the chalkboard: exactly those, nothing more!",
+   "Read the board carefully.",
+   "Put on exactly the toppings drawn on the board, bake it, cut it and serve it."
+  ],
+  "eggName": "Inferno Pizza",
+  "eggHow": "Metti il peperoncino sulla pizza: i topi strillano, diventano paonazzi con gli occhi in fiamme."
+ },
+ {
+  "folder": "Balloon",
+  "id": "balloon",
+  "title": "BLOW IT UP",
+  "hint": "Fill the dotted line. Not a puff more!",
+  "egg": "",
+  "n": 34,
+  "desc": "Gonfia il palloncino fino alla sagoma e aspetta 2 secondi (microfono o pompa).",
+  "hints": [
+   "Fill the dotted line. Not a puff more!",
+   "Stop at the line.",
+   "Pump (or blow) until the balloon fills the dotted outline, then wait 2 seconds."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "CatEyes",
+  "id": "cat_eyes",
+  "title": "CAT EYES",
+  "hint": "The cat's eyes follow your phone. Stare at the mouse!",
+  "egg": "",
+  "n": 35,
+  "desc": "Muovi gli occhi del gatto inclinando il telefono e fissa il topolino 3 secondi (inclinazione).",
+  "hints": [
+   "The cat's eyes follow your phone. Stare at the mouse!",
+   "The eyes follow the tilt.",
+   "Tilt the phone so the cat's eyes look at the mouse and hold it for 3 seconds."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Pancake",
+  "id": "pancake",
+  "title": "PANCAKE FLIP",
+  "hint": "A quick flick of the wrist... not too gentle, not too wild.",
+  "egg": "",
+  "n": 36,
+  "desc": "Tre giri della frittella con un colpo di polso (scuotimento + inclinazione).",
+  "hints": [
+   "A quick flick of the wrist... not too gentle, not too wild.",
+   "One short flick upward.",
+   "Give the phone a quick, medium upward flick, three times."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "WaspMaze",
+  "id": "sting_run",
+  "title": "STING RUN",
+  "hint": "Tilt to the star. The wasp follows the corridors: loop around the walls!",
+  "egg": "",
+  "n": 37,
+  "desc": "Labirinto aperto con più strade: arriva alla stella seminando la vespa (inclinazione).",
+  "hints": [
+   "Tilt to the star. The wasp follows the corridors: loop around the walls!",
+   "The wasp can't cut through walls.",
+   "Lead the wasp around a wall block, then dash for the star on the other side."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "LampSafe",
+  "id": "secret_code",
+  "title": "SECRET CODE",
+  "hint": "Red light hides red ink. Blue light hides blue ink. Remember!",
+  "egg": "",
+  "n": 38,
+  "desc": "Luci rossa e blu mai insieme: leggi metà codice per volta e apri la cassaforte.",
+  "hints": [
+   "Red light hides red ink. Blue light hides blue ink. Remember!",
+   "One lamp at a time.",
+   "Turn on red to read the blue digits, then blue to read the red ones. Type the full code."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "AppleCatch",
+  "id": "apple_catch",
+  "title": "APPLE CATCH",
+  "hint": "Shake the tree, tilt the basket. Five apples for a pie.",
+  "egg": "",
+  "n": 39,
+  "desc": "Scuoti l'albero e prendi 5 mele col cesto (scuotimento + inclinazione).",
+  "hints": [
+   "Shake the tree, tilt the basket. Five apples for a pie.",
+   "Shake, then tilt.",
+   "Shake the phone to drop apples, tilt to move the basket under them. Catch 5."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "MarbleRun",
+  "id": "marble_run",
+  "title": "MARBLE RUN",
+  "hint": "Draw up to three ramps. Hold GO longer for a stronger push!",
+  "egg": "",
+  "n": 40,
+  "desc": "Disegna fino a 3 rampe; tieni premuto GO per la forza della spinta.",
+  "hints": [
+   "Draw up to three ramps. Hold GO longer for a stronger push!",
+   "Ramps guide the marble.",
+   "Draw a ramp from the marble down to the cup, then hold GO for a medium push."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Copycat",
+  "id": "copycat",
+  "title": "COPYCAT",
+  "hint": "Watch the cat, listen, then play it back.",
+  "egg": "",
+  "n": 41,
+  "desc": "Ripeti le sequenze di luci e note del gatto (3, 4, 5 note).",
+  "hints": [
+   "Watch the cat, listen, then play it back.",
+   "Watch AND listen.",
+   "Repeat the cat's lights in the same order after each sequence."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Maze2",
+  "id": "zig_zag",
+  "title": "ZIG ZAG",
+  "hint": "The star is in the middle, but the pink gates open and close. Time it!",
+  "egg": "",
+  "n": 42,
+  "desc": "Labirinto a griglia con tre cancelli che si aprono e chiudono da soli: aspetta il momento giusto.",
+  "hints": [
+   "The star is in the middle, but the pink gates open and close. Time it!",
+   "Gates open in turns.",
+   "Wait next to each pink gate until it opens, then roll through."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Pancake2",
+  "id": "pancake_tower",
+  "title": "PANCAKE TOWER",
+  "hint": "Four flips this time. Steady wrist!",
+  "egg": "",
+  "n": 43,
+  "desc": "Come il 35, ma 4 giri.",
+  "hints": [
+   "Four flips this time. Steady wrist!",
+   "Same flick, four times.",
+   "Four quick, medium upward flicks."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Shell2",
+  "id": "shell_shock",
+  "title": "SHELL SHOCK",
+  "hint": "Faster hands, more swaps. Watch the tail!",
+  "egg": "",
+  "n": 44,
+  "desc": "Shell Game con 14 scambi più veloci.",
+  "hints": [
+   "Faster hands, more swaps. Watch the tail!",
+   "Same trick, faster.",
+   "Follow the box with the mouse until it stops, then tap it."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "LampSafe2",
+  "id": "code_breaker",
+  "title": "CODE BREAKER",
+  "hint": "Five digits now. Red light, blue light... memory!",
+  "egg": "",
+  "n": 45,
+  "desc": "Come il 37, codice a 5 cifre.",
+  "hints": [
+   "Five digits now. Red light, blue light... memory!",
+   "One lamp at a time.",
+   "Red lamp shows the blue digits, blue lamp shows the red ones. Type all five."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Cookie2",
+  "id": "top_shelf",
+  "title": "TOP SHELF",
+  "hint": "The jar moved higher. Tilt it out, roll it over.",
+  "egg": "",
+  "n": 46,
+  "desc": "Cookie Jar specchiato con il barattolo più in alto.",
+  "hints": [
+   "The jar moved higher. Tilt it out, roll it over.",
+   "Tip it the other way.",
+   "Tilt slowly so the cookie rolls out and down to the mouse without breaking."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Defend2",
+  "id": "bodyguard_2",
+  "title": "BODYGUARD 2",
+  "hint": "Angrier wasp, only two walls. Draw them well.",
+  "egg": "",
+  "n": 47,
+  "desc": "Vespa più veloce, solo 2 barriere, 12 secondi.",
+  "hints": [
+   "Angrier wasp, only two walls. Draw them well.",
+   "Make every wall count.",
+   "Draw two long walls between the wasp and the cat."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Balloon2",
+  "id": "big_balloon",
+  "title": "BIG BALLOON",
+  "hint": "Bigger balloon, longer wait. Patience...",
+  "egg": "",
+  "n": 48,
+  "desc": "14 pompate, 3 secondi di attesa.",
+  "hints": [
+   "Bigger balloon, longer wait. Patience...",
+   "Patience at the end.",
+   "Fill the outline exactly, then wait 3 seconds without pumping."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TrapMaze2",
+  "id": "trap_maze_2",
+  "title": "TRAP MAZE 2",
+  "hint": "Hug the walls around the holes. Wait for the laser.",
+  "egg": "",
+  "n": 49,
+  "desc": "Labirinto nuovo con buche (più piccole) e un laser.",
+  "hints": [
+   "Hug the walls around the holes. Wait for the laser.",
+   "Lasers switch off for a moment.",
+   "Hug the walls, wait for the laser to turn off, then roll to the star."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Toni2",
+  "id": "toni_tug",
+  "title": "TUG OF WAR",
+  "hint": "The house key is missing and Toni looks VERY innocent. Pull the sock out... gently! Yank it and he pulls back.",
+  "egg": "toni_tug",
+  "n": 50,
+  "desc": "Tira PIANO il calzino: escono gli oggetti, la chiave per ultima. 5 strattoni = egg.",
+  "hints": [
+   "The house key is missing and Toni looks VERY innocent. Pull the sock out... gently! Yank it and he pulls back.",
+   "Slow and steady.",
+   "Grab the sock and pull it slowly away from Toni. Repeat until the key comes out."
+  ],
+  "eggName": "Toni Wins",
+  "eggHow": "Dai 5 strattoni al calzino: Toni vince il tiro alla fune e si rimangia tutto il mucchio (*BURP*)."
+ },
+ {
+  "folder": "Birthday2",
+  "id": "big_birthday",
+  "title": "BIG BIRTHDAY",
+  "hint": "Seven candles. Take a deep breath!",
+  "egg": "",
+  "n": 51,
+  "desc": "7 candeline; troppo forte e volano via.",
+  "hints": [
+   "Seven candles. Take a deep breath!",
+   "Long, steady breath.",
+   "Blow steadily into the microphone until all seven candles are out."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Plant2",
+  "id": "high_plant",
+  "title": "HIGH PLANT",
+  "hint": "The pot is up on the shelf. Aim higher!",
+  "egg": "",
+  "n": 52,
+  "desc": "Il vaso è su una mensola in alto.",
+  "hints": [
+   "The pot is up on the shelf. Aim higher!",
+   "Higher arc.",
+   "Pull back further and aim up; wait for calm wind."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Copycat2",
+  "id": "copycat_pro",
+  "title": "COPYCAT PRO",
+  "hint": "Longer songs, quicker paws.",
+  "egg": "",
+  "n": 53,
+  "desc": "Sequenze da 4, 5 e 6 note, più veloci.",
+  "hints": [
+   "Longer songs, quicker paws.",
+   "Say the notes out loud.",
+   "Repeat each sequence in the same order."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Wasp2",
+  "id": "wasp_returns",
+  "title": "WASP RETURNS",
+  "hint": "Fifteen hits. Two stings and you're out: swat it while it lunges to stop the sting!",
+  "egg": "",
+  "n": 54,
+  "desc": "La vespa con la paletta: 15 colpi. Due punture = perso (colpiscila mentre si lancia per pararla).",
+  "hints": [
+   "Fifteen hits. Two stings and you're out: swat it while it lunges to stop the sting!",
+   "Hit it when it charges.",
+   "Swat the wasp the moment it dives at you; 15 hits."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "MarbleRun2",
+  "id": "marble_run_2",
+  "title": "MARBLE RUN 2",
+  "hint": "Right to left now, over a taller wall.",
+  "egg": "",
+  "n": 55,
+  "desc": "Da destra a sinistra, muretto più alto.",
+  "hints": [
+   "Right to left now, over a taller wall.",
+   "Go over, not through.",
+   "Draw a ramp that climbs over the wall, then a strong GO."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Laser",
+  "id": "laser_pointer",
+  "title": "LASER POINTER",
+  "hint": "Only a red dot wakes this cat. Tap the mirrors to turn them and bounce the laser to it.",
+  "egg": "",
+  "n": 56,
+  "desc": "Tocca gli specchi per girarli e porta il raggio laser al gatto che dorme. Batteria limitata.",
+  "hints": [
+   "Only a red dot wakes this cat. Tap the mirrors to turn them and bounce the laser to it.",
+   "Mirrors turn when tapped.",
+   "Turn each mirror so the beam bounces from the pen to the sleeping cat."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "CatEyes2",
+  "id": "tiny_mouse",
+  "title": "TINY MOUSE",
+  "hint": "A tiny mouse that changes hole every 3 seconds. Follow it with the cat's eyes!",
+  "egg": "",
+  "n": 57,
+  "desc": "Il topolino cambia tana ogni 3 secondi: seguilo con lo sguardo del gatto (inclinazione).",
+  "hints": [
+   "A tiny mouse that changes hole every 3 seconds. Follow it with the cat's eyes!",
+   "Follow the mouse.",
+   "Tilt so the eyes always point at the mouse's current hole."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Runaway2",
+  "id": "snooze_alarm",
+  "title": "SNOOZE ALARM",
+  "hint": "A faster button, only three fences.",
+  "egg": "",
+  "n": 58,
+  "desc": "Wake-up Call con pulsante più veloce e 3 staccionate.",
+  "hints": [
+   "A faster button, only three fences.",
+   "Few fences: make them long.",
+   "Trap the OFF button in a corner with 3 long fences, then tap it."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "DarkMaze2",
+  "id": "darker",
+  "title": "DARKER",
+  "hint": "Find the key in the dark. The gate is somewhere up there.",
+  "egg": "",
+  "n": 59,
+  "desc": "Labirinto al buio nuovo.",
+  "hints": [
+   "Find the key in the dark. The gate is somewhere up there.",
+   "Key first.",
+   "Find the key, then go up to the gate and the star."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "AppleCatch2",
+  "id": "apple_rain",
+  "title": "APPLE RAIN",
+  "hint": "Six apples this time, and they fall a bit faster.",
+  "egg": "",
+  "n": 60,
+  "desc": "7 mele, cadono più veloci.",
+  "hints": [
+   "Six apples this time, and they fall a bit faster.",
+   "Stay under the tree.",
+   "Shake to drop apples, tilt the basket under each one. Catch them all."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Campfire2",
+  "id": "wet_wood",
+  "title": "WET WOOD",
+  "hint": "It's raining! Hold the umbrella over the fire (not too close!) and get it going before the mouse freezes.",
+  "egg": "burnt_umbrella",
+  "n": 61,
+  "desc": "Piove: tieni l'ombrello sopra il fuoco (non troppo vicino) mentre lo accendi, o il topolino congela.",
+  "hints": [
+   "It's raining! Hold the umbrella over the fire (not too close!) and get it going before the mouse freezes.",
+   "The umbrella goes above, not on.",
+   "Hold the umbrella over the fire, a bit higher, while you rub and blow."
+  ],
+  "eggName": "Toasted Umbrella",
+  "eggHow": "Tieni l'ombrello troppo vicino al fuoco: prende fuoco e si accartoccia."
+ },
+ {
+  "folder": "Flashlight",
+  "id": "flashlight",
+  "title": "FLASHLIGHT",
+  "hint": "Your finger is a torch. Find the light switch... and don't shine on whatever sleeps up there.",
+  "egg": "",
+  "n": 62,
+  "desc": "Buio: il dito è una torcia. Trova l'interruttore e toccalo; non illuminare a lungo i pipistrelli che dormono.",
+  "hints": [
+   "Your finger is a torch. Find the light switch... and don't shine on whatever sleeps up there.",
+   "The switch is on a wall.",
+   "Sweep the torch along the walls, find the switch and tap it; avoid the bats."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "WaspMaze6",
+  "id": "double_sting",
+  "title": "DOUBLE STING",
+  "hint": "Two wasps, many roads. Loop around them!",
+  "egg": "",
+  "n": 63,
+  "desc": "Labirinto aperto con due vespe che ti inseguono (inclinazione).",
+  "hints": [
+   "Two wasps, many roads. Loop around them!",
+   "Make them follow you around a block.",
+   "Loop the wasps around a wall block and then run for the star."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Bridge",
+  "id": "bridge_builder",
+  "title": "BRIDGE BUILDER",
+  "hint": "Draw a bridge with the little ink you have, then press GO. Not too steep!",
+  "egg": "",
+  "n": 64,
+  "desc": "Disegna un ponte (inchiostro limitato) perché il topolino attraversi il burrone.",
+  "hints": [
+   "Draw a bridge with the little ink you have, then press GO. Not too steep!",
+   "Gentle slopes.",
+   "Draw a flat bridge from edge to edge, then press GO."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Bomb2",
+  "id": "short_fuse",
+  "title": "SHORT FUSE",
+  "hint": "Same bomb, half the time. Think fast!",
+  "egg": "",
+  "n": 65,
+  "desc": "Come il 6, con 6 secondi.",
+  "hints": [
+   "Same bomb, half the time. Think fast!",
+   "Same wires, less time.",
+   "Cut the only wire that reaches the timer."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Copycat3",
+  "id": "copycat_maestro",
+  "title": "COPYCAT MAESTRO",
+  "hint": "Five, six, seven notes. Hum along!",
+  "egg": "",
+  "n": 66,
+  "desc": "Sequenze da 5, 6 e 7 note.",
+  "hints": [
+   "Five, six, seven notes. Hum along!",
+   "Chunk the notes.",
+   "Repeat each sequence in the same order."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TrapMaze3",
+  "id": "trap_maze_3",
+  "title": "TRAP MAZE 3",
+  "hint": "Two lasers this time. Patience pays.",
+  "egg": "",
+  "n": 67,
+  "desc": "Buche e due laser, controllo addolcito (inclinazione).",
+  "hints": [
+   "Two lasers this time. Patience pays.",
+   "Wait for both lasers.",
+   "Move only when the laser in front of you switches off."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Rune",
+  "id": "magic_rune",
+  "title": "MAGIC RUNE",
+  "hint": "Copy the rune from the scroll in ONE stroke inside the circle. Three runes open the chest.",
+  "egg": "",
+  "n": 68,
+  "desc": "Ricopia col dito le rune del mago: 3 rune, 3 tentativi.",
+  "hints": [
+   "Copy the rune from the scroll in ONE stroke inside the circle. Three runes open the chest.",
+   "One single stroke.",
+   "Trace each rune in one go, without lifting your finger, inside the circle."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Mirror",
+  "id": "foggy_mirror",
+  "title": "FOGGY MIRROR",
+  "hint": "Someone wrote the code on the mirror with a finger. How do you make it show up?",
+  "egg": "bad_breath",
+  "n": 69,
+  "desc": "Soffia sul telefono per appannare lo specchio e leggere il codice, poi aprilo sull'armadietto.",
+  "hints": [
+   "Someone wrote the code on the mirror with a finger. How do you make it show up?",
+   "Fog shows finger marks.",
+   "Blow into the microphone to fog the mirror, read the code, type it on the cabinet."
+  ],
+  "eggName": "Bad Breath",
+  "eggHow": "Soffia sullo specchio senza fermarti per più di 5 secondi: sulla condensa compare \"BRUSH YOUR TEETH!\"."
+ },
+ {
+  "folder": "Morse2",
+  "id": "fast_beeps",
+  "title": "FIVE BEEPS",
+  "hint": "Five beeps this time, long and short. Tap the radio to listen again.",
+  "egg": "",
+  "n": 70,
+  "desc": "Morse con segnali da 5 suoni lunghi o corti.",
+  "hints": [
+   "Five beeps this time, long and short. Tap the radio to listen again.",
+   "Dots and dashes again.",
+   "Write down the 5 short/long beeps and press the matching code."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "DarkMaze3",
+  "id": "pitch_black",
+  "title": "PITCH BLACK",
+  "hint": "Something buzzes in the dark. Listen: louder means closer. Take another road!",
+  "egg": "",
+  "n": 71,
+  "desc": "Al buio, con una vespa che si sveglia se la illumini; il ronzio cresce avvicinandosi.",
+  "hints": [
+   "Something buzzes in the dark. Listen: louder means closer. Take another road!",
+   "The buzzing tells where the wasp is.",
+   "When the buzz gets loud, take another path; don't light the wasp."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Shell3",
+  "id": "shell_storm",
+  "title": "SHELL STORM",
+  "hint": "Twenty swaps, lightning fast.",
+  "egg": "",
+  "n": 72,
+  "desc": "20 scambi velocissimi.",
+  "hints": [
+   "Twenty swaps, lightning fast.",
+   "Don't blink.",
+   "Follow the box with the mouse until it stops, then tap it."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Rhythm",
+  "id": "dj_mouse",
+  "title": "DJ MOUSE",
+  "hint": "Tap when a note is in the ring, on the beat. Never tap the grey notes!",
+  "egg": "",
+  "n": 73,
+  "desc": "Tocca quando la nota è nel cerchio, a tempo di musica. Mai le note grigie con la X.",
+  "hints": [
+   "Tap when a note is in the ring, on the beat. Never tap the grey notes!",
+   "Tap on the beat.",
+   "Tap only when a coloured note is inside the ring; skip grey notes."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Defend3",
+  "id": "bodyguard_3",
+  "title": "BODYGUARD 3",
+  "hint": "Two wasps, fifteen seconds. Walls not touching the cat can be shoved!",
+  "egg": "",
+  "n": 74,
+  "desc": "Due vespe; spingono via le barriere non attaccate al gatto.",
+  "hints": [
+   "Two wasps, fifteen seconds. Walls not touching the cat can be shoved!",
+   "Attach walls to the cat.",
+   "Draw walls that touch the cat: those can't be pushed away."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Toni3",
+  "id": "toni_hide",
+  "title": "WHERE'S TONI?",
+  "hint": "Toni is hiding... and snoring. Move your finger around the room and listen (and feel): the closer, the louder.",
+  "egg": "",
+  "n": 75,
+  "desc": "Muovi il dito: russare più forte vicino al nascondiglio; tocca il posto giusto.",
+  "hints": [
+   "Toni is hiding... and snoring. Move your finger around the room and listen (and feel): the closer, the louder.",
+   "Keep your finger on the screen and move it around.",
+   "Where the snoring is loudest and the phone vibrates, tap that hiding spot."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "WaspMaze3",
+  "id": "wasp_hall",
+  "title": "WASP HALL",
+  "hint": "Two angry wasps on both sides. Find the gap!",
+  "egg": "",
+  "n": 76,
+  "desc": "Labirinto aperto con due vespe più aggressive.",
+  "hints": [
+   "Two angry wasps on both sides. Find the gap!",
+   "Use the side passages.",
+   "Lure the wasps to one side, then cut through the other."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TwoDoors",
+  "id": "two_doors",
+  "title": "TWO DOORS",
+  "hint": "Two keys are hidden in this room. Listen to the knocking... the monster knocks harder.",
+  "egg": "",
+  "n": 77,
+  "desc": "Due chiavi nascoste (pavimento e quadro), due porte: dietro una la ragazza, dietro l'altra il mostro che bussa più forte.",
+  "hints": [
+   "Two keys are hidden in this room. Listen to the knocking... the monster knocks harder.",
+   "One key on the floor, one in the painting.",
+   "Find both keys and open the door with the SOFTER knocking."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "LampSafe3",
+  "id": "master_code",
+  "title": "MASTER CODE",
+  "hint": "Six digits. Maybe write them down?",
+  "egg": "",
+  "n": 78,
+  "desc": "Come il 37, codice a 6 cifre.",
+  "hints": [
+   "Six digits. Maybe write them down?",
+   "Write it down.",
+   "Red lamp shows blue digits, blue lamp shows red ones. Type all six."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Plant3",
+  "id": "thirsty_tree",
+  "title": "THIRSTY TREE",
+  "hint": "Up on the shelf, six drops, and the wind comes in gusts. Wait for the calm!",
+  "egg": "",
+  "n": 79,
+  "desc": "Vaso sulla mensola, 6 gocce, raffiche di vento da 1-4 secondi.",
+  "hints": [
+   "Up on the shelf, six drops, and the wind comes in gusts. Wait for the calm!",
+   "Gusts come and go.",
+   "Wait for the windsock to hang down, then shoot; 6 drops."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Pipes",
+  "id": "plumber",
+  "title": "PLUMBER",
+  "hint": "Tap the pipes to turn them. Get the water from the tap to the flower!",
+  "egg": "",
+  "n": 80,
+  "desc": "Tocca i tubi per ruotarli e porta l'acqua dal rubinetto al fiore prima che appassisca.",
+  "hints": [
+   "Tap the pipes to turn them. Get the water from the tap to the flower!",
+   "Start from the tap.",
+   "Rotate pipes one by one following the path from the tap to the flower."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Balance",
+  "id": "fake_coin",
+  "title": "FAKE COIN",
+  "hint": "One coin is heavier. Put coins on the pans (tap to move them), two weighings, then pick the fake.",
+  "egg": "",
+  "n": 81,
+  "desc": "9 monete, una pesa di più: mettile sui piatti, solo due pesate, poi tocca la falsa.",
+  "hints": [
+   "One coin is heavier. Put coins on the pans (tap to move them), two weighings, then pick the fake.",
+   "Split in three groups.",
+   "Weigh 3 vs 3: if balanced the fake is in the other 3; then weigh 1 vs 1."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Spot",
+  "id": "spot_it",
+  "title": "SPOT IT",
+  "hint": "Five differences between the two pictures. Tap them! Three wrong taps and you lose.",
+  "egg": "",
+  "n": 82,
+  "desc": "Trova le 5 differenze tra i due disegni (cambiano ogni volta). 3 tocchi sbagliati = perso.",
+  "hints": [
+   "Five differences between the two pictures. Tap them! Three wrong taps and you lose.",
+   "Compare small details.",
+   "Check colours, missing pieces and shapes; tap the 5 differences."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "WhereMouse",
+  "id": "where_mouse",
+  "title": "WHERE'S MOUSE?",
+  "hint": "Find the mouse with the RED hat. Pinch to zoom, drag to look around.",
+  "egg": "",
+  "n": 83,
+  "desc": "Nella folla trova il topolino col cappellino ROSSO: due dita per ingrandire, un dito per spostarti.",
+  "hints": [
+   "Find the mouse with the RED hat. Pinch to zoom, drag to look around.",
+   "Zoom in.",
+   "Pinch to zoom and scan row by row for the red hat."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Tightrope",
+  "id": "tightrope",
+  "title": "TIGHTROPE",
+  "hint": "He leans, you lean the OTHER way. Watch out for the wind!",
+  "egg": "",
+  "n": 84,
+  "desc": "Il funambolo pende: inclina il telefono dalla parte opposta per tenerlo dritto (più stabile, raffiche leggere).",
+  "hints": [
+   "He leans, you lean the OTHER way. Watch out for the wind!",
+   "Counter-balance.",
+   "Tilt opposite to the lean, small movements, until he reaches the end."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Shadow",
+  "id": "shadow_play",
+  "title": "SHADOW PLAY",
+  "hint": "Match the shadow on the wall. One finger moves, two fingers turn and resize.",
+  "egg": "",
+  "n": 85,
+  "desc": "Fai combaciare l'oggetto con l'ombra sul muro: un dito sposta, due dita ruotano e ingrandiscono. 3 oggetti.",
+  "hints": [
+   "Match the shadow on the wall. One finger moves, two fingers turn and resize.",
+   "Rotate with two fingers.",
+   "Drag the object onto the shadow, then rotate and resize it until it matches."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Wasp3",
+  "id": "wasp_king",
+  "title": "WASP KING",
+  "hint": "The biggest, fastest wasp yet. Twenty hits!",
+  "egg": "",
+  "n": 86,
+  "desc": "La vespa con la paletta: 20 colpi, più veloce.",
+  "hints": [
+   "The biggest, fastest wasp yet. Twenty hits!",
+   "Same trick, faster.",
+   "Swat it the moment it dives; 20 hits."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "CatEyes3",
+  "id": "staring_contest",
+  "title": "STARING CONTEST",
+  "hint": "Tiny, faster mouse. Seven seconds of staring in total!",
+  "egg": "",
+  "n": 87,
+  "desc": "Topolino piccolo che cambia tana ogni 2,5 secondi: 7 secondi di sguardo in tutto.",
+  "hints": [
+   "Tiny, faster mouse. Seven seconds of staring in total!",
+   "Stay on the mouse.",
+   "Keep the eyes on the mouse for a total of 7 seconds."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "CardHouse",
+  "id": "card_house",
+  "title": "HOUSE OF CARDS",
+  "hint": "Tap to place each card. Hold the phone very still... and wait for the wind to calm down.",
+  "egg": "",
+  "n": 88,
+  "desc": "Tocca per posare le carte; tieni il telefono fermo e aspetta che la tenda smetta di sventolare. 9 carte.",
+  "hints": [
+   "Tap to place each card. Hold the phone very still... and wait for the wind to calm down.",
+   "Stillness.",
+   "Hold the phone still and place a card only when the curtain isn't moving."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "PaperPlane",
+  "id": "paper_plane",
+  "title": "PAPER PLANE",
+  "hint": "Tilt to pitch the nose: dive to gain speed, climb to spend it. Blow for a push. Every ring!",
+  "egg": "",
+  "n": 89,
+  "desc": "Inclina per alzare/abbassare il muso (in picchiata accelera), soffia per una spinta: passa in tutti gli anelli (diventano verdi).",
+  "hints": [
+   "Tilt to pitch the nose: dive to gain speed, climb to spend it. Blow for a push. Every ring!",
+   "Dive for speed.",
+   "Tilt down to speed up, up to climb, blow for a push; go through every ring."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "SafeCrack",
+  "id": "safe_cracker",
+  "title": "SAFE CRACKER",
+  "hint": "Turn the dial right, left, right. Listen for the CLUNK and stop there.",
+  "egg": "",
+  "n": 90,
+  "desc": "Gira la manopola destra-sinistra-destra; al numero giusto fa CLUNK: fermati lì. 60 secondi.",
+  "hints": [
+   "Turn the dial right, left, right. Listen for the CLUNK and stop there.",
+   "Listen.",
+   "Turn right until CLUNK, then left until CLUNK, then right until CLUNK."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Carousel",
+  "id": "carousel",
+  "title": "MERRY-GO-ROUND",
+  "hint": "The ride only turns if YOU turn. Spin around with the phone: three turns, then stop.",
+  "egg": "dizzy_cat",
+  "n": 91,
+  "desc": "Gira su te stesso col telefono: 3 giri di giostra, poi fermati.",
+  "hints": [
+   "The ride only turns if YOU turn. Spin around with the phone: three turns, then stop.",
+   "You have to spin.",
+   "Stand up and turn around with the phone: three full turns, then stop."
+  ],
+  "eggName": "Dizzy Cat",
+  "eggHow": "Continua a girare su te stesso oltre i giri richiesti: il gatto finisce con gli occhi a spirale."
+ },
+ {
+  "folder": "Slide",
+  "id": "slide_puzzle",
+  "title": "SLIDE PUZZLE",
+  "hint": "Tap a tile next to the hole to slide it. Fix the portrait before the cat wakes up!",
+  "egg": "",
+  "n": 92,
+  "desc": "Ricomponi il ritratto del gatto facendo scorrere i tasselli prima che si svegli.",
+  "hints": [
+   "Tap a tile next to the hole to slide it. Fix the portrait before the cat wakes up!",
+   "Corners first.",
+   "Slide tiles into the hole to rebuild the cat's portrait, row by row."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Domino",
+  "id": "domino",
+  "title": "DOMINO",
+  "hint": "Fill the gaps so the dominoes ring the bell. A falling tile reaches as far as it is tall.",
+  "egg": "",
+  "n": 93,
+  "desc": "Metti le tessere giuste nei due buchi e tocca la prima: il campanello deve suonare.",
+  "hints": [
+   "Fill the gaps so the dominoes ring the bell. A falling tile reaches as far as it is tall.",
+   "Height matters.",
+   "Put tiles tall enough to reach the next ones, then tap the first tile."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "MirrorMaze",
+  "id": "mirror_path",
+  "title": "MIRROR PATH",
+  "hint": "Guide the mouse along the path. Your finger moves him... the wrong way round.",
+  "egg": "",
+  "n": 94,
+  "desc": "Porta il topolino lungo il sentiero (più largo): i comandi sono invertiti, poi anche su e giù.",
+  "hints": [
+   "Guide the mouse along the path. Your finger moves him... the wrong way round.",
+   "Everything is reversed.",
+   "Move your finger the opposite way of where the mouse should go."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Magnet",
+  "id": "magnet_fishing",
+  "title": "MAGNET FISHING",
+  "hint": "Fish the key out with the magnet. Caught junk? Shake it off. Watch the piranha!",
+  "egg": "",
+  "n": 95,
+  "desc": "Pesca la chiave con la calamita; scuoti per staccare i rottami; il piranha morde il filo.",
+  "hints": [
+   "Fish the key out with the magnet. Caught junk? Shake it off. Watch the piranha!",
+   "Shake off the junk.",
+   "Lower the magnet on the key, shake the phone to drop junk, avoid the piranha."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Cuckoo",
+  "id": "cuckoo_clock",
+  "title": "CUCKOO CLOCK",
+  "hint": "Solve the riddle, set the hands, press the button. The cuckoo hates wrong answers.",
+  "egg": "lunch_time",
+  "n": 96,
+  "desc": "Risolvi l'indovinello, sposta le lancette e premi il pulsante.",
+  "hints": [
+   "Solve the riddle, set the hands, press the button. The cuckoo hates wrong answers.",
+   "Read the riddle twice.",
+   "Set the hands to the time in the riddle and press the button."
+  ],
+  "eggName": "Lunch Time",
+  "eggHow": "Imposta le lancette a mezzogiorno in punto e premi il pulsante."
+ },
+ {
+  "folder": "Fireflies",
+  "id": "fireflies",
+  "title": "FIREFLIES",
+  "hint": "Catch six fireflies while they glow. Yellow lights in pairs that don't move are NOT fireflies.",
+  "egg": "",
+  "n": 97,
+  "desc": "Tocca 6 lucciole mentre brillano, solo del colore scritto sul barattolo (cambia ogni 2). Coppie di luci ferme = lupo.",
+  "hints": [
+   "Catch six fireflies while they glow. Yellow lights in pairs that don't move are NOT fireflies.",
+   "Check the jar.",
+   "Tap only glowing fireflies of the colour written on the jar; ignore still pairs."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Memory",
+  "id": "cheating_cat",
+  "title": "CHEATING CAT",
+  "hint": "Find the pairs. Every three mistakes the cat swaps two cards. Watch the paw!",
+  "egg": "",
+  "n": 98,
+  "desc": "Memory a coppie; ogni 3 errori il gatto scambia due carte coperte. Max 10 errori.",
+  "hints": [
+   "Find the pairs. Every three mistakes the cat swaps two cards. Watch the paw!",
+   "Remember positions.",
+   "Match pairs carefully; after 3 mistakes watch which cards the paw swaps."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "BubbleNumbers",
+  "id": "bubble_count",
+  "title": "BUBBLE COUNT",
+  "hint": "Pop the bubbles from 1 to 8. Careful: some numbers are upside down.",
+  "egg": "",
+  "n": 99,
+  "desc": "Scoppia le bolle da 1 a 8 (numeri scritti in modi diversi, alcuni capovolti). Il 9 non serve.",
+  "hints": [
+   "Pop the bubbles from 1 to 8. Careful: some numbers are upside down.",
+   "Read upside down too.",
+   "Pop 1 to 8 in order; some are written as words, dots or upside down."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Toni4",
+  "id": "toni_cake",
+  "title": "TONI'S BIRTHDAY",
+  "hint": "Toni has to blow out his candle... but pugs can't blow. That peacock feather looks ticklish... and his nose is RIGHT there.",
+  "egg": "",
+  "n": 100,
+  "desc": "Solletica il naso di Toni con la piuma di pavone finché starnutisce.",
+  "hints": [
+   "Toni has to blow out his candle... but pugs can't blow. That peacock feather looks ticklish... and his nose is RIGHT there.",
+   "Tickle his nose.",
+   "Drag the peacock feather to Toni's nose and wiggle it until he sneezes."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Sneaky",
+  "id": "sneaky_mouse",
+  "title": "SNEAKY MOUSE",
+  "hint": "Drag the mouse to the cheese without being lit by the torch. Furniture casts shadows. Don't run!",
+  "egg": "",
+  "n": 101,
+  "desc": "Trascina il topolino al formaggio fuori dalla torcia del cane, dietro i mobili, senza correre.",
+  "hints": [
+   "Drag the mouse to the cheese without being lit by the torch. Furniture casts shadows. Don't run!",
+   "Shadows are safe.",
+   "Move slowly from one piece of furniture to the next, staying in the shadows."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Stopwatch",
+  "id": "blind_stopwatch",
+  "title": "BLIND STOPWATCH",
+  "hint": "Start, then stop at exactly the time shown. The digits vanish after two seconds!",
+  "egg": "speedrun",
+  "n": 102,
+  "desc": "Ferma il cronometro al tempo richiesto: dopo 2 secondi le cifre spariscono. 3 tentativi.",
+  "hints": [
+   "Start, then stop at exactly the time shown. The digits vanish after two seconds!",
+   "Count in your head.",
+   "Start it, count the seconds in your head, stop it at the target (±0.25 s)."
+  ],
+  "eggName": "Speedrunner",
+  "eggHow": "Ferma il cronometro subito dopo averlo avviato, in meno di un quarto di secondo."
+ },
+ {
+  "folder": "Whack",
+  "id": "whack_a_mole",
+  "title": "WHACK-A-MOLE",
+  "hint": "Bonk the angry moles (gold = 3). Never the party moles!",
+  "egg": "cat_bonk",
+  "n": 103,
+  "desc": "12 punti in 25 s: colpisci le talpe arrabbiate (oro = 3), mai quelle col cappellino.",
+  "hints": [
+   "Bonk the angry moles (gold = 3). Never the party moles!",
+   "Watch the hats.",
+   "Hit angry moles (gold counts 3) and never moles with a party hat."
+  ],
+  "eggName": "Cat Bonk",
+  "eggHow": "Colpisci il gatto che ogni tanto spunta da una buca al posto delle talpe."
+ },
+ {
+  "folder": "Credits",
+  "id": "the_end",
+  "title": "ROLLING CREDITS",
+  "hint": "The credits are rolling... but someone is hiding behind the names. Catch him three times!",
+  "egg": "credits_skip",
+  "n": 104,
+  "desc": "Titoli di coda (non è la fine): prendi 3 volte il topolino che sbuca dietro i nomi prima che finiscano.",
+  "hints": [
+   "The credits are rolling... but someone is hiding behind the names. Catch him three times!",
+   "He peeks out between names.",
+   "Tap the mouse the moment he peeks out; three times before the credits end."
+  ],
+  "eggName": "Credits Skipper",
+  "eggHow": "Premi SKIP durante i titoli di coda."
+ }
+]
