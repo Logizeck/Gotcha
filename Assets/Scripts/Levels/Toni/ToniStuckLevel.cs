@@ -15,7 +15,6 @@ namespace Gotcha.Levels
     public class ToniStuckLevel : LevelController
     {
         [SerializeField] ToniPug toni;
-        [SerializeField] Transform wall;
         [SerializeField] Transform flap;
         [SerializeField] Draggable2D butter;
         [SerializeField] Draggable2D bone;
@@ -23,12 +22,13 @@ namespace Gotcha.Levels
         [SerializeField] SmokeEmitter shine;
         [SerializeField] SmokeEmitter toot;
         [SerializeField] int pushesForEgg = 8;
-        [SerializeField] float pushDistance = 0.5f;
+        [SerializeField] float pushDistance = 0.35f;
 
         Camera cam;
         Vector3 home;
         bool greased, busy, pushing;
         float pushStartX, nextMumble, wiggle;
+        Vector2 pushStart;
         int pushes;
 
         Vector3 Butt => toni.transform.TransformPoint(new Vector2(0.75f, 0.15f));
@@ -44,7 +44,8 @@ namespace Gotcha.Levels
             foreach (Draggable2D d in new[] { butter, bone, feather }) d.Dropped += OnItemDropped;
             if (shine != null) shine.Stop();
             if (toot != null) toot.Stop();
-            nextMumble = Time.time + 1.2f;
+            nextMumble = Time.time + 3f;
+            toni.Say("I'm STUCK! Push me!", 2.2f);
         }
 
         void OnDestroy()
@@ -71,20 +72,27 @@ namespace Gotcha.Levels
             HandlePush();
         }
 
+        /// <summary>Su Toni (dentro o fuori casa, coordinate locali di Toni)?</summary>
+        bool OnToni(Vector2 w)
+        {
+            Vector2 l = toni.transform.InverseTransformPoint(w);
+            return l.x > -1.25f && l.x < 1.35f && Mathf.Abs(l.y - 0.1f) < 0.85f;
+        }
+
+        // spinta = un tocco su Toni oppure un trascinamento verso il muro
         void HandlePush()
         {
             if (busy || cam == null || Draggable2D.Active != null) { pushing = false; return; }
             if (!PointerInput.TryGetPrimary(out Vector2 sp, out bool began, out bool ended)) { pushing = false; return; }
             Vector2 w = PointerInput.ToWorld(cam, sp);
-            if (began && !PointerInput.IsOverUi())
-            {
-                Vector2 l = toni.transform.InverseTransformPoint(w);
-                if (w.x < wall.position.x && Mathf.Abs(l.y - 0.1f) < 0.8f && Mathf.Abs(l.x - 0.4f) < 0.9f) { pushing = true; pushStartX = w.x; }
-                else if (w.x > wall.position.x && Vector2.Distance(w, toni.HeadWorld) < 0.8f) toni.Say("Mmm?", 0.8f);
-            }
+            if (began && !PointerInput.IsOverUi() && OnToni(w)) { pushing = true; pushStartX = w.x; pushStart = w; }
             if (!pushing) return;
-            if (w.x - pushStartX > pushDistance) { pushing = false; Push(); }
-            if (ended) pushing = false;
+            if (w.x - pushStartX > pushDistance) { pushing = false; Push(); return; }
+            if (ended)
+            {
+                pushing = false;
+                if (Vector2.Distance(w, pushStart) < 0.3f) Push();   // un tocco vale come spinta
+            }
         }
 
         void Push()
@@ -117,7 +125,8 @@ namespace Gotcha.Levels
 
         void OnItemDropped(Draggable2D d, DropSlot slot)
         {
-            if (busy || IsFinished || Vector2.Distance(d.transform.position, Butt) > 1.1f) return;
+            // basta lasciarlo su Toni (o vicino al sedere): niente mira di precisione
+            if (busy || IsFinished || (!OnToni(d.transform.position) && Vector2.Distance(d.transform.position, Butt) > 1.4f)) return;
             if (d == butter) StartCoroutine(Grease());
             else if (d == bone) StartCoroutine(Excited());
             else if (d == feather) StartCoroutine(Giggle());

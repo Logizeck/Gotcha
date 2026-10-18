@@ -143,7 +143,7 @@ public static partial class GotchaProjectBuilder
         Bar(root.transform, "Grass", new Vector2(1.8f, -3.7f), new Vector2(2.8f, 3.4f), new Color(0.5f, 0.8f, 0.4f), -17);
         Art(root.transform, "Sun", "sun", -16, true, new Vector2(2.1f, 3.0f)).localScale = Vector3.one * 0.6f;
         Art(root.transform, "Bush", "bush", -16, true, new Vector2(2.2f, -2.2f));
-        Transform wall = Art(root.transform, "Wall", "wall_section", 8, false, new Vector2(0.4f, 0f));
+        Art(root.transform, "Wall", "wall_section", 8, false, new Vector2(0.4f, 0f));
         ToniPug toni = ToniRig(root.transform, new Vector2(0.15f, -2.59f), 1.2f, root.transform);
         Transform flap = Child(root.transform, "Flap", new Vector2(0.64f, -1.52f)).transform;
         flap.localRotation = Quaternion.Euler(0, 0, 55f);
@@ -161,7 +161,6 @@ public static partial class GotchaProjectBuilder
         toot.sideDrift = -1.5f;
 
         SetField(level, "toni", toni);
-        SetField(level, "wall", wall);
         SetField(level, "flap", flap);
         SetField(level, "butter", butter);
         SetField(level, "bone", bone);

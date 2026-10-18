@@ -38,7 +38,7 @@ public static class LevelHints
         { "hot_soup", new[] { "Blow on it like real soup.", "Blow into the microphone until the thermometer is low, then give the soup to the mouse." } },
         { "frozen_key", new[] { "Rub the ice quickly.", "Rub the ice block with your finger until it melts, pinch the key smaller, open the door." } },
         { "campfire", new[] { "Rub, then blow... softly.", "Rub the stick fast for a spark, then blow GENTLY into the microphone." } },
-        { "toni_stuck", new[] { "Try the things on the table on Toni's back end.", "Drag the butter onto Toni's bottom, then drag him toward the wall." } },
+        { "toni_stuck", new[] { "Try the things on the table on Toni.", "Drag the butter onto Toni, then tap him (or push him toward the wall)." } },
         { "alarm_clock", new[] { "Fences must be long enough.", "Draw long fences to trap the OFF button in a corner, then tap it." } },
         { "thirsty_plant", new[] { "Watch the windsock before you shoot.", "Pull back and release when the wind is calm; land 5 drops in the pot." } },
         { "shell_game", new[] { "Never look away from that box.", "Follow the box with the mouse until it stops, then tap it." } },

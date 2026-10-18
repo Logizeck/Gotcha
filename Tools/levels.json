@@ -390,11 +390,11 @@
   "hint": "Toni tried the cat flap. Bad idea. Pushing alone won't do... something slippery from the kitchen, maybe?",
   "egg": "toni_toot",
   "n": 25,
-  "desc": "Spalma il burro sul sedere di Toni, poi spingilo verso il muro. 8 spinte senza burro = egg.",
+  "desc": "Toni è incastrato nella gattaiola: lascia cadere il burro su di lui, poi toccalo (o spingilo verso il muro).",
   "hints": [
    "Toni tried the cat flap. Bad idea. Pushing alone won't do... something slippery from the kitchen, maybe?",
-   "Try the things on the table on Toni's back end.",
-   "Drag the butter onto Toni's bottom, then drag him toward the wall."
+   "Try the things on the table on Toni.",
+   "Drag the butter onto Toni, then tap him (or push him toward the wall)."
   ],
   "eggName": "Toni Rocket",
   "eggHow": "Spingi Toni 8 volte SENZA il burro: la pressione trova un'altra uscita (PRRRT!) e parte a razzo."

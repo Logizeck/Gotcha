@@ -266,6 +266,13 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.35
+- **Toni è un carlino NERO**: pelo antracite, orecchie e muso scuri, pieghe, bocca, unghie e occhi chiusi disegnati
+  in grigio chiaro per farli vedere; resta il collare rosso.
+- **25 STUCK!** più chiaro e tollerante: all'inizio Toni dice "I'm STUCK! Push me!"; basta un **tocco** su Toni (o
+  trascinarlo verso il muro) per spingerlo; burro, osso e piuma funzionano lasciati ovunque sopra di lui (prima
+  bisognava centrare il sedere e trascinare verso destra, e sembrava che non succedesse niente).
+
 ## Versione 0.34
 - **Hint a consumo**: ogni livello ha **3 suggerimenti** (`LevelDefinition.hints`, scritti in `Editor/LevelHints.cs`):
   una spinta, uno più preciso, la soluzione. Ognuno costa **1 hint** (`HintWallet`, saldo firmato come le vite);
