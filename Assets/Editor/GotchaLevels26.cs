@@ -510,7 +510,7 @@ public static partial class GotchaProjectBuilder
         for (int r = 0; r < 2; r++)
             for (int c = 0; c < 3; c++)
             {
-                Transform h = Child(root.transform, "Hole", new Vector2(-1.7f + c * 1.7f, -0.5f - r * 1.9f)).transform;
+                Transform h = Child(root.transform, "Hole", new Vector2(-1.7f + c * 1.7f + (r == 0 ? 0.25f : -0.25f), -3.05f - r * 1.3f)).transform;   // tutte nel prato (che inizia sotto y -2.8)
                 Art(h, "Back", "mole_hole", 2 + r * 10, false);
                 Transform pop = Child(h, "Pop", new Vector2(0, -0.9f)).transform;
                 foreach (var k in new[] { ("Angry", "mole_angry"), ("Party", "mole_party"), ("Gold", "mole_gold"), ("Cat", "cat") })

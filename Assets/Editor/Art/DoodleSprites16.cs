@@ -137,5 +137,67 @@ namespace Gotcha.EditorArt
             p.Shape(Sd.Union(Sd.Box(0.3f, 0.25f, 0.2f, 0.045f), Sd.Circle(0.1f, 0.29f, 0.06f), Sd.Circle(0.1f, 0.21f, 0.06f), Sd.Circle(0.5f, 0.29f, 0.06f), Sd.Circle(0.5f, 0.21f, 0.06f)), Rgba.Hex("FFF6E0"), 0.025f);
             return new DoodleArt("cream_splat", p);
         }
+
+        /// <summary>
+        /// Il muso di Toni in primo piano, di fronte, schiacciato contro lo schermo (livello 100: lecca la panna).
+        /// Centro 0,0; la bocca aperta (da cui esce la lingua) è in 0, -1.1.
+        /// </summary>
+        public static DoodleArt ToniFaceBig()
+        {
+            var p = new DoodlePainter(-2.4f, -2.2f, 2.4f, 2.1f, 70) { Ink = 0.09f };
+            // orecchie ripiegate
+            foreach (float sx in new[] { -1f, 1f })
+                Body(p, Sd.Rotate(Sd.Ellipse(sx * 1.55f, 1.45f, 0.6f, 0.38f), sx * 1.55f, 1.45f, sx * -30f), PugShade, Rgba.Hex("141418"));
+            Sdf head = Sd.Ellipse(0, 0, 2.05f, 1.75f);
+            Body(p, head, PugFawn, PugShade, null, -0.25f, 0.3f);
+            // rughe sulla fronte
+            p.Line(PugLine, 0.07f, -0.7f, 1.2f, -0.35f, 1.35f, 0f, 1.25f, 0.35f, 1.35f, 0.7f, 1.2f);
+            p.Line(PugLine, 0.06f, -0.45f, 0.95f, 0f, 1.05f, 0.45f, 0.95f);
+            // occhioni lucidi che guardano la panna
+            foreach (float sx in new[] { -1f, 1f })
+            {
+                p.Shape(Sd.Circle(sx * 0.82f, 0.38f, 0.5f), Rgba.Hex("2B211E"), 0.04f);
+                p.Fill(Sd.Circle(sx * 0.82f, 0.38f, 0.43f), Rgba.Hex("FFFDF5"));
+                p.Fill(Sd.Circle(sx * 0.78f, 0.5f, 0.27f), Rgba.Hex("2A1A12"));
+                p.Fill(Sd.Circle(sx * 0.7f, 0.62f, 0.09f), Rgba.White);
+            }
+            // muso schiacciato col naso grande
+            Body(p, Sd.Ellipse(0, -0.75f, 1.15f, 0.85f), PugMask, PugShade, null, -0.1f, 0.15f);
+            p.Shape(Sd.Ellipse(0, -0.35f, 0.42f, 0.26f), Rgba.Hex("120D0C"), 0.04f);
+            p.Fill(Sd.Ellipse(-0.12f, -0.27f, 0.12f, 0.06f), Rgba.White.WithAlpha(0.55f));
+            p.Line(PugLine, 0.05f, 0f, -0.6f, 0f, -0.85f);
+            // bocca aperta (la lingua esce da qui)
+            p.Shape(Sd.Ellipse(0, -1.1f, 0.62f, 0.32f), Rgba.Hex("5A1424"), 0.05f);
+            return new DoodleArt("toni_face_big", p);
+        }
+
+        /// <summary>Linguona di Toni, dritta verso l'alto (base in 0,0, lunga 2.2): si allunga e si gira per leccare.</summary>
+        public static DoodleArt ToniTongueBig()
+        {
+            var p = new DoodlePainter(-0.55f, -0.1f, 0.55f, 2.3f, 90) { Ink = 0.06f };
+            Sdf tongue = Sd.Union(Sd.Capsule(0, 0.2f, 0, 1.75f, 0.42f), Sd.Ellipse(0, 1.85f, 0.46f, 0.4f));
+            Body(p, tongue, Rgba.Hex("FF7A93"), Rgba.Hex("E0566F"), null, -0.12f, 0.1f);
+            p.Line(Rgba.Hex("D94A64"), 0.06f, 0f, 0.4f, 0f, 1.7f);   // il solco in mezzo
+            p.Fill(Sd.Ellipse(-0.2f, 1.6f, 0.08f, 0.2f), Rgba.White.WithAlpha(0.5f));
+            return new DoodleArt("toni_tongue_big", p);
+        }
+
+        /// <summary>Uno schizzo di panna (centro 0,0): tanti formano la torta spiaccicata sul vetro.</summary>
+        public static DoodleArt CreamBlob()
+        {
+            var p = new DoodlePainter(-0.75f, -0.7f, 0.75f, 0.7f, 90) { Ink = 0.05f };
+            var rnd = new Random(7);
+            var parts = new System.Collections.Generic.List<Sdf> { Sd.Circle(0, 0, 0.42f) };
+            for (int i = 0; i < 7; i++)
+            {
+                double a = i / 7.0 * Math.PI * 2 + rnd.NextDouble() * 0.4;
+                float r = 0.3f + (float)rnd.NextDouble() * 0.2f;
+                parts.Add(Sd.Circle((float)Math.Cos(a) * r, (float)Math.Sin(a) * r * 0.9f, 0.14f + (float)rnd.NextDouble() * 0.1f));
+            }
+            Sdf blob = Sd.Union(parts.ToArray());
+            Body(p, blob, Rgba.Hex("FFF8F0"), Rgba.Hex("F1DCCB"));
+            p.Shape(Sd.Circle(0.12f, 0.1f, 0.08f), Rgba.Hex("FF9FC4"), 0.02f);
+            return new DoodleArt("cream_blob", p);
+        }
     }
 }

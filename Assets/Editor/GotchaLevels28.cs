@@ -304,54 +304,5 @@ public static partial class GotchaProjectBuilder
         return SaveLevel(root, "Memory");
     }
 
-    // ---------- Titoli di coda (non è la fine: i livelli nuovi arrivano dopo) ----------
-
-    static GameObject BuildCreditsLevel()
-    {
-        var root = new GameObject("Level_Credits");
-        CreditsLevel level = root.AddComponent<CreditsLevel>();
-        Bar(root.transform, "Black", Vector2.zero, new Vector2(12f, 16f), new Color(0.06f, 0.05f, 0.1f), -20);
-        Transform roll = Child(root.transform, "Roll", new Vector2(0, -4.8f)).transform;
-        string[] text =
-        {
-            "GOTCHA!", "", "GAME DESIGN", "Andrea Zecchin", "", "CHIEF CAT OFFICER", "The Cat", "", "WASP WRANGLERS", "Wasp #1   Wasp #2", "",
-            "CHIEF DOG OFFICER", "Toni the pug", "", "SNOWMAN MELTING CONSULTANT", "Mr. Snowman (retired)", "", "PIZZA TESTERS", "Four hungry mice", "", "COCKROACH STUNTS", "Himself", "",
-            "LIGHTING", "A very tired lamp", "", "CHEESE SUPPLIER", "Nobody knows", "", "MOUSE", "(he did NOT sign a contract)", "",
-            "SPECIAL THANKS", "You, for playing", "", "", "TO BE CONTINUED...",
-        };
-        var lines = new List<TextMesh>();
-        for (int i = 0; i < text.Length; i++)
-        {
-            bool head = text[i] == text[i].ToUpperInvariant() && text[i].Length > 0 && i > 0 && text[i] != "TO BE CONTINUED...";
-            TextMesh t = Label(roll, new Vector2(0, -i * 0.62f), 5, text[i], head ? 0.04f : 0.055f);
-            t.color = head ? new Color(1f, 0.8f, 0.3f) : Color.white;
-            lines.Add(t);
-        }
-        Transform mouse = Child(root.transform, "Mouse", Vector2.zero).transform;
-        mouse.localScale = Vector3.one * 0.3f;
-        Art(mouse, "Art", "mouse", 8);
-        GameObject skipGo = Child(root.transform, "Skip", new Vector2(2.1f, -3.8f));
-        Label(skipGo.transform, Vector2.zero, 12, "SKIP >>", 0.045f).color = new Color(0.8f, 0.8f, 0.9f);
-        skipGo.AddComponent<BoxCollider2D>().size = new Vector2(1.3f, 0.6f);
-        TapButton skip = skipGo.AddComponent<TapButton>();
-        skip.id = "skip";
-        GameObject finale = Child(root.transform, "Finale", new Vector2(0, 0.6f));
-        Bar(finale.transform, "Dim", new Vector2(0, -0.6f), new Vector2(12f, 16f), new Color(0.06f, 0.05f, 0.1f, 0.9f), 20);
-        Label(finale.transform, new Vector2(0, 1.4f), 22, "MORE LEVELS SOON!", 0.13f).color = new Color(1f, 0.8f, 0.2f);
-        Art(finale.transform, "Trophy", "trophy", 21, true, new Vector2(0, -1.2f));
-        SmokeEmitter confetti = Emitter(root.transform, "Confetti", new Vector2(0, 3.0f), "confetti", 40f, 2.2f, -1.2f, 2.6f, 1.1f, new Color(1f, 0.85f, 0.35f), 45);
-        TextMesh counter = Label(root.transform, new Vector2(-2.0f, 3.7f), 12, "", 0.05f);
-        counter.color = Color.white;
-
-        SetField(level, "roll", roll);
-        SetArray(level, "lines", lines.ToArray());
-        SetField(level, "mouse", mouse);
-        SetField(level, "skip", skip);
-        SetField(level, "finale", finale);
-        SetField(level, "confetti", confetti);
-        SetField(level, "counter", counter);
-        SetField(level, "bubble", SmallBubble(root.transform, new Vector2(0.4f, 3.3f)));
-        return SaveLevel(root, "Credits");
-    }
 }
 #endif

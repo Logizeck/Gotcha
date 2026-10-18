@@ -32,7 +32,6 @@ namespace Gotcha.Core
             { "lunch_time", "Lunch Time" },
             { "speedrun", "Speedrunner" },
             { "cat_bonk", "Cat Bonk" },
-            { "credits_skip", "Credits Skipper" },
         };
 
         public static string Name(string id)

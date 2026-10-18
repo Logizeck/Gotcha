@@ -117,7 +117,6 @@ public static class LevelHints
         { "sneaky_mouse", new[] { "Shadows are safe.", "Move slowly from one piece of furniture to the next, staying in the shadows." } },
         { "blind_stopwatch", new[] { "Count in your head.", "Start it, count the seconds in your head, stop it at the target (±0.25 s)." } },
         { "whack_a_mole", new[] { "Watch the hats.", "Hit angry moles (gold counts 3) and never moles with a party hat." } },
-        { "the_end", new[] { "He peeks out between names.", "Tap the mouse the moment he peeks out; three times before the credits end." } },
     };
 }
 #endif

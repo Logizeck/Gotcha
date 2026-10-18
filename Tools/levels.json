@@ -1078,7 +1078,7 @@
   "hint": "Copy the rune from the scroll in ONE stroke inside the circle. Three runes open the chest.",
   "egg": "",
   "n": 68,
-  "desc": "Ricopia col dito le rune del mago: 3 rune, 3 tentativi.",
+  "desc": "Ricopia col dito le rune del mago (13 rune possibili, ne escono 3 a caso), 3 tentativi.",
   "hints": [
    "Copy the rune from the scroll in ONE stroke inside the circle. Three runes open the chest.",
    "One single stroke.",
@@ -1638,7 +1638,7 @@
   "hint": "Bonk the angry moles (gold = 3). Never the party moles!",
   "egg": "cat_bonk",
   "n": 103,
-  "desc": "12 punti in 25 s: colpisci le talpe arrabbiate (oro = 3), mai quelle col cappellino.",
+  "desc": "12 punti in 25 s: colpisci le talpe arrabbiate nelle buche del prato (oro = 3), mai quelle col cappellino.",
   "hints": [
    "Bonk the angry moles (gold = 3). Never the party moles!",
    "Watch the hats.",
@@ -1646,21 +1646,5 @@
   ],
   "eggName": "Cat Bonk",
   "eggHow": "Colpisci il gatto che ogni tanto spunta da una buca al posto delle talpe."
- },
- {
-  "folder": "Credits",
-  "id": "the_end",
-  "title": "ROLLING CREDITS",
-  "hint": "The credits are rolling... but someone is hiding behind the names. Catch him three times!",
-  "egg": "credits_skip",
-  "n": 104,
-  "desc": "Titoli di coda (non è la fine): prendi 3 volte il topolino che sbuca dietro i nomi prima che finiscano.",
-  "hints": [
-   "The credits are rolling... but someone is hiding behind the names. Catch him three times!",
-   "He peeks out between names.",
-   "Tap the mouse the moment he peeks out; three times before the credits end."
-  ],
-  "eggName": "Credits Skipper",
-  "eggHow": "Premi SKIP durante i titoli di coda."
  }
 ]

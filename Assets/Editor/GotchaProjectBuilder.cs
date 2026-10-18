@@ -31,7 +31,7 @@ public static partial class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 40;
+    const int BuilderVersion = 41;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -621,7 +621,6 @@ public static partial class GotchaProjectBuilder
         string[] dungeon = { "KeyDoor", "Maze", "TrapMaze", "DarkMaze", "WaspMaze", "ArtTheft", "FrozenKey", "Maze2", "TrapMaze2", "DarkMaze2", "WaspMaze6", "TrapMaze3", "DarkMaze3", "WaspMaze3", "TwoDoors", "MirrorMaze", "Magnet" };
         string[] animals = { "Idle", "Volume", "Roach", "Snowman", "Defend", "Bedtime", "Campfire", "Plant", "Shell", "Sunny", "CatEyes", "Copycat", "Shell2", "Defend2", "Plant2", "Copycat2", "Wasp2", "CatEyes2", "Campfire2", "Flashlight", "Bridge", "Copycat3", "Shell3", "Defend3", "Plant3", "Tightrope", "Wasp3", "CatEyes3", "Fireflies", "Sneaky", "Whack", "Laser", "Rhythm", "Pipes", "Slide", "WhereMouse", "Carousel", "Toni1", "Toni2", "Toni3", "Toni4" };
         string[] kitchen = { "Apple", "Cookie", "Birthday", "Soup", "Rope", "Pizza", "PizzaChef", "Pancake", "AppleCatch", "Pancake2", "Cookie2", "Birthday2", "AppleCatch2" };
-        if (folder == "Credits") return MusicTrack.Title;   // il finale suona il tema del titolo
         if (System.Array.IndexOf(dungeon, folder) >= 0) return MusicTrack.Dungeon;
         if (System.Array.IndexOf(animals, folder) >= 0) return MusicTrack.Animals;
         if (System.Array.IndexOf(kitchen, folder) >= 0) return MusicTrack.Kitchen;
@@ -4701,9 +4700,6 @@ public static partial class GotchaProjectBuilder
             Define("Whack", "whack_a_mole", "WHACK-A-MOLE",
                 "Bonk the angry moles (gold = 3). Never the party moles!",
                 BuildWhackLevel(), "cat_bonk"),
-            Define("Credits", "the_end", "ROLLING CREDITS",
-                "The credits are rolling... but someone is hiding behind the names. Catch him three times!",
-                BuildCreditsLevel(), "credits_skip"),
         };
     }
 

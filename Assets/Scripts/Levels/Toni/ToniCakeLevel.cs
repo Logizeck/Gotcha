@@ -21,7 +21,9 @@ namespace Gotcha.Levels
         [SerializeField] SmokeEmitter sneezeCloud;
         [SerializeField] SmokeEmitter confetti;
         [SerializeField] SpriteRenderer splat;
-        [SerializeField] Transform bigTongue;
+        [SerializeField] Transform bigFace;            // il muso di Toni in primo piano, dietro la panna sul vetro
+        [SerializeField] Transform tonguePivot;        // base della linguona (nella bocca del muso grande)
+        [SerializeField] Transform[] cream;            // gli schizzi di panna sullo schermo
         [SerializeField] SpeechBubble candleBubble;
         [SerializeField] float tickleRadius = 0.6f;
         [SerializeField] float sneezeAt = 4f;
@@ -42,9 +44,29 @@ namespace Gotcha.Levels
             flameScale = flame.localScale;
             lastFeather = feather.transform.position;
             if (splat != null) splat.gameObject.SetActive(false);
-            if (bigTongue != null) bigTongue.gameObject.SetActive(false);
+            if (bigFace != null) bigFace.gameObject.SetActive(false);
+            if (cream != null) foreach (Transform c in cream) if (c != null) c.gameObject.SetActive(false);
             if (candleBubble != null) candleBubble.Hide();
             nextBark = Time.time + 2.5f;
+        }
+
+        static float DistanceToSegment(Vector2 p, Vector2 a, Vector2 b)
+        {
+            Vector2 ab = b - a;
+            float t = Mathf.Clamp01(Vector2.Dot(p - a, ab) / Mathf.Max(ab.sqrMagnitude, 1e-4f));
+            return Vector2.Distance(p, a + ab * t);
+        }
+
+        /// <summary>Uno schizzo leccato via: si schiaccia, sbiadisce e sparisce.</summary>
+        IEnumerator Wipe(Transform c)
+        {
+            Vector3 s0 = c.localScale;
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.18f)
+            {
+                c.localScale = new Vector3(s0.x * (1f + 0.3f * k), s0.y * (1f - k), s0.z);
+                yield return null;
+            }
+            c.gameObject.SetActive(false);
         }
 
         void Update()
@@ -153,30 +175,110 @@ namespace Gotcha.Levels
             splat.color = Color.white;
             Sfx.Play(this, "bonk", 1f);
             Haptics.Heavy();
-            yield return new WaitForSeconds(0.6f);
-            toni.Say("!!!", 0.8f);
-            yield return new WaitForSeconds(0.6f);
-
-            // tre leccate e lo schermo è pulito
-            Vector3 splatScale = splat.transform.localScale;
-            bigTongue.gameObject.SetActive(true);
-            Vector3 t0 = bigTongue.position;
-            for (int lick = 0; lick < 3; lick++)
+            // gli schizzi di panna arrivano sul vetro uno dopo l'altro
+            var creamScale = new Vector3[cream.Length];
+            for (int i = 0; i < cream.Length; i++)
             {
-                float side = lick % 2 == 0 ? -1f : 1f;
-                for (float k = 0f; k < 1f; k += Time.deltaTime / 0.45f)
+                creamScale[i] = cream[i].localScale;
+                cream[i].gameObject.SetActive(true);
+                cream[i].localScale = Vector3.zero;
+            }
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.35f)
+            {
+                for (int i = 0; i < cream.Length; i++)
                 {
-                    bigTongue.position = t0 + new Vector3(side * Mathf.Lerp(-0.8f, 0.8f, k), Mathf.Sin(k * Mathf.PI) * 6.5f, 0f);
-                    bigTongue.localRotation = Quaternion.Euler(0, 0, side * Mathf.Lerp(15f, -15f, k));
+                    float t = Mathf.Clamp01(k * 1.6f - i * 0.06f);
+                    cream[i].localScale = creamScale[i] * (t < 0.7f ? t / 0.7f * 1.15f : Mathf.Lerp(1.15f, 1f, (t - 0.7f) / 0.3f));
+                }
+                yield return null;
+            }
+            yield return new WaitForSeconds(0.4f);
+
+            // il muso di Toni sale da sotto, dietro la panna, e si schiaccia contro il vetro
+            bigFace.gameObject.SetActive(true);
+            Vector3 faceHome = bigFace.localPosition, faceScale = bigFace.localScale;
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.5f)
+            {
+                float e = 1f - (1f - k) * (1f - k);
+                bigFace.localPosition = faceHome + Vector3.down * 6f * (1f - e);
+                yield return null;
+            }
+            bigFace.localPosition = faceHome;
+            Sfx.Play(this, "bonk", 0.6f);
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.2f)   // "SPLOT": si spiaccica sul vetro
+            {
+                bigFace.localScale = new Vector3(faceScale.x * (1f + 0.08f * Mathf.Sin(k * Mathf.PI)), faceScale.y * (1f - 0.06f * Mathf.Sin(k * Mathf.PI)), faceScale.z);
+                yield return null;
+            }
+            bigFace.localScale = faceScale;
+            toni.Say("Mmmh... CAKE!", 1f, "woof");
+
+            // leccate: la lingua si allunga verso uno schizzo, spazza di lato e pulisce tutto quello che tocca
+            var left = new System.Collections.Generic.List<int>();
+            for (int i = 0; i < cream.Length; i++) left.Add(i);
+            float splatAlpha = 1f;
+            for (int lick = 0; lick < 8 && left.Count > 0; lick++)
+            {
+                Vector3 mouthW = tonguePivot.position;
+                // bersaglio: lo schizzo più lontano tra quelli rimasti (così ogni passata ne prende tanti)
+                int target = left[0];
+                foreach (int i in left) if ((cream[i].position - mouthW).sqrMagnitude > (cream[target].position - mouthW).sqrMagnitude) target = i;
+                Vector2 to = cream[target].position - mouthW;
+                float reach = to.magnitude + 0.35f, aim = Mathf.Atan2(to.y, to.x) * Mathf.Rad2Deg - 90f;
+                float side = lick % 2 == 0 ? -1f : 1f, from = aim - 28f * side, until = aim + 28f * side;
+                float sx = tonguePivot.localScale.x;
+                tonguePivot.gameObject.SetActive(true);
+                // fuori la lingua
+                for (float k = 0f; k < 1f; k += Time.deltaTime / 0.15f)
+                {
+                    tonguePivot.rotation = Quaternion.Euler(0, 0, from);
+                    tonguePivot.localScale = new Vector3(sx, Mathf.Lerp(0.05f, reach / 2.2f, k) / bigFace.lossyScale.y, 1f);
                     yield return null;
                 }
-                Sfx.Play(this, "whoosh", 0.6f);
-                float left = 1f - (lick + 1) / 3f;
-                splat.color = new Color(1f, 1f, 1f, left);
-                splat.transform.localScale = splatScale * (0.6f + 0.4f * left);
+                Sfx.Play(this, "whoosh", 0.7f);
+                Haptics.Light();
+                // passata di lato: pulisce
+                for (float k = 0f; k < 1f; k += Time.deltaTime / 0.35f)
+                {
+                    float ang = Mathf.Lerp(from, until, Mathf.SmoothStep(0f, 1f, k));
+                    tonguePivot.rotation = Quaternion.Euler(0, 0, ang);
+                    bigFace.localScale = faceScale * (1f + 0.03f * Mathf.Sin(k * Mathf.PI));
+                    Vector3 tip = mouthW + Quaternion.Euler(0, 0, ang) * Vector3.up * reach;
+                    for (int n = left.Count - 1; n >= 0; n--)
+                    {
+                        Transform c = cream[left[n]];
+                        if (DistanceToSegment(c.position, mouthW, tip) < 0.75f)
+                        {
+                            StartCoroutine(Wipe(c));
+                            left.RemoveAt(n);
+                        }
+                    }
+                    splatAlpha = Mathf.MoveTowards(splatAlpha, left.Count / (float)cream.Length, Time.deltaTime * 3f);
+                    splat.color = new Color(1f, 1f, 1f, splatAlpha);
+                    yield return null;
+                }
+                // dentro la lingua (si lecca i baffi)
+                for (float k = 0f; k < 1f; k += Time.deltaTime / 0.15f)
+                {
+                    tonguePivot.localScale = new Vector3(sx, Mathf.Lerp(reach / 2.2f, 0.05f, k) / bigFace.lossyScale.y, 1f);
+                    yield return null;
+                }
+                tonguePivot.gameObject.SetActive(false);
+                Sfx.Play(this, "pop", 0.4f);
+                yield return new WaitForSeconds(0.08f);
             }
-            bigTongue.gameObject.SetActive(false);
+            foreach (int i in left) StartCoroutine(Wipe(cream[i]));
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.25f) { splat.color = new Color(1f, 1f, 1f, splatAlpha * (1f - k)); yield return null; }
             splat.gameObject.SetActive(false);
+            toni.Say("*burp*", 1f, "bonk");
+            yield return new WaitForSeconds(0.5f);
+            // il muso torna giù
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.4f)
+            {
+                bigFace.localPosition = faceHome + Vector3.down * 6f * k * k;
+                yield return null;
+            }
+            bigFace.gameObject.SetActive(false);
             if (confetti != null) confetti.Play();
             StartCoroutine(toni.Happy(2f));
             toni.Say("Best birthday ever!", 2f, "woof");

@@ -347,34 +347,5 @@ namespace Gotcha.EditorArt
             Body(p, Sd.Rotate(Sd.Box(-0.25f, 0.7f, 0.3f, 0.16f, 0.06f), -0.25f, 0.7f, 45f), Rgba.Hex("E8433F"), Rgba.Hex("B92E2A"));
             return new DoodleArt("mallet", p);
         }
-
-        // ---------- 100: il trofeo ----------
-
-        /// <summary>Coppa d'oro (base in 0,0, alta 1.3) e varianti: polvere grigia sopra, luccichio.</summary>
-        public static DoodleArt Trophy(int layer)
-        {
-            var p = new DoodlePainter(-0.75f, -0.08f, 0.75f, 1.45f, 130) { Ink = layer == 0 ? 0.045f : 0f };
-            Sdf cup = Sd.Union(Sd.Intersect(Sd.Circle(0, 1.05f, 0.42f), Sd.Box(0, 0.9f, 0.45f, 0.35f)), Sd.Box(0, 1.15f, 0.42f, 0.1f));
-            Sdf handles = Sd.Union(Sd.Subtract(Sd.Circle(-0.45f, 1.0f, 0.2f), Sd.Circle(-0.45f, 1.0f, 0.11f)), Sd.Subtract(Sd.Circle(0.45f, 1.0f, 0.2f), Sd.Circle(0.45f, 1.0f, 0.11f)));
-            Sdf stem = Sd.Union(Sd.Box(0, 0.45f, 0.07f, 0.2f), Sd.Box(0, 0.15f, 0.32f, 0.13f, 0.04f));
-            Sdf all = Sd.Union(Sd.Union(cup, handles), stem);
-            if (layer == 0)
-            {
-                Body(p, handles, Gold, GoldShade);
-                Body(p, Sd.Union(cup, stem), Gold, GoldShade);
-                p.Shape(Sd.Box(0, 0.15f, 0.22f, 0.07f, 0.02f), Rgba.Hex("2B2133"), 0.015f);
-                p.Shape(Sd.Polygon(0, 1.22f, 0.06f, 1.08f, 0.2f, 1.08f, 0.09f, 0.99f, 0.13f, 0.85f, 0, 0.94f, -0.13f, 0.85f, -0.09f, 0.99f, -0.2f, 1.08f, -0.06f, 1.08f), Rgba.Hex("FFF6C2"), 0.015f);
-            }
-            else if (layer == 1)
-                p.FillFunc(all, (x, y) => Rgba.Hex("8D8A80").WithAlpha(0.55f + Noise.Value(x * 14f, y * 14f) * 0.4f));
-            else
-            {
-                p.FillFunc(all, (x, y) => Rgba.White.WithAlpha(Clamp(0.5f - Math.Abs(x + y * 0.6f - 0.75f) * 2.2f)));
-                foreach (var s in new[] { (-0.5f, 1.35f), (0.55f, 0.6f), (0.2f, 1.4f) })
-                    p.Fill(Sd.Polygon(s.Item1, s.Item2 + 0.12f, s.Item1 + 0.03f, s.Item2 + 0.03f, s.Item1 + 0.12f, s.Item2, s.Item1 + 0.03f, s.Item2 - 0.03f, s.Item1, s.Item2 - 0.12f, s.Item1 - 0.03f, s.Item2 - 0.03f, s.Item1 - 0.12f, s.Item2, s.Item1 - 0.03f, s.Item2 + 0.03f), Rgba.White);
-            }
-            return new DoodleArt(layer == 0 ? "trophy" : layer == 1 ? "trophy_dust" : "trophy_shine", p);
-        }
-
     }
 }

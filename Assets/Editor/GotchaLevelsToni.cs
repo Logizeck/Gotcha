@@ -299,8 +299,23 @@ public static partial class GotchaProjectBuilder
         SmokeEmitter confetti = Emitter(root.transform, "Confetti", new Vector2(0f, 3.2f), "confetti", 40f, 2.2f, -1.6f, 2.6f, 1f, Color.white, 50);
         confetti.spinRange = 360f;
         SpriteRenderer splat = Art(root.transform, "Splat", "cream_splat", 90, true, new Vector2(0f, 0.3f)).GetComponent<SpriteRenderer>();
-        splat.transform.localScale = Vector3.one * 2.2f;
-        Transform tongue = Fitted(root.transform, "BigTongue", "pug_tongue", new Vector2(0f, -7.5f), 4f, 91);
+        splat.transform.localScale = Vector3.one * 1.6f;
+        // finale: il muso di Toni in primo piano dietro la panna, linguona e schizzi di panna da leccare via
+        Transform face = Art(root.transform, "BigFace", "toni_face_big", 85, false, new Vector2(0f, -2.0f));
+        face.localScale = Vector3.one * 1.3f;
+        Transform tonguePivot = Child(face, "TonguePivot", new Vector2(0f, -1.1f)).transform;
+        Art(tonguePivot, "Art", "toni_tongue_big", 95, false);
+        tonguePivot.gameObject.SetActive(false);
+        var cream = new List<Transform>();
+        var rnd = new System.Random(100);
+        foreach (Vector2 at in new[] { new Vector2(-1.5f, 1.6f), new Vector2(0.2f, 2.0f), new Vector2(1.6f, 1.3f), new Vector2(-0.6f, 0.9f), new Vector2(0.9f, 0.4f),
+                                         new Vector2(-1.7f, 0.1f), new Vector2(0f, -0.3f), new Vector2(1.7f, -0.5f), new Vector2(-0.9f, -0.9f), new Vector2(0.8f, -1.2f) })
+        {
+            Transform c = Art(root.transform, "Cream", "cream_blob", 91, false, at);
+            c.localScale = Vector3.one * (0.9f + (float)rnd.NextDouble() * 0.5f);
+            c.localRotation = Quaternion.Euler(0, 0, (float)rnd.NextDouble() * 360f);
+            cream.Add(c);
+        }
 
         SetField(level, "toni", toni);
         SetField(level, "feather", feather);
@@ -310,7 +325,9 @@ public static partial class GotchaProjectBuilder
         SetField(level, "sneezeCloud", sneeze);
         SetField(level, "confetti", confetti);
         SetField(level, "splat", splat);
-        SetField(level, "bigTongue", tongue);
+        SetField(level, "bigFace", face);
+        SetField(level, "tonguePivot", tonguePivot);
+        SetArray(level, "cream", cream.ToArray());
         SetField(level, "candleBubble", SmallBubble(root.transform, new Vector2(-1.0f, 0.3f)));
         return SaveLevel(root, "Toni4");
     }

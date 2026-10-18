@@ -266,6 +266,22 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.38
+- **100 TONI'S BIRTHDAY**: il finale con la torta sullo schermo è più chiaro. La torta si spiaccica sul vetro in tanti
+  schizzi di panna (`cream_blob`), poi il **muso di Toni in primo piano** (`toni_face_big`) sale da sotto, *dietro* la
+  panna, e si schiaccia contro il vetro; la **linguona** (`toni_tongue_big`) esce dalla bocca, punta lo schizzo più
+  lontano e spazza di lato: ogni schizzo toccato si schiaccia e sparisce (whoosh + vibrazione leggera a ogni leccata),
+  finché il vetro è pulito. Poi "*burp*", il muso scende e parte la festa.
+- **68 MAGIC RUNE**: nuovo riconoscitore "a nuvola di punti" (`PointCloudRecognizer`, algoritmo $P) che guarda la
+  forma e non l'ordine del tratto: la **stella** ora è accettata sia a pentagramma sia col contorno, da qualsiasi punta
+  e in qualsiasi verso. Le rune passano da 5 a **13** (cerchio, triangolo, quadrato, zigzag, stella, spunta, spirale,
+  cuore, infinito, onda, rombo, luna, montagne): a ogni partita ne escono 3 a caso. Il vecchio `ShapeRecognizer` è
+  stato rimosso.
+- **103 WHACK-A-MOLE**: tutte le buche delle talpe sono sul prato (prima la fila alta finiva nel cielo).
+- **Niente titoli di coda**: il livello ROLLING CREDITS è stato tolto (e con lui l'Easter egg Credits Skipper), perché
+  il gioco riceverà nuovi livelli a ogni aggiornamento. Ora i livelli sono 103.
+- Versione del costruttore 41.
+
 ## Versione 0.37
 - **21 LOW BATTERY (Easter egg Mecha Mode)**: sotto "GATTAI!!" compare il sottotitolo giapponese **合体！**
   (disegnato a pennellate, `gattai_jp`: il font del gioco non ha i caratteri giapponesi), con un piccolo rimbalzo.
