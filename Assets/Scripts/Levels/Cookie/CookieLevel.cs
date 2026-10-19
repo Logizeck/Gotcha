@@ -61,7 +61,8 @@ namespace Gotcha.Levels
 
         void OnHit(float speed, Vector2 at)
         {
-            if (done || IsFinished || speed < breakImpact) return;
+            if (done || IsFinished) return;
+            if (speed < breakImpact) { if (speed > breakImpact * 0.3f) Haptics.Light(); return; }   // botta che non lo rompe
             done = true;
             StartCoroutine(Break(at));
         }

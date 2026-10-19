@@ -67,7 +67,6 @@ namespace Gotcha.Levels
 
         IEnumerator Fall()
         {
-            Haptics.Medium();
             done = true;
             if (bubble != null) bubble.Show("AAAAAH!", true);
             Vector3 from = acrobat.position;
@@ -78,6 +77,7 @@ namespace Gotcha.Levels
                 acrobat.rotation = Quaternion.Euler(0, 0, -side * (fallAngle + k * 160f));
                 yield return null;
             }
+            Haptics.Medium();
             if (splash != null) { splash.transform.position = new Vector3(acrobat.position.x, -3.4f, 0f); splash.Play(); }
             if (bubble != null) bubble.Show("SPLASH!", true);
             yield return new WaitForSeconds(0.3f);

@@ -93,6 +93,7 @@ namespace Gotcha.Levels
         {
             if (cutMark != null) cutMark.enabled = false;
             whole.SetActive(false);
+            Haptics.Light();
             Vector3 c = pizza.position;
             // ogni spicchio ha il suo pivot nel baricentro (a 4r/3π dal centro, sulla bisettrice): lo si afferra lì
             float centroid = 4f * radius / (3f * Mathf.PI);
@@ -113,6 +114,7 @@ namespace Gotcha.Levels
         void OnServed(DropSlot plate, Draggable2D slice)
         {
             served++;
+            Haptics.Light();
             slice.transform.rotation = Quaternion.Euler(0, 0, -45f);
             int i = System.Array.IndexOf(plates, plate);
             StartCoroutine(Eat(i >= 0 && mice != null && i < mice.Length ? mice[i] : null, slice.transform));

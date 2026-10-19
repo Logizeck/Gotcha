@@ -126,6 +126,7 @@ namespace Gotcha.Levels
             Vector3 from = f.position;
             for (float k = 0f; k < 1f; k += Time.deltaTime / 0.4f) { f.position = Vector3.Lerp(from, jar.position, k); yield return null; }
             f.gameObject.SetActive(false);
+            Haptics.Light();
             count++;
             if (++sinceChange >= 2) { sinceChange = 0; wanted = (wanted + Random.Range(1, 3)) % 3; }   // ora un altro colore
             Count();
@@ -145,6 +146,7 @@ namespace Gotcha.Levels
             wolf.SetActive(true);
             Vector3 s = wolf.transform.localScale;
             for (float k = 0f; k < 1f; k += Time.deltaTime / 0.35f) { wolf.transform.localScale = s * Mathf.Lerp(0.3f, 1.4f, k); yield return null; }
+            Haptics.Medium();
             if (bubble != null) bubble.Show("Those were NOT fireflies.");
             yield return new WaitForSeconds(1.5f);
             Fail();

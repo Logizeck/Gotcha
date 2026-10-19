@@ -127,6 +127,7 @@ namespace Gotcha.Levels
             yield return new WaitForSeconds(0.4f);
             safeClosed.SetActive(false);
             safeOpen.SetActive(true);
+            Haptics.Light();
             dial.gameObject.SetActive(false);
             if (bubble != null) bubble.Show("Smooth. Very smooth.");
             yield return new WaitForSeconds(1.5f);

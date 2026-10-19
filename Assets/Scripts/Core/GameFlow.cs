@@ -14,8 +14,13 @@ namespace Gotcha.Core
     {
         public static GameFlow Instance { get; private set; }
 
-        /// <summary>Build di prova: tutti i livelli giocabili dalla selezione (il progresso vero resta salvato).</summary>
+        /// <summary>Build di prova: tutti i livelli giocabili dalla selezione (il progresso vero resta salvato).
+        /// Nella build per Google Play (define GOTCHA_RELEASE, menu Gotcha > Build Google Play AAB) si sbloccano giocando.</summary>
+#if GOTCHA_RELEASE
+        public const bool UnlockAllLevels = false;
+#else
         public const bool UnlockAllLevels = true;
+#endif
 
         [SerializeField] LevelCatalog catalog;
         [SerializeField] Transform levelHost;
@@ -54,7 +59,7 @@ namespace Gotcha.Core
         void Awake()
         {
             Instance = this;
-            Ads = new AdBreakManager(new SimulatedAdProvider());   // pubblicità simulata finché non c'è AdMob
+            Ads = new AdBreakManager(CreateAdProvider());
             Ads.AdsRemoved = () => SaveData.AdsRemoved;
             Lives = GetComponent<LivesManager>();
             if (Lives == null) Lives = gameObject.AddComponent<LivesManager>();
@@ -62,6 +67,19 @@ namespace Gotcha.Core
             // Mentre il gioco è aperto lo schermo non si spegne e non si abbassa (molti livelli si giocano
             // senza toccarlo: inclinazione, attesa...). Su Android è il flag KEEP_SCREEN_ON.
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
+        }
+
+        /// <summary>AdMob se il plugin è installato (define GOTCHA_ADMOB); nella build per lo store senza AdMob nessuna
+        /// pubblicità; nelle build di prova la pubblicità simulata.</summary>
+        static IAdProvider CreateAdProvider()
+        {
+#if GOTCHA_ADMOB && !UNITY_EDITOR
+            return new AdMobProvider();
+#elif GOTCHA_RELEASE
+            return new NoAdsProvider();
+#else
+            return new SimulatedAdProvider();
+#endif
         }
 
         void OnApplicationFocus(bool focus)

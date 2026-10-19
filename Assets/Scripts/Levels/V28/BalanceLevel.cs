@@ -64,6 +64,7 @@ namespace Gotcha.Levels
                 place[i] = (place[i] + 1) % 3;
                 tiltTarget = 0f;   // spostando le monete la bilancia torna dritta
                 Sfx.Play(this, "tick");
+                if (place[i] != 0) Haptics.Light();   // moneta sul piatto
                 return;
             }
         }
@@ -91,6 +92,7 @@ namespace Gotcha.Levels
                 if (place[i] == 1) left += m; else if (place[i] == 2) right += m;
             }
             Sfx.Play(this, "clunk", 0.8f);
+            Haptics.Light();
             tiltTarget = Mathf.Approximately(left, right) ? 0f : (left > right ? 14f : -14f);   // piatto più pesante in basso
             weighsLeft--;
             yield return new WaitForSeconds(0.9f);

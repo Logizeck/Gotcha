@@ -135,6 +135,7 @@ namespace Gotcha.Levels
             Vector3 m = mouse.localPosition;
             if (bubble != null) bubble.Show("HOT HOT HOT!!!");
             Squeak();
+            Haptics.Medium();
             if (steam != null) { steam.transform.position = mouse.position + Vector3.up * 0.7f; steam.puffsPerSecond = 14f; steam.Play(); }
             for (float k = 0f; k < 1f; k += Time.deltaTime / 1.1f)
             {
@@ -145,6 +146,7 @@ namespace Gotcha.Levels
             }
             // FWOOSH: fiammata
             if (fire != null) fire.Play();
+            Haptics.Heavy();
             for (float k = 0f; k < 1f; k += Time.deltaTime / 0.6f)
             {
                 if (burnGlow != null) { burnGlow.color = new Color(1f, 0.55f, 0.15f, 0.6f + 0.4f * Mathf.Sin(k * Mathf.PI)); burnGlow.transform.localScale = Vector3.one * (4f + k * 3f); }

@@ -26,3 +26,8 @@
 Screenshots/
 Tools/.xlsx_img/
 Gotcha_livelli.xlsx
+
+# firma della build per Google Play (password del keystore): mai in git
+ReleaseSigning.json
+*.keystore
+*.jks

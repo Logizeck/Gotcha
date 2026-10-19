@@ -49,6 +49,7 @@ namespace Gotcha.Levels
             if (bubble != null) bubble.Show("Find me!");
             yield return new WaitForSeconds(1.3f);
             yield return Lift(boxes, false);
+            Haptics.Light();   // le scatole toccano il tavolo
             mouse.gameObject.SetActive(false);   // ora è nascosto davvero
             FollowBox();
             if (bubble != null) bubble.Hide();

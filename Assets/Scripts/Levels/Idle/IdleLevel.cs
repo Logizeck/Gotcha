@@ -130,6 +130,7 @@ namespace Gotcha.Levels
                 t.position += Vector3.down * (v * Time.deltaTime);
                 yield return null;
             }
+            if (t != null) Haptics.Light();
         }
 
         static IEnumerator HideLater(SpeechBubble b, float seconds)

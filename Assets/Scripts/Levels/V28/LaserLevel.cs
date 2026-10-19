@@ -112,6 +112,7 @@ namespace Gotcha.Levels
             Vector3 from = cat.position;
             for (float k = 0f; k < 1f; k += Time.deltaTime / 0.35f) { cat.position = from + Vector3.up * Mathf.Sin(k * Mathf.PI) * 0.6f; yield return null; }
             cat.position = from;
+            Haptics.Light();   // il gatto atterra sul puntino
             yield return new WaitForSeconds(1f);
             Win();
         }

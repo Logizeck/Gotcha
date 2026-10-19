@@ -76,6 +76,7 @@ namespace Gotcha.Levels
         void CutRope(int i)
         {
             ropes[i].enabled = false;
+            Haptics.Light();
             foreach (DistanceJoint2D j in joints)
                 if (j != null && j.enabled && Vector2.Distance(j.connectedAnchor, anchors[i].position) < 0.05f) j.enabled = false;
         }
@@ -106,6 +107,7 @@ namespace Gotcha.Levels
         IEnumerator Eat()
         {
             done = true;
+            Haptics.Light();
             cookie.simulated = false;
             foreach (LineRenderer r in ropes) if (r != null) r.enabled = false;
             Transform t = cookie.transform;
@@ -127,6 +129,7 @@ namespace Gotcha.Levels
         IEnumerator Crumbs()
         {
             done = true;
+            Haptics.Medium();
             if (crumbs != null) { crumbs.transform.position = cookie.position; crumbs.Play(); }
             cookie.gameObject.SetActive(false);
             if (bubble != null) bubble.Show("Nooo, crumbs!");

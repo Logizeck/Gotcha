@@ -1646,5 +1646,405 @@
   ],
   "eggName": "Cat Bonk",
   "eggHow": "Colpisci il gatto che ogni tanto spunta da una buca al posto delle talpe."
+ },
+ {
+  "folder": "BulbGrid",
+  "id": "bulb_grid",
+  "title": "BULB GRID",
+  "hint": "Each bulb also flips its neighbours.",
+  "egg": "",
+  "n": 104,
+  "desc": "Soffitta buia: tocca le lampadine (ognuna accende/spegne anche le vicine) finché sono tutte e 9 accese.",
+  "hints": [
+   "Each bulb also flips its neighbours.",
+   "Tapping the same bulb twice undoes it. The scramble was only 3 or 4 taps.",
+   "A dark plus shape (+) means: tap its centre bulb. Two overlapping pluses? Tap both centres. Lost? Press RESET."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "ColorTubes",
+  "id": "color_tubes",
+  "title": "SORT IT OUT",
+  "hint": "One colour per tube. Is that grey one really a ball?",
+  "egg": "",
+  "n": 105,
+  "desc": "Ordina le palline (un colore per provetta); la pallina grigia è un criceto arrotolato che, sollevato, scappa liberando spazio.",
+  "hints": [
+   "One colour per tube. Is that grey one really a ball?",
+   "The grey 'ball' is a curled-up hamster: lift it and it runs away, freeing space.",
+   "Dig out the hamster first, then use the empty space to stack each colour in its own tube."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "WaterJugs",
+  "id": "four_liters",
+  "title": "FOUR LITERS",
+  "hint": "A 5 and a 3 can make a 4. Pour back and forth.",
+  "egg": "",
+  "n": 106,
+  "desc": "Il gatto vuole ESATTAMENTE 4 litri: caraffe da 5 L e 3 L, rubinetto, lavandino e ciotola.",
+  "hints": [
+   "A 5 and a 3 can make a 4. Pour back and forth.",
+   "Fill the 5 L jug and pour it into the 3 L one: 2 L stay in the big jug.",
+   "Fill 5, pour into 3, empty 3, pour the 2 L into 3, fill 5, top up the 3: 4 L stay in the 5 L jug. Pour it in the bowl."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Untangle",
+  "id": "untangle",
+  "title": "YARN KNOT",
+  "hint": "Drag the buttons until no strings cross.",
+  "egg": "",
+  "n": 107,
+  "desc": "Il gatto ha ingarbugliato la lana: trascina i 7 bottoni finché nessun filo si incrocia (il bottone con 4 fili al centro).",
+  "hints": [
+   "Drag the buttons until no strings cross.",
+   "One button is tied to four others: put it in the middle.",
+   "Put the busiest button in the centre, then arrange the other six around it in a ring, following the strings."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "DotToDot",
+  "id": "dot_to_dot",
+  "title": "CONNECT THE DOTS",
+  "hint": "Draw from 1 to 12... and back to 1.",
+  "egg": "",
+  "n": 108,
+  "desc": "Unisci i puntini 1→12→1: diventa una chiave vera da portare alla serratura; una mosca sul 9 va scacciata con un tocco.",
+  "hints": [
+   "Draw from 1 to 12... and back to 1.",
+   "Something is sitting on dot 9. Tap it!",
+   "Shoo the fly off dot 9, draw 1→12→1, then drag the key into the lock."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Crane",
+  "id": "sky_crane",
+  "title": "SKY CRANE",
+  "hint": "Tap to drop the crate. Only what lands on the stack stays.",
+  "egg": "crane_perfect",
+  "n": 109,
+  "desc": "Tocca per sganciare la cassa che oscilla dalla gru; la parte che sporge viene tagliata. Impila 6 casse per far scendere il gatto dal tetto. 3 vite.",
+  "hints": [
+   "Tap to drop the crate. Only what lands on the stack stays.",
+   "Wait until the crate is right above the tower, then tap.",
+   "Tap when the swinging crate lines up with the top crate: perfect drops don't shrink."
+  ],
+  "eggName": "Master Builder",
+  "eggHow": "Tutte e 6 le casse con lancio PERFECT!"
+ },
+ {
+  "folder": "Fishing",
+  "id": "gone_fishing",
+  "title": "GONE FISHING",
+  "hint": "Not every wobble is a fish.",
+  "egg": "",
+  "n": 110,
+  "desc": "Tira solo quando il galleggiante va tutto sott'acqua con lo spruzzo; rana, foglia e papera sono finte. 3 pesci.",
+  "hints": [
+   "Not every wobble is a fish.",
+   "Twitches, frogs, leaves and ducks are fake-outs.",
+   "Tap only when the bobber goes fully under with a splash and a \"!\". The boot is free."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Sheep",
+  "id": "count_sheep",
+  "title": "COUNT THE SHEEP",
+  "hint": "Count only the real sheep that END UP on the right.",
+  "egg": "",
+  "n": 111,
+  "desc": "Conta le pecore che finiscono oltre lo steccato: quella che torna indietro e il lupo travestito non contano, l'agnellino che passa sotto sì.",
+  "hints": [
+   "Count only the real sheep that END UP on the right.",
+   "The wolf doesn't count, the one that turns back doesn't count. Watch the bottom of the fence!",
+   "Count sheep that end on the right side, plus the tiny lamb running UNDER the fence."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "LockPattern",
+  "id": "lock_screen",
+  "title": "LOCK SCREEN",
+  "hint": "Look closely at the glass. Fingers leave traces.",
+  "egg": "",
+  "n": 112,
+  "desc": "Sblocca il telefono ripassando le ditate unte sul vetro, partendo dall'impronta grande. 3 tentativi.",
+  "hints": [
+   "Look closely at the glass. Fingers leave traces.",
+   "The greasy smudges on the screen draw the path.",
+   "Start at the big fingerprint and follow the smudges from dot to dot without lifting."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Giraffe",
+  "id": "tall_guest",
+  "title": "TALL GUEST",
+  "hint": "The screen is too short. Is it, though?",
+  "egg": "",
+  "n": 113,
+  "desc": "La giraffa non entra nello schermo: gira il telefono in orizzontale e il mondo ruota.",
+  "hints": [
+   "The screen is too short. Is it, though?",
+   "You can't zoom. But you can turn something.",
+   "Turn your phone sideways (landscape) and hold it there."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Sokoban",
+  "id": "box_pusher",
+  "title": "BOX PUSHER",
+  "hint": "Swipe to push the cheese crates onto the red marks.",
+  "egg": "",
+  "n": 114,
+  "desc": "Sokoban: spingi le 3 casse di formaggio sui segni rossi; attento alla zampa del gatto che ogni tanto colpisce una casella.",
+  "hints": [
+   "Swipe to push the cheese crates onto the red marks.",
+   "A crate pushed into a corner is stuck forever: plan the order (UNDO is free). Watch the shadow on the right, a paw is coming!",
+   "Left crate: push it up, then left into the corner. Middle crate: push it right twice, then up twice from below. Bottom crate: push it right twice, then up once."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Snake",
+  "id": "hungry_snake",
+  "title": "HUNGRY SNAKE",
+  "hint": "Swipe to steer the snake. Eat 8 apples!",
+  "egg": "ouroboros",
+  "n": 115,
+  "desc": "Snake: guida il serpente con gli swipe e mangia 8 mele. 3 vite.",
+  "hints": [
+   "Swipe to steer the snake. Eat 8 apples!",
+   "You can't turn back on yourself. Plan wide turns and stay away from the walls as you speed up.",
+   "Swipe toward each apple, circle around your body. Leave space: the faster you go, the earlier you must turn."
+  ],
+  "eggName": "Ouroboros",
+  "eggHow": "Fai mordere alla testa esattamente la punta della coda."
+ },
+ {
+  "folder": "Pinball",
+  "id": "pinball",
+  "title": "PINBALL",
+  "hint": "Tap the left or right half of the screen to flip. Light all 3 bumpers!",
+  "egg": "",
+  "n": 116,
+  "desc": "Flipper: accendi i 3 respingenti, il gatto apre la bocca: mandaci dentro la pallina. 3 palline.",
+  "hints": [
+   "Tap the left or right half of the screen to flip. Light all 3 bumpers!",
+   "Every bumper you hit stays lit. When all 3 are lit, the cat opens its mouth.",
+   "Flip when the ball reaches the middle of the flipper. With all 3 lit, aim straight up the center into the cat's mouth."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "AirHockey",
+  "id": "air_hockey",
+  "title": "AIR HOCKEY",
+  "hint": "Drag your mallet and score 3 goals before the cat does.",
+  "egg": "",
+  "n": 117,
+  "desc": "Air hockey contro il gatto, primo a 3 gol; sul 2-0 il gatto bara con lo zampone: toccalo per farlo ritirare.",
+  "hints": [
+   "Drag your mallet and score 3 goals before the cat does.",
+   "Hit the puck when the cat's paw is away. Bank shots off the side walls fool it.",
+   "At 2-0 the cat blocks its goal with a big paw: tap the paw to boop it away, then shoot quickly!"
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Basket",
+  "id": "slam_dunk",
+  "title": "SLAM DUNK",
+  "hint": "Flick the ball up toward the hoop.",
+  "egg": "",
+  "n": 118,
+  "desc": "Tiro a canestro con uno swipe: 3 canestri con 6 palloni, il ferro si sposta.",
+  "hints": [
+   "Flick the ball up toward the hoop.",
+   "Swipe straight toward the hoop. A medium-fast flick is better than a super-fast one.",
+   "Flick from the ball toward the rim with a quick, medium swipe. For the moving hoop, swipe where it WILL be."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Knock",
+  "id": "knock_knock",
+  "title": "KNOCK KNOCK",
+  "hint": "Who's there? Not your fingertip.",
+  "egg": "",
+  "n": 119,
+  "desc": "Toccare lo schermo non vale: bussa con le nocche sul RETRO del telefono col ritmo giusto (un colpo, pausa, due colpi).",
+  "hints": [
+   "Who's there? Not your fingertip.",
+   "Screen taps don't count: the whole phone is the door.",
+   "Knock with your knuckles on the BACK of the phone: knock... (pause) knock-knock."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "FaceDown",
+  "id": "screen_time",
+  "title": "SCREEN TIME",
+  "hint": "He's staring at something bright...",
+  "egg": "",
+  "n": 120,
+  "desc": "Il bambino fissa lo schermo e non dorme: metti il telefono a faccia in giù per 3 secondi, poi giralo.",
+  "hints": [
+   "He's staring at something bright...",
+   "He won't sleep while the screen is on. And YOU are the screen.",
+   "Put the phone face DOWN for 3 seconds (lullaby, then snoring), then turn it back up."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Vase",
+  "id": "broken_vase",
+  "title": "BROKEN VASE",
+  "hint": "Quick, before Mom sees!",
+  "egg": "",
+  "n": 121,
+  "desc": "Ricomponi i 5 cocci del vaso (toccali per ruotarli); uno è sotto il gatto: toccalo per farlo spostare.",
+  "hints": [
+   "Quick, before Mom sees!",
+   "Tap a shard to turn it: it only fits the right way up.",
+   "One shard slid under the sleeping cat: tap the cat to make it roll away."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Words",
+  "id": "word_salad",
+  "title": "WORD SALAD",
+  "hint": "Tap the letters to answer the riddle.",
+  "egg": "",
+  "n": 122,
+  "desc": "Tre indovinelli con le tessere delle lettere; l'ultimo: la parola sempre scritta sbagliata è WRONG.",
+  "hints": [
+   "Tap the letters to answer the riddle.",
+   "Tap a letter in a box to send it back. Some letters are decoys.",
+   "The last answer is the word itself: W-R-O-N-G."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Chicken",
+  "id": "why_chicken",
+  "title": "WHY THE CHICKEN",
+  "hint": "Mom is waiting on the other side.",
+  "egg": "",
+  "n": 123,
+  "desc": "Frogger: porta il pulcino oltre 4 corsie di traffico fino alla mamma (tocca = salto avanti). 3 vite.",
+  "hints": [
+   "Mom is waiting on the other side.",
+   "Swipe down to hop back, left or right to step aside. The middle grass is safe.",
+   "Tap to hop only when there's a gap, rest on the middle grass, then cross the second road."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Paint",
+  "id": "paint_mixer",
+  "title": "PAINT MIXER",
+  "hint": "Tap the tubes to drip paint into the bucket. Watch the MATCH meter.",
+  "egg": "",
+  "n": 124,
+  "desc": "Mescola le gocce di tempera per ottenere il colore del campione; l'ultimo è solo una parola: SALMONE.",
+  "hints": [
+   "Tap the tubes to drip paint into the bucket. Watch the MATCH meter.",
+   "Red+yellow = orange, yellow+blue = green, red+blue = purple. White makes it lighter.",
+   "Salmon is a pinkish orange: 2 red + 1 yellow + 2 white."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Toni5",
+  "id": "toni_dream",
+  "title": "SWEET DREAMS",
+  "hint": "Toni is dreaming of a bone. The room is full of stuff... but what he really wants isn't in the room.",
+  "egg": "",
+  "n": 125,
+  "desc": "Toni dorme e sogna un osso: tra tanti oggetti, la soluzione è trascinare l'osso FUORI dal sogno davanti al suo naso.",
+  "hints": [
+   "Toni is dreaming of a bone. The room is full of stuff... but what he really wants isn't in the room.",
+   "Dreams can come true... with a little help.",
+   "Drag the bone OUT of Toni's dream bubble and drop it right in front of his nose."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "BubbleWrap",
+  "id": "bubble_wrap",
+  "title": "BUBBLE WRAP",
+  "hint": "Pop every bubble. Every. Single. One.",
+  "egg": "",
+  "n": 126,
+  "desc": "Scoppia tutte le bolle del pluriball; l'ultima è sul retro: gira il foglio con uno swipe.",
+  "hints": [
+   "Pop every bubble. Every. Single. One.",
+   "The counter says one is left... but not on THIS side.",
+   "Swipe sideways across the sheet to flip it over, then pop the bubble on the back."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Guitar",
+  "id": "out_of_tune",
+  "title": "OUT OF TUNE",
+  "hint": "Pluck a string, play the tuning fork, turn the peg until they match.",
+  "egg": "",
+  "n": 127,
+  "desc": "Accorda le 3 corde della chitarra del gatto: pizzica, ascolta il diapason e gira la chiavetta.",
+  "hints": [
+   "Pluck a string, play the tuning fork, turn the peg until they match.",
+   "Drag a peg up to raise the pitch, down to lower it. The tuner shows LOW/HIGH while the string rings.",
+   "For each string: pluck it, drag its peg until the needle is centred and the string glows. Tune all three."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Claw",
+  "id": "claw_machine",
+  "title": "CLAW MACHINE",
+  "hint": "Move the claw, press DROP. Win the plush with the golden key!",
+  "egg": "",
+  "n": 128,
+  "desc": "Gru del luna park con 5 gettoni: togli il pesce di peluche sopra l'orsetto con la chiave, poi prendi l'orsetto.",
+  "hints": [
+   "Move the claw, press DROP. Win the plush with the golden key!",
+   "The key bear is buried under a fish. Clear the fish out of the way first.",
+   "Centre the claw on the fish and DROP, then centre it on the bear and DROP again."
+  ],
+  "eggName": "",
+  "eggHow": ""
  }
 ]

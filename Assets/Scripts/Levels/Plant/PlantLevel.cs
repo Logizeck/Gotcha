@@ -209,6 +209,7 @@ namespace Gotcha.Levels
             done = true;
             flying = false;
             if (current != null) current.gameObject.SetActive(false);
+            Haptics.Medium();
             if (splash != null) { splash.transform.position = bird.position; splash.Play(); }
             if (birdUp != null) birdUp.SetActive(false);
             if (birdDown != null) birdDown.SetActive(false);
@@ -328,6 +329,7 @@ namespace Gotcha.Levels
             flying = false;
             current.gameObject.SetActive(false);
             absorbed++;
+            Haptics.Light();
             Grow();
             UpdateTexts();
             if (sparkle != null) { sparkle.Play(); yield return new WaitForSeconds(0.2f); sparkle.Stop(); }
@@ -340,6 +342,7 @@ namespace Gotcha.Levels
         {
             flying = false;
             current.gameObject.SetActive(false);
+            Haptics.Light();
             if (splash != null) { splash.transform.position = new Vector3(at.x, Mathf.Max(at.y, groundY), 0f); splash.Play(); }
             yield return new WaitForSeconds(0.15f);
             if (splash != null) splash.Stop();

@@ -113,6 +113,7 @@ namespace Gotcha.Levels
             pancake.position = new Vector3(pancake.position.x, panY, pancake.position.z);
             state = State.Resting;
             rest = 0.5f;
+            Haptics.Light();
             if (steam != null) steam.Play();
             StartCoroutine(Squash());
             if (flipped)
@@ -147,6 +148,7 @@ namespace Gotcha.Levels
             pancake.position = new Vector3(pancake.position.x, ceilingY, pancake.position.z);
             pancake.rotation = Quaternion.Euler(0, 0, 180f);
             pancake.localScale = new Vector3(1.25f, 0.7f, 1f);
+            Haptics.Medium();
             Say("SPLAT! ...too strong.");
             yield return new WaitForSeconds(1.6f);
             Fail();
@@ -163,6 +165,7 @@ namespace Gotcha.Levels
             }
             pancake.rotation = Quaternion.identity;
             pancake.localScale = new Vector3(1.3f, 0.6f, 1f);
+            Haptics.Medium();
             Say("Splat! On the floor...");
             yield return new WaitForSeconds(1.4f);
             Fail();

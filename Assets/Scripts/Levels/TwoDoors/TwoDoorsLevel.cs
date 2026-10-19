@@ -95,6 +95,7 @@ namespace Gotcha.Levels
             for (int i = 0; i < count && !done; i++)
             {
                 sfx.PlayOneShot(strong ? hardKnock : softKnock, strong ? 1f : 0.6f);
+                if (strong) Haptics.Light();
                 if (strong && dust != null) { dust.transform.position = panels[door].position + new Vector3(0.66f, 2.55f, 0f); dust.Play(); }
                 for (float k = 0f; k < 0.16f; k += Time.deltaTime)
                 {
@@ -140,6 +141,7 @@ namespace Gotcha.Levels
             else
             {
                 sfx.PlayOneShot(hardKnock, 1f);
+                Haptics.Medium();
                 if (bubble != null) bubble.Show("RAAAAAWR!!!");
                 Vector3 s = who.localScale, home = transform.localPosition;
                 for (float k = 0f; k < 0.8f; k += Time.deltaTime)

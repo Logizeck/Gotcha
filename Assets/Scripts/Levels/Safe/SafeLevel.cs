@@ -107,6 +107,7 @@ namespace Gotcha.Levels
                 portrait.localRotation = Quaternion.Euler(0, 0, 6f + spin);
                 yield return null;
             }
+            Haptics.Medium();
             if (dust != null) { dust.transform.position = new Vector3(portrait.position.x, portrait.position.y - 0.9f, 0f); dust.Play(); }
             // atterra a faccia in giù: si vede il retro col post-it
             portrait.gameObject.SetActive(false);
@@ -148,6 +149,7 @@ namespace Gotcha.Levels
                 keypad.SetActive(false);
                 if (safeClosed != null) safeClosed.SetActive(false);
                 if (safeOpen != null) safeOpen.SetActive(true);
+                Haptics.Light();
                 if (key != null) key.gameObject.SetActive(true);
                 step = Step.Key;
             }

@@ -138,6 +138,7 @@ namespace Gotcha.Levels
             Vector2 at = PointerInput.TryGetPrimary(out Vector2 sp, out _, out _) ? PointerInput.ToWorld(cam, sp) : (Vector2)bowl.transform.position;
             if (Vector2.Distance(at, pizza.position) > dropRadius) return;
             if (!added.Add(bowl.itemId)) return;
+            Haptics.Light();
             for (int i = 0; i < layerIds.Length; i++)
                 if (layerIds[i] == bowl.itemId && wholeLayers[i] != null) { wholeLayers[i].SetActive(true); StartCoroutine(Plop(wholeLayers[i].transform)); }
             foreach (Transform s in slices)
@@ -188,6 +189,7 @@ namespace Gotcha.Levels
             }
             pizza.position = inOven;
             pizza.localScale = scale * 0.45f;
+            Haptics.Light();
             if (ovenSmoke != null) ovenSmoke.Play();
             for (float k = 0f; k < 1f; k += Time.deltaTime / 2.2f)
             {
@@ -270,6 +272,7 @@ namespace Gotcha.Levels
             if (cutMark != null) cutMark.enabled = false;
             if (steam != null) steam.Stop();
             pizza.gameObject.SetActive(false);
+            Haptics.Light();
             Vector3 c = pizza.position;
             float centroid = 4f * Radius / (3f * Mathf.PI);
             for (float k = 0f; k <= 1f; k += Time.deltaTime / 0.3f)
@@ -290,6 +293,7 @@ namespace Gotcha.Levels
         void OnServed(DropSlot plate, Draggable2D slice)
         {
             served++;
+            Haptics.Light();
             StartCoroutine(Munch(slice.transform, plate.transform.position + new Vector3(0f, 0.45f, 0f)));
             if (served >= plates.Length) StartCoroutine(Verdict());
         }
@@ -317,6 +321,7 @@ namespace Gotcha.Levels
             {
                 // EASTER EGG: piccantissima! strillano, paonazzi, furiosi, occhi in fiamme, lingua penzolante
                 if (bubble != null) bubble.Show("HOT!!! MAMMA MIAAA!!!");
+                Haptics.Medium();
                 StartCoroutine(Squeaks());
                 foreach (GameObject f in spicyFaces) if (f != null) f.SetActive(true);
                 if (steam != null) { steam.puffsPerSecond = 18f; steam.transform.position = pizzaHome() + Vector3.up * 0.6f; steam.Play(); }

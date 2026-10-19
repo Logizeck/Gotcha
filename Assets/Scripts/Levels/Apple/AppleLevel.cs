@@ -42,6 +42,7 @@ namespace Gotcha.Levels
             if (angle < -180f) angle += 360f;
             if (Mathf.Abs(angle) > 90f) angle += 180f;                         // non capovolgere la mela
 
+            Haptics.Light();
             if (wholeApple != null) wholeApple.SetActive(false);
             if (halves != null)
             {

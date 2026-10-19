@@ -157,6 +157,7 @@ namespace Gotcha.Levels
                             {
                                 strokes++;
                                 swing = 0f;
+                                Haptics.Light();
                                 if (smoke != null) smoke.Play();
                                 if (sparks != null) { sparks.transform.position = new Vector3(w.x, stickHome.y - 0.35f, 0f); sparks.Play(); sparkFor = 0.12f; }
                             }
@@ -240,6 +241,7 @@ namespace Gotcha.Levels
         {
             phase = Phase.Done;
             if (umbrella != null) umbrella.enabled = false;
+            Haptics.Medium();
             if (umbrellaFire != null) { umbrellaFire.transform.position = umbrella.transform.position + Vector3.up * 0.25f; umbrellaFire.Play(); }
             if (bubble != null) bubble.Show("My umbrella! FIRE!!");
             for (float k = 0f; k < 1.3f; k += Time.deltaTime)
@@ -292,6 +294,7 @@ namespace Gotcha.Levels
                 }
                 ice.localScale = full;
             }
+            Haptics.Medium();
             if (sparks != null) { sparks.transform.position = mouse.position + Vector3.up * 0.5f; sparks.tint = new Color(0.8f, 0.95f, 1f); sparks.Play(); }
             if (bubble != null) bubble.Show("*frozen*");
             for (float k = 0f; k < 0.3f; k += Time.deltaTime) { Rain(); yield return null; }

@@ -33,6 +33,8 @@ namespace Gotcha.Core
         AudioClip pending;     // brano che entra dopo la sfumata
         float fade = 1f;       // 0..1, moltiplica il volume
         bool fadingOut;
+        int lastSamples = -1;  // per accorgersi di un brano "in play" ma fermo (uscita audio persa)
+        float stuckFor;
 
         void Awake()
         {
@@ -51,8 +53,10 @@ namespace Gotcha.Core
 
         void OnDestroy() { if (Instance == this) Instance = null; }
 
-        // Al primo avvio Android mostra la richiesta del microfono: l'app perde il fuoco e l'audio può restare
-        // fermo. Al ritorno si riparte (e si riparte anche se la clip non era ancora caricata al primo Play).
+        // Al primo avvio Android mostra la richiesta del microfono: l'app perde il fuoco e, su molti telefoni, al ritorno
+        // l'AudioSource dice di suonare ma l'uscita audio è stata ricreata e resta muta. Quindi al ritorno non ci si
+        // fida di isPlaying: si riavvia il brano dal punto in cui era (e lo si fa anche se la clip non era ancora
+        // caricata al primo Play).
         void OnApplicationFocus(bool focus) { if (focus) Resume(); }
         void OnApplicationPause(bool paused) { if (!paused) Resume(); }
 
@@ -60,7 +64,12 @@ namespace Gotcha.Core
         {
             if (source == null || source.clip == null || AudioListener.pause) return;
             if (source.clip.loadState == AudioDataLoadState.Unloaded) source.clip.LoadAudioData();
-            if (!source.isPlaying) source.Play();
+            if (source.clip.loadState != AudioDataLoadState.Loaded) return;   // ci pensa Update appena è pronta
+            int at = source.timeSamples;
+            source.Stop();
+            source.Play();
+            source.timeSamples = Mathf.Clamp(at, 0, Mathf.Max(0, source.clip.samples - 1));
+            stuckFor = 0f;
         }
 
         public AudioClip Clip(MusicTrack track)
@@ -125,6 +134,14 @@ namespace Gotcha.Core
                 if (source.clip.loadState == AudioDataLoadState.Unloaded) source.clip.LoadAudioData();
                 else source.Play();
             }
+            // controllo: se il brano risulta in play ma non avanza da più di un secondo, si riavvia
+            if (source.isPlaying && !AudioListener.pause && source.clip != null)
+            {
+                if (source.timeSamples == lastSamples) stuckFor += dt; else stuckFor = 0f;
+                lastSamples = source.timeSamples;
+                if (stuckFor > 1f) Resume();
+            }
+            else { stuckFor = 0f; lastSamples = -1; }
         }
 
         /// <summary>Abbassa la musica finché <paramref name="owner"/> non chiama Unduck (o viene distrutto).</summary>

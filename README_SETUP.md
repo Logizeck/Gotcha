@@ -266,6 +266,40 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.39
+- **25 livelli nuovi (104-128)**, ognuno con una meccanica mai usata prima nel gioco:
+- **104 Bulb Grid** — Soffitta buia: tocca le lampadine (ognuna accende/spegne anche le vicine) finché sono tutte e 9 accese.
+- **105 Sort It Out** — Ordina le palline (un colore per provetta); la pallina grigia è un criceto arrotolato che, sollevato, scappa liberando spazio.
+- **106 Four Liters** — Il gatto vuole ESATTAMENTE 4 litri: caraffe da 5 L e 3 L, rubinetto, lavandino e ciotola.
+- **107 Yarn Knot** — Il gatto ha ingarbugliato la lana: trascina i 7 bottoni finché nessun filo si incrocia (il bottone con 4 fili al centro).
+- **108 Connect The Dots** — Unisci i puntini 1→12→1: diventa una chiave vera da portare alla serratura; una mosca sul 9 va scacciata con un tocco.
+- **109 Sky Crane** — Tocca per sganciare la cassa che oscilla dalla gru; la parte che sporge viene tagliata. Impila 6 casse per far scendere il gatto dal tetto. 3 vite. Easter egg *Master Builder*: Tutte e 6 le casse con lancio PERFECT!
+- **110 Gone Fishing** — Tira solo quando il galleggiante va tutto sott'acqua con lo spruzzo; rana, foglia e papera sono finte. 3 pesci.
+- **111 Count The Sheep** — Conta le pecore che finiscono oltre lo steccato: quella che torna indietro e il lupo travestito non contano, l'agnellino che passa sotto sì.
+- **112 Lock Screen** — Sblocca il telefono ripassando le ditate unte sul vetro, partendo dall'impronta grande. 3 tentativi.
+- **113 Tall Guest** — La giraffa non entra nello schermo: gira il telefono in orizzontale e il mondo ruota.
+- **114 Box Pusher** — Sokoban: spingi le 3 casse di formaggio sui segni rossi; attento alla zampa del gatto che ogni tanto colpisce una casella.
+- **115 Hungry Snake** — Snake: guida il serpente con gli swipe e mangia 8 mele. 3 vite. Easter egg *Ouroboros*: Fai mordere alla testa esattamente la punta della coda.
+- **116 Pinball** — Flipper: accendi i 3 respingenti, il gatto apre la bocca: mandaci dentro la pallina. 3 palline.
+- **117 Air Hockey** — Air hockey contro il gatto, primo a 3 gol; sul 2-0 il gatto bara con lo zampone: toccalo per farlo ritirare.
+- **118 Slam Dunk** — Tiro a canestro con uno swipe: 3 canestri con 6 palloni, il ferro si sposta.
+- **119 Knock Knock** — Toccare lo schermo non vale: bussa con le nocche sul RETRO del telefono col ritmo giusto (un colpo, pausa, due colpi).
+- **120 Screen Time** — Il bambino fissa lo schermo e non dorme: metti il telefono a faccia in giù per 3 secondi, poi giralo.
+- **121 Broken Vase** — Ricomponi i 5 cocci del vaso (toccali per ruotarli); uno è sotto il gatto: toccalo per farlo spostare.
+- **122 Word Salad** — Tre indovinelli con le tessere delle lettere; l'ultimo: la parola sempre scritta sbagliata è WRONG.
+- **123 Why The Chicken** — Frogger: porta il pulcino oltre 4 corsie di traffico fino alla mamma (tocca = salto avanti). 3 vite.
+- **124 Paint Mixer** — Mescola le gocce di tempera per ottenere il colore del campione; l'ultimo è solo una parola: SALMONE.
+- **125 Sweet Dreams** (Toni) — Toni dorme e sogna un osso: tra tanti oggetti, la soluzione è trascinare l'osso FUORI dal sogno davanti al suo naso.
+- **126 Bubble Wrap** — Scoppia tutte le bolle del pluriball; l'ultima è sul retro: gira il foglio con uno swipe.
+- **127 Out Of Tune** — Accorda le 3 corde della chitarra del gatto: pizzica, ascolta il diapason e gira la chiavetta.
+- **128 Claw Machine** — Gru del luna park con 5 gettoni: togli il pesce di peluche sopra l'orsetto con la chiave, poi prendi l'orsetto.
+- **Musica all'avvio**: se l'uscita audio si perde (es. dopo la richiesta del permesso microfono al primo avvio), al
+  ritorno il brano viene riavviato dal punto in cui era; in più un controllo riavvia il brano se risulta "in play" ma
+  fermo da più di un secondo.
+- **Vibrazioni** in circa 40 livelli: esplosioni (forte), punture, morsi, cadute e rotture (media), atterraggi,
+  colpi e scatti (leggera).
+- Easter egg nuovi: *Ouroboros* (115) e *Master Builder* (109).
+
 ## Versione 0.38
 - **100 TONI'S BIRTHDAY**: il finale con la torta sullo schermo è più chiaro. La torta si spiaccica sul vetro in tanti
   schizzi di panna (`cream_blob`), poi il **muso di Toni in primo piano** (`toni_face_big`) sale da sotto, *dietro* la

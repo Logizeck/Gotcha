@@ -60,6 +60,7 @@ namespace Gotcha.Components
                 yield return null;
             }
             key.localScale = ks;
+            Haptics.Light();   // clac della serratura
 
             if (panel != null)
             {

@@ -40,6 +40,7 @@ namespace Gotcha.Components
             if (bubble != null) bubble.Show("AAAAAAH!!");
             if (smoke != null) smoke.Play();
             Shoot(eyes);
+            Haptics.Medium();   // occhi che schizzano via
             if (mouthO != null && !mouthO.gameObject.activeSelf) { mouthO.gameObject.SetActive(true); StartCoroutine(PopIn(mouthO.transform)); }
 
             if (hat != null) { melter.Attach(hat); melter.Drop(hat, new Vector2(1.4f, 6.5f)); }   // il cappello salta per lo spavento
@@ -89,6 +90,7 @@ namespace Gotcha.Components
                     melter.Attach(eye);
                     melter.Drop(eye, Vector2.zero);
                     yield return new WaitForSeconds(0.3f);
+                    Haptics.Light();
                     if (bubble != null) bubble.Show("plop!");
                 }
             yield return new WaitForSeconds(1.6f);

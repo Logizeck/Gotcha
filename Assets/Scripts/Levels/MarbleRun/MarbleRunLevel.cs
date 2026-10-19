@@ -113,6 +113,7 @@ namespace Gotcha.Levels
             rollTime += Time.deltaTime;
             Vector2 p = marble.position;
             bool cupped = cupZone.OverlapPoint(p);
+            if (cupped && inCup <= 0f) Haptics.Light();   // tac nella tazza
             inCup = cupped ? inCup + Time.deltaTime : 0f;
             if (inCup > 0.5f) { StartCoroutine(Score()); return; }
             // ferma fuori dalla tazza (spinta troppo debole o incastrata su una rampa): torna al via

@@ -15,6 +15,7 @@ namespace Gotcha.Ads
         public float rewardedSeconds = 5f;
 
         public bool IsReady => true;
+        public bool RewardedReady => true;
 
         public void Show(Action onClosed)
         {

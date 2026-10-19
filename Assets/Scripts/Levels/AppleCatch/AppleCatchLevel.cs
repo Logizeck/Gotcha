@@ -82,6 +82,7 @@ namespace Gotcha.Levels
                     f.t.localPosition = new Vector3(Random.Range(-0.35f, 0.35f), 0.66f + caught * 0.03f, 0f);
                     f.t.localRotation = Quaternion.identity;
                     caught++;
+                    Haptics.Light();
                     UpdateCounter();
                     if (caught >= needed) { StartCoroutine(Yum()); return; }
                 }
@@ -90,6 +91,7 @@ namespace Gotcha.Levels
                     falling.RemoveAt(i);
                     f.t.gameObject.SetActive(false);
                     lost++;
+                    Haptics.Medium();
                     if (bubble != null) { bubble.Show("Bonk!"); StartCoroutine(HideLater(0.7f)); }
                 }
             }

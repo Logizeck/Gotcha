@@ -132,6 +132,7 @@ namespace Gotcha.Levels
         IEnumerator Splash()
         {
             done = true;
+            Haptics.Medium();
             if (splash != null) { splash.transform.position = new Vector3(mouse.position.x, fallBelow, 0f); splash.Play(); }
             if (bubble != null) bubble.Show("BLUB!");
             yield return new WaitForSeconds(0.3f);

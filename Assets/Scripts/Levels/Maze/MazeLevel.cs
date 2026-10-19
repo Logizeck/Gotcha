@@ -47,6 +47,7 @@ namespace Gotcha.Levels
                     t.localScale = scale * Mathf.Lerp(1f, 0.6f, k);
                     yield return null;
                 }
+                Haptics.Light();   // la pallina cade nella buca
             }
             Win();
         }

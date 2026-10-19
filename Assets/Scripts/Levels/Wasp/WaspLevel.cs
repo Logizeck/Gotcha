@@ -278,6 +278,7 @@ namespace Gotcha.Levels
             wasp.localPosition += (Vector3)(Random.insideUnitCircle.normalized * 0.35f);   // sbanda
             PickTarget();
             if (hits >= hitsNeeded) StartCoroutine(Fall());
+            else Haptics.Light();
         }
 
         IEnumerator Fall()
@@ -300,6 +301,7 @@ namespace Gotcha.Levels
             }
             wasp.localPosition = new Vector3(wasp.localPosition.x, groundY, 0f);
             wasp.localRotation = Quaternion.identity;   // a pancia in su, zampe all'aria
+            Haptics.Light();
             for (float k = 0f; k < 1f; k += Time.deltaTime / 0.25f)
             {
                 wasp.localPosition = new Vector3(wasp.localPosition.x, groundY + Mathf.Sin(k * Mathf.PI) * 0.15f, 0f);

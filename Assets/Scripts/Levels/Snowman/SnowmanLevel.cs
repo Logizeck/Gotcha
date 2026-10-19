@@ -158,7 +158,7 @@ namespace Gotcha.Levels
                 t.position += Vector3.down * (v * Time.deltaTime);
                 yield return null;
             }
-            if (t != null) t.position = new Vector3(t.position.x, target, t.position.z);
+            if (t != null) { t.position = new Vector3(t.position.x, target, t.position.z); Haptics.Light(); }
         }
 
         void LockInput()
@@ -197,6 +197,7 @@ namespace Gotcha.Levels
             Vector3 from = t.position;
             for (float k = 0f; k < 1f; k += Time.deltaTime / 0.15f) { t.position = Vector3.Lerp(from, target, k); yield return null; }
             t.position = target;
+            Haptics.Medium();
 
             // 1. sobbalzo e rossore, tremando dall'imbarazzo
             Vector3 home = snowman.localPosition;

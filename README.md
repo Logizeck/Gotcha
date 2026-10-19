@@ -70,6 +70,9 @@ Livelli 61-100 — terza ondata (ogni meccanica compare al massimo 3 volte; dall
 96 Bubble Count (numeri scritti in modi diversi, il 6 capovolto) · 97 Sneaky Mouse (torcia del cane e ombre dei mobili) ·
 98 Blind Stopwatch (ferma il cronometro a occhi chiusi) · 99 Whack-a-Mole (mai la talpa con il cappellino).
 
+Livelli 104-128 — quarta ondata, tutte meccaniche nuove (Toni al 125):
+104 Bulb Grid · 105 Sort It Out · 106 Four Liters · 107 Yarn Knot · 108 Connect The Dots · 109 Sky Crane · 110 Gone Fishing · 111 Count The Sheep · 112 Lock Screen · 113 Tall Guest · 114 Box Pusher · 115 Hungry Snake · 116 Pinball · 117 Air Hockey · 118 Slam Dunk · 119 Knock Knock · 120 Screen Time · 121 Broken Vase · 122 Word Salad · 123 Why The Chicken · 124 Paint Mixer · 125 Sweet Dreams · 126 Bubble Wrap · 127 Out Of Tune · 128 Claw Machine.
+
 Free to play: si gioca gratis; nel **negozio** (SHOP) si possono comprare **1 ora di vite infinite (0,99 €)** e
 **niente pubblicità per sempre (4,99 €)**. Vedi README_SETUP.md per la configurazione degli acquisti.
 

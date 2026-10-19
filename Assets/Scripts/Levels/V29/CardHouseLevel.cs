@@ -80,6 +80,7 @@ namespace Gotcha.Levels
             Vector3 to = c.localPosition;
             for (float k = 0f; k < 1f; k += Time.deltaTime / 0.15f) { c.localPosition = to + Vector3.up * (1f - k) * 0.6f; yield return null; }
             c.localPosition = to;
+            Haptics.Light();
         }
 
         IEnumerator AllPlaced()

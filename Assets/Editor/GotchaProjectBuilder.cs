@@ -31,7 +31,7 @@ public static partial class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 41;
+    const int BuilderVersion = 42;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -202,6 +202,10 @@ public static partial class GotchaProjectBuilder
         };
         levels.AddRange(VariantLevels());   // 41-60: dopo i livelli originali, i cui prefab servono da base
         levels.AddRange(VariantLevels2());  // 61-100
+        foreach (List<LevelDefinition> pack in new[] { Levels39A(), Levels39B(), Levels39C(), Levels39D(), Levels39E() })
+            levels.AddRange(pack);          // 0.39: 24 livelli nuovi (104-128, con Toni al 125)
+        foreach (List<LevelDefinition> pack in new[] { Levels40A(), Levels40B(), Levels40C(), Levels40D(), Levels40E() })
+            levels.AddRange(pack);          // 0.40: 21 livelli compositi (129-150, con Toni al 150)
         // I livelli nuovi di ogni aggiornamento vanno in coda (qui sopra, in fondo a VariantLevels2 o in una lista
         // nuova): non c'è un livello finale fisso. Toni occupa sempre le posizioni multiple di 25.
         levels = PlaceToniLevels(levels, ToniLevels());
@@ -618,8 +622,8 @@ public static partial class GotchaProjectBuilder
     /// </summary>
     static MusicTrack MusicFor(string folder)
     {
-        string[] dungeon = { "KeyDoor", "Maze", "TrapMaze", "DarkMaze", "WaspMaze", "ArtTheft", "FrozenKey", "Maze2", "TrapMaze2", "DarkMaze2", "WaspMaze6", "TrapMaze3", "DarkMaze3", "WaspMaze3", "TwoDoors", "MirrorMaze", "Magnet" };
-        string[] animals = { "Idle", "Volume", "Roach", "Snowman", "Defend", "Bedtime", "Campfire", "Plant", "Shell", "Sunny", "CatEyes", "Copycat", "Shell2", "Defend2", "Plant2", "Copycat2", "Wasp2", "CatEyes2", "Campfire2", "Flashlight", "Bridge", "Copycat3", "Shell3", "Defend3", "Plant3", "Tightrope", "Wasp3", "CatEyes3", "Fireflies", "Sneaky", "Whack", "Laser", "Rhythm", "Pipes", "Slide", "WhereMouse", "Carousel", "Toni1", "Toni2", "Toni3", "Toni4" };
+        string[] dungeon = { "KeyDoor", "Maze", "TrapMaze", "DarkMaze", "WaspMaze", "ArtTheft", "FrozenKey", "Maze2", "TrapMaze2", "DarkMaze2", "WaspMaze6", "TrapMaze3", "DarkMaze3", "WaspMaze3", "TwoDoors", "MirrorMaze", "Magnet", "DotToDot", "Sokoban", "Claw", "LockPattern" };
+        string[] animals = { "Idle", "Volume", "Roach", "Snowman", "Defend", "Bedtime", "Campfire", "Plant", "Shell", "Sunny", "CatEyes", "Copycat", "Shell2", "Defend2", "Plant2", "Copycat2", "Wasp2", "CatEyes2", "Campfire2", "Flashlight", "Bridge", "Chicken", "Fishing", "Sheep", "Giraffe", "WaterJugs", "Untangle", "Snake", "AirHockey", "Copycat3", "Shell3", "Defend3", "Plant3", "Tightrope", "Wasp3", "CatEyes3", "Fireflies", "Sneaky", "Whack", "Laser", "Rhythm", "Pipes", "Slide", "WhereMouse", "Carousel", "Toni1", "Toni2", "Toni3", "Toni4", "Toni5", "Toni6" };
         string[] kitchen = { "Apple", "Cookie", "Birthday", "Soup", "Rope", "Pizza", "PizzaChef", "Pancake", "AppleCatch", "Pancake2", "Cookie2", "Birthday2", "AppleCatch2" };
         if (System.Array.IndexOf(dungeon, folder) >= 0) return MusicTrack.Dungeon;
         if (System.Array.IndexOf(animals, folder) >= 0) return MusicTrack.Animals;
@@ -4783,13 +4787,9 @@ public static partial class GotchaProjectBuilder
 
         PlayerSettings.productName = "Gotcha!";
         PlayerSettings.companyName = "Gotcha";
-        PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "com.gotcha.game");
         PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
-        PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel23;
-        PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevelAuto;
-        // 64 bit obbligatorio: molti telefoni recenti rifiutano gli APK solo a 32 bit
-        PlayerSettings.SetScriptingBackend(BuildTargetGroup.Android, ScriptingImplementation.IL2CPP);
-        PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64 | AndroidArchitecture.ARMv7;
+        // pacchetto (InviteService.PackageName), versione da GameUI.Version, API 36, IL2CPP, ARM64 + ARMv7
+        GotchaBuildMenu.ApplyStoreSettings();
         // codice C# non usato tolto dalla build (Assets/link.xml protegge ciò che si carica per nome, es. lo store IAP)
         PlayerSettings.SetManagedStrippingLevel(BuildTargetGroup.Android, ManagedStrippingLevel.Medium);
         PlayerSettings.stripEngineCode = true;

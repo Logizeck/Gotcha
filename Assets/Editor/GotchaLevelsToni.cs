@@ -6,7 +6,7 @@ using Gotcha.Components;
 using Gotcha.EditorArt;
 using Gotcha.Levels;
 
-/// <summary>I livelli di Toni, il carlino: uno ogni 25 (25, 50, 75, 100).</summary>
+/// <summary>I livelli di Toni, il carlino: uno ogni 25 (25, 50, 75, 100, 125, 150).</summary>
 public static partial class GotchaProjectBuilder
 {
     /// <summary>I livelli di Toni, nell'ordine in cui compaiono (uno ogni 25). Quelli nuovi si aggiungono in fondo.</summary>
@@ -24,6 +24,12 @@ public static partial class GotchaProjectBuilder
         Define("Toni4", "toni_cake", "TONI'S BIRTHDAY",
             "Toni has to blow out his candle... but pugs can't blow. That peacock feather looks ticklish... and his nose is RIGHT there.",
             BuildToniCakeLevel()),
+        Define("Toni5", "toni_dream", "SWEET DREAMS",
+            "Toni is dreaming of a bone. The room is full of stuff... but what he really wants isn't in the room.",
+            BuildToniDreamLevel()),
+        Define("Toni6", "toni_fetch", "FETCH!",
+            "Toni's ball is stuck in the tree. Four steps to get it back to him... every one needs a different trick.",
+            BuildToniFetchLevel()),
     };
 
     /// <summary>
@@ -330,6 +336,101 @@ public static partial class GotchaProjectBuilder
         SetArray(level, "cream", cream.ToArray());
         SetField(level, "candleBubble", SmallBubble(root.transform, new Vector2(-1.0f, 0.3f)));
         return SaveLevel(root, "Toni4");
+    }
+
+    // ---------- 125: SWEET DREAMS ----------
+
+    static GameObject BuildToniDreamLevel()
+    {
+        var root = new GameObject("Level_Toni5");
+        ToniDreamLevel level = root.AddComponent<ToniDreamLevel>();
+        Art(root.transform, "Room", "night_bg", -20, false);
+        Art(root.transform, "Cushion", "pug_cushion", 1, false, new Vector2(0.4f, -3.05f)).localScale = Vector3.one * 1.05f;
+        ToniPug toni = ToniRig(root.transform, new Vector2(0.4f, -2.85f), 1.1f, root.transform);
+
+        // il sogno: nuvoletta con i pallini che scendono verso la testa, e dentro l'osso
+        Transform cloud = Art(root.transform, "DreamCloud", "dream_cloud", 20, false, new Vector2(0.96f, -0.2f));
+        cloud.localScale = Vector3.one * 0.9f;
+        Draggable2D bone = Prop(root.transform, "DreamBone", "bone", new Vector2(0.96f, -0.15f), 1.1f, new Vector2(1.3f, 0.75f), Vector2.zero, 22);
+
+        // la mensola e tutte le cose che si possono spostare (nessuna sveglia Toni)
+        Bar(root.transform, "Shelf", new Vector2(-1.65f, 0.95f), new Vector2(2.2f, 0.12f), new Color(0.55f, 0.36f, 0.22f), -5);
+        var props = new List<Draggable2D>
+        {
+            Prop(root.transform, "Sock", "sock", new Vector2(-2.2f, -2.9f), 1f, new Vector2(0.8f, 1f), new Vector2(0.06f, -0.15f), 10, -15f),
+            Prop(root.transform, "Teddy", "teddy_bear", new Vector2(-1.75f, -3.85f), 0.95f, new Vector2(1.1f, 1.15f), Vector2.zero, 10),
+            Prop(root.transform, "Ball", "toni_ball", new Vector2(-0.6f, -4.15f), 0.9f, new Vector2(1f, 1f), Vector2.zero, 10),
+            Prop(root.transform, "Slipper", "slipper", new Vector2(1.65f, -4.2f), 1f, new Vector2(1.35f, 0.7f), Vector2.zero, 10),
+            Prop(root.transform, "Clock", "alarm_clock", new Vector2(2.3f, -2.75f), 0.45f, new Vector2(2f, 1.8f), new Vector2(0f, 0.77f), 10),
+            Prop(root.transform, "Bell", "bell", new Vector2(-2.3f, 1.05f), 0.6f, new Vector2(1.2f, 1.1f), new Vector2(0f, 0.4f), 10),
+            Prop(root.transform, "Feather", "feather", new Vector2(-1.55f, 1.15f), 0.55f, new Vector2(1.75f, 0.9f), new Vector2(0.55f, 0.22f), 10, 10f),
+            Prop(root.transform, "Cheese", "cheese_wedge", new Vector2(-0.85f, 1.1f), 0.8f, new Vector2(1f, 0.7f), new Vector2(0f, 0.2f), 10),
+        };
+        string[] reactions =
+        {
+            "*sniff*... ew. Zzz...", "*cuddle*... Zzz...", "*paws twitch*... Zzz...", "*chew chew*... Zzz...",
+            "Five more minutes... Zzz", "*ding ding*... Zzz...", "Ah... ahh... Zzz...", "Cheese? ...no. BONE. Zzz...",
+        };
+        SmokeEmitter sparkle = Emitter(root.transform, "Sparkle", Vector2.zero, "sparkle_star", 30f, 0.6f, 0.4f, 0.4f, 0.8f, Color.white, 40);
+
+        SetField(level, "toni", toni);
+        SetField(level, "cloud", cloud);
+        SetField(level, "dreamBone", bone);
+        SetField(level, "dreamBoneArt", bone.GetComponentInChildren<SpriteRenderer>());
+        SetArray(level, "props", props.ToArray());
+        var so = new SerializedObject(level);
+        SerializedProperty rp = so.FindProperty("reactions");
+        rp.arraySize = reactions.Length;
+        for (int i = 0; i < reactions.Length; i++) rp.GetArrayElementAtIndex(i).stringValue = reactions[i];
+        so.ApplyModifiedPropertiesWithoutUndo();
+        SetField(level, "sparkle", sparkle);
+        return SaveLevel(root, "Toni5");
+    }
+
+    // ---------- 150: FETCH! ----------
+
+    static GameObject BuildToniFetchLevel()
+    {
+        var root = new GameObject("Level_Toni6");
+        ToniFetchLevel level = root.AddComponent<ToniFetchLevel>();
+        Art(root.transform, "Park", "park_bg", -20, false);
+        Transform pond = Art(root.transform, "Pond", "park_pond", -15, false, new Vector2(0.25f, -0.75f));
+        var water = pond.gameObject.AddComponent<CapsuleCollider2D>();
+        water.direction = CapsuleDirection2D.Horizontal;
+        water.size = new Vector2(4.3f, 1.44f);
+        water.isTrigger = true;
+        Transform tree = Art(root.transform, "Tree", "apple_tree", -8, false, new Vector2(-1.45f, 1.15f));
+        tree.localScale = Vector3.one * 0.6f;
+        Transform ball = Child(root.transform, "Ball", new Vector2(-1.2f, 2.05f)).transform;
+        Art(ball, "Art", "toni_ball", 12, false);
+        ToniPug toni = ToniRig(root.transform, new Vector2(0.2f, -3.4f), 1f, root.transform);
+        Transform cat = Child(root.transform, "Cat", new Vector2(1.8f, -1.7f)).transform;
+        cat.localScale = Vector3.one * 0.35f;
+        Art(cat, "Art", "cat", 13, false);
+        Draggable2D yarn = Prop(root.transform, "Yarn", "yarn_ball", new Vector2(-1.9f, -3.9f), 1f, new Vector2(0.9f, 0.9f), Vector2.zero, 11);
+
+        TextMesh goal = Fit(Label(root.transform, new Vector2(0f, 3.15f), 40, "", 0.06f), 5.2f, 0.5f);
+        var dots = new List<SpriteRenderer>();
+        for (int i = 0; i < 4; i++)
+        {
+            Transform d = Art(root.transform, "StageDot", "led", 41, false, new Vector2(-0.6f + i * 0.4f, 2.7f));
+            d.localScale = Vector3.one * 0.35f;
+            dots.Add(d.GetComponentInChildren<SpriteRenderer>());
+        }
+        SmokeEmitter splash = Emitter(root.transform, "Splash", Vector2.zero, "puff", 40f, 0.6f, 1.2f, 0.4f, 0.35f, new Color(0.85f, 0.95f, 1f, 0.9f), 20);
+        SmokeEmitter confetti = Emitter(root.transform, "Confetti", new Vector2(0f, 3.2f), "confetti", 40f, 2.2f, -1.6f, 2.6f, 1f, Color.white, 50);
+
+        SetField(level, "toni", toni);
+        SetField(level, "tree", tree);
+        SetField(level, "ball", ball);
+        SetField(level, "cat", cat);
+        SetField(level, "yarn", yarn);
+        SetField(level, "water", (Collider2D)water);
+        SetField(level, "goal", goal);
+        SetArray(level, "stageDots", dots.ToArray());
+        SetField(level, "splash", splash);
+        SetField(level, "confetti", confetti);
+        return SaveLevel(root, "Toni6");
     }
 }
 #endif

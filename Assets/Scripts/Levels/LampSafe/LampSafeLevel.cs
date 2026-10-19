@@ -117,6 +117,7 @@ namespace Gotcha.Levels
                 keypad.SetActive(false);
                 if (safeClosed != null) safeClosed.SetActive(false);
                 if (safeOpen != null) safeOpen.SetActive(true);
+                Haptics.Light();
                 if (confetti != null) confetti.Play();
                 if (bubble != null) bubble.Show("Cracked it!");
                 yield return new WaitForSeconds(1.6f);

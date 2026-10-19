@@ -5,15 +5,19 @@ using System.Collections.Generic;
 /// I 3 suggerimenti di ogni livello: il primo è quello del livello (una spinta nella direzione giusta), il secondo
 /// più preciso, il terzo è la soluzione. Chiave = levelId. Un livello nuovo senza voce qui ha solo il primo.
 /// </summary>
-public static class LevelHints
+public static partial class LevelHints
 {
     public static string[] For(string levelId, string first)
     {
-        return Extra.TryGetValue(levelId, out string[] more) ? new[] { first, more[0], more[1] } : new[] { first };
+        foreach (Dictionary<string, string[]> pack in new[] { Extra, V39A, V39B, V39C, V39D, V39E, V40A, V40B, V40C, V40D, V40E })
+            if (pack.TryGetValue(levelId, out string[] more)) return new[] { first, more[0], more[1] };
+        return new[] { first };
     }
 
     static readonly Dictionary<string, string[]> Extra = new Dictionary<string, string[]>
     {
+        { "toni_fetch", new[] { "Shake, blow, distract, throw: one trick per step.", "Shake the phone for the tree, blow into the mic to push the ball across the pond, drag the yarn far from the cat, then swipe the ball UP." } },
+        { "toni_dream", new[] { "Dreams can come true... with a little help.", "Drag the bone OUT of Toni's dream bubble and drop it right in front of his nose." } },
         { "key_door", new[] { "Use two fingers on the key.", "Pinch the key smaller, then drag it into the lock." } },
         { "tilt_maze", new[] { "Hold the phone like a tray and lean it.", "Tilt the phone gently: the ball rolls downhill. Lead it to the star." } },
         { "do_nothing", new[] { "The painting isn't just a painting.", "Drag the fish from the painting to the cat, then don't touch anything for 5 seconds." } },

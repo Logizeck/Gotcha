@@ -59,6 +59,7 @@ namespace Gotcha.Levels
             if (held != null && Inputs.Shake() > 9f && dropCooldown <= 0f)
             {
                 Sfx.Play(this, "bonk");
+                Haptics.Light();
                 rest[held] = new Vector3(held.position.x, rest[held].y, held.position.z);
                 held = null;
                 dropCooldown = 1f;
@@ -73,7 +74,7 @@ namespace Gotcha.Levels
                 if (held == null && dropCooldown <= 0f && d < pull && m.y < waterY)
                 {
                     t.position = Vector3.MoveTowards(t.position, magnet.position, (pull - d + 0.4f) * 2.5f * dt);
-                    if (d < stick) { held = t; Sfx.Play(this, "clunk", 0.6f); }
+                    if (d < stick) { held = t; Sfx.Play(this, "clunk", 0.6f); Haptics.Light(); }
                 }
                 else t.position = Vector3.MoveTowards(t.position, r, 1.2f * dt);   // ricade sul fondo
             }

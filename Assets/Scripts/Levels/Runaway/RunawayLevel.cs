@@ -163,6 +163,7 @@ namespace Gotcha.Levels
             for (int i = 0; i < 3; i++)
             {
                 if (bubble != null) bubble.Show(i < 2 ? "BANG! BANG!" : "SHUT IT OFF!!!", true);
+                Haptics.Medium();
                 for (float k = 0f; k < 0.35f; k += Time.deltaTime)
                 {
                     room.localPosition = home + (Vector3)(Random.insideUnitCircle * 0.1f);
@@ -204,6 +205,7 @@ namespace Gotcha.Levels
         IEnumerator Caught()
         {
             done = true;
+            Haptics.Light();
             squash = 0.3f;
             visual.localScale = new Vector3(visualScale.x * 1.2f, visualScale.y * 0.6f, 1f);
             if (bubble != null) bubble.Show("OK OK, you got me!", true);
@@ -217,6 +219,7 @@ namespace Gotcha.Levels
             }
             button.position = to;
             visual.localScale = new Vector3(visualScale.x * 1.2f, visualScale.y * 0.6f, 1f);   // CLICK
+            Haptics.Light();
             if (alarm != null) alarm.Stop();
             if (waves != null) waves.SetActive(false);
             if (clock != null) clock.localPosition = clockHome;

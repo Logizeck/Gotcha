@@ -87,6 +87,7 @@ namespace Gotcha.Levels
                 yield return null;
             }
             t.gameObject.SetActive(false);
+            Haptics.Medium();
             if (bubble != null) bubble.Show("Plop!");
             yield return new WaitForSeconds(0.8f);
             Fail();

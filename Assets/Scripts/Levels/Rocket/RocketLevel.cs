@@ -85,6 +85,7 @@ namespace Gotcha.Levels
                 yield return null;
             }
             if (coverHinge != null) coverHinge.localScale = new Vector3(1f, -0.35f, 1f);
+            Haptics.Light();
         }
 
         void Update()
@@ -128,6 +129,7 @@ namespace Gotcha.Levels
         {
             pfffCooldown = 1.5f;
             if (bubble != null) bubble.Show("Pfff... no fuel!");
+            Haptics.Light();
             if (smoke != null) smoke.Play();
             yield return new WaitForSeconds(0.3f);
             if (smoke != null) smoke.Stop();

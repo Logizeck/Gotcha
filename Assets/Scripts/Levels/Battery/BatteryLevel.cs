@@ -228,6 +228,7 @@ namespace Gotcha.Levels
             level.localPosition = levelHome;
             if (shockRing != null) shockRing.gameObject.SetActive(false);
             if (bubble != null) bubble.Show("OVERCHARGE!!!");
+            Haptics.Medium();
             if (batteryUi != null) batteryUi.SetActive(false);
 
             // 2. si solleva, bianco incandescente, davanti alla raggiera; lo sfondo si oscura
@@ -269,6 +270,7 @@ namespace Gotcha.Levels
                     piece.rotation = Quaternion.identity;
                     if (sparks != null) { sparks.transform.position = to; sparks.Play(); }
                     if (sfx != null) sfx.PlayOneShot(Clang());
+                    Haptics.Medium();
                     if (stars != null) { stars.transform.position = to; stars.Play(); }
                     if (flash != null) flash.color = new Color(0.8f, 0.95f, 1f, 0.45f);   // piccolo lampo a ogni aggancio
                     level.localPosition = levelHome + (Vector3)(Random.insideUnitCircle * 0.08f);
@@ -323,6 +325,7 @@ namespace Gotcha.Levels
             }
             robot.localPosition = home;
             if (sfx != null) sfx.PlayOneShot(Clang());
+            Haptics.Heavy();   // atterraggio con onda d'urto
             if (shockRing != null) shockRing.gameObject.SetActive(true);
             SpriteRenderer ring = shockRing != null ? shockRing.GetComponent<SpriteRenderer>() : null;
             for (float k = 0f; k < 1f; k += Time.deltaTime / 0.6f)

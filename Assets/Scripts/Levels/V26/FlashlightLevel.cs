@@ -99,6 +99,7 @@ namespace Gotcha.Levels
                 bat.localScale = scale * Mathf.Lerp(1f, 3.5f, k);   // ti vola in faccia
                 yield return null;
             }
+            Haptics.Medium();
             yield return new WaitForSeconds(0.5f);
             Fail();
         }

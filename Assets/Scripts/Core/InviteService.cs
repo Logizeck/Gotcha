@@ -12,7 +12,10 @@ namespace Gotcha.Core
     public static class InviteService
     {
         const string CodeKey = "gotcha.inviteCode";
-        public const string StoreUrl = "https://play.google.com/store/apps/details?id=com.gotcha.game";
+        /// <summary>Nome del pacchetto su Google Play (unico, NON si può più cambiare dopo il primo caricamento).
+        /// Lo usa anche il builder per le impostazioni Android.</summary>
+        public const string PackageName = "com.gotcha.game";
+        public const string StoreUrl = "https://play.google.com/store/apps/details?id=" + PackageName;
 
         /// <summary>Codice personale (casuale, generato una volta) che identifica chi invita.</summary>
         public static string MyCode

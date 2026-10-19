@@ -95,7 +95,7 @@ namespace Gotcha.Levels
 
         IEnumerator Burst()
         {
-            Haptics.Heavy();
+            Haptics.Light();   // snip
             sparks.Play();
             yield return new WaitForSeconds(0.15f);
             sparks.Stop();
@@ -123,9 +123,9 @@ namespace Gotcha.Levels
 
         IEnumerator Boom()
         {
-            Haptics.Heavy();
             over = true;
             yield return new WaitForSeconds(0.25f);
+            Haptics.Heavy();
             if (bomb != null) bomb.SetActive(false);
             if (boom != null)
             {

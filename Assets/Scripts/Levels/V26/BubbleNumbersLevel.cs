@@ -68,6 +68,7 @@ namespace Gotcha.Levels
         IEnumerator Pop(Transform b)
         {
             Sfx.Play(this, "pop");
+            Haptics.Light();
             Vector3 s = b.localScale;
             for (float k = 0f; k < 1f; k += Time.deltaTime / 0.12f) { b.localScale = s * (1f + k * 0.4f); yield return null; }
             b.gameObject.SetActive(false);

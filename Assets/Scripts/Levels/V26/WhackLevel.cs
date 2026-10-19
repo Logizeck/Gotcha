@@ -93,6 +93,7 @@ namespace Gotcha.Levels
                 if (k == 1) { StartCoroutine(Oops("HEY! It's my BIRTHDAY!", false)); return; }
                 if (k == 3) { StartCoroutine(Oops("...the cat will remember this.", true)); return; }
                 Sfx.Play(this, "bonk");
+                Haptics.Light();
                 score += k == 2 ? 3 : 1;
                 Count();
                 if (score >= needed) StartCoroutine(Cleared());
@@ -113,6 +114,7 @@ namespace Gotcha.Levels
         {
             done = true;
             Sfx.Play(this, "bonk", 1f);
+            Haptics.Medium();
             if (bubble != null) bubble.Show(message);
             yield return new WaitForSeconds(1.8f);
             if (egg) FailWithEgg(eggId); else Fail();

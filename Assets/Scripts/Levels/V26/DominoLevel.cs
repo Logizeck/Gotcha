@@ -95,6 +95,7 @@ namespace Gotcha.Levels
                     yield return null;
                 }
                 t.localRotation = Quaternion.Euler(0, 0, -to);
+                Haptics.Light();   // clack
                 if (!hits) { StartCoroutine(Stopped()); yield break; }
             }
             done = true;

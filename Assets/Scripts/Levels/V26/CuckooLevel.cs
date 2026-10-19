@@ -111,6 +111,7 @@ namespace Gotcha.Levels
             for (int i = 0; i < 3; i++)
             {
                 Sfx.Play(this, "bonk", 0.8f);
+                Haptics.Medium();
                 for (float k = 0f; k < 1f; k += Time.deltaTime / 0.12f) { cuckoo.localPosition = cuckooIn + Vector3.down * (0.55f + Mathf.Sin(k * Mathf.PI) * 0.4f); yield return null; }
             }
             yield return new WaitForSeconds(0.8f);

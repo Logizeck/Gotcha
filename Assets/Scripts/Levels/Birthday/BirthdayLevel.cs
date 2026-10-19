@@ -107,6 +107,7 @@ namespace Gotcha.Levels
         IEnumerator Hurricane()
         {
             if (bubble != null) bubble.Show("WHOOOSH!!");
+            Haptics.Medium();
             var flying = new System.Collections.Generic.List<Transform>();
             for (int i = 0; i < candles.Length; i++)
             {

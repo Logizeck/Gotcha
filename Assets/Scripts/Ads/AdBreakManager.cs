@@ -5,7 +5,10 @@ namespace Gotcha.Ads
 {
     public interface IAdProvider
     {
+        /// <summary>Pausa pubblicitaria (interstitial) pronta.</summary>
         bool IsReady { get; }
+        /// <summary>Pubblicità con premio pronta.</summary>
+        bool RewardedReady { get; }
         void Show(Action onClosed);
         /// <summary>Pubblicità con premio: onDone(true) se è stata guardata fino in fondo.</summary>
         void ShowRewarded(Action<bool> onDone);
@@ -15,6 +18,7 @@ namespace Gotcha.Ads
     public class LogAdProvider : IAdProvider
     {
         public bool IsReady => true;
+        public bool RewardedReady => true;
 
         public void Show(Action onClosed)
         {
@@ -51,6 +55,9 @@ namespace Gotcha.Ads
         /// <summary>Acquisto "niente pubblicità": le pause tra i livelli spariscono (quella con premio resta, è volontaria).</summary>
         public Func<bool> AdsRemoved { get; set; }
 
+        /// <summary>C'è una pubblicità con premio da guardare (altrimenti la UI nasconde i pulsanti "WATCH AD").</summary>
+        public bool RewardedReady => provider != null && provider.RewardedReady;
+
         public bool IsDue => (AdsRemoved == null || !AdsRemoved()) && (LevelsSinceAd >= LevelsInterval || PlaySecondsSinceAd >= SecondsInterval);
 
         public void Tick(float deltaTime, bool isPlaying)
@@ -66,7 +73,7 @@ namespace Gotcha.Ads
         /// <summary>Pubblicità con premio (es. una vita). Conta anche come pausa pubblicitaria: azzera i contatori.</summary>
         public void ShowRewarded(Action<bool> onDone)
         {
-            if (provider == null || !provider.IsReady) { onDone?.Invoke(false); return; }
+            if (!RewardedReady) { onDone?.Invoke(false); return; }
             provider.ShowRewarded(ok =>
             {
                 if (ok) { LevelsSinceAd = 0; PlaySecondsSinceAd = 0f; }

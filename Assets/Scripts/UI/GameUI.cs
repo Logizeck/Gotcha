@@ -21,7 +21,7 @@ namespace Gotcha.UI
         public static bool TitleShown => current != null && current.titlePanel != null && current.titlePanel.activeSelf;
 
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.38";
+        public const string Version = "0.39";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
@@ -47,6 +47,9 @@ namespace Gotcha.UI
         Text shopLivesLabel, shopAdsLabel, shopStatus;
         Button shopAdsButton;
         bool menuFromTitle, resetArmed;
+#if GOTCHA_ADMOB && !UNITY_EDITOR
+        GameObject privacyButton;
+#endif
         Text hintBody, menuEggs, resultTitle, resultBody, resultButton, musicLabel, shareLabel;
         Button shareButton;
         // hint a pagamento, premio per la condivisione degli Easter egg
@@ -229,8 +232,11 @@ namespace Gotcha.UI
             hintBody.text = shown == 0 ? "Stuck? This level has " + hints.Length + " hints,\nfrom a little nudge to the solution." : sb.ToString();
             hintWalletLabel.text = "Your hints: " + HintWallet.Balance;
             bool more = shown < hints.Length;
-            hintRevealButton.gameObject.SetActive(more);
+            // senza hint e senza pubblicità pronta il pulsante sparisce: restano quelli del negozio
+            bool canReveal = HintWallet.Balance > 0 || flow.Ads.RewardedReady;
+            hintRevealButton.gameObject.SetActive(more && canReveal);
             if (!more) hintWalletLabel.text += "   (that was the solution!)";
+            else if (!canReveal) hintWalletLabel.text += "   (get more below)";
             else if (HintWallet.Balance > 0) hintRevealLabel.text = "SHOW HINT " + (shown + 1) + "/" + hints.Length + "  (-1)";
             else hintRevealLabel.text = "WATCH AD: +1 HINT";
             hintRevealButton.interactable = true;
@@ -289,6 +295,9 @@ namespace Gotcha.UI
             RefreshMusicLabel();
             settingsInfo.text = "Levels: " + Mathf.Min(SaveData.HighestUnlocked + 1, flow.LevelCount) + " / " + flow.LevelCount +
                 "\nEaster eggs found: " + SaveData.EasterEggCount + "\nVersion " + Version;
+#if GOTCHA_ADMOB && !UNITY_EDITOR
+            privacyButton.SetActive(Gotcha.Ads.AdMobProvider.PrivacyOptionsRequired);
+#endif
             settingsPanel.SetActive(true);
             if (!titlePanel.activeSelf) flow.Paused = true;
         }
@@ -582,6 +591,7 @@ namespace Gotcha.UI
             livesBody.text = "Lives: " + lm.Lives + " / " + LivesManager.MaxLives + "\n" +
                 (full ? "Your hearts are full!" : "Next life in " + FormatTime(lm.SecondsToNext)) +
                 "\nInvite a friend: +1 life when they join!";
+            adButton.gameObject.SetActive(flow.Ads.RewardedReady);   // compare solo se c'è uno spot pronto
             adButton.interactable = !full;
             bool canPlay = pendingLevel >= 0 && lm.CanPlay;
             bool atTitle = titlePanel.activeSelf;   // dal titolo si può sempre tornare indietro
@@ -758,6 +768,11 @@ namespace Gotcha.UI
             Button reset = CreateButton(setCard, "RESET PROGRESS", Accent, ResetProgress);
             resetLabel = reset.GetComponentInChildren<Text>();
             Place(reset.transform, new Vector2(0.12f, 0.22f), new Vector2(0.88f, 0.33f));
+#if GOTCHA_ADMOB && !UNITY_EDITOR
+            // GDPR: chi ha dato (o negato) il consenso alla pubblicità deve poterlo cambiare
+            privacyButton = CreateButton(setCard, "PRIVACY OPTIONS", EggColor, Gotcha.Ads.AdMobProvider.ShowPrivacyOptions).gameObject;
+            Place(privacyButton.transform, new Vector2(0.2f, 0.338f), new Vector2(0.8f, 0.398f));
+#endif
             Place(CreateButton(setCard, "BACK", Dark, CloseSettings).transform, new Vector2(0.25f, 0.06f), new Vector2(0.75f, 0.16f));
 
             // Negozio (sopra a tutto: si apre anche dal pannello delle vite)
