@@ -2398,5 +2398,517 @@
   ],
   "eggName": "",
   "eggHow": ""
+ },
+ {
+  "folder": "DontTouchMe",
+  "id": "dont_touch_me",
+  "title": "DON'T TOUCH ME!",
+  "hint": "He's really sensitive.",
+  "egg": "",
+  "n": 151,
+  "desc": "Il pulsante arrabbiato: tienilo premuto 5 secondi finché si arrende; tre tocchi rapidi lo fanno infuriare.",
+  "hints": [
+   "He's really sensitive.",
+   "A quick touch only makes him angrier.",
+   "Press and hold for five seconds."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "BalloonSurgery",
+  "id": "balloon_surgery",
+  "title": "BALLOON SURGERY",
+  "hint": "Don't pop it.",
+  "egg": "",
+  "n": 152,
+  "desc": "Sgonfia piano il palloncino con due dita finché la chiave si posa al sicuro (non farlo scoppiare).",
+  "hints": [
+   "Don't pop it.",
+   "Two fingers can control its size.",
+   "Pinch slowly until the key lands safely."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheLazyElevator",
+  "id": "the_lazy_elevator",
+  "title": "THE LAZY ELEVATOR",
+  "hint": "The fifth floor still exists.",
+  "egg": "",
+  "n": 153,
+  "desc": "Il pulsante 5 è rotto: trascina il 4 sotto l'1, 4+1=5 e l'ascensore sale.",
+  "hints": [
+   "The fifth floor still exists.",
+   "The buttons can work together.",
+   "Combine 4 and 1."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "PhoneSandwich",
+  "id": "phone_sandwich",
+  "title": "PHONE SANDWICH",
+  "hint": "Gravity is your chef.",
+  "egg": "",
+  "n": 154,
+  "desc": "Senza gravità: inclina il telefono per impilare gli ingredienti sul pane, poi capovolgilo per chiudere il panino.",
+  "hints": [
+   "Gravity is your chef.",
+   "Tilt the phone to stack the ingredients.",
+   "Flip the phone when everything is in place."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "LeftBehind",
+  "id": "left_behind",
+  "title": "LEFT BEHIND",
+  "hint": "The instruction might be hiding something.",
+  "egg": "",
+  "n": 155,
+  "desc": "Il cartello dice GO RIGHT: trascina via RIGHT, sotto c'è LEFT, esci a sinistra.",
+  "hints": [
+   "The instruction might be hiding something.",
+   "Move the words.",
+   "Drag RIGHT away to reveal LEFT."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "SleepingGuard",
+  "id": "sleeping_guard",
+  "title": "SLEEPING GUARD",
+  "hint": "He makes enough noise himself.",
+  "egg": "",
+  "n": 156,
+  "desc": "Trascina la chiave solo mentre la guardia russa forte.",
+  "hints": [
+   "He makes enough noise himself.",
+   "Move when the snoring is loudest.",
+   "Drag the key during the loud snoring."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheBrokenCompass",
+  "id": "the_broken_compass",
+  "title": "THE BROKEN COMPASS",
+  "hint": "Something is upside down.",
+  "egg": "",
+  "n": 157,
+  "desc": "Capovolgi il telefono per aggiustare l'ago, poi ruota la ghiera finché la N coincide.",
+  "hints": [
+   "Something is upside down.",
+   "Rotate your phone.",
+   "Correct the compass after turning the device."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "FakeUpdate",
+  "id": "fake_update",
+  "title": "FAKE UPDATE",
+  "hint": "The update isn't real.",
+  "egg": "",
+  "n": 158,
+  "desc": "Finto aggiornamento al 99%: trascina via il 99, metti l'1 nascosto davanti ai due 9 e diventa 100.",
+  "hints": [
+   "The update isn't real.",
+   "Try moving the percentage.",
+   "Drag 99 upwards, then move the hidden 1 into position."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "GlassFloor",
+  "id": "glass_floor",
+  "title": "GLASS FLOOR",
+  "hint": "Not all glass sounds the same.",
+  "egg": "",
+  "n": 159,
+  "desc": "Tocca le lastre di vetro per ascoltarle: nota grave = robusta; porta il topolino solo su quelle.",
+  "hints": [
+   "Not all glass sounds the same.",
+   "Listen before stepping.",
+   "The low-pitched tiles are safe."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TinyThief",
+  "id": "tiny_thief",
+  "title": "TINY THIEF",
+  "hint": "He's much smaller than you think.",
+  "egg": "",
+  "n": 160,
+  "desc": "Ingrandisci col pizzico per trovare il ladro minuscolo e mettigli il cesto sul percorso vicino all'uscita.",
+  "hints": [
+   "He's much smaller than you think.",
+   "Zoom in and look around the furniture.",
+   "Trap him with the basket near the exit."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheSilentAlarm",
+  "id": "the_silent_alarm",
+  "title": "THE SILENT ALARM",
+  "hint": "Silence matters.",
+  "egg": "",
+  "n": 161,
+  "desc": "Abbassa a zero il volume del telefono, poi premi i pulsanti nell'ordine mostrato.",
+  "hints": [
+   "Silence matters.",
+   "The device volume is part of the puzzle.",
+   "Set media volume to zero before entering the sequence."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "BlackHole",
+  "id": "black_hole",
+  "title": "BLACK HOLE",
+  "hint": "Small problems sometimes need big solutions.",
+  "egg": "",
+  "n": 162,
+  "desc": "Allarga il buco nero col pizzico finché supera lo schermo: YOU ESCAPED.",
+  "hints": [
+   "Small problems sometimes need big solutions.",
+   "Make the black hole bigger.",
+   "Pinch outward until it fills the screen."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "GravityResigned",
+  "id": "gravity_resigned",
+  "title": "GRAVITY RESIGNED",
+  "hint": "Turn his world around.",
+  "egg": "gravity_resigned",
+  "n": 163,
+  "desc": "Capovolgi il telefono e tienilo 2 s per far cadere l'omino.",
+  "hints": [
+   "Turn his world around.",
+   "Your phone can change which way is down.",
+   "Rotate the device upside down and hold it."
+  ],
+  "eggName": "Gravity Resigned",
+  "eggHow": "Ruota il telefono 0°→180°→0°→180°→0° entro 12 s con una pausa a ogni posizione: la Gravità si dimette."
+ },
+ {
+  "folder": "TheCheapMagician",
+  "id": "the_cheap_magician",
+  "title": "THE CHEAP MAGICIAN",
+  "hint": "Maybe he isn't a real magician.",
+  "egg": "",
+  "n": 164,
+  "desc": "Tira fuori il coniglio dal cilindro e coprilo col cilindro: TA-DAA!",
+  "hints": [
+   "Maybe he isn't a real magician.",
+   "You don't need magic.",
+   "Hide the rabbit under the hat."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "DontWakeTheBomb",
+  "id": "dont_wake_the_bomb",
+  "title": "DON'T WAKE THE BOMB",
+  "hint": "It's a light sleeper.",
+  "egg": "",
+  "n": 165,
+  "desc": "Sfila la miccia lentissimamente senza svegliare la bomba.",
+  "hints": [
+   "It's a light sleeper.",
+   "Slow down your fingers.",
+   "Pull the fuse very slowly."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheUpsideDownKing",
+  "id": "the_upside_down_king",
+  "title": "THE UPSIDE-DOWN KING",
+  "hint": "He needs a little help reaching the ceiling.",
+  "egg": "",
+  "n": 166,
+  "desc": "Inclina il telefono per portare la scala sotto la corona, poi trascina il re sulla scala.",
+  "hints": [
+   "He needs a little help reaching the ceiling.",
+   "Move the ladder by tilting.",
+   "Position the ladder and drag the king onto it."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "OneTooMany",
+  "id": "one_too_many",
+  "title": "ONE TOO MANY",
+  "hint": "Are there really six?",
+  "egg": "",
+  "n": 167,
+  "desc": "Sei galline per cinque nidi: la sesta è un riflesso, trascina via la pozzanghera.",
+  "hints": [
+   "Are there really six?",
+   "Look at the reflection.",
+   "Move the puddle away."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "ReverseParking",
+  "id": "reverse_parking",
+  "title": "REVERSE PARKING",
+  "hint": "One finger isn't enough.",
+  "egg": "",
+  "n": 168,
+  "desc": "Parcheggio con due pollici: uno sul volante e uno sul pedale, breve retromarcia nel posto giallo.",
+  "hints": [
+   "One finger isn't enough.",
+   "Steer and move at the same time.",
+   "Use two fingers and reverse into the space."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "StubbornDoor",
+  "id": "the_stubborn_door",
+  "title": "THE STUBBORN DOOR",
+  "hint": "The key can only open one lock.",
+  "egg": "",
+  "n": 169,
+  "desc": "Una chiave per tre lucchetti: inseriscila e girala, poi porta gli altri due lucchetti sulla chiave.",
+  "hints": [
+   "The key can only open one lock.",
+   "Try moving the locks.",
+   "Bring the remaining locks to the inserted key."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "ZeroGravityDinner",
+  "id": "zero_gravity_dinner",
+  "title": "ZERO GRAVITY DINNER",
+  "hint": "Don't chase every meatball.",
+  "egg": "",
+  "n": 170,
+  "desc": "Raccogli 5 polpette fluttuanti con la ciotola e tienila ferma 3 secondi.",
+  "hints": [
+   "Don't chase every meatball.",
+   "Position the bowl along their paths.",
+   "Catch all five, then hold still."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "ForgottenPassword",
+  "id": "the_forgotten_password",
+  "title": "THE FORGOTTEN PASSWORD",
+  "hint": "The answer is already visible.",
+  "egg": "",
+  "n": 171,
+  "desc": "Non digitare: trascina il post-it 'I FORGOT IT' nel campo password.",
+  "hints": [
+   "The answer is already visible.",
+   "Don't type.",
+   "Drag the sticky note into the password field."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "ShrinkingRoom",
+  "id": "the_shrinking_room",
+  "title": "THE SHRINKING ROOM",
+  "hint": "Think bigger than the mouse.",
+  "egg": "",
+  "n": 172,
+  "desc": "Le pareti si stringono: rimpicciolisci tutta la stanza col pizzico e appare l'uscita.",
+  "hints": [
+   "Think bigger than the mouse.",
+   "The room itself can change.",
+   "Pinch the entire room smaller."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "PaperworkNightmare",
+  "id": "paperwork_nightmare",
+  "title": "PAPERWORK NIGHTMARE",
+  "hint": "The papers are hiding something.",
+  "egg": "",
+  "n": 173,
+  "desc": "Butta tutti i fogli nel cestino: il documento è stampato sulla scrivania, toccalo.",
+  "hints": [
+   "The papers are hiding something.",
+   "Clear the desk.",
+   "Throw the papers away and tap the desk."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "BatteryVampire",
+  "id": "battery_vampire",
+  "title": "BATTERY VAMPIRE",
+  "hint": "He loves electricity.",
+  "egg": "",
+  "n": 174,
+  "desc": "Scambia il + e il − della batteria: il vampiro prende la scossa e scappa.",
+  "hints": [
+   "He loves electricity.",
+   "Maybe the polarity matters.",
+   "Swap the plus and minus symbols."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheFourthWall",
+  "id": "the_fourth_wall",
+  "title": "THE FOURTH WALL",
+  "hint": "The walls aren't permanent.",
+  "egg": "",
+  "n": 175,
+  "desc": "L'attore è chiuso in un quadro: trascina la CORNICE finché un lato esce dallo schermo, lui esce dalla parete mancante.",
+  "hints": [
+   "The walls aren't permanent.",
+   "Move the frame, not the actor.",
+   "Drag the frame partly offscreen."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "HotPotato",
+  "id": "hot_potato",
+  "title": "HOT POTATO",
+  "hint": "Watch the timing.",
+  "egg": "",
+  "n": 176,
+  "desc": "Patata bollente tra 4 amici: tocca chi la riceve quando la lucina diventa verde, 5 prese; 2 errori = purè.",
+  "hints": [
+   "Watch the timing.",
+   "Tap just before the potato arrives.",
+   "Use the green flash as your signal."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "ShakeToUndo",
+  "id": "shake_to_undo",
+  "title": "SHAKE TO UNDO",
+  "hint": "The undo button isn't the only option.",
+  "egg": "",
+  "n": 177,
+  "desc": "Il pittore ha disegnato mutande sul capolavoro: scuoti il telefono 3 volte e fermati (la 4ª scossa forte cancella tutto).",
+  "hints": [
+   "The undo button isn't the only option.",
+   "Try shaking something.",
+   "Shake your phone three times, then stop."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheLonelyCloud",
+  "id": "the_lonely_cloud",
+  "title": "THE LONELY CLOUD",
+  "hint": "The cloud is too small.",
+  "egg": "",
+  "n": 178,
+  "desc": "Allarga la nuvola con due dita finché la pioggia arriva sul fiore, entro 25 s.",
+  "hints": [
+   "The cloud is too small.",
+   "Stretch it.",
+   "Spread the cloud with two fingers until the rain reaches the flower."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "GhostSelfie",
+  "id": "ghost_selfie",
+  "title": "GHOST SELFIE",
+  "hint": "He hates sudden photos.",
+  "egg": "",
+  "n": 179,
+  "desc": "Tieni premuto il pulsante della foto: il fantasma entra nell'inquadratura durante il 3-2-1, rilascia alla fine.",
+  "hints": [
+   "He hates sudden photos.",
+   "Hold the camera button.",
+   "Hold for three seconds and release when he's in frame."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "MagnetMayhem",
+  "id": "magnet_mayhem",
+  "title": "MAGNET MAYHEM",
+  "hint": "Magnets move metal.",
+  "egg": "",
+  "n": 180,
+  "desc": "Guida la chiave nel labirinto spostando 3 calamite (rosse attirano, blu respingono) senza toccare le barre elettriche.",
+  "hints": [
+   "Magnets move metal.",
+   "Opposite poles attract.",
+   "Position the magnets to guide the key without touching it."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheFakeCrash",
+  "id": "the_fake_crash",
+  "title": "THE FAKE CRASH",
+  "hint": "It's not a real system error.",
+  "egg": "",
+  "n": 181,
+  "desc": "Finta finestra 'GOTCHA HAS STOPPED WORKING': trascina via la parola WORKING.",
+  "hints": [
+   "It's not a real system error.",
+   "The message is interactive.",
+   "Drag the word WORKING away."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "RainbowThief",
+  "id": "rainbow_thief",
+  "title": "RAINBOW THIEF",
+  "hint": "Some colors can be mixed.",
+  "egg": "",
+  "n": 182,
+  "desc": "Ricrea giallo, ciano e magenta mettendo a coppie le luci primarie nelle tre casse.",
+  "hints": [
+   "Some colors can be mixed.",
+   "Start with the three basic light colors.",
+   "Combine the primary lights to restore the missing colors."
+  ],
+  "eggName": "",
+  "eggHow": ""
  }
 ]

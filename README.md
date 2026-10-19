@@ -76,6 +76,9 @@ Livelli 104-128 — quarta ondata, tutte meccaniche nuove (Toni al 125):
 Livelli 129-150 — rompicapi compositi a più fasi (Toni al 150):
 129 Morning Routine · 130 Bank Heist · 131 Submarine · 132 Haunted House · 133 Kitchen Escape · 134 Space Station · 135 Treasure Map · 136 Detective · 137 Bomb Squad · 138 Potion Lab · 139 Robot Factory · 140 Train Switches · 141 Garden Seasons · 142 Museum Night · 143 Ice Cream Shop · 144 Pirate Cannon · 145 Elevator Logic · 146 Circuit Board · 147 Snow Globe · 148 Knight'S Quest · 149 The Gauntlet · 150 Fetch!.
 
+Livelli 151-182 — specifica "105-200", blocchi 1-2:
+151 Don'T Touch Me! · 152 Balloon Surgery · 153 The Lazy Elevator · 154 Phone Sandwich · 155 Left Behind · 156 Sleeping Guard · 157 The Broken Compass · 158 Fake Update · 159 Glass Floor · 160 Tiny Thief · 161 The Silent Alarm · 162 Black Hole · 163 Gravity Resigned · 164 The Cheap Magician · 165 Don'T Wake The Bomb · 166 The Upside-Down King · 167 One Too Many · 168 Reverse Parking · 169 The Stubborn Door · 170 Zero Gravity Dinner · 171 The Forgotten Password · 172 The Shrinking Room · 173 Paperwork Nightmare · 174 Battery Vampire · 175 The Fourth Wall · 176 Hot Potato · 177 Shake To Undo · 178 The Lonely Cloud · 179 Ghost Selfie · 180 Magnet Mayhem · 181 The Fake Crash · 182 Rainbow Thief.
+
 Free to play: si gioca gratis; nel **negozio** (SHOP) si possono comprare **1 ora di vite infinite (0,99 €)** e
 **niente pubblicità per sempre (4,99 €)**. Vedi README_SETUP.md per la configurazione degli acquisti.
 

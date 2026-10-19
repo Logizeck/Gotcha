@@ -266,6 +266,43 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.41
+- **Livelli 151-182**: i primi 32 livelli della specifica "105-200" (blocchi 1 e 2), messi in coda a quelli esistenti
+  (i livelli di Toni della specifica arriveranno con i pacchetti successivi):
+- **151 Don'T Touch Me!** — Il pulsante arrabbiato: tienilo premuto 5 secondi finché si arrende; tre tocchi rapidi lo fanno infuriare.
+- **152 Balloon Surgery** — Sgonfia piano il palloncino con due dita finché la chiave si posa al sicuro (non farlo scoppiare).
+- **153 The Lazy Elevator** — Il pulsante 5 è rotto: trascina il 4 sotto l'1, 4+1=5 e l'ascensore sale.
+- **154 Phone Sandwich** — Senza gravità: inclina il telefono per impilare gli ingredienti sul pane, poi capovolgilo per chiudere il panino.
+- **155 Left Behind** — Il cartello dice GO RIGHT: trascina via RIGHT, sotto c'è LEFT, esci a sinistra.
+- **156 Sleeping Guard** — Trascina la chiave solo mentre la guardia russa forte.
+- **157 The Broken Compass** — Capovolgi il telefono per aggiustare l'ago, poi ruota la ghiera finché la N coincide.
+- **158 Fake Update** — Finto aggiornamento al 99%: trascina via il 99, metti l'1 nascosto davanti ai due 9 e diventa 100.
+- **159 Glass Floor** — Tocca le lastre di vetro per ascoltarle: nota grave = robusta; porta il topolino solo su quelle.
+- **160 Tiny Thief** — Ingrandisci col pizzico per trovare il ladro minuscolo e mettigli il cesto sul percorso vicino all'uscita.
+- **161 The Silent Alarm** — Abbassa a zero il volume del telefono, poi premi i pulsanti nell'ordine mostrato.
+- **162 Black Hole** — Allarga il buco nero col pizzico finché supera lo schermo: YOU ESCAPED.
+- **163 Gravity Resigned** — Capovolgi il telefono e tienilo 2 s per far cadere l'omino. Easter egg *Gravity Resigned*: Ruota il telefono 0°→180°→0°→180°→0° entro 12 s con una pausa a ogni posizione: la Gravità si dimette.
+- **164 The Cheap Magician** — Tira fuori il coniglio dal cilindro e coprilo col cilindro: TA-DAA!
+- **165 Don'T Wake The Bomb** — Sfila la miccia lentissimamente senza svegliare la bomba.
+- **166 The Upside-Down King** — Inclina il telefono per portare la scala sotto la corona, poi trascina il re sulla scala.
+- **167 One Too Many** — Sei galline per cinque nidi: la sesta è un riflesso, trascina via la pozzanghera.
+- **168 Reverse Parking** — Parcheggio con due pollici: uno sul volante e uno sul pedale, breve retromarcia nel posto giallo.
+- **169 The Stubborn Door** — Una chiave per tre lucchetti: inseriscila e girala, poi porta gli altri due lucchetti sulla chiave.
+- **170 Zero Gravity Dinner** — Raccogli 5 polpette fluttuanti con la ciotola e tienila ferma 3 secondi.
+- **171 The Forgotten Password** — Non digitare: trascina il post-it 'I FORGOT IT' nel campo password.
+- **172 The Shrinking Room** — Le pareti si stringono: rimpicciolisci tutta la stanza col pizzico e appare l'uscita.
+- **173 Paperwork Nightmare** — Butta tutti i fogli nel cestino: il documento è stampato sulla scrivania, toccalo.
+- **174 Battery Vampire** — Scambia il + e il − della batteria: il vampiro prende la scossa e scappa.
+- **175 The Fourth Wall** — L'attore è chiuso in un quadro: trascina la CORNICE finché un lato esce dallo schermo, lui esce dalla parete mancante.
+- **176 Hot Potato** — Patata bollente tra 4 amici: tocca chi la riceve quando la lucina diventa verde, 5 prese; 2 errori = purè.
+- **177 Shake To Undo** — Il pittore ha disegnato mutande sul capolavoro: scuoti il telefono 3 volte e fermati (la 4ª scossa forte cancella tutto).
+- **178 The Lonely Cloud** — Allarga la nuvola con due dita finché la pioggia arriva sul fiore, entro 25 s.
+- **179 Ghost Selfie** — Tieni premuto il pulsante della foto: il fantasma entra nell'inquadratura durante il 3-2-1, rilascia alla fine.
+- **180 Magnet Mayhem** — Guida la chiave nel labirinto spostando 3 calamite (rosse attirano, blu respingono) senza toccare le barre elettriche.
+- **181 The Fake Crash** — Finta finestra 'GOTCHA HAS STOPPED WORKING': trascina via la parola WORKING.
+- **182 Rainbow Thief** — Ricrea giallo, ciano e magenta mettendo a coppie le luci primarie nelle tre casse.
+- Versione del costruttore 44.
+
 ## Versione 0.40
 - **Livelli 129-150: rompicapi compositi**, ognuno a più fasi con interazioni diverse (difficoltà crescente):
 - **129 Morning Routine** — La mattina del gatto in 4 fasi: scuoti il telefono per svegliarlo, apri le tende, inclina per versare i cereali fino alla linea, poi il latte fino alla fascia verde.
