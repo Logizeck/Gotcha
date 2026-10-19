@@ -40,10 +40,16 @@ public static partial class GotchaProjectBuilder
         var root = new GameObject("Level_Flashlight");
         FlashlightLevel level = root.AddComponent<FlashlightLevel>();
         Art(root.transform, "Room", "room_bg", -20, false);
+        // posti dell'interruttore: solo muro libero (niente quadro, lampada col suo cono, pianta, pavimento)
         var spots = new List<Transform>();
-        foreach (Vector2 s in new[] { new Vector2(-1.9f, 2.6f), new Vector2(0.1f, 3.0f), new Vector2(2.0f, 2.3f), new Vector2(-2.1f, 0.4f),
-                     new Vector2(1.9f, 0.1f), new Vector2(-0.6f, 1.2f), new Vector2(0.9f, -1.6f), new Vector2(-1.6f, -2.0f), new Vector2(0.4f, -3.0f) })
+        foreach (Vector2 s in new[] { new Vector2(-2.0f, 0.5f), new Vector2(-0.6f, 2.5f), new Vector2(0.4f, 1.0f), new Vector2(2.1f, 0.4f),
+                     new Vector2(-0.8f, -1.4f), new Vector2(1.0f, -1.5f), new Vector2(0.4f, 3.0f), new Vector2(2.2f, -1.5f), new Vector2(-0.6f, 0.0f) })
             spots.Add(Child(root.transform, "Spot", s).transform);
+        // posti dei pipistrelli (anche loro lontani da quadro, lampada e pianta)
+        var batSpots = new List<Transform>();
+        foreach (Vector2 s in new[] { new Vector2(-0.4f, 3.0f), new Vector2(0.7f, 2.1f), new Vector2(-1.1f, 1.0f), new Vector2(1.3f, 0.9f),
+                     new Vector2(2.1f, -0.6f), new Vector2(-2.1f, -0.4f), new Vector2(0.2f, -1.2f), new Vector2(-1.2f, -2.0f), new Vector2(1.7f, -2.0f), new Vector2(-2.2f, 1.2f) })
+            batSpots.Add(Child(root.transform, "BatSpot", s).transform);
         var bats = new List<Transform>();
         for (int i = 0; i < 4; i++)
         {
@@ -64,6 +70,7 @@ public static partial class GotchaProjectBuilder
         SetField(level, "blackout", blackout);
         SetArray(level, "bats", bats.ToArray());
         SetArray(level, "spots", spots.ToArray());
+        SetArray(level, "batSpots", batSpots.ToArray());
         SetField(level, "lightSwitch", sw.GetComponent<BoxCollider2D>());
         SetField(level, "switchArt", swArt);
         SetField(level, "switchOn", sprites["switch_on"]);
@@ -297,11 +304,43 @@ public static partial class GotchaProjectBuilder
         mouse.localScale = Vector3.one * 0.35f;
         Art(mouse, "Art", "mouse", 10);
         Art(root.transform, "Cheese", "cheese_wedge", 8, true, pts[pts.Length - 1]).localScale = Vector3.one * 0.6f;
-        TextMesh sign = Label(root.transform, new Vector2(-2.0f, 3.5f), 12, "<  >", 0.07f);
+        // legenda dei comandi: per ogni direzione del dito, la freccia punta dove va il topo
+        Transform legend = Child(root.transform, "Legend", new Vector2(0.5f, -3.25f)).transform;
+        Art(legend, "Panel", "mirror_legend", 20, false);
+        Vector2 pad = new Vector2(-1.22f, -0.12f);
+        Fit(Label(legend, pad + new Vector2(0f, 0.92f), 22, "MOUSE GOES", 0.035f), 1.3f, 0.22f);
+        var arrows = new List<SpriteRenderer>();
+        foreach (Vector2 dir in new[] { Vector2.right, Vector2.left, Vector2.up, Vector2.down })
+        {
+            Transform slot = Child(legend, "Arrow", pad + dir * 0.47f).transform;
+            arrows.Add(Art(slot, "Art", "ctrl_arrow", 22, false).GetComponent<SpriteRenderer>());
+        }
+        Transform padMouse = Child(legend, "Finger", pad).transform;
+        padMouse.localScale = Vector3.one * 0.15f;
+        Art(padMouse, "Art", "mouse", 22, false);
+        SpriteRenderer IconRow(string name, float y, float rot, out TextMesh text)
+        {
+            Transform icon = Child(legend, name, new Vector2(0.05f, y)).transform;
+            icon.localRotation = Quaternion.Euler(0, 0, rot);
+            icon.localScale = Vector3.one * 0.85f;
+            text = Fit(Label(legend, new Vector2(1.15f, y), 22, "", 0.04f), 1.45f, 0.75f);
+            return Art(icon, "Art", "swap_icon", 22, false).GetComponent<SpriteRenderer>();
+        }
+        SpriteRenderer lrIcon = IconRow("LeftRight", 0.45f, 0f, out TextMesh lrText);
+        SpriteRenderer udIcon = IconRow("UpDown", -0.5f, 90f, out TextMesh udText);
+        Transform bigIcon = Child(root.transform, "BigIcon", new Vector2(0f, 0.6f)).transform;
+        Art(bigIcon, "Art", "swap_icon", 50, false);
+        SpriteRenderer flash = Bar(root.transform, "Flash", Vector2.zero, new Vector2(12f, 16f), new Color(1f, 1f, 1f, 0.5f), 45);
 
         SetField(level, "mouse", mouse);
         SetArray(level, "path", path.ToArray());
-        SetField(level, "sign", sign);
+        SetArray(level, "arrows", arrows.ToArray());
+        SetField(level, "lrIcon", lrIcon);
+        SetField(level, "udIcon", udIcon);
+        SetField(level, "lrText", lrText);
+        SetField(level, "udText", udText);
+        SetField(level, "bigIcon", bigIcon);
+        SetField(level, "flash", flash);
         SetField(level, "bubble", SmallBubble(root.transform, new Vector2(0.6f, 3.6f)));
         return SaveLevel(root, "MirrorMaze");
     }
@@ -432,7 +471,7 @@ public static partial class GotchaProjectBuilder
         var root = new GameObject("Level_BubbleNumbers");
         BubbleNumbersLevel level = root.AddComponent<BubbleNumbersLevel>();
         Art(root.transform, "Bath", "bathroom_bg", -20, false);
-        var labels = new[] { ("1", 1, 0f, 0.09f), ("II", 2, 0f, 0.08f), ("three", 3, 0f, 0.045f), ("2+2", 4, 0f, 0.06f), ("V", 5, 0f, 0.09f),
+        var labels = new[] { ("1", 1, 0f, 0.09f), ("II", 2, 0f, 0.08f), ("three", 3, 0f, 0.045f), ("2+2", 4, 0f, 0.06f), ("PAW", 5, 0f, 0.09f),
             ("6\n_", 6, 45f, 0.07f), ("SEVEN", 7, 0f, 0.04f), ("8", 8, 35f, 0.09f), ("9\n_", 9, -40f, 0.07f) };
         var bubbles = new List<Transform>();
         var values = new List<int>();
@@ -444,7 +483,8 @@ public static partial class GotchaProjectBuilder
             Art(b, "Art", "soap_bubble", 5, false);
             Transform label = Child(b, "Label", Vector2.zero).transform;
             label.localRotation = Quaternion.Euler(0, 0, Random.Range(0, 360));
-            Label(label, l.Item1.Contains("\n") ? new Vector2(0, -0.08f) : Vector2.zero, 6, l.Item1, l.Item4);
+            if (l.Item1 == "PAW") Art(label, "Paw", "dog_paw_print", 6, false).localScale = Vector3.one * 0.85f;   // 1 cuscinetto + 4 dita = 5
+            else Label(label, l.Item1.Contains("\n") ? new Vector2(0, -0.08f) : Vector2.zero, 6, l.Item1, l.Item4);
             bubbles.Add(b);
             values.Add(l.Item2);
             spins.Add(l.Item3);

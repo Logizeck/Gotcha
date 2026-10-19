@@ -9,8 +9,6 @@ namespace Gotcha.Levels
     /// <summary>
     /// Livello "Hungry Snake" — il classico serpente. Swipe (o tocco a lato della testa) per girare, niente inversioni
     /// a U. Mangia 8 mele per vincere; ogni mela lo rende un po' più veloce. Muro o morso al corpo = una delle 3 vite.
-    /// Easter egg `ouroboros`: se la testa morde proprio la punta della coda (l'ultimo segmento) il serpente si mangia
-    /// da solo ("I... ate myself?").
     /// </summary>
     public class HungrySnakeLevel : LevelController
     {
@@ -31,7 +29,6 @@ namespace Gotcha.Levels
         [SerializeField] SpeechBubble bubble;
         [SerializeField] int applesNeeded = 8;
         [SerializeField] float startInterval = 0.22f, speedUp = 0.012f, minInterval = 0.12f;
-        [SerializeField] string eggId = "ouroboros";
 
         readonly List<Vector2Int> cells = new List<Vector2Int>();
         readonly List<Vector2Int> prevCells = new List<Vector2Int>();
@@ -132,7 +129,6 @@ namespace Gotcha.Levels
             if (next.x < 0 || next.x >= Cols || next.y < 0 || next.y >= Rows) { StartCoroutine(Crash("Ouch! A wall!")); return; }
             bool eat = next == appleCell;
             int last = cells.Count - 1;
-            if (!eat && next == cells[last]) { StartCoroutine(Ouroboros()); return; }
             for (int i = 0; i < cells.Count; i++)
                 if (cells[i] == next && (i < last || eat)) { StartCoroutine(Crash("Ow! I bit myself!")); return; }
 
@@ -275,38 +271,6 @@ namespace Gotcha.Levels
             for (int i = 0; i < bodies.Count; i++) bodies[i].gameObject.SetActive(on && i < cells.Count - 2);
         }
 
-        /// <summary>Easter egg: la testa addenta la propria coda. Il serpente diventa un anello e gira su sé stesso.</summary>
-        IEnumerator Ouroboros()
-        {
-            done = true;
-            Render(1f);
-            Haptics.Medium();
-            Sfx.Play(this, "bonk", 0.8f);
-            head.localPosition = Vector3.Lerp(head.localPosition, tail.localPosition, 0.45f);
-            if (bubble != null) bubble.Show("Crunch! Wait...");
-            yield return new WaitForSeconds(1.0f);
-            if (bubble != null) bubble.Show("I... ate myself?");
-            // tutto il serpente ruota attorno al suo centro, come l'anello dell'uroboro
-            Vector3 c = Vector3.zero;
-            var parts = new List<Transform> { head, tail };
-            for (int i = 0; i < cells.Count - 2; i++) parts.Add(bodies[i]);
-            foreach (Transform p in parts) c += p.localPosition;
-            c /= parts.Count;
-            var offs = new List<Vector3>();
-            foreach (Transform p in parts) offs.Add(p.localPosition - c);
-            for (float t = 0f; t < 2.2f; t += Time.deltaTime)
-            {
-                float a = t * t * 160f;
-                Quaternion q = Quaternion.Euler(0, 0, a);
-                for (int i = 0; i < parts.Count; i++)
-                {
-                    parts[i].localPosition = c + q * offs[i] * (1f - t * 0.25f);
-                    if (i == 0) parts[i].localRotation = Quaternion.Euler(0, 0, a + Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg);
-                }
-                yield return null;
-            }
-            FailWithEgg(eggId);
-        }
 
         IEnumerator Full()
         {

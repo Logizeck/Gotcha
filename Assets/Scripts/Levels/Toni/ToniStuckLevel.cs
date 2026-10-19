@@ -9,8 +9,8 @@ namespace Gotcha.Levels
     /// Livello 25 — "STUCK!". Toni voleva uscire in giardino dalla gattaiola... ed è rimasto incastrato a metà: la
     /// testa fuori, il sedere (con la coda che scodinzola e le zampe che pedalano) dentro casa. Spingerlo non basta.
     /// Sul tavolo ci sono un osso (si agita e basta), una piuma (ride e scalcia) e il burro: imburrato, una spinta
-    /// e SCHLUPP! esce. Easter egg `toni_toot`: spingerlo tante volte senza burro... la pressione trova un'altra
-    /// via d'uscita e Toni parte a razzo.
+    /// e SCHLUPP! esce. Quando è imburrato si VEDE: sedere lucido con riflessi e stelline che brillano, gocce di burro,
+    /// la scritta "SLIPPERY!" e un freccione che indica la spinta (verso il muro, a destra).
     /// </summary>
     public class ToniStuckLevel : LevelController
     {
@@ -21,7 +21,11 @@ namespace Gotcha.Levels
         [SerializeField] Draggable2D feather;
         [SerializeField] SmokeEmitter shine;
         [SerializeField] SmokeEmitter toot;
-        [SerializeField] int pushesForEgg = 8;
+        [Header("Imburrato: si vede!")]
+        [SerializeField] SpriteRenderer gloss;        // riflessi lucidi sul sedere (figlio di Toni)
+        [SerializeField] SmokeEmitter drips;          // gocce di burro che colano
+        [SerializeField] Transform arrow;             // freccione "spingi di qua"
+        [SerializeField] TextMesh slippery;           // scritta "SLIPPERY!"
         [SerializeField] float pushDistance = 0.35f;
 
         Camera cam;
@@ -29,6 +33,8 @@ namespace Gotcha.Levels
         bool greased, busy, pushing;
         float pushStartX, nextMumble, wiggle;
         Vector2 pushStart;
+        Vector3 arrowHome, slipperyScale;
+        float greasedAt;
         int pushes;
 
         Vector3 Butt => toni.transform.TransformPoint(new Vector2(0.75f, 0.15f));
@@ -44,6 +50,10 @@ namespace Gotcha.Levels
             foreach (Draggable2D d in new[] { butter, bone, feather }) d.Dropped += OnItemDropped;
             if (shine != null) shine.Stop();
             if (toot != null) toot.Stop();
+            if (drips != null) drips.Stop();
+            if (gloss != null) gloss.gameObject.SetActive(false);
+            if (arrow != null) { arrowHome = arrow.localPosition; arrow.gameObject.SetActive(false); }
+            if (slippery != null) { slipperyScale = slippery.transform.localScale; slippery.gameObject.SetActive(false); }
             nextMumble = Time.time + 3f;
             toni.Say("I'm STUCK! Push me!", 2.2f);
         }
@@ -69,6 +79,7 @@ namespace Gotcha.Levels
                 }
                 if (shine != null && greased) shine.transform.position = Butt;
             }
+            if (greased) ShowGreased();
             HandlePush();
         }
 
@@ -85,7 +96,8 @@ namespace Gotcha.Levels
             if (busy || cam == null || Draggable2D.Active != null) { pushing = false; return; }
             if (!PointerInput.TryGetPrimary(out Vector2 sp, out bool began, out bool ended)) { pushing = false; return; }
             Vector2 w = PointerInput.ToWorld(cam, sp);
-            if (began && !PointerInput.IsOverUi() && OnToni(w)) { pushing = true; pushStartX = w.x; pushStart = w; }
+            bool onArrow = greased && arrow != null && arrow.gameObject.activeSelf && Vector2.Distance(w, arrow.position) < 1.0f;
+            if (began && !PointerInput.IsOverUi() && (OnToni(w) || onArrow)) { pushing = true; pushStartX = w.x; pushStart = w; }
             if (!pushing) return;
             if (w.x - pushStartX > pushDistance) { pushing = false; Push(); return; }
             if (ended)
@@ -99,7 +111,6 @@ namespace Gotcha.Levels
         {
             if (greased) { StartCoroutine(SlideOut()); return; }
             pushes++;
-            if (pushes >= pushesForEgg) { StartCoroutine(TootOut()); return; }
             string[] lines = { "Mmmpf!", "Nope!", "STUCK!", "*wheeze*", "Harder?", "Ouch!", "...my belly!" };
             toni.Say(lines[Mathf.Min(pushes - 1, lines.Length - 1)], 1f, "bonk");
             Haptics.Light();
@@ -148,10 +159,34 @@ namespace Gotcha.Levels
             }
             butter.gameObject.SetActive(false);
             greased = true;
+            greasedAt = Time.time;
             Sfx.Play(this, "pop", 0.7f);
+            Haptics.Light();
             if (shine != null) { shine.transform.position = Butt; shine.Play(); }
-            toni.Say("...slippery?", 1.2f);
+            if (drips != null) { drips.transform.position = Butt; drips.Play(); }
+            if (gloss != null) gloss.gameObject.SetActive(true);
+            if (slippery != null) slippery.gameObject.SetActive(true);
+            toni.Say("Ooh... slippery!", 1.4f);
+            yield return new WaitForSeconds(0.5f);
+            if (arrow != null) arrow.gameObject.SetActive(true);   // la freccia arriva dopo la scritta
             busy = false;
+        }
+
+        /// <summary>Burro ben visibile: riflessi che pulsano, "SLIPPERY!" che salta fuori e poi resta piccola, freccia che spinge.</summary>
+        void ShowGreased()
+        {
+            float t = Time.time - greasedAt;
+            if (gloss != null) gloss.color = new Color(1f, 1f, 1f, 0.75f + 0.25f * Mathf.Sin(t * 5f));
+            if (drips != null) drips.transform.position = Butt + new Vector3(0f, -0.25f, 0f);
+            if (slippery != null && slippery.gameObject.activeSelf)
+            {
+                // pop elastico, poi un leggero ondeggiare
+                float pop = t < 0.35f ? Mathf.Lerp(0f, 1.3f, t / 0.35f) : t < 0.55f ? Mathf.Lerp(1.3f, 1f, (t - 0.35f) / 0.2f) : 1f + Mathf.Sin(t * 4f) * 0.04f;
+                slippery.transform.localScale = slipperyScale * pop;
+                slippery.transform.localRotation = Quaternion.Euler(0, 0, 8f + Mathf.Sin(t * 3f) * 4f);
+            }
+            if (arrow != null && arrow.gameObject.activeSelf)
+                arrow.localPosition = arrowHome + new Vector3(Mathf.Abs(Mathf.Sin(t * 4f)) * 0.25f, 0f, 0f);   // "spingi di qua!"
         }
 
         IEnumerator Excited()
@@ -187,6 +222,9 @@ namespace Gotcha.Levels
         {
             busy = true;
             if (shine != null) shine.Stop();
+            if (drips != null) drips.Stop();
+            if (arrow != null) arrow.gameObject.SetActive(false);
+            if (slippery != null) slippery.gameObject.SetActive(false);
             toni.Say("SCHLUPP!", 1f, "whoosh");
             Haptics.Medium();
             Vector3 start = toni.transform.localPosition;
@@ -209,26 +247,5 @@ namespace Gotcha.Levels
             Win();
         }
 
-        IEnumerator TootOut()
-        {
-            busy = true;
-            toni.Say("...uh oh.", 0.9f);
-            yield return new WaitForSeconds(0.9f);
-            toni.Say("PRRRRRRT!!", 1.5f, "buzz");
-            Haptics.Heavy();
-            if (toot != null) { toot.transform.position = Butt; toot.Play(); }
-            Vector3 start = toni.transform.localPosition;
-            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.5f)   // a razzo, fuori dallo schermo
-            {
-                toni.transform.localPosition = start + new Vector3(7f * k * k, 1.5f * k, 0f);
-                toni.transform.localRotation = Quaternion.Euler(0, 0, 15f * k);
-                if (toot != null) toot.transform.position = Butt;
-                if (flap != null) flap.localRotation = Quaternion.Euler(0, 0, 80f * (1f - k));
-                yield return null;
-            }
-            yield return new WaitForSeconds(0.8f);
-            if (toot != null) toot.Stop();
-            WinWithEgg("toni_toot");
-        }
     }
 }

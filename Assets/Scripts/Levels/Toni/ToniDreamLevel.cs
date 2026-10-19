@@ -18,7 +18,6 @@ namespace Gotcha.Levels
         [SerializeField] Draggable2D dreamBone;         // l'osso sognato (trascinabile)
         [SerializeField] SpriteRenderer dreamBoneArt;
         [SerializeField] Draggable2D[] props;           // tutto il resto della stanza
-        [SerializeField] string[] reactions;            // cosa borbotta Toni per ogni oggetto (stesso ordine di props)
         [SerializeField] SmokeEmitter sparkle;
         [SerializeField] float noseRange = 1.1f;
         [SerializeField] float cloudRadius = 1.4f;
@@ -60,8 +59,7 @@ namespace Gotcha.Levels
             if (!busy && t >= nextMumble)
             {
                 nextMumble = t + Random.Range(5f, 8f);
-                string[] lines = { "*mumble* ...bone...", "*slurp*", "Zzz... mmh, bone...", "*happy snore*" };
-                toni.Say(lines[Random.Range(0, lines.Length)], 1.4f, "snore");
+                Sfx.Play(this, "snore", 0.5f);   // russa beato: niente fumetti, parla solo il sogno
             }
         }
 
@@ -87,7 +85,6 @@ namespace Gotcha.Levels
                     Sfx.Play(this, "ding", 0.6f);
                     Haptics.Light();
                     if (sparkle != null) StartCoroutine(SparkleAt(dreamBone.transform.position));
-                    toni.Say("*sniff*... ?", 1.2f);
                     StartCoroutine(Deflate());
                 }
                 yield return null;
@@ -126,17 +123,15 @@ namespace Gotcha.Levels
                 return;
             }
             if (NearNose(dreamBone.transform)) StartCoroutine(WakeAndEat());
-            else toni.Say("*sniff sniff*... Zzz", 1.2f, "snore");
+            else Sfx.Play(this, "snore", 0.8f);
         }
 
         void OnPropDropped(Draggable2D d, DropSlot slot)
         {
             if (IsFinished || busy) return;
             Haptics.Light();
-            int i = System.Array.IndexOf(props, d);
             if (!NearNose(d.transform)) return;
-            string line = reactions != null && i >= 0 && i < reactions.Length ? reactions[i] : "Zzz...";
-            toni.Say(line, 1.6f, "snore");
+            Sfx.Play(this, "snore", 0.8f);   // annusa nel sonno e continua a dormire
             StartCoroutine(Twitch());
         }
 
@@ -156,14 +151,14 @@ namespace Gotcha.Levels
         {
             busy = true;
             dreamBone.enabled = false;
-            toni.Say("*SNIFF SNIFF*", 0.9f, "snore");
+            Sfx.Play(this, "snore", 0.8f);
             yield return new WaitForSeconds(0.9f);
             toni.WakeUp(1);
             yield return new WaitForSeconds(0.4f);
             toni.WakeUp(2);
             toni.Alert(true);
             toni.LookTarget = dreamBone.transform;
-            toni.Say("BONE?! IT'S REAL!", 1.2f, "woof");
+            Sfx.Play(this, "woof", 0.8f);
             Haptics.Medium();
             // la nuvoletta svanisce: il sogno si è avverato
             for (float k = 0f; k < 1f; k += Time.deltaTime / 0.4f)
@@ -176,7 +171,7 @@ namespace Gotcha.Levels
             toni.Alert(false);
             yield return StartCoroutine(toni.Chomp(dreamBone.transform));
             yield return StartCoroutine(toni.Happy(1.6f));
-            toni.Say("Best dream EVER!", 1.5f, "woof");
+            Sfx.Play(this, "woof", 0.8f);
             yield return new WaitForSeconds(1.2f);
             Win();
         }

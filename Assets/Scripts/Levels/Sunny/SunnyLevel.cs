@@ -9,8 +9,8 @@ namespace Gotcha.Levels
     /// <summary>
     /// Livello 29 — giornata di sole. Il sole picchia sul pupazzo di neve: suda, arrossisce, si affloscia un po'.
     /// Trascina la nuvola davanti al sole per fargli ombra; il vento però la sposta piano piano. Se il caldo arriva
-    /// al limite, parte la stessa tragedia dell'Easter egg del livello 11 (urlo, occhi che schizzano, scioglimento
-    /// completo): Easter egg e video da condividere. Se resisti fino al tramonto, il sole scende dietro le colline,
+    /// al limite, parte la stessa tragedia del livello 11 (urlo, occhi che schizzano, scioglimento completo) e il
+    /// livello è perso. Se resisti fino al tramonto, il sole scende dietro le colline,
     /// sorge la luna e il pupazzo è salvo.
     /// </summary>
     public class SunnyLevel : LevelController
@@ -34,7 +34,6 @@ namespace Gotcha.Levels
         [SerializeField] float sunsetAfter = 14f;
         [SerializeField] float wind = 0.32f;
         [SerializeField] float horizonY = -4.2f;      // dove spariscono sole e luna (dietro le colline)
-        [SerializeField] string eggId = "sun_melt";
 
         float heat, timeLeft;
         bool over, worried;
@@ -105,12 +104,12 @@ namespace Gotcha.Levels
             if (sweat != null) sweat.Stop();
             if (meltdown != null)
             {
-                // con un limite di tempo: anche se l'animazione si inceppasse, l'Easter egg viene comunque assegnato
+                // con un limite di tempo: anche se l'animazione si inceppasse, il livello finisce comunque
                 StartCoroutine(meltdown.Play(new List<Transform>(eyes), new List<Transform>(attached)));
                 yield return null;
                 for (float t = 0f; t < 10f && meltdown.Running; t += Time.deltaTime) yield return null;
             }
-            FailWithEgg(eggId);
+            Fail();
         }
 
         IEnumerator Sunset()

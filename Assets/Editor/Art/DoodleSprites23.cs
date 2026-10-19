@@ -117,5 +117,16 @@ namespace Gotcha.EditorArt
             p.Line(Rgba.Hex("E36A98"), 0.03f, 0.3f, -0.2f, 0.5f, -0.3f, 0.62f, -0.18f, 0.72f, -0.3f);
             return new DoodleArt("yarn_ball", p);
         }
+
+        /// <summary>Impronta di zampa di cane: un cuscinetto e 4 dita = 5 (livello 99, al posto del "V"). Centro 0,0.</summary>
+        public static DoodleArt DogPawPrint()
+        {
+            var p = new DoodlePainter(-0.36f, -0.34f, 0.36f, 0.38f, 200) { Ink = 0.025f };
+            Rgba ink = Rgba.Hex("3B2F45");
+            p.Fill(Sd.Union(Sd.Ellipse(0, -0.14f, 0.2f, 0.15f), Sd.Ellipse(-0.1f, -0.2f, 0.12f, 0.1f), Sd.Ellipse(0.1f, -0.2f, 0.12f, 0.1f)), ink);
+            foreach (var t in new[] { (-0.24f, 0.08f, -20f), (-0.09f, 0.22f, -6f), (0.09f, 0.22f, 6f), (0.24f, 0.08f, 20f) })
+                p.Fill(Sd.Rotate(Sd.Ellipse(t.Item1, t.Item2, 0.065f, 0.09f), t.Item1, t.Item2, t.Item3), ink);
+            return new DoodleArt("dog_paw_print", p);
+        }
     }
 }

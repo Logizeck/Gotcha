@@ -73,6 +73,9 @@ Livelli 61-100 — terza ondata (ogni meccanica compare al massimo 3 volte; dall
 Livelli 104-128 — quarta ondata, tutte meccaniche nuove (Toni al 125):
 104 Bulb Grid · 105 Sort It Out · 106 Four Liters · 107 Yarn Knot · 108 Connect The Dots · 109 Sky Crane · 110 Gone Fishing · 111 Count The Sheep · 112 Lock Screen · 113 Tall Guest · 114 Box Pusher · 115 Hungry Snake · 116 Pinball · 117 Air Hockey · 118 Slam Dunk · 119 Knock Knock · 120 Screen Time · 121 Broken Vase · 122 Word Salad · 123 Why The Chicken · 124 Paint Mixer · 125 Sweet Dreams · 126 Bubble Wrap · 127 Out Of Tune · 128 Claw Machine.
 
+Livelli 129-150 — rompicapi compositi a più fasi (Toni al 150):
+129 Morning Routine · 130 Bank Heist · 131 Submarine · 132 Haunted House · 133 Kitchen Escape · 134 Space Station · 135 Treasure Map · 136 Detective · 137 Bomb Squad · 138 Potion Lab · 139 Robot Factory · 140 Train Switches · 141 Garden Seasons · 142 Museum Night · 143 Ice Cream Shop · 144 Pirate Cannon · 145 Elevator Logic · 146 Circuit Board · 147 Snow Globe · 148 Knight'S Quest · 149 The Gauntlet · 150 Fetch!.
+
 Free to play: si gioca gratis; nel **negozio** (SHOP) si possono comprare **1 ora di vite infinite (0,99 €)** e
 **niente pubblicità per sempre (4,99 €)**. Vedi README_SETUP.md per la configurazione degli acquisti.
 

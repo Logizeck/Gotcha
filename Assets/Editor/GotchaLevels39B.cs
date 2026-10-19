@@ -79,13 +79,14 @@ public static partial class GotchaProjectBuilder
         Transform ripple = Holder39B(root.transform, "Ripple", "ripple", rest, 4);
         Transform bobber = Holder39B(root.transform, "Bobber", "bobber", rest, 5);
         Transform splash = Holder39B(root.transform, "Splash", "splash", rest, 6);
-        Transform alert = Holder39B(root.transform, "Alert", "alert", rest + new Vector2(0f, 1.0f), 9, 0.8f);
+        Transform alert = Holder39B(root.transform, "Alert", "alert", rest + new Vector2(0f, 1.25f), 9, 1.5f);   // "!" grande: il morso vero si vede
+        Transform bigRipple = Holder39B(root.transform, "BigRipple", "ripple", rest, 4);
         Transform frog = Holder39B(root.transform, "Frog", "pond_frog", new Vector2(-1.9f, -1.0f), 5, 0.9f);
         Transform duck = Holder39B(root.transform, "Duck", "pond_duck", rest + new Vector2(3.3f, 0f), 5, 0.9f);
         Transform fish = Holder39B(root.transform, "CaughtFish", "fish", rest, 12, 2.2f);
         Transform boot = Holder39B(root.transform, "CaughtBoot", "fish_boot", rest, 12, 1.5f);
         var icons = new List<SpriteRenderer>();
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 2; i++)
         {
             Transform ic = Child(root.transform, "Catch" + i, new Vector2(-2.2f + i * 0.75f, 3.15f)).transform;
             ic.localScale = Vector3.one * 1.4f;
@@ -105,7 +106,11 @@ public static partial class GotchaProjectBuilder
         SetField(level, "caughtFish", fish);
         SetField(level, "caughtBoot", boot);
         SetArray(level, "catchIcons", icons.ToArray());
-        SetArray(level, "hearts", Hearts39B(root.transform, new Vector2(1.3f, 3.15f), 0.45f));
+        SetField(level, "bigRipple", bigRipple);
+        // 5 tentativi
+        var fishHearts = new Transform[5];
+        for (int i = 0; i < 5; i++) fishHearts[i] = Holder39B(root.transform, "Heart" + i, "heart", new Vector2(0.75f + i * 0.42f, 3.15f), 40, 1.0f);
+        SetArray(level, "hearts", fishHearts);
         SetField(level, "bubble", SmallBubble(root.transform, new Vector2(0f, 2.45f)));
         return SaveLevel(root, "Fishing");
     }
@@ -279,7 +284,7 @@ public static partial class LevelHints
     static readonly Dictionary<string, string[]> V39B = new Dictionary<string, string[]>
     {
         { "sky_crane", new[] { "Wait until the crate is right above the tower, then tap.", "Tap when the swinging crate lines up with the top crate: perfect drops don't shrink." } },
-        { "gone_fishing", new[] { "Twitches, frogs, leaves and ducks are fake-outs.", "Tap only when the bobber goes fully under with a splash and a \"!\". The boot is free." } },
+        { "gone_fishing", new[] { "Small twitches, frogs, leaves and ducks are fake-outs. Big rings mean a real fish is coming.", "Wait for the big rings, then tap when the bobber goes fully under with a splash and a big \"!\". Two fish win; the boot is free." } },
         { "count_sheep", new[] { "The wolf doesn't count, the one that turns back doesn't count. Watch the bottom of the fence!", "Count sheep that end on the right side, plus the tiny lamb running UNDER the fence." } },
         { "lock_screen", new[] { "The greasy smudges on the screen draw the path.", "Start at the big fingerprint and follow the smudges from dot to dot without lifting." } },
         { "tall_guest", new[] { "You can't zoom. But you can turn something.", "Turn your phone sideways (landscape) and hold it there." } },

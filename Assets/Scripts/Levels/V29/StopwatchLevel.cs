@@ -8,7 +8,6 @@ namespace Gotcha.Levels
     /// <summary>
     /// Livello 98 — il cronometro cieco. Premi il pulsante per far partire il cronometro e premilo di nuovo esattamente
     /// al tempo richiesto. Ma dopo due secondi le cifre si spengono: devi contare a mente! Tre tentativi.
-    /// Easter egg `speedrun`: fermarlo subito, in meno di un quarto di secondo.
     /// </summary>
     public class StopwatchLevel : LevelController
     {
@@ -20,7 +19,6 @@ namespace Gotcha.Levels
         [SerializeField] SpeechBubble bubble;
         [SerializeField] float tolerance = 0.25f, visibleFor = 2f;   // almeno 2 decimi, più il ritardo del tocco
         [SerializeField] int attempts = 3;
-        [SerializeField] string eggId = "speedrun";
 
         static readonly float[] targets = { 5f, 6f, 7f, 8f };
         float target, started = -1f;
@@ -63,14 +61,6 @@ namespace Gotcha.Levels
             display.text = t.ToString("0.00");
             hand.localRotation = Quaternion.Euler(0, 0, -t * 36f);
             Sfx.Play(this, "clunk");
-            if (t < 0.25f)
-            {
-                done = true;
-                if (bubble != null) bubble.Show("0." + Mathf.RoundToInt(t * 100f).ToString("00") + "?! WORLD RECORD! ...wrong game.");
-                yield return new WaitForSeconds(2f);
-                FailWithEgg(eggId);
-                yield break;
-            }
             float diff = t - target;
             if (Mathf.Abs(diff) <= tolerance)
             {

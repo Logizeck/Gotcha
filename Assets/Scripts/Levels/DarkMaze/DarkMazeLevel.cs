@@ -9,6 +9,8 @@ namespace Gotcha.Levels
     /// rosso: prima bisogna trovare la chiave, nascosta in un vicolo cieco. Toccandola con la sfera la si prende
     /// e il cancello si apre. Nelle varianti nel buio dorme una vespa: se la luce della sfera la raggiunge si sveglia e
     /// insegue (il ronzio si sente sempre più forte avvicinandosi, anche attraverso i muri). Se punge, si riprova.
+    /// Nel livello 17 lungo i corridoi ci sono anche tre buche (si vedono solo quando la luce ci arriva) e un laser
+    /// intermittente (brilla nel buio) davanti alla chiave: stesse trappole del labirinto con trappole (MazeTrapFx).
     /// </summary>
     public class DarkMazeLevel : LevelController
     {
@@ -20,6 +22,12 @@ namespace Gotcha.Levels
         [SerializeField] SmokeEmitter sparkle;
         [SerializeField] SpeechBubble bubble;
         [SerializeField] MazeChaser[] wasps;
+        [SerializeField] Transform[] pits;
+        [SerializeField] float pitRadius = 0.3f;
+        [SerializeField] float fallInside = 0.68f;
+        [SerializeField] LaserBeam[] lasers;
+        [SerializeField] float ballRadius = 0.2f;
+        [SerializeField] SmokeEmitter sparks;      // scintille rosse del laser
 
         GoalZone goal;
         bool hasKey, over, hurting;
@@ -101,6 +109,26 @@ namespace Gotcha.Levels
             }
             StopWasps();
             yield return new WaitForSeconds(0.6f);
+            Fail();
+        }
+
+        void Update()
+        {
+            if (over || IsFinished || ball == null) return;
+            switch (MazeTrapFx.Check(ball.position, pits, pitRadius * fallInside, lasers, ballRadius, out Vector2 pitAt))
+            {
+                case MazeTrapFx.Hit.Pit: StartCoroutine(Trapped(MazeTrapFx.FallIn(this, ball, pitAt), "Plop!")); break;
+                case MazeTrapFx.Hit.Laser: StartCoroutine(Trapped(MazeTrapFx.Zap(this, ball, sparks), "ZAP!")); break;
+            }
+        }
+
+        IEnumerator Trapped(IEnumerator fx, string say)
+        {
+            over = true;
+            StopWasps();
+            yield return fx;
+            if (bubble != null) bubble.Show(say, true);
+            yield return new WaitForSeconds(0.8f);
             Fail();
         }
 

@@ -16,6 +16,12 @@ namespace Gotcha.Levels
 
         public virtual void OnLevelStart() { }
 
+        /// <summary>
+        /// Suggerimenti calcolati durante la partita (es. la risposta dell'indovinello uscito a caso). Se non è null
+        /// sostituisce i suggerimenti fissi del livello, nello stesso ordine.
+        /// </summary>
+        public virtual string[] DynamicHints => null;
+
         protected void Win() { Finish(LevelResult.Solved, null); }
         protected void Fail() { Finish(LevelResult.Failed, null); }
         /// <summary>Vittoria che svela anche un Easter egg (es. il robot che si evolve).</summary>

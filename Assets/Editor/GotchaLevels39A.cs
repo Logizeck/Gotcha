@@ -11,7 +11,7 @@ public static partial class GotchaProjectBuilder
     {
         Define("BulbGrid", "bulb_grid", "BULB GRID", "Each bulb also flips its neighbours.", BuildBulbGridLevel()),
         Define("ColorTubes", "color_tubes", "SORT IT OUT", "One colour per tube. Is that grey one really a ball?", BuildColorTubesLevel()),
-        Define("WaterJugs", "four_liters", "FOUR LITERS", "A 5 and a 3 can make a 4. Pour back and forth.", BuildFourLitersLevel()),
+        Define("WaterJugs", "four_liters", "FOUR LITERS", "Drag a jug under the tap to fill it. A 5 and a 3 can make a 4: pour back and forth.", BuildFourLitersLevel()),
         Define("Untangle", "untangle", "YARN KNOT", "Drag the buttons until no strings cross.", BuildUntangleLevel()),
         Define("DotToDot", "dot_to_dot", "CONNECT THE DOTS", "Draw from 1 to 12... and back to 1.", BuildDotToDotLevel()),
     };
@@ -128,11 +128,20 @@ public static partial class GotchaProjectBuilder
         Art(mouth, "Art", "faucet", 6, false);
         Transform tapSpot = Child(root.transform, "TapSpot", new Vector2(1.45f, 0.75f)).transform;
         Bar(root.transform, "Tray", new Vector2(1.45f, 0.62f), new Vector2(1.5f, 0.1f), steel, 1);
-        TextMesh fill = Label(root.transform, new Vector2(1.45f, 0.38f), 2, "FILL", 0.035f);
+        // istruzione ben visibile: dove si riempiono le caraffe (zona tratteggiata sotto il rubinetto)
+        TextMesh fill = Fit(Label(root.transform, new Vector2(1.45f, 2.05f), 4, "FILL THE JUG HERE", 0.06f), 2.4f, 0.4f);
+        for (int d = 0; d < 6; d++)
+        {
+            Bar(root.transform, "Dash", new Vector2(0.75f + d * 0.28f, 1.75f), new Vector2(0.16f, 0.04f), new Color(0.3f, 0.3f, 0.4f), 2);
+            Bar(root.transform, "Dash", new Vector2(0.75f + d * 0.28f, 0.68f), new Vector2(0.16f, 0.04f), new Color(0.3f, 0.3f, 0.4f), 2);
+        }
+        for (int d = 0; d < 4; d++)
+            foreach (float x in new[] { 0.62f, 2.28f })
+                Bar(root.transform, "Dash", new Vector2(x, 0.82f + d * 0.27f), new Vector2(0.04f, 0.16f), new Color(0.3f, 0.3f, 0.4f), 2);
         // lavandino (svuotare)
         Transform sink = Child(root.transform, "Sink", new Vector2(-1.6f, 1.3f)).transform;
         Art(sink, "Art", "drain_sink", 3, false);
-        Label(root.transform, new Vector2(-1.6f, 0.5f), 2, "EMPTY", 0.035f);
+        Fit(Label(root.transform, new Vector2(-1.6f, 0.45f), 2, "EMPTY HERE", 0.05f), 1.8f, 0.35f);
         // gatto e ciotola
         Transform cat = Child(root.transform, "Cat", new Vector2(-1.85f, -2.3f)).transform;
         cat.localScale = Vector3.one * 0.36f;

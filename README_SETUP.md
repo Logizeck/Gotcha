@@ -266,6 +266,48 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.40
+- **Livelli 129-150: rompicapi compositi**, ognuno a più fasi con interazioni diverse (difficoltà crescente):
+- **129 Morning Routine** — La mattina del gatto in 4 fasi: scuoti il telefono per svegliarlo, apri le tende, inclina per versare i cereali fino alla linea, poi il latte fino alla fascia verde.
+- **130 Bank Heist** — Colpo in banca: torcia UV sul quadro per il codice invisibile, tastierino, poi il filo giusto dell'allarme secondo l'indovinello.
+- **131 Submarine** — Sottomarino: inclina per guidarlo nella grotta e soffia nel microfono per l'ossigeno; PING del sonar per il masso giusto; rotelle coi simboli della bandiera.
+- **132 Haunted House** — Casa stregata: dito-torcia per trovare 3 candele, strofina il fiammifero e accendile, poi VOLUME SU per sentire il sussurro e scegliere la porta.
+- **133 Kitchen Escape** — Fuga dalla cucina con inventario: raccogli, unisci spago e calamita, pesca la chiave dallo scarico, apri il pensile e pizzica il blocco per bambini.
+- **134 Space Station** — Stazione spaziale: ruota i cavi per portare energia alla parabola, inclina per puntarla, decodifica il codice luminoso e lancia il razzo.
+- **135 Treasure Map** — Mappa del tesoro: ricomponi i 4 pezzi, segui le istruzioni con gli swipe (la rosa dei venti è ruotata), scava strofinando, apri il baule coi simboli degli angoli.
+- **136 Detective** — Giallo: ascolta gli alibi, ingrandisci la scena per trovare 3 indizi, ammanetta il bugiardo.
+- **137 Bomb Squad** — Bomba a moduli con manuale da sfogliare: fili, pulsante e simboli in 90 secondi.
+- **138 Potion Lab** — Pozione: ingredienti nell'ordine dell'indovinello, mescola con 5 cerchi orari, scalda soffiando fino al verde.
+- **139 Robot Factory** — Fabbrica di robot: monta il pezzo mancante sui robot del nastro, poi programma il percorso con 6 carte comando.
+- **140 Train Switches** — Scambi ferroviari in tempo reale: manda 8 treni alle stazioni del loro colore, max 2 errori.
+- **141 Garden Seasons** — Un anno nell'orto in 4 fasi: semina e annaffia inclinando, scaccia le nuvole e fai ombra, difendi le zucche dalla talpa, scuoti per togliere la neve dalla serra.
+- **142 Museum Night** — Furto al museo: muovi il gatto ladro nell'ombra, scambia il quadro col falso mentre il guardiano sbadiglia, esci tra i laser a ritmo.
+- **143 Ice Cream Shop** — Gelateria: componi i coni degli scontrini prima che finisca la pazienza; il gatto vuole lo stesso del cliente prima.
+- **144 Pirate Cannon** — Cannone pirata: angolo, potenza e vento per colpire 3 bersagli, poi aggancia il forziere col rampino.
+- **145 Elevator Logic** — Logica dell'ascensore: porta 4 animali ai loro piani seguendo gli indizi (soluzione unica).
+- **146 Circuit Board** — Circuito: collega pila, 2 lampadine e LED (con la resistenza!) e accendi l'interruttore.
+- **147 Snow Globe** — Palla di neve: scuoti per vedere il codice nei fiocchi, imposta gli anelli inclinando, ingrandisci la chiavetta e apri il carillon.
+- **148 Knight'S Quest** — Scacchi: col cavaliere mangia 4 topi in 6 mosse, poi scacco matto in 2 con torre e cavaliere.
+- **149 The Gauntlet** — Remix dei trucchi classici con 3 cuori: chiave col pizzico, biglia, candeline, volume giù, non toccare per 5 secondi.
+- **150 Fetch!** (Toni) — Toni al parco in 4 tappe: scuoti l'albero, soffia la palla attraverso lo stagno, allontana il gatto col gomitolo, lancia la palla a Toni.
+- **Sblocco**: i livelli si sbloccano solo superandoli (anche nelle build di prova).
+- **Modalità beta tester**: Impostazioni → BETA TESTING → password. Dà vite e hint infiniti e toglie la
+  pubblicità (la password è salvata solo come hash; si può disattivare dallo stesso pannello).
+- **Condivisione dei video**: proposta solo la prima volta che si trova un Easter egg, e mai più dopo averlo
+  condiviso. Premio: 3 minuti di vite infinite oppure 1 hint gratis.
+- **Pubblicità**: mai tra un tentativo e l'altro (solo dopo un livello superato).
+- **Easter egg tolti** dai livelli 25, 30, 50, 102, 103, 115; **nuovo egg** al 55: *Shattered Screen* (rampa che spara
+  la biglia dritta in alto a piena potenza: lo schermo va in frantumi).
+- **Livelli rifatti** su segnalazione: 16 (trappole sul percorso), 17 (+3 buche e un laser), 18 (soffiare via la
+  polvere dal retro del quadro), 20 (taniche H e O: 2 H + 1 O), 21 (trasformazione del robot più epica), 25 (Toni
+  imburrato si vede), 40 e 55 (un solo tiro), 46 (nuovo: FOLD IT, mappa da piegare), 62 (interruttore mai sotto i
+  pipistrelli o sui mobili), 92 (puzzle con Toni che lecca lo schermo), 94 (legenda delle direzioni invertite), 99
+  (impronta di cane al posto del V), 106 (scritta "FILL THE JUG HERE"), 110 (più facile), 113 (niente icona di
+  rotazione), 117 (gatto più lento), 122 (ogni hint dà la parola giusta), 125 (solo il sogno, niente fumetti).
+- **Fumetti**: si allargano finché il testo ci sta e rientrano nello schermo se escono dai bordi.
+- **Coda di Toni** arricciata a spirale.
+- Versione del costruttore 43.
+
 ## Versione 0.39
 - **25 livelli nuovi (104-128)**, ognuno con una meccanica mai usata prima nel gioco:
 - **104 Bulb Grid** — Soffitta buia: tocca le lampadine (ognuna accende/spegne anche le vicine) finché sono tutte e 9 accese.

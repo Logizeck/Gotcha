@@ -15,7 +15,8 @@ namespace Gotcha.Levels
         [SerializeField] Transform torch;              // sprite "darkness" col buco: segue il dito
         [SerializeField] SpriteRenderer blackout;      // buio totale quando non tocchi
         [SerializeField] Transform[] bats;             // figli "Sleep" e "Awake"
-        [SerializeField] Transform[] spots;            // posti possibili per pipistrelli e interruttore
+        [SerializeField] Transform[] spots;            // posti possibili per l'interruttore (muro libero)
+        [SerializeField] Transform[] batSpots;         // posti possibili per i pipistrelli
         [SerializeField] Collider2D lightSwitch;
         [SerializeField] SpriteRenderer switchArt;
         [SerializeField] Sprite switchOn;
@@ -31,12 +32,24 @@ namespace Gotcha.Levels
         public override void OnLevelStart()
         {
             cam = Camera.main;
-            // a caso: dove stanno l'interruttore e i pipistrelli
-            var order = new System.Collections.Generic.List<int>();
-            for (int i = 0; i < spots.Length; i++) order.Add(i);
-            for (int i = order.Count - 1; i > 0; i--) { int j = Random.Range(0, i + 1); (order[i], order[j]) = (order[j], order[i]); }
-            lightSwitch.transform.position = spots[order[0]].position;
-            for (int i = 0; i < bats.Length; i++) bats[i].position = spots[order[1 + i]].position + new Vector3(0f, 0.35f, 0f);
+            // a caso: dove sta l'interruttore (solo muro libero, mai su quadro/lampada/pianta)
+            Vector3 sw = spots[Random.Range(0, spots.Length)].position;
+            lightSwitch.transform.position = sw;
+            // pipistrelli: mai sopra l'interruttore né troppo vicini
+            var free = new System.Collections.Generic.List<Vector3>();
+            foreach (Transform t in batSpots)
+            {
+                Vector3 b = t.position;
+                bool over = Mathf.Abs(b.x - sw.x) < 0.95f && b.y > sw.y;
+                if (!over && Vector2.Distance(b, sw) >= 1.3f) free.Add(b);
+            }
+            for (int i = free.Count - 1; i > 0; i--) { int j = Random.Range(0, i + 1); (free[i], free[j]) = (free[j], free[i]); }
+            for (int i = 0; i < bats.Length; i++)
+            {
+                bool used = i < free.Count;
+                bats[i].gameObject.SetActive(used);
+                if (used) bats[i].position = free[i] + new Vector3(0f, 0.35f, 0f);
+            }
             lit = new float[bats.Length];
             foreach (Transform b in bats) SetBat(b, false);
             torch.gameObject.SetActive(false);
@@ -62,6 +75,7 @@ namespace Gotcha.Levels
 
             for (int i = 0; i < bats.Length; i++)
             {
+                if (!bats[i].gameObject.activeSelf) continue;
                 bool hit = Vector2.Distance(w, bats[i].position + new Vector3(0f, -0.35f, 0f)) < lightRadius;
                 lit[i] = hit ? lit[i] + Time.deltaTime : Mathf.Max(0f, lit[i] - Time.deltaTime);
                 // si agita nel sonno: avviso

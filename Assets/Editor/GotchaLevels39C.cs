@@ -10,7 +10,7 @@ public static partial class GotchaProjectBuilder
     static List<LevelDefinition> Levels39C() => new List<LevelDefinition>
     {
         Define("Sokoban", "box_pusher", "BOX PUSHER", "Swipe to push the cheese crates onto the red marks.", BuildBoxPusherLevel()),
-        Define("Snake", "hungry_snake", "HUNGRY SNAKE", "Swipe to steer the snake. Eat 8 apples!", BuildHungrySnakeLevel(), "ouroboros"),
+        Define("Snake", "hungry_snake", "HUNGRY SNAKE", "Swipe to steer the snake. Eat 8 apples!", BuildHungrySnakeLevel()),
         Define("Pinball", "pinball", "PINBALL", "Tap the left or right half of the screen to flip. Light all 3 bumpers!", BuildPinballLevel()),
         Define("AirHockey", "air_hockey", "AIR HOCKEY", "Drag your mallet and score 3 goals before the cat does.", BuildAirHockeyLevel()),
         Define("Basket", "slam_dunk", "SLAM DUNK", "Flick the ball up toward the hoop.", BuildSlamDunkLevel()),
@@ -219,11 +219,12 @@ public static partial class GotchaProjectBuilder
         AirHockeyLevel level = root.AddComponent<AirHockeyLevel>();
         Bar(root.transform, "Back", Vector2.zero, new Vector2(12f, 16f), new Color(0.22f, 0.2f, 0.36f), -30);
         float w = AirHockeyLevel.HalfW, top = AirHockeyLevel.Top, bot = AirHockeyLevel.Bottom, g = AirHockeyLevel.GoalHalf;
-        Art(root.transform, "Table", "hockey_table", -20, false, new Vector2(0f, (top + bot) * 0.5f));
+        float cg = AirHockeyLevel.CatGoalHalf;   // la porta del gatto è più larga
+        Art(root.transform, "Table", "hockey_table_wide", -20, false, new Vector2(0f, (top + bot) * 0.5f));
         foreach (float s in new[] { -1f, 1f })
         {
-            WallC39(root.transform, "Wall", new[] { new Vector2(s * g, top), new Vector2(s * w, top), new Vector2(s * w, bot), new Vector2(s * g, bot) }, 0f, Color.clear, 0);
-            WallC39(root.transform, "PostTop", new[] { new Vector2(s * g, top), new Vector2(s * g, top + 0.5f) }, 0f, Color.clear, 0);
+            WallC39(root.transform, "Wall", new[] { new Vector2(s * cg, top), new Vector2(s * w, top), new Vector2(s * w, bot), new Vector2(s * g, bot) }, 0f, Color.clear, 0);
+            WallC39(root.transform, "PostTop", new[] { new Vector2(s * cg, top), new Vector2(s * cg, top + 0.5f) }, 0f, Color.clear, 0);
             WallC39(root.transform, "PostBottom", new[] { new Vector2(s * g, bot), new Vector2(s * g, bot - 0.5f) }, 0f, Color.clear, 0);
         }
         GameObject puckGo = Child(root.transform, "Puck", new Vector2(0f, -2f));
@@ -232,11 +233,12 @@ public static partial class GotchaProjectBuilder
         puckGo.AddComponent<CircleCollider2D>().radius = AirHockeyLevel.PuckR;
         Art(puckGo.transform, "Art", "hockey_puck", 6, false);
         Transform player = Child(root.transform, "PlayerMallet", AirHockeyLevel.PlayerHome).transform;
-        Art(player, "Art", "hockey_mallet", 7, false);
+        Art(player, "Art", "hockey_mallet", 7, false).localScale = Vector3.one * 1.15f;
         Transform catMallet = Child(root.transform, "CatMallet", AirHockeyLevel.CatHome).transform;
         Art(catMallet, "Art", "hockey_paw_mallet", 7, false);
 
         Transform bigPaw = Child(root.transform, "BigPaw", new Vector2(0f, 5.2f)).transform;
+        bigPaw.localScale = new Vector3(1.3f, 1.1f, 1f);   // copre tutta la porta larga
         Art(bigPaw, "Art", "hockey_big_paw", 9, false);
         Rigidbody2D pawRb = bigPaw.gameObject.AddComponent<Rigidbody2D>();
         pawRb.bodyType = RigidbodyType2D.Kinematic;
@@ -313,8 +315,8 @@ public static partial class LevelHints
                                   "Swipe toward each apple, circle around your body. Leave space: the faster you go, the earlier you must turn." } },
         { "pinball", new[] { "Every bumper you hit stays lit. When all 3 are lit, the cat opens its mouth.",
                              "Flip when the ball reaches the middle of the flipper. With all 3 lit, aim straight up the center into the cat's mouth." } },
-        { "air_hockey", new[] { "Hit the puck when the cat's paw is away. Bank shots off the side walls fool it.",
-                                "At 2-0 the cat blocks its goal with a big paw: tap the paw to boop it away, then shoot quickly!" } },
+        { "air_hockey", new[] { "The cat is slow and gets distracted: aim for the corners of its wide goal when it looks away.",
+                                "At 2-0 the cat blocks its goal with a big paw: tap near the paw to boop it away, then shoot quickly while it sulks!" } },
         { "slam_dunk", new[] { "Swipe straight toward the hoop. A medium-fast flick is better than a super-fast one.",
                                "Flick from the ball toward the rim with a quick, medium swipe. For the moving hoop, swipe where it WILL be." } },
     };

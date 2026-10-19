@@ -254,8 +254,13 @@ public static partial class GotchaProjectBuilder
         Bar(root.transform, "Wall", Vector2.zero, new Vector2(12f, 16f), new Color(0.55f, 0.75f, 0.85f), -20);
         Bar(root.transform, "Frame", new Vector2(0, 0.2f), new Vector2(4.6f, 4.6f), new Color(0.55f, 0.36f, 0.22f), -5);
         Bar(root.transform, "Slot", new Vector2(0, 0.2f), new Vector2(4.25f, 4.25f), new Color(0.2f, 0.15f, 0.12f), -4);
-        Transform pic = Art(root.transform, "Picture", "puzzle_cat", 3, false, new Vector2(0, 0.2f));
+        Transform pic = Art(root.transform, "Picture", "puzzle_toni", 3, false, new Vector2(0, 0.2f));
         pic.localScale = Vector3.one * (4.2f / 3.6f);
+        // Toni prende vita: bocca aperta, linguona e bava sul vetro
+        GameObject mouthOpen = Art(pic, "MouthOpen", "puzzle_toni_mouth", 5, false, new Vector2(0f, -0.66f)).gameObject;
+        Transform tongue = Child(root.transform, "Tongue", new Vector2(0f, -0.57f)).transform;
+        Art(tongue, "Art", "toni_tongue_big", 8, false);
+        SpriteRenderer smearSr = Art(root.transform, "Smear", "lick_smear", 9, false).GetComponent<SpriteRenderer>();
         GameObject tile = Child(root.transform, "Tile", Vector2.zero);
         SpriteRenderer tileSr = tile.AddComponent<SpriteRenderer>();
         tileSr.sortingOrder = 4;
@@ -268,6 +273,9 @@ public static partial class GotchaProjectBuilder
         SetField(level, "tileTemplate", tileSr);
         SetField(level, "moves", moves);
         SetField(level, "timeBar", time);
+        SetField(level, "mouthOpen", mouthOpen);
+        SetField(level, "tongue", tongue);
+        SetField(level, "smearTemplate", smearSr);
         SetField(level, "bubble", SmallBubble(root.transform, new Vector2(0, -3.4f)));
         return SaveLevel(root, "Slide");
     }

@@ -246,7 +246,7 @@
   "hint": "A round maze: go around the rings to the star in the middle. Mind the holes... and the lasers keep a rhythm.",
   "egg": "",
   "n": 16,
-  "desc": "Labirinto con buche e laser a tempo (inclinazione).",
+  "desc": "Labirinto circolare a inclinazione: buche e laser sul percorso obbligato, una trappola ogni 45°.",
   "hints": [
    "A round maze: go around the rings to the star in the middle. Mind the holes... and the lasers keep a rhythm.",
    "The gaps in the rings alternate top and bottom.",
@@ -262,7 +262,7 @@
   "hint": "Who turned off the lights? Every locked gate has a key somewhere.",
   "egg": "",
   "n": 17,
-  "desc": "Labirinto al buio: prendi la chiave, poi raggiungi il cancello (inclinazione).",
+  "desc": "Labirinto al buio: trova la chiave (oltre il laser), evita le 3 buche nascoste, poi l'uscita.",
   "hints": [
    "Who turned off the lights? Every locked gate has a key somewhere.",
    "The light follows the ball.",
@@ -278,7 +278,7 @@
   "hint": "That painting is stuck to the wall. Maybe a good shake would help?",
   "egg": "",
   "n": 18,
-  "desc": "Scuoti il telefono per far cadere il quadro, leggi il codice e apri la cassaforte (scuotimento).",
+  "desc": "Scuoti per far cadere il quadro, SOFFIA via la polvere dal retro per leggere il codice, apri la cassaforte.",
   "hints": [
    "That painting is stuck to the wall. Maybe a good shake would help?",
    "Shake the phone.",
@@ -310,7 +310,7 @@
   "hint": "Rockets need fuel. And launch buttons are always protected.",
   "egg": "",
   "n": 20,
-  "desc": "Fai il pieno al razzo, alza la protezione e lancia.",
+  "desc": "Due taniche H e O: servono 2 dosi di H e 1 di O (H2O!), poi coperchio e conto alla rovescia.",
   "hints": [
    "Rockets need fuel. And launch buttons are always protected.",
    "Fuel first.",
@@ -388,16 +388,16 @@
   "id": "toni_stuck",
   "title": "STUCK!",
   "hint": "Toni tried the cat flap. Bad idea. Pushing alone won't do... something slippery from the kitchen, maybe?",
-  "egg": "toni_toot",
+  "egg": "",
   "n": 25,
-  "desc": "Toni è incastrato nella gattaiola: lascia cadere il burro su di lui, poi toccalo (o spingilo verso il muro).",
+  "desc": "Toni incastrato nella gattaiola: imburralo (diventa lucido) e spingilo fuori.",
   "hints": [
    "Toni tried the cat flap. Bad idea. Pushing alone won't do... something slippery from the kitchen, maybe?",
    "Try the things on the table on Toni.",
    "Drag the butter onto Toni, then tap him (or push him toward the wall)."
   ],
-  "eggName": "Toni Rocket",
-  "eggHow": "Spingi Toni 8 volte SENZA il burro: la pressione trova un'altra uscita (PRRRT!) e parte a razzo."
+  "eggName": "",
+  "eggHow": ""
  },
  {
   "folder": "Runaway",
@@ -468,7 +468,7 @@
   "id": "sunny_day",
   "title": "SUNNY DAY",
   "hint": "Snowmen hate the sun. Could a cloud help?",
-  "egg": "sun_melt",
+  "egg": "",
   "n": 30,
   "desc": "Copri il sole con la nuvola finché tramonta.",
   "hints": [
@@ -476,8 +476,8 @@
    "Keep the sun covered.",
    "Drag the cloud over the sun and keep it there until the sun sets."
   ],
-  "eggName": "Meltdown",
-  "eggHow": "Lascia il sole scoperto troppo a lungo: il pupazzo urla e si scioglie del tutto."
+  "eggName": "",
+  "eggHow": ""
  },
  {
   "folder": "Rope",
@@ -630,7 +630,7 @@
   "hint": "Draw up to three ramps. Hold GO longer for a stronger push!",
   "egg": "",
   "n": 40,
-  "desc": "Disegna fino a 3 rampe; tieni premuto GO per la forza della spinta.",
+  "desc": "Disegna le rampe e porta la biglia nella tazza: un solo tiro!",
   "hints": [
    "Draw up to three ramps. Hold GO longer for a stronger push!",
    "Ramps guide the marble.",
@@ -721,16 +721,16 @@
  },
  {
   "folder": "Cookie2",
-  "id": "top_shelf",
-  "title": "TOP SHELF",
-  "hint": "The jar moved higher. Tilt it out, roll it over.",
+  "id": "paper_fold",
+  "title": "FOLD IT",
+  "hint": "Swipe across a dashed line to fold that flap. Make the path reach the X!",
   "egg": "",
   "n": 46,
-  "desc": "Cookie Jar specchiato con il barattolo più in alto.",
+  "desc": "Mappa da piegare lungo le linee tratteggiate: piega prima il lembo destro poi quello in alto, il sentiero arriva alla X (la X rossa a sinistra è un tranello).",
   "hints": [
-   "The jar moved higher. Tilt it out, roll it over.",
-   "Tip it the other way.",
-   "Tilt slowly so the cookie rolls out and down to the mouse without breaking."
+   "Swipe across a dashed line to fold that flap. Make the path reach the X!",
+   "The big red X on the left is a trick: that flap hides the start. The flap folded last ends up on top.",
+   "Fold the RIGHT flap first, then the TOP flap: the path climbs from the flag straight to the X."
   ],
   "eggName": "",
   "eggHow": ""
@@ -788,7 +788,7 @@
   "id": "toni_tug",
   "title": "TUG OF WAR",
   "hint": "The house key is missing and Toni looks VERY innocent. Pull the sock out... gently! Yank it and he pulls back.",
-  "egg": "toni_tug",
+  "egg": "",
   "n": 50,
   "desc": "Tira PIANO il calzino: escono gli oggetti, la chiave per ultima. 5 strattoni = egg.",
   "hints": [
@@ -796,8 +796,8 @@
    "Slow and steady.",
    "Grab the sock and pull it slowly away from Toni. Repeat until the key comes out."
   ],
-  "eggName": "Toni Wins",
-  "eggHow": "Dai 5 strattoni al calzino: Toni vince il tiro alla fune e si rimangia tutto il mucchio (*BURP*)."
+  "eggName": "",
+  "eggHow": ""
  },
  {
   "folder": "Birthday2",
@@ -868,16 +868,16 @@
   "id": "marble_run_2",
   "title": "MARBLE RUN 2",
   "hint": "Right to left now, over a taller wall.",
-  "egg": "",
+  "egg": "glass_smash",
   "n": 55,
-  "desc": "Da destra a sinistra, muretto più alto.",
+  "desc": "Come il 40, da destra a sinistra e muretto più alto: un solo tiro.",
   "hints": [
    "Right to left now, over a taller wall.",
    "Go over, not through.",
    "Draw a ramp that climbs over the wall, then a strong GO."
   ],
-  "eggName": "",
-  "eggHow": ""
+  "eggName": "Shattered Screen",
+  "eggHow": "Disegna una rampa che spari la biglia dritta in alto a piena potenza: lo schermo va in frantumi."
  },
  {
   "folder": "Laser",
@@ -982,7 +982,7 @@
   "hint": "Your finger is a torch. Find the light switch... and don't shine on whatever sleeps up there.",
   "egg": "",
   "n": 62,
-  "desc": "Buio: il dito è una torcia. Trova l'interruttore e toccalo; non illuminare a lungo i pipistrelli che dormono.",
+  "desc": "Il dito è una torcia: trova l'interruttore sul muro libero senza svegliare i pipistrelli.",
   "hints": [
    "Your finger is a torch. Find the light switch... and don't shine on whatever sleeps up there.",
    "The switch is on a wall.",
@@ -1462,7 +1462,7 @@
   "hint": "Tap a tile next to the hole to slide it. Fix the portrait before the cat wakes up!",
   "egg": "",
   "n": 92,
-  "desc": "Ricomponi il ritratto del gatto facendo scorrere i tasselli prima che si svegli.",
+  "desc": "Ricomponi il ritratto di Toni a tasselli: finito, Toni lecca lo schermo.",
   "hints": [
    "Tap a tile next to the hole to slide it. Fix the portrait before the cat wakes up!",
    "Corners first.",
@@ -1494,7 +1494,7 @@
   "hint": "Guide the mouse along the path. Your finger moves him... the wrong way round.",
   "egg": "",
   "n": 94,
-  "desc": "Porta il topolino lungo il sentiero (più largo): i comandi sono invertiti, poi anche su e giù.",
+  "desc": "Comandi allo specchio (la legenda mostra le frecce invertite), poi anche su/giù.",
   "hints": [
    "Guide the mouse along the path. Your finger moves him... the wrong way round.",
    "Everything is reversed.",
@@ -1620,7 +1620,7 @@
   "id": "blind_stopwatch",
   "title": "BLIND STOPWATCH",
   "hint": "Start, then stop at exactly the time shown. The digits vanish after two seconds!",
-  "egg": "speedrun",
+  "egg": "",
   "n": 102,
   "desc": "Ferma il cronometro al tempo richiesto: dopo 2 secondi le cifre spariscono. 3 tentativi.",
   "hints": [
@@ -1628,15 +1628,15 @@
    "Count in your head.",
    "Start it, count the seconds in your head, stop it at the target (±0.25 s)."
   ],
-  "eggName": "Speedrunner",
-  "eggHow": "Ferma il cronometro subito dopo averlo avviato, in meno di un quarto di secondo."
+  "eggName": "",
+  "eggHow": ""
  },
  {
   "folder": "Whack",
   "id": "whack_a_mole",
   "title": "WHACK-A-MOLE",
   "hint": "Bonk the angry moles (gold = 3). Never the party moles!",
-  "egg": "cat_bonk",
+  "egg": "",
   "n": 103,
   "desc": "12 punti in 25 s: colpisci le talpe arrabbiate nelle buche del prato (oro = 3), mai quelle col cappellino.",
   "hints": [
@@ -1644,8 +1644,8 @@
    "Watch the hats.",
    "Hit angry moles (gold counts 3) and never moles with a party hat."
   ],
-  "eggName": "Cat Bonk",
-  "eggHow": "Colpisci il gatto che ogni tanto spunta da una buca al posto delle talpe."
+  "eggName": "",
+  "eggHow": ""
  },
  {
   "folder": "BulbGrid",
@@ -1750,7 +1750,7 @@
   "hint": "Not every wobble is a fish.",
   "egg": "",
   "n": 110,
-  "desc": "Tira solo quando il galleggiante va tutto sott'acqua con lo spruzzo; rana, foglia e papera sono finte. 3 pesci.",
+  "desc": "Tira solo al morso vero (cerchi grandi e '!'): bastano 2 pesci, 5 tentativi.",
   "hints": [
    "Not every wobble is a fish.",
    "Twitches, frogs, leaves and ducks are fake-outs.",
@@ -1828,7 +1828,7 @@
   "id": "hungry_snake",
   "title": "HUNGRY SNAKE",
   "hint": "Swipe to steer the snake. Eat 8 apples!",
-  "egg": "ouroboros",
+  "egg": "",
   "n": 115,
   "desc": "Snake: guida il serpente con gli swipe e mangia 8 mele. 3 vite.",
   "hints": [
@@ -1836,8 +1836,8 @@
    "You can't turn back on yourself. Plan wide turns and stay away from the walls as you speed up.",
    "Swipe toward each apple, circle around your body. Leave space: the faster you go, the earlier you must turn."
   ],
-  "eggName": "Ouroboros",
-  "eggHow": "Fai mordere alla testa esattamente la punta della coda."
+  "eggName": "",
+  "eggHow": ""
  },
  {
   "folder": "Pinball",
@@ -1862,7 +1862,7 @@
   "hint": "Drag your mallet and score 3 goals before the cat does.",
   "egg": "",
   "n": 117,
-  "desc": "Air hockey contro il gatto, primo a 3 gol; sul 2-0 il gatto bara con lo zampone: toccalo per farlo ritirare.",
+  "desc": "Air hockey contro il gatto (lento e distratto), primo a 3; sul 2-0 tocca lo zampone per farlo ritirare.",
   "hints": [
    "Drag your mallet and score 3 goals before the cat does.",
    "Hit the puck when the cat's paw is away. Bank shots off the side walls fool it.",
@@ -2043,6 +2043,358 @@
    "Move the claw, press DROP. Win the plush with the golden key!",
    "The key bear is buried under a fish. Clear the fish out of the way first.",
    "Centre the claw on the fish and DROP, then centre it on the bear and DROP again."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Morning",
+  "id": "morning_routine",
+  "title": "MORNING ROUTINE",
+  "hint": "The cat must get ready. Step one: wake him up!",
+  "egg": "",
+  "n": 129,
+  "desc": "La mattina del gatto in 4 fasi: scuoti il telefono per svegliarlo, apri le tende, inclina per versare i cereali fino alla linea, poi il latte fino alla fascia verde.",
+  "hints": [
+   "The cat must get ready. Step one: wake him up!",
+   "Tapping won't wake him: shake his whole world. Later, tilt to pour and stop at the lines.",
+   "SHAKE the phone, drag both curtains aside, tilt LEFT gently and straighten up at the orange line, then tap the milk, hold on the bowl and let go in the green band."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Heist",
+  "id": "bank_heist",
+  "title": "BANK HEIST",
+  "hint": "Some ink can only be seen in the right light.",
+  "egg": "",
+  "n": 130,
+  "desc": "Colpo in banca: torcia UV sul quadro per il codice invisibile, tastierino, poi il filo giusto dell'allarme secondo l'indovinello.",
+  "hints": [
+   "Some ink can only be seen in the right light.",
+   "Sweep the UV light over the whole painting. The year on the plaque is a decoy.",
+   "Read the 4 glowing digits, type them and press OK. Then work out the riddle's wire from the colours and cut only that one."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Submarine",
+  "id": "submarine",
+  "title": "SUBMARINE",
+  "hint": "Dive to the wreck. Keep an eye on your air!",
+  "egg": "",
+  "n": 131,
+  "desc": "Sottomarino: inclina per guidarlo nella grotta e soffia nel microfono per l'ossigeno; PING del sonar per il masso giusto; rotelle coi simboli della bandiera.",
+  "hints": [
+   "Dive to the wreck. Keep an eye on your air!",
+   "Tilt to steer. When the air runs low, your own breath is the pump.",
+   "Tilt left/right in the tunnel and BLOW into the mic to refill the oxygen; PING and tap the rock that echoes; set the dials to the 3 symbols on the flag."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Haunted",
+  "id": "haunted_house",
+  "title": "HAUNTED HOUSE",
+  "hint": "Find the candles in the dark. Your finger is the flashlight.",
+  "egg": "",
+  "n": 132,
+  "desc": "Casa stregata: dito-torcia per trovare 3 candele, strofina il fiammifero e accendile, poi VOLUME SU per sentire il sussurro e scegliere la porta.",
+  "hints": [
+   "Find the candles in the dark. Your finger is the flashlight.",
+   "The ghost whispers too quietly... what makes things louder on a phone?",
+   "Find the candles with your finger, rub the match fast on the brown strip and light them, then press VOLUME UP a few times and tap the door with the whispered word."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "KitchenEscape",
+  "id": "kitchen_escape",
+  "title": "KITCHEN ESCAPE",
+  "hint": "Tap things to pick them up. Then get crafty.",
+  "egg": "",
+  "n": 133,
+  "desc": "Fuga dalla cucina con inventario: raccogli, unisci spago e calamita, pesca la chiave dallo scarico, apri il pensile e pizzica il blocco per bambini.",
+  "hints": [
+   "Tap things to pick them up. Then get crafty.",
+   "The drawer opens. In the tray, drop one item onto another to combine them.",
+   "String on magnet, then fish in the drain. Key on the lock, then pinch the white child-lock with two fingers."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Station",
+  "id": "space_station",
+  "title": "SPACE STATION",
+  "hint": "Power first, then signal, then the launch code.",
+  "egg": "",
+  "n": 134,
+  "desc": "Stazione spaziale: ruota i cavi per portare energia alla parabola, inclina per puntarla, decodifica il codice luminoso e lancia il razzo.",
+  "hints": [
+   "Power first, then signal, then the launch code.",
+   "Energy must flow from the reactor (left) to the dish (bottom right). Then tilt slowly and HOLD still.",
+   "Decode each blink group with the table: short = small dash, long = long dash. Gaps separate the 3 digits."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TreasureMap",
+  "id": "treasure_map",
+  "title": "TREASURE MAP",
+  "hint": "Every detail on the map matters. EVERY detail.",
+  "egg": "",
+  "n": 135,
+  "desc": "Mappa del tesoro: ricomponi i 4 pezzi, segui le istruzioni con gli swipe (la rosa dei venti è ruotata), scava strofinando, apri il baule coi simboli degli angoli.",
+  "hints": [
+   "Every detail on the map matters. EVERY detail.",
+   "The island compass is turned: N is where its red arrow points, not up. Wrong steps send you back.",
+   "Rub the X fast. For the lock, tap the little map (top left): corner symbols 1, 2, 3 in order."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Detective",
+  "id": "detective",
+  "title": "DETECTIVE",
+  "hint": "Listen carefully, look closely, then accuse.",
+  "egg": "",
+  "n": 136,
+  "desc": "Giallo: ascolta gli alibi, ingrandisci la scena per trovare 3 indizi, ammanetta il bugiardo.",
+  "hints": [
+   "Listen carefully, look closely, then accuse.",
+   "Compare each alibi with the case fact and with how the suspect LOOKS.",
+   "Dry dog in the rain, crumbs on the cookie-hater, or a 'flightless' parrot that's flying: cuff the liar."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "BombSquad",
+  "id": "bomb_squad",
+  "title": "BOMB SQUAD",
+  "hint": "The manual knows. Swipe its pages.",
+  "egg": "",
+  "n": 137,
+  "desc": "Bomba a moduli con manuale da sfogliare: fili, pulsante e simboli in 90 secondi.",
+  "hints": [
+   "The manual knows. Swipe its pages.",
+   "Wires: count them first, then use the first rule that fits. Button: when holding, check the strip colour.",
+   "Cut the wire the page-1 rules point to; tap or hold the button as page 2 says (blue strip = let go on a 4); press the 4 symbols in the order of the one column that has all of them."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Potion",
+  "id": "potion_lab",
+  "title": "POTION LAB",
+  "hint": "Solve the riddle in the spell book.",
+  "egg": "",
+  "n": 138,
+  "desc": "Pozione: ingredienti nell'ordine dell'indovinello, mescola con 5 cerchi orari, scalda soffiando fino al verde.",
+  "hints": [
+   "Solve the riddle in the spell book.",
+   "Tears of the sky = water, the cow = milk, the mouse's dream = cheese... Then stir CLOCKWISE.",
+   "Drop the 4 ingredients in the riddle's order, draw 5 clockwise circles in the cauldron, then blow gently: stop when the thermometer hits green and keep it there 2 seconds."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "RobotFactory",
+  "id": "robot_factory",
+  "title": "ROBOT FACTORY",
+  "hint": "Look at what each robot is missing.",
+  "egg": "",
+  "n": 139,
+  "desc": "Fabbrica di robot: monta il pezzo mancante sui robot del nastro, poi programma il percorso con 6 carte comando.",
+  "hints": [
+   "Look at what each robot is missing.",
+   "The grey ghost on the robot (and the blueprint) shows the missing part. Then plan the route on the grid.",
+   "Drag the blueprint's part from its bin onto 3 passing robots. Then use all 6 slots: straight ahead, ONE turn, straight to the battery (e.g. F, F, F, RIGHT, F, F or F, F, LEFT, F, F, F) and press RUN."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Trains",
+  "id": "train_switches",
+  "title": "TRAIN SWITCHES",
+  "hint": "Tap the switches before the train gets there.",
+  "egg": "",
+  "n": 140,
+  "desc": "Scambi ferroviari in tempo reale: manda 8 treni alle stazioni del loro colore, max 2 errori.",
+  "hints": [
+   "Tap the switches before the train gets there.",
+   "The light next to the tunnel shows the colour of the next train.",
+   "Top switch: left for red, right for yellow. Lower switches: outer track = red/yellow, inner track = blue. Set them while the train is still on the way."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Seasons",
+  "id": "garden_seasons",
+  "title": "GARDEN SEASONS",
+  "hint": "One garden, four seasons. Read the goal at the top.",
+  "egg": "",
+  "n": 141,
+  "desc": "Un anno nell'orto in 4 fasi: semina e annaffia inclinando, scaccia le nuvole e fai ombra, difendi le zucche dalla talpa, scuoti per togliere la neve dalla serra.",
+  "hints": [
+   "One garden, four seasons. Read the goal at the top.",
+   "Tilt LEFT to pour. In summer the shadow falls on the side away from the sun - and the sun moves.",
+   "Seed in the hole, tilt left until the soil is dark; swipe the clouds; keep the umbrella's SHADOW on the plant; bonk the mole (never the cat); shake the phone in winter."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Museum",
+  "id": "museum_night",
+  "title": "MUSEUM NIGHT",
+  "hint": "Stay out of the flashlight beam.",
+  "egg": "",
+  "n": 142,
+  "desc": "Furto al museo: muovi il gatto ladro nell'ombra, scambia il quadro col falso mentre il guardiano sbadiglia, esci tra i laser a ritmo.",
+  "hints": [
+   "Stay out of the flashlight beam.",
+   "Hide behind the statue pedestals and sneak behind the guard's back. Swap only after his yawn.",
+   "Move when his beam points away; when he yawns he turns for 3 s - drop the fake on the frame. At the lasers, hold to walk and let go as soon as a beam flickers."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "IceCream",
+  "id": "ice_cream_shop",
+  "title": "ICE CREAM SHOP",
+  "hint": "Read the ticket: the bottom scoop goes on first.",
+  "egg": "",
+  "n": 143,
+  "desc": "Gelateria: componi i coni degli scontrini prima che finisca la pazienza; il gatto vuole lo stesso del cliente prima.",
+  "hints": [
+   "Read the ticket: the bottom scoop goes on first.",
+   "Wrong scoop? Tap the bin. Toppings go on last. Remember each order...",
+   "Build the ticket bottom-to-top, add sprinkles/cherry, tap SERVE. The cat wants exactly what customer 4 had - memorize it before he leaves!"
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Cannon",
+  "id": "pirate_cannon",
+  "title": "PIRATE CANNON",
+  "hint": "Watch the windsock before you fire.",
+  "egg": "",
+  "n": 144,
+  "desc": "Cannone pirata: angolo, potenza e vento per colpire 3 bersagli, poi aggancia il forziere col rampino.",
+  "hints": [
+   "Watch the windsock before you fire.",
+   "Wind pushes the ball: aim against it. Power goes up AND down - release at the right moment.",
+   "Steep angle and high power for the flag, flatter for the barrel and the hat. After the ship sinks, shoot the hook at the floating chest the same way."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Elevator",
+  "id": "elevator_logic",
+  "title": "ELEVATOR LOGIC",
+  "hint": "Read every clue: only one way works.",
+  "egg": "",
+  "n": 145,
+  "desc": "Logica dell'ascensore: porta 4 animali ai loro piani seguendo gli indizi (soluzione unica).",
+  "hints": [
+   "Read every clue: only one way works.",
+   "Floors count from 1 (bottom) to 5 (top); one floor stays empty. Cat and dog never ride together.",
+   "Start from the 'lowest/highest' and 'right above' clues, then use odd/even to pin the rest. Right animals stay put after a check."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Circuit",
+  "id": "circuit_board",
+  "title": "CIRCUIT BOARD",
+  "hint": "Light all three. Gently.",
+  "egg": "",
+  "n": 146,
+  "desc": "Circuito: collega pila, 2 lampadine e LED (con la resistenza!) e accendi l'interruttore.",
+  "hints": [
+   "Light all three. Gently.",
+   "Tap a placed piece to turn it. 9 volts is way too much for a 2V LED.",
+   "Put the RESISTOR on the LED's branch (right of the middle cross, or just under the LED), then tap the switch."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "SnowGlobe",
+  "id": "snow_globe",
+  "title": "SNOW GLOBE",
+  "hint": "Shake it and watch the snow settle.",
+  "egg": "",
+  "n": 147,
+  "desc": "Palla di neve: scuoti per vedere il codice nei fiocchi, imposta gli anelli inclinando, ingrandisci la chiavetta e apri il carillon.",
+  "hints": [
+   "Shake it and watch the snow settle.",
+   "The flakes spell 3 digits only while settling: shake again to re-read. Then tap a ring and tilt the phone.",
+   "Set the rings to the snow code, then pinch the tiny key to about the keyhole's size and drag its tip into the music box."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Knight",
+  "id": "knight_quest",
+  "title": "KNIGHT'S QUEST",
+  "hint": "Knights jump in an L. Sometimes backwards.",
+  "egg": "",
+  "n": 148,
+  "desc": "Scacchi: col cavaliere mangia 4 topi in 6 mosse, poi scacco matto in 2 con torre e cavaliere.",
+  "hints": [
+   "Knights jump in an L. Sometimes backwards.",
+   "Mice first: you may need to jump back to a square you already visited. Undo is free.",
+   "Mice: c2, e3, back to c2, d4, b5. Mate: rook to a4, knight to d3 (either order)."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Gauntlet",
+  "id": "the_gauntlet",
+  "title": "THE GAUNTLET",
+  "hint": "Everything you learned, all at once.",
+  "egg": "",
+  "n": 149,
+  "desc": "Remix dei trucchi classici con 3 cuori: chiave col pizzico, biglia, candeline, volume giù, non toccare per 5 secondi.",
+  "hints": [
+   "Everything you learned, all at once.",
+   "Pinch the key small, tilt the marble, blow on the candles, use the phone's volume buttons.",
+   "Last trial: put the phone down and touch NOTHING for 5 seconds. The knob on the radio turns it UP."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Toni6",
+  "id": "toni_fetch",
+  "title": "FETCH!",
+  "hint": "Toni's ball is stuck in the tree. Four steps to get it back to him... every one needs a different trick.",
+  "egg": "",
+  "n": 150,
+  "desc": "Toni al parco in 4 tappe: scuoti l'albero, soffia la palla attraverso lo stagno, allontana il gatto col gomitolo, lancia la palla a Toni.",
+  "hints": [
+   "Toni's ball is stuck in the tree. Four steps to get it back to him... every one needs a different trick.",
+   "Shake, blow, distract, throw: one trick per step.",
+   "Shake the phone for the tree, blow into the mic to push the ball across the pond, drag the yarn far from the cat, then swipe the ball UP."
   ],
   "eggName": "",
   "eggHow": ""

@@ -66,7 +66,7 @@ namespace Gotcha.Core
         public bool CanPlay => Lives > 0 || Infinite;
 
         /// <summary>Vite infinite (acquisto da 0,99 €): fallire non costa niente finché dura.</summary>
-        public bool Infinite => infiniteLeft > 0f;
+        public bool Infinite => infiniteLeft > 0f || BetaMode.Active;
         public float InfiniteSecondsLeft => infiniteLeft;
 
         public void GrantInfinite(float seconds)

@@ -26,9 +26,9 @@ namespace Gotcha.Levels
         [SerializeField] Transform doorPoint;
         [SerializeField] SpeechBubble bubble;      // scena verticale
         [SerializeField] SpeechBubble bubbleWide;  // scena orizzontale
-        [SerializeField] float tiltNeeded = 0.7f, holdSeconds = 0.8f, hintAfter = 10f;
+        [SerializeField] float tiltNeeded = 0.7f, holdSeconds = 0.8f;
 
-        float hold, elapsed, talkCooldown, pinchStart;
+        float hold, talkCooldown, pinchStart;
         bool turning, pinching, pinchTold;
         Camera cam;
 
@@ -53,10 +53,9 @@ namespace Gotcha.Levels
         {
             if (turning || IsFinished) return;
             float dt = Time.deltaTime;
-            elapsed += dt;
             talkCooldown -= dt;
             if (talkCooldown < -1.5f && bubble != null && bubble.gameObject.activeSelf) bubble.Hide();
-            if (elapsed > hintAfter && !rotateHint.gameObject.activeSelf) rotateHint.gameObject.SetActive(true);
+            // niente icona "ruota il telefono": la soluzione si scopre da soli (o con gli hint)
             if (rotateHint.gameObject.activeSelf)
                 rotateHint.localRotation = Quaternion.Euler(0, 0, -Mathf.SmoothStep(0f, 90f, Mathf.PingPong(Time.time * 0.8f, 1f)));
 

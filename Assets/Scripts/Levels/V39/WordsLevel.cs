@@ -58,6 +58,14 @@ namespace Gotcha.Levels
             Setup();
         }
 
+        /// <summary>Ogni hint dà la parola giusta di un indovinello (nell'ordine in cui escono).</summary>
+        public override string[] DynamicHints => order.Count < 2 ? null : new[]
+        {
+            "Riddle 1: the answer is " + Answers[order[0]] + ".",
+            "Riddle 2: the answer is " + Answers[order[1]] + ".",
+            "Riddle 3: the answer is " + LastAnswer + ".",
+        };
+
         void Say(string text, float seconds)
         {
             if (bubble == null) return;

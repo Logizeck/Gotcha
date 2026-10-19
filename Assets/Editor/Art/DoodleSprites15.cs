@@ -84,10 +84,26 @@ namespace Gotcha.EditorArt
         /// <summary>Coda arricciata (attacco in 0,0): si scodinzola ruotandola.</summary>
         public static DoodleArt PugTail()
         {
+            // codina arricciata a spirale (un ricciolo e mezzo che si stringe), che si assottiglia verso la punta
             var p = new DoodlePainter(-0.1f, -0.1f, 0.45f, 0.45f, 160) { Ink = 0.035f };
-            Sdf curl = Sd.Union(Sd.Subtract(Sd.Circle(0.2f, 0.24f, 0.15f), Sd.Circle(0.2f, 0.24f, 0.065f)), Sd.Capsule(0f, 0f, 0.08f, 0.15f, 0.07f));
+            var pts = new System.Collections.Generic.List<(float x, float y, float r)> { (0f, 0f, 0.075f), (0.05f, 0.12f, 0.072f) };
+            const float cx = 0.21f, cy = 0.25f;
+            for (int i = 0; i <= 24; i++)
+            {
+                float k = i / 24f;
+                double a = Math.PI * (1.05 - 2.15 * k);           // dal lato sinistro, sopra, giù a destra e dentro
+                float rad = 0.165f - 0.09f * k;
+                pts.Add((cx + (float)Math.Cos(a) * rad, cy + (float)Math.Sin(a) * rad, 0.058f - 0.03f * k));
+            }
+            var parts = new System.Collections.Generic.List<Sdf>();
+            for (int i = 1; i < pts.Count; i++)
+                parts.Add(Sd.Capsule(pts[i - 1].x, pts[i - 1].y, pts[i].x, pts[i].y, Math.Min(pts[i - 1].r, pts[i].r)));
+            Sdf curl = Sd.Union(parts.ToArray());
             Body(p, curl, PugFawn, PugShade);
-            p.Line(PugLine, 0.02f, 0.2f, 0.34f, 0.29f, 0.26f, 0.24f, 0.15f);
+            // riflesso lungo il ricciolo: si legge come una spirale, non come un anello
+            var hl = new System.Collections.Generic.List<float>();
+            for (int i = 3; i < pts.Count - 4; i++) { hl.Add(pts[i].x - 0.012f); hl.Add(pts[i].y + 0.012f); }
+            p.Line(PugLine, 0.014f, hl.ToArray());
             return new DoodleArt("pug_tail", p);
         }
 

@@ -7,6 +7,8 @@ namespace Gotcha.Levels
     /// <summary>
     /// Livello 16 — labirinto con trappole. Come il livello 2 (inclinazione), ma lungo la serpentina ci sono buche
     /// (ci cadi dentro: si riprova) e laser intermittenti (se ti toccano mentre sono accesi: zap!). Si arriva alla stella.
+    /// Nel livello 16 (labirinto circolare) le trappole stanno sul percorso obbligato, una ogni 45°: buche alternate contro
+    /// le pareti (si passa dall'altro lato), una sulla bocca di ogni varco (si entra di sbieco) e un laser per corridoio.
     /// </summary>
     public class TrapMazeLevel : LevelController
     {
@@ -34,15 +36,10 @@ namespace Gotcha.Levels
         void Update()
         {
             if (over || IsFinished || ball == null) return;
-            Vector2 p = ball.position;
-            foreach (Transform pit in pits)
+            switch (MazeTrapFx.Check(ball.position, pits, pitRadius * fallInside, lasers, ballRadius, out Vector2 pitAt))
             {
-                if (pit == null) continue;
-                if (Vector2.Distance(p, pit.position) < pitRadius * fallInside) { StartCoroutine(FallIn(pit.position)); return; }
-            }
-            foreach (LaserBeam l in lasers)
-            {
-                if (l != null && l.IsOn && l.DistanceTo(p) < ballRadius + 0.04f) { StartCoroutine(Zap()); return; }
+                case MazeTrapFx.Hit.Pit: StartCoroutine(FallIn(pitAt)); break;
+                case MazeTrapFx.Hit.Laser: StartCoroutine(Zap()); break;
             }
         }
 
@@ -71,23 +68,7 @@ namespace Gotcha.Levels
         IEnumerator FallIn(Vector2 center)
         {
             over = true;
-            ball.simulated = false;
-            Transform t = ball.transform;
-            Vector3 from = t.position, scale = t.localScale;
-            SpriteRenderer sr = t.GetComponent<SpriteRenderer>();
-            TrailRenderer trail = t.GetComponent<TrailRenderer>();
-            if (trail != null) trail.emitting = false;
-            // la sfera gira nel bordo della buca e sparisce nel buio
-            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.7f)
-            {
-                float a = k * 9f, r = Vector2.Distance(from, center) * (1f - k);
-                t.position = new Vector3(center.x + Mathf.Cos(a) * r, center.y + Mathf.Sin(a) * r, from.z);
-                t.localScale = scale * Mathf.Lerp(1f, 0.1f, k * k);
-                if (sr != null) sr.color = Color.Lerp(Color.white, new Color(0.2f, 0.2f, 0.25f), k);
-                yield return null;
-            }
-            t.gameObject.SetActive(false);
-            Haptics.Medium();
+            yield return MazeTrapFx.FallIn(this, ball, center);
             if (bubble != null) bubble.Show("Plop!");
             yield return new WaitForSeconds(0.8f);
             Fail();
@@ -95,20 +76,8 @@ namespace Gotcha.Levels
 
         IEnumerator Zap()
         {
-            Haptics.Medium();
             over = true;
-            ball.simulated = false;
-            Transform t = ball.transform;
-            SpriteRenderer sr = t.GetComponent<SpriteRenderer>();
-            if (sparks != null) { sparks.transform.position = t.position; sparks.Play(); }
-            Vector3 start = t.position;
-            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.6f)
-            {
-                t.position = start + (Vector3)(Random.insideUnitCircle * 0.05f);
-                if (sr != null) sr.color = Mathf.Repeat(k * 10f, 1f) < 0.5f ? new Color(1f, 0.35f, 0.35f) : Color.white;
-                yield return null;
-            }
-            if (sparks != null) sparks.Stop();
+            yield return MazeTrapFx.Zap(this, ball, sparks);
             if (bubble != null) bubble.Show("ZAP!");
             yield return new WaitForSeconds(0.7f);
             Fail();

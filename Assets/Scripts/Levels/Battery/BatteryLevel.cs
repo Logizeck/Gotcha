@@ -52,6 +52,11 @@ namespace Gotcha.Levels
         [SerializeField] SmokeEmitter stars;          // stelline luccicanti
         [SerializeField] Transform glint;             // scintilla "ting!" sulla visiera
         [SerializeField] AudioSource sfx;
+        [Header("Trasformazione epica")]
+        [SerializeField] SpriteRenderer[] trails;     // scie dei pezzi d'armatura in volo
+        [SerializeField] SpriteRenderer speedLines;   // linee cinetiche del rallentatore
+        [SerializeField] Transform cape;              // mantello della posa eroica (figlio del robot)
+        [SerializeField] SpriteRenderer[] windLines;  // linee di vento
 
         bool armed, done, cranking, cranked;
         float lastAngle;
@@ -81,6 +86,10 @@ namespace Gotcha.Levels
             if (streak != null) streak.color = new Color(1f, 1f, 1f, 0f);
             if (stars != null) stars.Stop();
             if (glint != null) glint.gameObject.SetActive(false);
+            if (trails != null) foreach (SpriteRenderer t in trails) if (t != null) t.gameObject.SetActive(false);
+            if (speedLines != null) speedLines.gameObject.SetActive(false);
+            if (cape != null) cape.gameObject.SetActive(false);
+            if (windLines != null) foreach (SpriteRenderer w in windLines) if (w != null) w.gameObject.SetActive(false);
             if (armor != null) foreach (Transform a in armor) if (a != null) a.gameObject.SetActive(false);
             if (lightning != null) foreach (LineRenderer l in lightning) if (l != null) l.enabled = false;
             if (crank != null) crank.SetActive(false);
@@ -201,40 +210,47 @@ namespace Gotcha.Levels
         Vector3 Center => robot.position + new Vector3(0f, 1.9f, 0f);
 
         /// <summary>
-        /// Trasformazione "da anime": fulmini e tremori, il robot si solleva bianco incandescente davanti a una raggiera,
-        /// i pezzi dell'armatura arrivano in volo uno a uno (clang!), lampo, GATTAI!!, atterraggio con onda d'urto.
+        /// Trasformazione "da anime" (circa 7,5 s): sovraccarico con la batteria che sfora il 100% e la telecamera che
+        /// trema sempre di più; il robot si solleva incandescente davanti alla raggiera; i pezzi dell'armatura arrivano
+        /// in volo con le scie (clang! scintille, scossone); momento al rallentatore con zoom e linee cinetiche;
+        /// lampo enorme, GATTAI!! + 合体！, atterraggio con onda d'urto e posa eroica col mantello al vento.
         /// </summary>
         IEnumerator Evolve()
         {
             SpriteRenderer onArt = robotOn != null ? robotOn.GetComponent<SpriteRenderer>() : null;
             if (robotOn != null) robotOn.SetActive(true);
-            if (bubble != null) bubble.Show("100%! ...wait... MORE?!");
+            if (bubble != null) bubble.Show("100%! ...wait...");
             Vector3 home = robotHome;
-            Transform level = transform;
-            Vector3 levelHome = level.localPosition;
+            BeginCamera();
 
-            // 1. sovraccarico: trema sempre di più, scintille e archi elettrici
-            for (float k = 0f; k < 1.8f; k += Time.deltaTime)
+            // 1. sovraccarico: la batteria sfora, trema tutto sempre di più, scintille, archi elettrici, anelli
+            const float build = 1.9f;
+            int said = 0;
+            for (float k = 0f; k < build; k += Time.deltaTime)
             {
-                float e = k / 1.8f;
-                robot.localPosition = home + (Vector3)(Random.insideUnitCircle * 0.07f * e);
-                if (aura != null) { aura.color = new Color(0.6f, 0.95f, 1f, e * 0.9f); aura.transform.localScale = Vector3.one * (6f + Mathf.Sin(k * 30f) * 0.6f); }
+                float e = k / build;
+                robot.localPosition = home + (Vector3)(Random.insideUnitCircle * 0.08f * e);
+                if (aura != null) { aura.color = new Color(0.6f, 0.95f, 1f, e * 0.9f); aura.transform.localScale = Vector3.one * (6f + Mathf.Sin(k * 30f) * 0.6f * e); }
+                if (batteryFill != null) batteryFill.localScale = new Vector3(1f + 0.35f * e + Mathf.Sin(k * 40f) * 0.03f, 1f, 1f);   // 120%, 135%...
+                if (batteryBar != null) batteryBar.color = Mathf.Repeat(k * 6f, 1f) < 0.5f ? Color.white : new Color(0.36f, 1f, 0.45f);
                 if (sparks != null && k > 0.3f) sparks.Play();
                 Zap(e);
-                PulseRing(k, e);   // anelli di energia che si allargano a ritmo
-                if (k > 1.2f) level.localPosition = levelHome + (Vector3)(Random.insideUnitCircle * 0.05f);
+                PulseRing(k, e);
+                CamShake(0.015f + 0.09f * e * e);
+                if (said == 0 && k > 0.7f) { said = 1; if (bubble != null) bubble.Show("150%?!"); Haptics.Light(); }
+                if (said == 1 && k > 1.35f) { said = 2; if (bubble != null) bubble.Show("OVERCHARGE!!!"); Haptics.Medium(); }
                 yield return null;
             }
-            level.localPosition = levelHome;
+            CamShake(0f);
             if (shockRing != null) shockRing.gameObject.SetActive(false);
-            if (bubble != null) bubble.Show("OVERCHARGE!!!");
-            Haptics.Medium();
             if (batteryUi != null) batteryUi.SetActive(false);
+            if (bubble != null) bubble.Hide();
+            Haptics.Medium();
 
             // 2. si solleva, bianco incandescente, davanti alla raggiera; lo sfondo si oscura
             if (rays != null) rays.gameObject.SetActive(true);
             Vector3 up = home + Vector3.up * 1.1f;
-            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.8f)
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.6f)
             {
                 float e = Mathf.SmoothStep(0f, 1f, k);
                 robot.localPosition = Vector3.Lerp(home, up, e) + (Vector3)(Random.insideUnitCircle * 0.03f);
@@ -242,29 +258,42 @@ namespace Gotcha.Levels
                 if (rays != null) { rays.localScale = Vector3.one * Mathf.Lerp(0.2f, 1.6f, e); rays.Rotate(0, 0, 90f * Time.deltaTime); }
                 if (onArt != null) onArt.color = Color.Lerp(Color.white, new Color(2f, 2f, 2.4f), e);
                 Zap(1f);
-                // la colonna di luce scende dal cielo sul robot
                 Pillar(e, k);
                 RainbowRays();
+                CamShake(0.03f);
                 yield return null;
             }
+            CamShake(0f);
             if (sparks != null) sparks.Stop();
             Zap(-1f);
 
-            // 3. i pezzi dell'armatura arrivano dai bordi e si agganciano, uno dopo l'altro
+            // 3. i pezzi dell'armatura arrivano dai bordi con le scie e si agganciano, uno dopo l'altro
             if (armor != null)
                 for (int i = 0; i < armor.Length; i++)
                 {
                     Transform piece = armor[i];
                     if (piece == null) continue;
                     piece.gameObject.SetActive(true);
+                    SpriteRenderer trail = trails != null && i < trails.Length ? trails[i] : null;
+                    if (trail != null) trail.gameObject.SetActive(true);
                     float side = i % 2 == 0 ? -1f : 1f;
                     Vector3 from = Center + new Vector3(side * 4.5f, 2.5f - i * 1.2f, 0f);
                     Vector3 to = Center + new Vector3(side * 0.15f, 0.6f - i * 0.35f, 0f);
-                    for (float k = 0f; k < 1f; k += Time.deltaTime / 0.28f)
+                    Sfx.Play(this, "whoosh", 0.5f);
+                    for (float k = 0f; k < 1f; k += Time.deltaTime / 0.24f)
                     {
                         piece.position = Vector3.Lerp(from, to, k * k);
                         piece.Rotate(0, 0, side * -900f * Time.deltaTime);
+                        if (trail != null)
+                        {
+                            Vector3 back = from - to;
+                            trail.transform.position = piece.position;
+                            trail.transform.rotation = Quaternion.Euler(0, 0, Mathf.Atan2(back.y, back.x) * Mathf.Rad2Deg);
+                            trail.transform.localScale = new Vector3(0.6f + 1.4f * k, 1f, 1f);
+                            trail.color = new Color(0.6f, 0.95f, 1f, 0.9f);
+                        }
                         if (rays != null) rays.Rotate(0, 0, 90f * Time.deltaTime);
+                        Pillar(1f, Time.time);
                         yield return null;
                     }
                     piece.rotation = Quaternion.identity;
@@ -272,43 +301,73 @@ namespace Gotcha.Levels
                     if (sfx != null) sfx.PlayOneShot(Clang());
                     Haptics.Medium();
                     if (stars != null) { stars.transform.position = to; stars.Play(); }
-                    if (flash != null) flash.color = new Color(0.8f, 0.95f, 1f, 0.45f);   // piccolo lampo a ogni aggancio
-                    level.localPosition = levelHome + (Vector3)(Random.insideUnitCircle * 0.08f);
                     for (float k = 0f; k < 1f; k += Time.deltaTime / 0.12f)
                     {
                         piece.localScale = Vector3.one * Mathf.Lerp(1.3f, 0.2f, k);   // si fonde col corpo
-                        if (flash != null) flash.color = new Color(0.8f, 0.95f, 1f, 0.45f * (1f - k));
+                        if (flash != null) flash.color = new Color(0.8f, 0.95f, 1f, 0.5f * (1f - k));   // piccolo lampo a ogni aggancio
+                        if (trail != null) trail.color = new Color(0.6f, 0.95f, 1f, 0.9f * (1f - k));
+                        CamShake(0.12f * (1f - k));
                         Pillar(1f, Time.time);
                         RainbowRays();
                         yield return null;
                     }
-                    level.localPosition = levelHome;
+                    CamShake(0f);
                     if (sparks != null) sparks.Stop();
                     if (stars != null) stars.Stop();
+                    if (trail != null) trail.gameObject.SetActive(false);
                     piece.gameObject.SetActive(false);
                 }
 
-            // 4. lampo bianco: durante il lampo il robot diventa un robot da battaglia
-            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.12f) { if (flash != null) flash.color = new Color(1f, 1f, 1f, k); yield return null; }
+            // 4. rallentatore: tutto quasi fermo, zoom sul robot, linee cinetiche, battito del cuore
+            if (speedLines != null) { speedLines.gameObject.SetActive(true); speedLines.transform.position = Center; }
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.75f)
+            {
+                float e = Mathf.SmoothStep(0f, 1f, k);
+                CamZoom(e, Center);
+                if (speedLines != null)
+                {
+                    speedLines.color = new Color(1f, 1f, 1f, 0.55f * Mathf.Min(1f, k * 3f));
+                    speedLines.transform.localScale = Vector3.one * (1.15f - 0.1f * k);
+                    speedLines.transform.Rotate(0, 0, 6f * Time.deltaTime);
+                }
+                if (rays != null) rays.Rotate(0, 0, 8f * Time.deltaTime);   // la raggiera quasi si ferma
+                if (onArt != null) onArt.color = Color.Lerp(new Color(2f, 2f, 2.4f), new Color(3f, 3f, 3f), Mathf.PingPong(k * 4f, 1f));
+                if (aura != null) { aura.color = new Color(1f, 1f, 1f, 0.9f); aura.transform.localScale = Vector3.one * (6f + 2f * e); }
+                Pillar(1f, Time.time * 0.15f);
+                if (k > 0.05f && k - Time.deltaTime / 0.75f <= 0.05f) Haptics.Light();   // tu-tum
+                if (k > 0.5f && k - Time.deltaTime / 0.75f <= 0.5f) Haptics.Light();
+                yield return null;
+            }
+
+            // 5. LAMPO enorme: durante il lampo il robot diventa un robot da battaglia
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.1f) { if (flash != null) flash.color = new Color(1f, 1f, 1f, k); yield return null; }
+            if (flash != null) flash.color = Color.white;
             if (robotOn != null) robotOn.SetActive(false);
             if (robotMecha != null) robotMecha.SetActive(true);
+            if (cape != null) cape.gameObject.SetActive(true);
+            if (speedLines != null) speedLines.gameObject.SetActive(false);
+            CamZoom(0f, Center);
             home = robotHome + new Vector3(0.5f, 0f, 0f);   // il robot da battaglia è più grosso: un passo verso il centro
             up = home + Vector3.up * 1.1f;
             robot.localPosition = up;
+            Haptics.Heavy();
+            if (sfx != null) sfx.PlayOneShot(Clang());
+            yield return new WaitForSeconds(0.12f);   // bianco pieno per un istante
             if (banner != null) banner.gameObject.SetActive(true);
             if (bannerJp != null) { bannerJp.gameObject.SetActive(true); bannerJp.localScale = Vector3.zero; }
             if (stars != null && banner != null) { stars.transform.position = banner.transform.position; stars.Play(); }
             if (streak != null) streak.transform.position = Center;
-            Haptics.Heavy();
-            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.5f)
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.55f)
             {
                 if (flash != null) flash.color = new Color(1f, 1f, 1f, 1f - k);
                 if (aura != null) aura.color = new Color(1f, 0.85f, 0.4f, (1f - k) * 0.9f);
                 if (banner != null) banner.transform.localScale = Vector3.one * (k < 0.4f ? Mathf.Lerp(3f, 0.85f, k / 0.4f) : Mathf.Lerp(0.85f, 1f, (k - 0.4f) / 0.6f));
-                // il sottotitolo giapponese arriva subito dopo, con un piccolo rimbalzo
+                // il sottotitolo giapponese 合体！ arriva subito dopo, con un piccolo rimbalzo
                 if (bannerJp != null) bannerJp.localScale = jpScale * (k < 0.3f ? 0f : k < 0.7f ? Mathf.Lerp(0f, 1.15f, (k - 0.3f) / 0.4f) : Mathf.Lerp(1.15f, 1f, (k - 0.7f) / 0.3f));
                 // lampo orizzontale da obiettivo che si allunga e svanisce
                 if (streak != null) { streak.color = new Color(1f, 1f, 1f, 1f - k); streak.transform.localScale = new Vector3(Mathf.Lerp(0.3f, 2.2f, k), 1f + (1f - k), 1f); }
+                CamShake(0.15f * (1f - k));
+                Cape(k);
                 Pillar(1f - k * 0.5f, Time.time);
                 RainbowRays();
                 if (rays != null) rays.Rotate(0, 0, 120f * Time.deltaTime);
@@ -316,10 +375,11 @@ namespace Gotcha.Levels
             }
             if (streak != null) streak.color = new Color(1f, 1f, 1f, 0f);
 
-            // 5. atterraggio pesante con onda d'urto
-            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.25f)
+            // 6. atterraggio pesante con onda d'urto
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.22f)
             {
                 robot.localPosition = Vector3.Lerp(up, home, k * k);
+                Cape(k);
                 if (rays != null) rays.Rotate(0, 0, 120f * Time.deltaTime);
                 yield return null;
             }
@@ -328,34 +388,107 @@ namespace Gotcha.Levels
             Haptics.Heavy();   // atterraggio con onda d'urto
             if (shockRing != null) shockRing.gameObject.SetActive(true);
             SpriteRenderer ring = shockRing != null ? shockRing.GetComponent<SpriteRenderer>() : null;
-            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.6f)
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.5f)
             {
-                level.localPosition = levelHome + (Vector3)(Random.insideUnitCircle * 0.12f * (1f - k));
+                CamShake(0.2f * (1f - k));
                 if (shockRing != null) { shockRing.position = robot.position + new Vector3(0f, 0.2f, 0f); shockRing.localScale = new Vector3(1f, 0.35f, 1f) * Mathf.Lerp(0.5f, 4.5f, k); }
                 if (ring != null) ring.color = new Color(1f, 1f, 1f, 1f - k);
                 if (rays != null) rays.Rotate(0, 0, 120f * Time.deltaTime);
+                Cape(k);
                 yield return null;
             }
-            level.localPosition = levelHome;
+            CamShake(0f);
             if (shockRing != null) shockRing.gameObject.SetActive(false);
             if (stars != null) stars.Stop();
+
+            // 7. posa eroica: mantello e linee di vento, "ting!" sulla visiera
             StartCoroutine(Glint());
             if (bubble != null) bubble.Show("ARIGATO, MASTER!");
-            if (sparks != null) { sparks.transform.position = robot.position + new Vector3(-1.1f, 1.2f, 0f); sparks.Play(); yield return new WaitForSeconds(0.2f); sparks.Stop(); }
-            for (float k = 0f; k < 1.6f; k += Time.deltaTime)
+            if (sparks != null) { sparks.transform.position = robot.position + new Vector3(-1.1f, 1.2f, 0f); sparks.Play(); }
+            for (float k = 0f; k < 1.3f; k += Time.deltaTime)
             {
+                if (k > 0.2f && sparks != null) sparks.Stop();
                 if (rays != null) rays.Rotate(0, 0, 60f * Time.deltaTime);
+                Cape(k);
+                Wind(k);
                 yield return null;
             }
             // il velo scuro sparisce
-            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.4f)
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.35f)
             {
                 if (dim != null) dim.color = new Color(0.05f, 0.03f, 0.12f, 0.8f * (1f - k));
                 if (rays != null) rays.localScale = Vector3.one * Mathf.Lerp(1.6f, 0f, k);
                 Pillar(0.5f * (1f - k), Time.time);
+                Cape(1.3f + k);
+                Wind(1.3f + k);
                 yield return null;
             }
+            if (windLines != null) foreach (SpriteRenderer w in windLines) if (w != null) w.gameObject.SetActive(false);
+            EndCamera();
             WinWithEgg(eggId);
+        }
+
+        // ---------- telecamera: tremolio e zoom (sempre ripristinati) ----------
+
+        Camera shakeCam;
+        Vector3 camHome;
+        float camSize;
+
+        void BeginCamera()
+        {
+            shakeCam = cam != null ? cam : Camera.main;
+            if (shakeCam == null) return;
+            camHome = shakeCam.transform.position;
+            camSize = shakeCam.orthographicSize;
+        }
+
+        void CamShake(float amp)
+        {
+            if (shakeCam == null) return;
+            Vector2 r = amp > 0f ? Random.insideUnitCircle * amp : Vector2.zero;
+            shakeCam.transform.position = camHome + new Vector3(r.x, r.y, 0f);
+        }
+
+        /// <summary>Zoom verso il punto "focus" (0 = inquadratura normale, 1 = ingrandito).</summary>
+        void CamZoom(float e, Vector3 focus)
+        {
+            if (shakeCam == null) return;
+            shakeCam.orthographicSize = camSize * Mathf.Lerp(1f, 0.78f, e);
+            Vector3 p = Vector3.Lerp(camHome, new Vector3(focus.x, focus.y, camHome.z), 0.35f * e);
+            shakeCam.transform.position = p;
+        }
+
+        void EndCamera()
+        {
+            if (shakeCam == null) return;
+            shakeCam.transform.position = camHome;
+            shakeCam.orthographicSize = camSize;
+            shakeCam = null;
+        }
+
+        void OnDisable() { EndCamera(); }
+
+        /// <summary>Il mantello sventola (si allarga e ondeggia).</summary>
+        void Cape(float t)
+        {
+            if (cape == null) return;
+            cape.localScale = new Vector3(1f + Mathf.Sin(t * 14f) * 0.08f, 1f + Mathf.Sin(t * 9f + 1f) * 0.04f, 1f);
+            cape.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(t * 7f) * 5f + 6f);
+        }
+
+        /// <summary>Linee di vento che attraversano la posa eroica da sinistra a destra.</summary>
+        void Wind(float t)
+        {
+            if (windLines == null || robot == null) return;
+            for (int i = 0; i < windLines.Length; i++)
+            {
+                SpriteRenderer w = windLines[i];
+                if (w == null) continue;
+                w.gameObject.SetActive(true);
+                float f = Mathf.Repeat(t * 0.9f + i * 0.5f, 1f);
+                w.transform.position = robot.position + new Vector3(Mathf.Lerp(-2.6f, 2.2f, f), 1.2f + i * 1.3f, 0f);
+                w.color = new Color(1f, 1f, 1f, Mathf.Sin(f * Mathf.PI) * 0.9f);
+            }
         }
 
         Vector3 jpScale = Vector3.one;

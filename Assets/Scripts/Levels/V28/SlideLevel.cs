@@ -6,8 +6,9 @@ using Gotcha.Core;
 namespace Gotcha.Levels
 {
     /// <summary>
-    /// Livello 89 — il puzzle scorrevole. Il ritratto del gatto è a pezzi: tocca un tassello vicino al buco per farlo
-    /// scorrere. Rimettilo in ordine prima che il gatto si svegli (barra del tempo). Ci sono i numerini negli angoli.
+    /// Livello 89 — il puzzle scorrevole. Il ritratto di Toni (il carlino nero) è a pezzi: tocca un tassello vicino
+    /// al buco per farlo scorrere. Rimettilo in ordine prima che Toni si svegli (barra del tempo). Ci sono i numerini
+    /// negli angoli. Finito il ritratto, Toni prende vita, si spiaccica contro il vetro e LECCA lo schermo.
     /// </summary>
     public class SlideLevel : LevelController
     {
@@ -20,6 +21,10 @@ namespace Gotcha.Levels
         [SerializeField] TextMesh moves;
         [SerializeField] SpeechBubble bubble;
         [SerializeField] float seconds = 120f;
+        [SerializeField] GameObject mouthOpen;        // bocca aperta del ritratto (figlio del disegno)
+        [SerializeField] Transform tongue;            // perno della linguona, sulla bocca
+        [SerializeField] SpriteRenderer smearTemplate;
+        [SerializeField] float tongueLength = 2.2f;
 
         int[] board;                                  // board[cella] = tassello (size*size-1 = buco)
         Transform[] tiles;
@@ -55,6 +60,9 @@ namespace Gotcha.Levels
                 tiles[i] = sr.transform;
             }
             picture.gameObject.SetActive(false);
+            if (mouthOpen != null) mouthOpen.SetActive(false);
+            if (tongue != null) tongue.gameObject.SetActive(false);
+            if (smearTemplate != null) smearTemplate.gameObject.SetActive(false);
             for (int i = 0; i < n; i++) board[i] = i;
             hole = n - 1;
             // mescola con mosse valide (così è sempre risolvibile)
@@ -129,15 +137,84 @@ namespace Gotcha.Levels
             picture.gameObject.SetActive(true);
             foreach (Transform t in tiles) if (t != null) t.gameObject.SetActive(false);
             Sfx.Play(this, "ding", 0.6f);
-            if (bubble != null) bubble.Show("Purrfect. In " + moveCount + " moves!");
-            yield return new WaitForSeconds(1.5f);
+            if (bubble != null) bubble.Show("In " + moveCount + " moves! Wait... it's alive?!");
+            // il ritratto prende vita: due saltelli, poi Toni si spiaccica contro il vetro
+            Transform pic = picture.transform;
+            Vector3 size = pic.localScale, home = pic.position;
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.6f)
+            {
+                pic.localScale = size * (1f + 0.07f * Mathf.Abs(Mathf.Sin(k * Mathf.PI * 2f)));
+                yield return null;
+            }
+            Sfx.Play(this, "woof", 0.9f);
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.35f)
+            {
+                pic.localScale = size * Mathf.Lerp(1f, 1.22f, Mathf.SmoothStep(0f, 1f, k));
+                pic.position = home + Vector3.up * 0.25f * k;
+                yield return null;
+            }
+            if (bubble != null) bubble.Hide();
+            if (mouthOpen != null) mouthOpen.SetActive(true);
+            if (tongue != null && smearTemplate != null) yield return Lick();
+            if (mouthOpen != null) mouthOpen.SetActive(false);
+            if (bubble != null) bubble.Show("SLURP! Woof!");
+            yield return new WaitForSeconds(1.4f);
             Win();
+        }
+
+        /// <summary>La linguona esce e spazza lo schermo tre volte, lasciando strisciate di bava che svaniscono.</summary>
+        IEnumerator Lick()
+        {
+            var smears = new System.Collections.Generic.List<SpriteRenderer>();
+            tongue.position = mouthOpen.transform.position;
+            tongue.gameObject.SetActive(true);
+            float big = 1.45f;
+            tongue.localRotation = Quaternion.Euler(0, 0, 60f);
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.25f) { tongue.localScale = Vector3.one * big * k; yield return null; }
+            tongue.localScale = Vector3.one * big;
+            float from = 60f;
+            for (int sweep = 0; sweep < 3; sweep++)
+            {
+                float to = -from;
+                Sfx.Play(this, "whoosh", 0.8f);
+                Haptics.Light();
+                float drop = 0f;
+                for (float k = 0f; k < 1f; k += Time.deltaTime / 0.5f)
+                {
+                    float a = Mathf.Lerp(from, to, Mathf.SmoothStep(0f, 1f, k));
+                    tongue.localRotation = Quaternion.Euler(0, 0, a);
+                    // la punta si allarga un po' quando preme sul vetro
+                    tongue.localScale = new Vector3(big * (1f + 0.25f * Mathf.Sin(k * Mathf.PI)), big, 1f);
+                    drop -= Time.deltaTime;
+                    if (drop <= 0f)
+                    {
+                        drop = 0.04f;
+                        SpriteRenderer sm = Instantiate(smearTemplate, transform);
+                        sm.gameObject.SetActive(true);
+                        sm.transform.position = tongue.position + tongue.up * tongueLength * big * 0.85f;
+                        sm.transform.rotation = Quaternion.Euler(0, 0, a + 90f + Random.Range(-10f, 10f));
+                        sm.transform.localScale = Vector3.one * Random.Range(1.0f, 1.5f);
+                        smears.Add(sm);
+                    }
+                    yield return null;
+                }
+                from = to;
+            }
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.2f) { tongue.localScale = Vector3.one * big * (1f - k); yield return null; }
+            tongue.gameObject.SetActive(false);
+            // la bava sfuma via
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 1.2f)
+            {
+                foreach (SpriteRenderer sm in smears) sm.color = new Color(1f, 1f, 1f, 1f - k);
+                yield return null;
+            }
+            foreach (SpriteRenderer sm in smears) Destroy(sm.gameObject);
         }
 
         IEnumerator Woke()
         {
             done = true;
-            if (bubble != null) bubble.Show("MEOW?! Who broke my portrait?!");
+            if (bubble != null) bubble.Show("WOOF?! Who broke my portrait?!");
             yield return new WaitForSeconds(1.5f);
             Fail();
         }

@@ -14,13 +14,8 @@ namespace Gotcha.Core
     {
         public static GameFlow Instance { get; private set; }
 
-        /// <summary>Build di prova: tutti i livelli giocabili dalla selezione (il progresso vero resta salvato).
-        /// Nella build per Google Play (define GOTCHA_RELEASE, menu Gotcha > Build Google Play AAB) si sbloccano giocando.</summary>
-#if GOTCHA_RELEASE
+        /// <summary>I livelli si sbloccano solo superandoli (anche per i beta tester).</summary>
         public const bool UnlockAllLevels = false;
-#else
-        public const bool UnlockAllLevels = true;
-#endif
 
         [SerializeField] LevelCatalog catalog;
         [SerializeField] Transform levelHost;
@@ -48,6 +43,8 @@ namespace Gotcha.Core
         public LevelDefinition CurrentDefinition { get; private set; }
 
         LevelController current;
+        /// <summary>Il livello in corso (null se non se ne sta giocando uno).</summary>
+        public LevelController Current => current;
         LevelResult lastResult;
         bool paused;
 
@@ -60,7 +57,7 @@ namespace Gotcha.Core
         {
             Instance = this;
             Ads = new AdBreakManager(CreateAdProvider());
-            Ads.AdsRemoved = () => SaveData.AdsRemoved;
+            Ads.AdsRemoved = () => SaveData.AdsRemoved || BetaMode.Active;
             Lives = GetComponent<LivesManager>();
             if (Lives == null) Lives = gameObject.AddComponent<LivesManager>();
             if (GetComponent<StoreManager>() == null) gameObject.AddComponent<StoreManager>();   // acquisti in-app
@@ -172,7 +169,7 @@ namespace Gotcha.Core
 
         /// <summary>
         /// Da chiamare quando il giocatore preme "Avanti"/"Riprova" (dopo l'eventuale schermata di condivisione).
-        /// Se è dovuta, la pubblicità parte qui, cioè sempre tra un livello e l'altro.
+        /// Se è dovuta, la pubblicità parte qui, solo dopo un livello superato: mai tra un tentativo e l'altro.
         /// </summary>
         public void Continue()
         {
@@ -183,7 +180,8 @@ namespace Gotcha.Core
                 GameCompleted?.Invoke();
                 return;
             }
-            Ads.TryShowBreak(() => TryStartLevel(next));
+            if (lastResult == LevelResult.Solved) Ads.TryShowBreak(() => TryStartLevel(next));
+            else TryStartLevel(next);
         }
     }
 }

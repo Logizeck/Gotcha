@@ -10,14 +10,16 @@ using Gotcha.Levels;
 public static partial class GotchaProjectBuilder
 {
     /// <summary>I livelli di Toni, nell'ordine in cui compaiono (uno ogni 25). Quelli nuovi si aggiungono in fondo.</summary>
-    static List<LevelDefinition> ToniLevels() => new List<LevelDefinition>
+    static List<LevelDefinition> ToniLevels()
+    {
+        var list = new List<LevelDefinition>
     {
         Define("Toni1", "toni_stuck", "STUCK!",
             "Toni tried the cat flap. Bad idea. Pushing alone won't do... something slippery from the kitchen, maybe?",
-            BuildToniStuckLevel(), "toni_toot"),
+            BuildToniStuckLevel()),
         Define("Toni2", "toni_tug", "TUG OF WAR",
             "The house key is missing and Toni looks VERY innocent. Pull the sock out... gently! Yank it and he pulls back.",
-            BuildToniTugLevel(), "toni_tug"),
+            BuildToniTugLevel()),
         Define("Toni3", "toni_hide", "WHERE'S TONI?",
             "Toni is hiding... and snoring. Move your finger around the room and listen (and feel): the closer, the louder.",
             BuildToniHideLevel()),
@@ -31,6 +33,9 @@ public static partial class GotchaProjectBuilder
             "Toni's ball is stuck in the tree. Four steps to get it back to him... every one needs a different trick.",
             BuildToniFetchLevel()),
     };
+        list.AddRange(Toni41());   // specifica: X-RAY, BEAUTY FILTER, PERSONAL TRAINER, FINAL EXAM
+        return list;
+    }
 
     /// <summary>
     /// Intreccia i livelli normali con quelli di Toni: Toni va in ogni posizione multipla di 25 (25, 50, 75, ...), i
@@ -50,8 +55,8 @@ public static partial class GotchaProjectBuilder
             }
             all.Add(regular[r++]);
         }
-        // un livello di Toni pronto per la prossima casella resta in fondo solo se cade proprio lì
-        if (t < toni.Count && (all.Count + 1) % 25 == 0) all.Add(toni[t++]);
+        // i livelli di Toni rimasti senza casella chiudono la lista (es. l'esame finale di Toni come ultimo livello)
+        while (t < toni.Count) all.Add(toni[t++]);
         return all;
     }
 
@@ -162,7 +167,26 @@ public static partial class GotchaProjectBuilder
         Draggable2D bone = Prop(root.transform, "Bone", "bone", new Vector2(-1.5f, -0.48f), 0.55f, new Vector2(1.1f, 0.5f), Vector2.zero, 10);
         Draggable2D feather = Prop(root.transform, "Feather", "feather", new Vector2(-1.15f, -0.45f), 0.55f, new Vector2(1.75f, 0.75f), new Vector2(0.55f, 0.22f), 10, 15f);
 
-        SmokeEmitter shine = Emitter(root.transform, "Shine", Vector2.zero, "puff", 6f, 0.7f, 0.4f, 0.4f, 0.18f, new Color(1f, 0.95f, 0.5f, 0.9f), 12);
+        // imburrato: stelline che brillano, gocce, riflessi lucidi, "SLIPPERY!" e la freccia della spinta
+        SmokeEmitter shine = Emitter(root.transform, "Shine", Vector2.zero, "sparkle_star", 7f, 0.8f, 0.25f, 0.45f, 0.45f, new Color(1f, 0.97f, 0.7f, 1f), 12);
+        shine.growth = -0.7f;
+        shine.spinRange = 200f;
+        shine.sideDrift = 0.15f;
+        SmokeEmitter drips = Emitter(root.transform, "Drips", Vector2.zero, "butter_drip", 2.5f, 0.9f, -0.7f, 0.35f, 1.0f, Color.white, 12);
+        drips.growth = 0f;
+        drips.spinRange = 0f;
+        drips.sideDrift = 0f;
+        SpriteRenderer gloss = Art(toni.transform, "ButterGloss", "butter_gloss", 5, false, new Vector2(0.75f, 0.15f)).GetComponent<SpriteRenderer>();
+        Transform arrow = Child(root.transform, "PushArrow", new Vector2(-2.0f, -2.35f)).transform;
+        Art(arrow, "Art", "push_arrow", 11).localScale = Vector3.one * 0.75f;
+        TextMesh pushText = Label(arrow, new Vector2(-0.1f, 0.5f), 11, "PUSH!", 0.04f);
+        pushText.color = new Color(0.93f, 0.5f, 0.08f);
+        TextMesh slippery = Label(root.transform, new Vector2(-1.2f, -1.25f), 13, "SLIPPERY!", 0.07f);
+        slippery.color = new Color(0.95f, 0.6f, 0.1f);
+        SetField(level, "gloss", gloss);
+        SetField(level, "drips", drips);
+        SetField(level, "arrow", arrow);
+        SetField(level, "slippery", slippery);
         SmokeEmitter toot = Emitter(root.transform, "Toot", Vector2.zero, "puff", 30f, 1.4f, 0.2f, 0.4f, 0.6f, new Color(0.6f, 0.85f, 0.35f, 0.85f), 12);
         toot.sideDrift = -1.5f;
 
@@ -366,11 +390,6 @@ public static partial class GotchaProjectBuilder
             Prop(root.transform, "Feather", "feather", new Vector2(-1.55f, 1.15f), 0.55f, new Vector2(1.75f, 0.9f), new Vector2(0.55f, 0.22f), 10, 10f),
             Prop(root.transform, "Cheese", "cheese_wedge", new Vector2(-0.85f, 1.1f), 0.8f, new Vector2(1f, 0.7f), new Vector2(0f, 0.2f), 10),
         };
-        string[] reactions =
-        {
-            "*sniff*... ew. Zzz...", "*cuddle*... Zzz...", "*paws twitch*... Zzz...", "*chew chew*... Zzz...",
-            "Five more minutes... Zzz", "*ding ding*... Zzz...", "Ah... ahh... Zzz...", "Cheese? ...no. BONE. Zzz...",
-        };
         SmokeEmitter sparkle = Emitter(root.transform, "Sparkle", Vector2.zero, "sparkle_star", 30f, 0.6f, 0.4f, 0.4f, 0.8f, Color.white, 40);
 
         SetField(level, "toni", toni);
@@ -378,11 +397,6 @@ public static partial class GotchaProjectBuilder
         SetField(level, "dreamBone", bone);
         SetField(level, "dreamBoneArt", bone.GetComponentInChildren<SpriteRenderer>());
         SetArray(level, "props", props.ToArray());
-        var so = new SerializedObject(level);
-        SerializedProperty rp = so.FindProperty("reactions");
-        rp.arraySize = reactions.Length;
-        for (int i = 0; i < reactions.Length; i++) rp.GetArrayElementAtIndex(i).stringValue = reactions[i];
-        so.ApplyModifiedPropertiesWithoutUndo();
         SetField(level, "sparkle", sparkle);
         return SaveLevel(root, "Toni5");
     }

@@ -45,9 +45,10 @@ namespace Gotcha.Core
         public static bool TryReveal(string levelId, int available)
         {
             int shown = Revealed(levelId);
-            if (shown >= available || Balance <= 0) return false;
+            if (shown >= available || (Balance <= 0 && !BetaMode.Active)) return false;
             PlayerPrefs.SetInt(RevealedPrefix + levelId, shown + 1);
-            Save(Balance - 1);
+            if (BetaMode.Active) { PlayerPrefs.Save(); Changed?.Invoke(); }   // beta tester: hint infiniti
+            else Save(Balance - 1);
             return true;
         }
 

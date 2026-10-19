@@ -22,8 +22,11 @@ namespace Gotcha.Components
         Vector3 textBaseScale = Vector3.one;
         bool initialized;
 
+        Vector3 appliedShift;   // spostamento fatto per rientrare nello schermo (si annulla al fumetto successivo)
+
         void Init()
         {
+            if (appliedShift != Vector3.zero) { transform.position -= appliedShift; appliedShift = Vector3.zero; }
             if (initialized) return;
             initialized = true;
             baseScale = transform.localScale;
@@ -76,20 +79,59 @@ namespace Gotcha.Components
                 size = LocalSize();
             }
 
-            // 2) se non entra ancora, prima si rimpicciolisce un po' il testo (mai sotto il 75%),
-            //    poi si allarga il fumetto: il testo resta sempre dentro e leggibile
-            float fit = Mathf.Min(1f, maxTextWidth / Mathf.Max(size.x, 0.0001f), maxTextHeight / Mathf.Max(size.y, 0.0001f));
-            float ts = Mathf.Max(fit, 0.75f);
+            // 2) se non entra ancora, si allarga il fumetto (il testo resta grande e leggibile); il testo si
+            //    rimpicciolisce solo se il fumetto diventerebbe più largo dello schermo
+            float maxGrowX = MaxGrowX();
+            float ts = Mathf.Min(1f, maxGrowX * maxTextWidth / Mathf.Max(size.x, 0.0001f));
             text.transform.localScale = textBaseScale * ts;
             if (art != null)
             {
-                float gx = Mathf.Max(1f, size.x * ts / maxTextWidth), gy = Mathf.Max(1f, size.y * ts / maxTextHeight);
+                float gx = Mathf.Max(1f, size.x * ts / maxTextWidth * 1.08f), gy = Mathf.Max(1f, size.y * ts / maxTextHeight * 1.1f);
                 art.localScale = new Vector3(artBaseScale.x * gx, artBaseScale.y * gy, artBaseScale.z);
                 // il corpo del fumetto sta un po' sopra il centro del disegno (sotto c'è la codina)
                 Vector3 tp = text.transform.localPosition;
                 text.transform.localPosition = new Vector3(tp.x, textBaseY + (gy - 1f) * bodyOffset, tp.z);
             }
             yield return Pop();
+            KeepOnScreen();
+        }
+
+        /// <summary>Di quanto può allargarsi il fumetto prima di uscire dallo schermo (in larghezza).</summary>
+        float MaxGrowX()
+        {
+            Camera cam = Camera.main;
+            if (cam == null || !cam.orthographic || art == null) return 3f;
+            SpriteRenderer sr = art.GetComponent<SpriteRenderer>();
+            if (sr == null || sr.sprite == null) return 3f;
+            float screenW = cam.orthographicSize * 2f * cam.aspect * 0.94f;
+            float artW = sr.sprite.bounds.size.x * Mathf.Abs(artBaseScale.x * baseScale.x) * ParentScaleX();
+            return Mathf.Max(1f, screenW / Mathf.Max(artW, 0.0001f));
+        }
+
+        float ParentScaleX() => transform.parent != null ? Mathf.Abs(transform.parent.lossyScale.x) : 1f;
+
+        /// <summary>Se il fumetto ingrandito esce dallo schermo, lo si sposta quanto basta per farlo rientrare.</summary>
+        void KeepOnScreen()
+        {
+            Camera cam = Camera.main;
+            if (cam == null || !cam.orthographic || art == null) return;
+            SpriteRenderer sr = art.GetComponent<SpriteRenderer>();
+            if (sr == null) return;
+            Bounds b = sr.bounds;
+            float h = cam.orthographicSize, w = h * cam.aspect;
+            Vector3 c = cam.transform.position;
+            Vector3 shift = Vector3.zero;
+            if (b.size.x < w * 2f)
+            {
+                if (b.min.x < c.x - w) shift.x = (c.x - w) - b.min.x + 0.05f;
+                else if (b.max.x > c.x + w) shift.x = (c.x + w) - b.max.x - 0.05f;
+            }
+            if (b.size.y < h * 2f)
+            {
+                if (b.max.y > c.y + h) shift.y = (c.y + h) - b.max.y - 0.05f;
+                else if (b.min.y < c.y - h) shift.y = (c.y - h) - b.min.y + 0.05f;
+            }
+            if (shift != Vector3.zero) { transform.position += shift; appliedShift = shift; }
         }
 
         IEnumerator Pop()

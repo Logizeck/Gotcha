@@ -8,7 +8,7 @@ namespace Gotcha.Levels
     /// <summary>
     /// Livello 99 — acchiappa la talpa. Dalle buche escono talpe arrabbiate (colpiscile!), talpe con il cappellino
     /// da festa (sono innocenti: NON colpirle) e ogni tanto la talpa d'oro, che vale tre. 12 punti in 25 secondi.
-    /// Easter egg `cat_bonk`: ogni tanto da una buca spunta il gatto. Che ci fa lì?!
+    /// Ogni tanto da una buca spunta il gatto: colpirlo è un errore, come le talpe col cappellino.
     /// </summary>
     public class WhackLevel : LevelController
     {
@@ -19,7 +19,6 @@ namespace Gotcha.Levels
         [SerializeField] SpeechBubble bubble;
         [SerializeField] int needed = 12;
         [SerializeField] float seconds = 25f;
-        [SerializeField] string eggId = "cat_bonk";
 
         static readonly string[] kinds = { "Angry", "Party", "Gold", "Cat" };
         int[] kind;           // -1 = vuota
@@ -90,8 +89,8 @@ namespace Gotcha.Levels
                 int k = kind[i];
                 kind[i] = -1;
                 Set(i, -1, 0f);
-                if (k == 1) { StartCoroutine(Oops("HEY! It's my BIRTHDAY!", false)); return; }
-                if (k == 3) { StartCoroutine(Oops("...the cat will remember this.", true)); return; }
+                if (k == 1) { StartCoroutine(Oops("HEY! It's my BIRTHDAY!")); return; }
+                if (k == 3) { StartCoroutine(Oops("...the cat will remember this.")); return; }
                 Sfx.Play(this, "bonk");
                 Haptics.Light();
                 score += k == 2 ? 3 : 1;
@@ -110,14 +109,14 @@ namespace Gotcha.Levels
             hammer.gameObject.SetActive(false);
         }
 
-        IEnumerator Oops(string message, bool egg)
+        IEnumerator Oops(string message)
         {
             done = true;
             Sfx.Play(this, "bonk", 1f);
             Haptics.Medium();
             if (bubble != null) bubble.Show(message);
             yield return new WaitForSeconds(1.8f);
-            if (egg) FailWithEgg(eggId); else Fail();
+            Fail();
         }
 
         IEnumerator Cleared()

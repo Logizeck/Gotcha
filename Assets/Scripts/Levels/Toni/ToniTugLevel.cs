@@ -9,7 +9,7 @@ namespace Gotcha.Levels
     /// Livello 50 — "TUG OF WAR". Le chiavi di casa sono sparite e Toni ha un calzino che gli spunta dalla bocca,
     /// con l'aria più innocente del mondo. Tira il calzino... ed escono un sacco di cose legate insieme, una dopo
     /// l'altra, fino alla chiave. Ma va tirato PIANO: uno strattone e Toni lo prende per un gioco, tira anche lui e
-    /// si riprende tutto il pezzo. Easter egg `toni_tug`: dargli troppi strattoni... vince lui, e si rimangia tutto.
+    /// si riprende tutto il pezzo. Troppi strattoni... vince lui, si rimangia tutto e il livello è perso.
     /// </summary>
     public class ToniTugLevel : LevelController
     {
@@ -183,7 +183,7 @@ namespace Gotcha.Levels
             busy = false;
         }
 
-        /// <summary>Easter egg: Toni vince la gara di tiro alla fune... e si rimangia il mucchio, chiave compresa.</summary>
+        /// <summary>Troppi strattoni: Toni vince la gara di tiro alla fune... e si rimangia il mucchio, chiave compresa.</summary>
         IEnumerator SlurpEverything()
         {
             toni.MouthOpen(true);
@@ -207,7 +207,7 @@ namespace Gotcha.Levels
             yield return new WaitForSeconds(0.4f);
             toni.Say("*BURP*", 1.5f, "bonk");
             yield return new WaitForSeconds(1.6f);
-            FailWithEgg("toni_tug");
+            Fail();
         }
     }
 }
