@@ -17,6 +17,9 @@ namespace Gotcha.Core
         /// <summary>I livelli si sbloccano solo superandoli (anche per i beta tester).</summary>
         public const bool UnlockAllLevels = false;
 
+        /// <summary>Tutti i livelli giocabili dall'elenco: build di prova o password beta attiva (per i tester).</summary>
+        public static bool AllLevelsOpen => UnlockAllLevels || BetaMode.Active;
+
         [SerializeField] LevelCatalog catalog;
         [SerializeField] Transform levelHost;
 

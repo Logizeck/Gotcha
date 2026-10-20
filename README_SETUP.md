@@ -21,7 +21,7 @@ Grafica in stile cartone "doodle" generata da codice (nessuna immagine esterna d
    Meglio di File > Build Settings > Build: da quella finestra Unity a volte scrive in Console
    "GUI Error: Invalid GUILayout state in BuildPlayerWindow" e "ArgumentException: Getting control 1's position...",
    un bug noto e innocuo dell'Editor che dal menu Gotcha non si presenta.
-   Package name provvisorio: `com.gotcha.game` (da cambiare prima della pubblicazione).
+   Package name: `com.gotcha.zeck` (definitivo dal primo caricamento su Google Play).
 
 Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli asset generati.
 
@@ -266,6 +266,15 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
   progresso compare anche **CONTINUE (LEVEL N)**.
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
+
+## Versione 0.51 (beta per il test interno di Google Play)
+- **Password beta: tutti i livelli aperti** nell'elenco dei livelli (oltre a vite e suggerimenti infiniti e niente
+  pubblicità), così se un livello si blocca si possono provare gli altri. Togliendo la password torna il blocco
+  normale (si riparte dall'ultimo livello sbloccato giocando).
+- Nome del pacchetto definitivo: `com.gotcha.zeck`.
+- **Beta senza acquisti in-app**: tolto il pacchetto Unity IAP 4.12.2 (usa una Billing Library che Google Play
+  rifiuta). Il negozio risponde "Store not available"; gli acquisti tornano con Unity IAP aggiornato.
+- Passi per creare l'AAB e caricarlo: PLAY_STORE.md, sezione "Beta interna".
 
 ## Versione 0.50
 - **Ultimi 8 livelli della specifica "105-200"** (blocco 7), compresi i 4 livelli di Toni:

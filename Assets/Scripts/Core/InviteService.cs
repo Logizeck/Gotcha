@@ -14,7 +14,7 @@ namespace Gotcha.Core
         const string CodeKey = "gotcha.inviteCode";
         /// <summary>Nome del pacchetto su Google Play (unico, NON si può più cambiare dopo il primo caricamento).
         /// Lo usa anche il builder per le impostazioni Android.</summary>
-        public const string PackageName = "com.gotcha.game";
+        public const string PackageName = "com.gotcha.zeck";
         public const string StoreUrl = "https://play.google.com/store/apps/details?id=" + PackageName;
 
         /// <summary>Codice personale (casuale, generato una volta) che identifica chi invita.</summary>

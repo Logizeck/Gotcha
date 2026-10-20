@@ -22,7 +22,7 @@ namespace Gotcha.UI
         public static bool TitleShown => current != null && current.titlePanel != null && current.titlePanel.activeSelf;
 
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.50";
+        public const string Version = "0.51";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
@@ -415,7 +415,7 @@ namespace Gotcha.UI
         void OpenBeta()
         {
             betaInput.text = "";
-            RefreshBeta(BetaMode.Active ? "Beta mode is ON:\nunlimited lives and hints, no ads." : "Enter the beta tester password.");
+            RefreshBeta(BetaMode.Active ? "Beta mode is ON:\nall levels open, unlimited lives and hints, no ads." : "Enter the beta tester password.");
             betaPanel.SetActive(true);
         }
 
@@ -435,7 +435,7 @@ namespace Gotcha.UI
             }
             else if (BetaMode.TryActivate(betaInput.text))
             {
-                RefreshBeta("Welcome, tester!\nUnlimited lives and hints, no ads.");
+                RefreshBeta("Welcome, tester!\nAll levels open, unlimited lives and hints, no ads.");
             }
             else
             {
@@ -607,7 +607,7 @@ namespace Gotcha.UI
                     int index = p * LevelsPerPage + k;
                     if (index >= count) break;
                     int col = k % 2, row = k / 2;
-                    RectTransform cell = LevelCell(page, index, GameFlow.UnlockAllLevels || index <= unlocked);
+                    RectTransform cell = LevelCell(page, index, GameFlow.AllLevelsOpen || index <= unlocked);
                     Place(cell, new Vector2(col * 0.5f + 0.015f, 1f - (row + 1) * 0.2f + 0.012f), new Vector2((col + 1) * 0.5f - 0.015f, 1f - row * 0.2f - 0.012f));
                 }
                 Image dot = CreateRect("Dot" + p, pageDots, Vector2.zero, Vector2.zero).gameObject.AddComponent<Image>();

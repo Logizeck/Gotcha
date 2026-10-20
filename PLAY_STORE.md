@@ -5,6 +5,47 @@ Questa guida va seguita dall'alto in basso. Le parti che il codice fa già da so
 
 ---
 
+## ▶ Beta interna (versione 0.51) — passo passo
+
+Obiettivo: caricare l'AAB nel canale **Test interno** di Play Console (fino a 100 tester, niente revisione lunga,
+niente vincolo dei 12 tester/14 giorni, che vale solo per passare alla produzione).
+Scelte fatte per questa beta: pacchetto **`com.gotcha.zeck`**, **niente acquisti in-app** (il pacchetto Unity IAP
+è stato tolto: il negozio risponde "Store not available"), pubblicità reali assenti (nessun AdMob).
+
+1. **Aggiorna il progetto**: `git pull`, poi apri il progetto con **Unity 2022.3.62f1**. All'apertura il builder
+   rigenera da solo scena e livelli (versione del costruttore 52). Se non parte: menu **Gotcha > Build Scene and
+   Levels**. In *Window > Package Manager* "In App Purchasing" non deve più esserci (lo toglie `Packages/manifest.json`).
+2. **Android SDK Platform 36** (target API 36 obbligatorio): alla prima build Unity può proporre
+   *"Update Android SDK"* → accetta. Se non lo propone e la build si lamenta di "android-36", da terminale:
+   `"<SDK>/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"`
+   (`<SDK>` è il percorso in *Edit > Preferences > External Tools > Android SDK*).
+3. **Chiave di caricamento** (una volta sola, poi **conservala con backup**: senza non puoi aggiornare l'app;
+   con Play App Signing si può solo chiedere a Google di reimpostarla). Da terminale, nella cartella del progetto,
+   usando il keytool del JDK di Unity
+   (`<Unity>/Editor/Data/PlaybackEngines/AndroidPlayer/OpenJDK/bin/keytool`):
+   `keytool -genkeypair -v -keystore gotcha-upload.keystore -alias gotcha -keyalg RSA -keysize 2048 -validity 10000`
+   Poi crea `ReleaseSigning.json` nella cartella del progetto (è già escluso da git):
+   `{"keystorePath":"gotcha-upload.keystore","keystorePass":"...","keyAlias":"gotcha","keyAliasPass":"..."}`
+4. **Crea l'AAB**: menu **Gotcha > Build Google Play AAB** → salva `Builds/Gotcha-0.51.aab`
+   (versionCode **5100**, pacchetto `com.gotcha.zeck`, firmato, define `GOTCHA_RELEASE`).
+   Errori della finestra "Build Settings" (GUILayout) non c'entrano: usa sempre questo menu.
+5. **Play Console**: *Crea app* → nome "Gotcha!", lingua predefinita Inglese (US), **Gioco**, **Senza costi**,
+   accetta le dichiarazioni. Poi *Testa e rilascia > Test > Test interno*:
+   - scheda **Tester**: crea un elenco email con i tuoi tester (anche solo il tuo Gmail) e salva;
+   - **Crea nuova release** → accetta **Play App Signing** (consigliato) → carica `Gotcha-0.51.aab` →
+     nome release "0.51 beta", note di rilascio brevi → *Avanti* → *Salva e pubblica*.
+   - Torna su *Tester* e copia il **link di partecipazione**: i tester lo aprono col proprio account, accettano e
+     installano dal Play Store (la prima volta può volerci qualche minuto).
+6. **Sul telefono**: Impostazioni del gioco → **BETA** → password `Zeckrulez` → tutti i livelli aperti, vite e
+   suggerimenti infiniti, niente pubblicità. Così, se un livello si blocca, si passa agli altri.
+7. **Per ricaricare** una correzione: aumenta `GameUI.Version` (es. "0.51.1" → versionCode 5101) e ripeti il punto 4.
+
+Se la build fallisce, copia il primo errore rosso della Console (spesso Gradle o SDK) e mandamelo.
+Avvisi che Play Console può mostrare e che **non bloccano** il test interno: file di debug simbolici mancanti,
+dichiarazioni dei contenuti ancora da compilare (servono per la produzione, sezioni 7-10).
+
+---
+
 ## 0. Da sapere subito (possono bloccare la data)
 
 1. **Account sviluppatore personale e test chiuso obbligatorio.** Gli account Play Console *personali* creati
@@ -48,7 +89,7 @@ Questa guida va seguita dall'alto in basso. Le parti che il codice fa già da so
 ## 2. Nome del pacchetto (decidere PRIMA del primo caricamento)
 
 Il nome del pacchetto (application ID) è l'identità dell'app su Play: **deve essere unico e non si può più
-cambiare dopo il primo caricamento**. Ora è `com.gotcha.game`, troppo generico (potrebbe essere già preso).
+cambiare dopo il primo caricamento**. ✅ Scelto: **`com.gotcha.zeck`** (in `InviteService.PackageName`).
 
 - [ ] Scegli qualcosa di tuo, ad es. `com.<tuonome>.gotcha` (solo minuscole, cifre, punti e `_`).
 - [ ] Cambialo in **un solo punto**: `Assets/Scripts/Core/InviteService.cs` → `PackageName`. Da lì lo prendono il
