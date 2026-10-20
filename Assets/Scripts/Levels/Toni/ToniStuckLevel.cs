@@ -29,13 +29,14 @@ namespace Gotcha.Levels
         [SerializeField] float pushDistance = 0.35f;
 
         Camera cam;
-        Vector3 home;
+        Vector3 home, homeScale;
         bool greased, busy, pushing;
         float pushStartX, nextMumble, wiggle;
         Vector2 pushStart;
         Vector3 arrowHome, slipperyScale;
         float greasedAt;
         int pushes;
+        readonly System.Collections.Generic.Dictionary<Draggable2D, Vector3> itemHome = new System.Collections.Generic.Dictionary<Draggable2D, Vector3>();
 
         Vector3 Butt => toni.transform.TransformPoint(new Vector2(0.75f, 0.15f));
 
@@ -47,7 +48,14 @@ namespace Gotcha.Levels
             toni.WakeUp(2);
             toni.Wag = 0.7f;
             home = toni.transform.localPosition;
-            foreach (Draggable2D d in new[] { butter, bone, feather }) d.Dropped += OnItemDropped;
+            homeScale = toni.transform.localScale;
+            foreach (Draggable2D d in new[] { butter, bone, feather })
+            {
+                // il ritorno sul tavolo lo fa il livello: Draggable2D lo farebbe PRIMA di dirci dove è stato lasciato
+                d.returnOnMiss = false;
+                itemHome[d] = d.transform.position;
+                d.Dropped += OnItemDropped;
+            }
             if (shine != null) shine.Stop();
             if (toot != null) toot.Stop();
             if (drips != null) drips.Stop();
@@ -136,11 +144,29 @@ namespace Gotcha.Levels
 
         void OnItemDropped(Draggable2D d, DropSlot slot)
         {
-            // basta lasciarlo su Toni (o vicino al sedere): niente mira di precisione
-            if (busy || IsFinished || (!OnToni(d.transform.position) && Vector2.Distance(d.transform.position, Butt) > 1.4f)) return;
-            if (d == butter) StartCoroutine(Grease());
-            else if (d == bone) StartCoroutine(Excited());
+            // basta lasciarlo su Toni, vicino al sedere o alla gattaiola: niente mira di precisione
+            Vector2 p = d.transform.position;
+            bool near = OnToni(p) || Vector2.Distance(p, Butt) < 1.8f || (flap != null && Vector2.Distance(p, flap.position) < 1.6f);
+            if (d == butter && near && !IsFinished && !greased) { StopAllCoroutines(); ResetPose(); StartCoroutine(Grease()); return; }
+            BackHome(d);
+            if (busy || IsFinished || !near) return;
+            if (d == bone) StartCoroutine(Excited());
             else if (d == feather) StartCoroutine(Giggle());
+        }
+
+        void BackHome(Draggable2D d)
+        {
+            if (itemHome.TryGetValue(d, out Vector3 h)) d.transform.position = h;
+        }
+
+        void ResetPose()
+        {
+            busy = false;
+            toni.transform.localPosition = home;
+            toni.transform.localRotation = Quaternion.identity;
+            toni.transform.localScale = homeScale;
+            if (flap != null) flap.localRotation = Quaternion.Euler(0, 0, 55f);
+            toni.Wag = 0.7f;
         }
 
         IEnumerator Grease()

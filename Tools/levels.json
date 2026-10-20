@@ -163,14 +163,14 @@
   "folder": "Snowman",
   "id": "snowman",
   "title": "SNOWMAN",
-  "hint": "Give the snowman a happy face. Eyes and nose go on the head... and the smile? Draw it in the snow!",
+  "hint": "Give the snowman a face: eyes and nose anywhere on the head... and the mouth? Draw it in the snow!",
   "egg": "snowman_butt",
   "n": 11,
-  "desc": "Completa il pupazzo di neve (occhi, naso, sorriso) senza farlo sciogliere.",
+  "desc": "Dai una faccia al pupazzo di neve: occhi e naso dove vuoi, bocca qualsiasi. Più è storta, più è buffo.",
   "hints": [
-   "Give the snowman a happy face. Eyes and nose go on the head... and the smile? Draw it in the snow!",
+   "Give the snowman a face: eyes and nose anywhere on the head... and the mouth? Draw it in the snow!",
    "Coal for the eyes, carrot for the nose.",
-   "Put the coal eyes and carrot nose on the head, then draw a smile on its face with your finger."
+   "Stick both coal eyes and the carrot anywhere on the head, then draw any mouth on its face with your finger. The sillier, the better!"
   ],
   "eggName": "Carrot Bum",
   "eggHow": "Invece che sul naso, lascia la carota sul sedere del pupazzo: arrossisce dalla vergogna e si scioglie."

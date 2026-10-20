@@ -31,7 +31,7 @@ public static partial class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 47;
+    const int BuilderVersion = 48;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -108,7 +108,7 @@ public static partial class GotchaProjectBuilder
                 "Locked again? Some paintings are more realistic than they look.",
                 BuildKeyPaintingLevel(keyPrefab, doorPrefab)),
             Define("Snowman", "snowman", "SNOWMAN",
-                "Give the snowman a happy face. Eyes and nose go on the head... and the smile? Draw it in the snow!",
+                "Give the snowman a face: eyes and nose anywhere on the head... and the mouth? Draw it in the snow!",
                 BuildSnowmanLevel(carrotPrefab, coalPrefab), "snowman_butt"),
             Define("Defend", "defend_cat", "BODYGUARD",
                 "Draw walls with your finger. The wasp hates walls.",

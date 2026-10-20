@@ -116,8 +116,9 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Pupazzo dalle sembianze umane (gambe tozze, fianchi, busto) con una testa enorme e buffa, in posa di 3/4
   (guarda a sinistra). Il sedere è solo accennato dalla curva dei fianchi sul retro.
 - Occhi (carboni) e naso (carota), più grandi del normale, restano attaccati dove li lasci sulla testa;
-  altrove cadono nella neve. Nessuna posizione è indicata: ogni occhio deve stare nella sua zona (ampia e
-  invisibile) e il naso al centro; la bocca si disegna col dito e resta come un solco: deve essere un sorriso.
+  altrove cadono nella neve. Nessuna posizione è richiesta: due occhi e il naso in un punto qualsiasi della testa
+  e una bocca qualsiasi disegnata col dito (resta come un solco). Il pupazzo commenta la faccia: più è storta,
+  più è buffo (occhi che ballano, saltelli sbilenchi).
 - Easter egg `snowman_butt`: lascia la carota sul sedere. Resta piantata lì; il pupazzo arrossisce, trema e
   URLA (voce femminile: `Assets/Audio/Scream.wav` se presente, altrimenti sintetizzata da `ScreamSynth`): gli occhi
   schizzano via, la bocca disegnata diventa una "O", il cappello salta, le braccia si agitano nel panico.
@@ -265,6 +266,15 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
   progresso compare anche **CONTINUE (LEVEL N)**.
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
+
+## Versione 0.45
+- **Livello 25 (Toni STUCK!) ora si supera**: il burro veniva rimesso sul tavolo prima di controllare dove era
+  stato lasciato, quindi non ungeva mai Toni. Ora vale se lasciato su Toni, vicino al sedere o alla gattaiola;
+  poi un tocco o una spinta verso destra lo fa uscire.
+- **Livello 11 (pupazzo di neve)**: occhi e naso in qualsiasi punto della testa, qualsiasi bocca disegnata.
+  Alla vittoria il pupazzo commenta la faccia ("Who nose where my nose goes?!", "Cross-eyed and PROUD!", ...),
+  gli occhi di carbone ballano e saltella tutto storto.
+- Versione del costruttore 48.
 
 ## Versione 0.44
 - **Livelli 215-222**: altri 8 livelli della specifica "105-200" (blocco 4):

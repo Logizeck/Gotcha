@@ -29,7 +29,7 @@ public static partial class LevelHints
         { "hold_both", new[] { "Use two fingers at the same time.", "Keep one finger on each button until the countdown ends. Don't lift them!" } },
         { "bug_spray", new[] { "Spray where the roach is going, not where it is.", "Keep your finger pressed to spray and follow the roach until it stops moving." } },
         { "art_theft", new[] { "Look closely at the painting.", "The key in the painting is real: drag it out and into the door." } },
-        { "snowman", new[] { "Coal for the eyes, carrot for the nose.", "Put the coal eyes and carrot nose on the head, then draw a smile on its face with your finger." } },
+        { "snowman", new[] { "Coal for the eyes, carrot for the nose.", "Stick both coal eyes and the carrot anywhere on the head, then draw any mouth on its face with your finger. The sillier, the better!" } },
         { "defend_cat", new[] { "Walls between the wasp and the cat.", "Draw short walls around the cat, on the wasp's side, and keep it out for 10 seconds." } },
         { "you_won", new[] { "Each lamp hides something.", "Switch on BOTH lamps: the hidden words appear." } },
         { "cookie_jar", new[] { "Tip the jar by tilting the phone.", "Turn the phone upside down slowly so the cookie rolls out gently to the mouse." } },

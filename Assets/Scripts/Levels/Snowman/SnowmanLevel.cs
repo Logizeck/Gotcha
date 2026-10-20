@@ -9,8 +9,8 @@ namespace Gotcha.Levels
     /// <summary>
     /// Livello 11 — pupazzo di neve.
     /// Occhi (2 carboni) e naso (carota) si attaccano dove li lasci sulla testa: nessuna posizione è indicata.
-    /// Per vincere ogni occhio deve stare nella sua zona (ampia, invisibile), il naso nella sua, e la bocca va
-    /// disegnata col dito: un sorriso che resta come un solco nella neve.
+    /// Per vincere bastano due occhi e il naso attaccati alla testa, DOVE SI VUOLE, e una bocca disegnata col dito
+    /// (qualsiasi forma: resta come un solco nella neve). Più la faccia è storta, più il pupazzo commenta buffo.
     /// Il pupazzo è in posa di 3/4 (guarda a sinistra): il sedere sporge sul retro, a destra in basso.
     /// Easter egg: lasciare la carota sul sedere → la carota resta piantata lì, il pupazzo arrossisce, gli occhi
     /// schizzano via, la bocca resta a "O", e si scioglie del tutto dall'alto in basso (SnowmanMelter) finché resta
@@ -29,13 +29,9 @@ namespace Gotcha.Levels
         [SerializeField] SnowmanMeltdown meltdown;   // urlo + scioglimento (uguale al livello 29)
         [SerializeField] SpriteRenderer mouthO;  // bocca stupita (nascosta finché non serve)
 
-        [Header("Zone invisibili (coordinate del pupazzo, piedi in 0,0)")]
+        [Header("Coordinate del pupazzo, piedi in 0,0")]
         [SerializeField] Vector2 headCenter = new Vector2(-0.1f, 3.7f);
         [SerializeField] float stickRadius = 1.15f;                             // dove gli oggetti restano attaccati
-        [SerializeField] Rect leftEyeZone = new Rect(-1.05f, 3.72f, 0.85f, 0.75f);
-        [SerializeField] Rect rightEyeZone = new Rect(-0.2f, 3.72f, 0.9f, 0.75f);
-        [SerializeField] Rect noseZone = new Rect(-1.05f, 3.3f, 1.5f, 0.66f);
-        [SerializeField] Rect mouthZone = new Rect(-1.05f, 2.8f, 1.8f, 0.85f);  // dove deve stare il sorriso
         [SerializeField] Vector2 buttCenter = new Vector2(0.86f, 1.02f);
         [SerializeField] float buttRadius = 0.5f;
         [SerializeField] Vector2 buttSurface = new Vector2(0.86f, 1.02f);       // dove si pianta la punta della carota
@@ -49,7 +45,7 @@ namespace Gotcha.Levels
 
         Draggable2D[] items;
         bool resolving;
-        bool smileOk;
+        bool mouthOk;
 
         public override void OnLevelStart()
         {
@@ -97,53 +93,68 @@ namespace Gotcha.Levels
 
         void OnMouthDrawn(StrokeDrawer pen)
         {
-            smileOk = IsSmile(pen.LastStrokePoints);
+            // qualsiasi bocca va bene: sorriso, broncio, zig-zag... basta che ci sia
+            IReadOnlyList<Vector3> pts = pen.LastStrokePoints;
+            mouthOk = pts != null && pts.Count >= 2;
             CheckComplete();
-        }
-
-        /// <summary>Un sorriso: abbastanza largo, nella zona della bocca, con le punte più in alto del centro.</summary>
-        bool IsSmile(IReadOnlyList<Vector3> pts)
-        {
-            if (pts == null || pts.Count < 3) return false;
-            float minX = float.MaxValue, maxX = float.MinValue, minY = float.MaxValue, sumY = 0f;
-            int lowest = 0;
-            for (int i = 0; i < pts.Count; i++)
-            {
-                Vector2 p = Local(mouthPen.transform.TransformPoint(pts[i]));
-                if (!mouthZone.Contains(p)) return false;
-                minX = Mathf.Min(minX, p.x);
-                maxX = Mathf.Max(maxX, p.x);
-                if (p.y < minY) { minY = p.y; lowest = i; }
-                sumY += p.y;
-            }
-            Vector2 a = Local(mouthPen.transform.TransformPoint(pts[0]));
-            Vector2 b = Local(mouthPen.transform.TransformPoint(pts[pts.Count - 1]));
-            bool wide = maxX - minX >= 0.25f;
-            bool curved = (a.y + b.y) * 0.5f - minY >= 0.03f;
-            bool lowInMiddle = lowest > 0 && lowest < pts.Count - 1;
-            return wide && curved && lowInMiddle;
         }
 
         void CheckComplete()
         {
-            if (IsFinished || resolving) return;
-            bool left = false, right = false, nose = false;
-            foreach (Draggable2D d in items)
-            {
-                if (d == null || d.transform.parent != headPart) continue;
-                Vector2 p = Local(d.transform.position);
-                if (d.itemId == "eye")
-                {
-                    if (!left && leftEyeZone.Contains(p)) left = true;
-                    else if (!right && rightEyeZone.Contains(p)) right = true;
-                }
-                if (d.itemId == "carrot" && noseZone.Contains(p)) nose = true;
-            }
-            if (left && right && nose && smileOk)
+            if (IsFinished || resolving || !mouthOk) return;
+            if (Face(out _, out _, out _))
             {
                 resolving = true;
                 StartCoroutine(WinRoutine());
             }
+        }
+
+        /// <summary>Due occhi e il naso attaccati alla testa, in qualunque punto (coordinate del pupazzo).</summary>
+        bool Face(out Vector2 eyeA, out Vector2 eyeB, out Vector2 nose)
+        {
+            eyeA = eyeB = nose = Vector2.zero;
+            int eyes = 0;
+            bool hasNose = false;
+            foreach (Draggable2D d in items)
+            {
+                if (d == null || d.transform.parent != headPart) continue;
+                Vector2 p = Local(d.transform.position);
+                if (d.itemId == "eye") { if (eyes == 0) eyeA = p; else eyeB = p; eyes++; }
+                else if (d.itemId == "carrot") { nose = p; hasNose = true; }
+            }
+            return eyes >= 2 && hasNose;
+        }
+
+        /// <summary>Il commento del pupazzo sulla faccia che gli hai fatto: più è storta, più è buffo.</summary>
+        string FaceComment(out bool silly)
+        {
+            silly = true;
+            Face(out Vector2 a, out Vector2 b, out Vector2 nose);
+            IReadOnlyList<Vector3> pts = mouthPen != null ? mouthPen.LastStrokePoints : null;
+            Vector2 mouth = Vector2.zero, m0 = Vector2.zero, m1 = Vector2.zero;
+            float topY = float.MinValue;
+            if (pts != null && pts.Count > 0)
+            {
+                for (int i = 0; i < pts.Count; i++)
+                {
+                    Vector2 p = Local(mouthPen.transform.TransformPoint(pts[i]));
+                    mouth += p;
+                    if (i > 0 && i < pts.Count - 1) topY = Mathf.Max(topY, p.y);
+                }
+                mouth /= pts.Count;
+                m0 = Local(mouthPen.transform.TransformPoint(pts[0]));
+                m1 = Local(mouthPen.transform.TransformPoint(pts[pts.Count - 1]));
+            }
+            if (mouth.y > Mathf.Max(a.y, b.y)) return "Is my face... upside down?";
+            if (nose.y > Mathf.Max(a.y, b.y) + 0.1f) return "Who nose where my nose goes?!";
+            if (Mathf.Abs(a.y - b.y) > 0.35f) return "I see the world... sideways!";
+            if (Vector2.Distance(a, b) < 0.4f) return "Cross-eyed and PROUD!";
+            if (Vector2.Distance(a, b) > 1.1f) return "I can see behind me!";
+            if (mouth.y > nose.y) return "My nose is on my chin. Chic!";
+            if (Mathf.Abs(nose.x - (a.x + b.x) * 0.5f) > 0.6f) return "Nose to the side: very modern!";
+            if (pts != null && pts.Count > 2 && topY > (m0.y + m1.y) * 0.5f + 0.06f) return "Grumpy... but HANDSOME!";
+            silly = false;
+            return "Yay! Handsome!";
         }
 
         IEnumerator FallToGround(Transform t)
@@ -170,16 +181,39 @@ namespace Gotcha.Levels
         IEnumerator WinRoutine()
         {
             LockInput();
-            if (bubble != null) bubble.Show("Yay!");
+            string line = FaceComment(out bool silly);
+            if (bubble != null) bubble.Show(line);
+            // gli occhi di carbone ballano come occhi finti, il pupazzo sghignazza e saltella tutto storto
+            var eyes = new List<Transform>();
+            foreach (Draggable2D d in items) if (d != null && d.itemId == "eye" && d.transform.parent == headPart) eyes.Add(d.transform);
+            var eyeHome = new List<Vector3>();
+            foreach (Transform e in eyes) eyeHome.Add(e.localPosition);
             Vector3 start = snowman.localPosition;
-            for (int hop = 0; hop < 2; hop++)
+            Quaternion headRot = headPart.localRotation;
+            float hops = silly ? 3 : 2;
+            for (int hop = 0; hop < hops; hop++)
+            {
+                Sfx.Play(this, "pop", 0.5f);
                 for (float k = 0f; k < 1f; k += Time.deltaTime / 0.35f)
                 {
-                    snowman.localPosition = start + Vector3.up * (Mathf.Sin(k * Mathf.PI) * 0.3f);
+                    float s = Mathf.Sin(k * Mathf.PI);
+                    snowman.localPosition = start + Vector3.up * (s * 0.3f);
+                    snowman.localRotation = Quaternion.Euler(0, 0, (hop % 2 == 0 ? 1f : -1f) * s * (silly ? 7f : 3f));
+                    headPart.localRotation = headRot * Quaternion.Euler(0, 0, Mathf.Sin((hop + k) * Mathf.PI * 3f) * (silly ? 9f : 4f));
+                    for (int i = 0; i < eyes.Count; i++)
+                    {
+                        float ph = (hop + k) * 13f + i * 2.1f;
+                        eyes[i].localPosition = eyeHome[i] + new Vector3(Mathf.Cos(ph), Mathf.Sin(ph), 0f) * 0.05f;
+                    }
                     yield return null;
                 }
+            }
             snowman.localPosition = start;
-            yield return new WaitForSeconds(0.4f);
+            snowman.localRotation = Quaternion.identity;
+            headPart.localRotation = headRot;
+            for (int i = 0; i < eyes.Count; i++) eyes[i].localPosition = eyeHome[i];
+            Haptics.Light();
+            yield return new WaitForSeconds(0.7f);
             Win();
         }
 
