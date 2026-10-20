@@ -267,6 +267,24 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.50
+- **Ultimi 8 livelli della specifica "105-200"** (blocco 7), compresi i 4 livelli di Toni:
+- **175 Toni's X-ray** — Toni ha ingoiato la chiave del frigo: passa lo scanner a raggi X sulla pancia, inclina il telefono per portare la chiave in gola, poi tocca il naso e la starnutisce.
+- **200 Toni's Beauty Filter** — Ogni filtro migliora una cosa e ne peggiora un'altra: sposta il pannello dei filtri e premi il pulsantino NO FILTER nascosto sotto. Toni era già bellissimo.
+- **225 Toni's Personal Trainer** — Guida Toni con il biscotto lungo il percorso senza farglielo mangiare: lo segue, salta i tre ostacoli e arriva al traguardo.
+- **242 The Great Escape** — Il topo è in cella e il gatto carceriere dorme a turni: mentre dorme porta il cucchiaino sulla piastrella smossa, che si alza e apre il tunnel verso l'uscita.
+- **243 The Impossible Shot** — Fionda e canestro dietro due muretti sfalsati: serve un tiro di sponda con due rimbalzi (dopo 3 errori compare la traiettoria).
+- **244 The Endless Staircase** — La scala è infinita e la cima si allontana: trascina la parola TOP giù fino all'omino, la scala si accorcia e lui arriva in vetta.
+- **245 Almost There** — Il contatore dice 99/100: trascina giù la barra "/" e tocca il puntino nascosto sotto per l'ultimo punto.
+- **246 Toni's Final Exam** — L'esame finale di Toni: 2+2 = BISCUIT, trova il bicchiere col biscotto, poi trascina giù il diploma fino a lui. CERTIFIED GOOD BOY!
+- Easter egg *Mouse Union* in The Great Escape: prima di aprire il tunnel tocca le sbarre della finestrella 2ª, 5ª, 1ª
+  (da sinistra), poi tieni premuta la ciotola 4 s: assemblea sindacale dei topi, il gatto viene eletto rappresentante
+  per sbaglio, firma un contratto da 23 ore di sonno al giorno e si addormenta; i topi escono dalla porta principale.
+- Toni ora è al 175, al 200 e al 225; l'esame finale di Toni è l'ultimo livello (246). I livelli normali dal 175 in poi
+  sono scalati di una posizione per ogni livello di Toni inserito prima di loro.
+- Musica: The Great Escape nel dungeon, i livelli di Toni (Toni7-10) tra gli animali.
+- Versione del costruttore 52.
+
 ## Versione 0.49
 - **Livelli 231-238**: altri 8 livelli della specifica "105-200" (blocco 6):
 - **231 The Two-finger Pianist** — Il leggio chiede tre accordi (C+E, D+A, F+B), ma il secondo tasto è timido e sparisce se toccato da solo: tieni premuto il primo e premi il secondo con un altro dito.

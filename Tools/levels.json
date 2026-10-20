@@ -2784,12 +2784,28 @@
   "eggHow": ""
  },
  {
+  "folder": "Toni7",
+  "id": "toni_xray",
+  "title": "TONI'S X-RAY",
+  "hint": "Toni has eaten something important.",
+  "egg": "",
+  "n": 175,
+  "desc": "Toni ha ingoiato la chiave del frigo: passa lo scanner a raggi X sulla pancia, inclina il telefono per portare la chiave in gola, poi tocca il naso e la starnutisce.",
+  "hints": [
+   "Toni has eaten something important.",
+   "Look inside his belly.",
+   "Move the key toward his mouth and make him sneeze."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
   "folder": "TheFourthWall",
   "id": "the_fourth_wall",
   "title": "THE FOURTH WALL",
   "hint": "The walls aren't permanent.",
   "egg": "",
-  "n": 175,
+  "n": 176,
   "desc": "L'attore è chiuso in un quadro: trascina la CORNICE finché un lato esce dallo schermo, lui esce dalla parete mancante.",
   "hints": [
    "The walls aren't permanent.",
@@ -2805,7 +2821,7 @@
   "title": "HOT POTATO",
   "hint": "Watch the timing.",
   "egg": "",
-  "n": 176,
+  "n": 177,
   "desc": "Patata bollente tra 4 amici: tocca chi la riceve quando la lucina diventa verde, 5 prese; 2 errori = purè.",
   "hints": [
    "Watch the timing.",
@@ -2821,7 +2837,7 @@
   "title": "SHAKE TO UNDO",
   "hint": "The undo button isn't the only option.",
   "egg": "",
-  "n": 177,
+  "n": 178,
   "desc": "Il pittore ha disegnato mutande sul capolavoro: scuoti il telefono 3 volte e fermati (la 4ª scossa forte cancella tutto).",
   "hints": [
    "The undo button isn't the only option.",
@@ -2837,7 +2853,7 @@
   "title": "THE LONELY CLOUD",
   "hint": "The cloud is too small.",
   "egg": "",
-  "n": 178,
+  "n": 179,
   "desc": "Allarga la nuvola con due dita finché la pioggia arriva sul fiore, entro 25 s.",
   "hints": [
    "The cloud is too small.",
@@ -2853,7 +2869,7 @@
   "title": "GHOST SELFIE",
   "hint": "He hates sudden photos.",
   "egg": "",
-  "n": 179,
+  "n": 180,
   "desc": "Tieni premuto il pulsante della foto: il fantasma entra nell'inquadratura durante il 3-2-1, rilascia alla fine.",
   "hints": [
    "He hates sudden photos.",
@@ -2869,7 +2885,7 @@
   "title": "MAGNET MAYHEM",
   "hint": "Magnets move metal.",
   "egg": "",
-  "n": 180,
+  "n": 181,
   "desc": "Guida la chiave nel labirinto spostando 3 calamite (rosse attirano, blu respingono) senza toccare le barre elettriche.",
   "hints": [
    "Magnets move metal.",
@@ -2885,7 +2901,7 @@
   "title": "THE FAKE CRASH",
   "hint": "It's not a real system error.",
   "egg": "",
-  "n": 181,
+  "n": 182,
   "desc": "Finta finestra 'GOTCHA HAS STOPPED WORKING': trascina via la parola WORKING.",
   "hints": [
    "It's not a real system error.",
@@ -2901,7 +2917,7 @@
   "title": "RAINBOW THIEF",
   "hint": "Some colors can be mixed.",
   "egg": "",
-  "n": 182,
+  "n": 183,
   "desc": "Ricrea giallo, ciano e magenta mettendo a coppie le luci primarie nelle tre casse.",
   "hints": [
    "Some colors can be mixed.",
@@ -2917,7 +2933,7 @@
   "title": "PIXEL REBELLION",
   "hint": "The creature is smaller than it looks.",
   "egg": "pixel_rebellion",
-  "n": 183,
+  "n": 184,
   "desc": "Zooma col pizzico sul puntino luminoso finché diventa una creaturina di pixel e toccala.",
   "hints": [
    "The creature is smaller than it looks.",
@@ -2933,7 +2949,7 @@
   "title": "COLD COFFEE",
   "hint": "Coffee needs warmth.",
   "egg": "",
-  "n": 184,
+  "n": 185,
   "desc": "Metti la tazza sotto la lampada e tieni premuto HEAT, rilascia perché il termometro si fermi nel verde.",
   "hints": [
    "Coffee needs warmth.",
@@ -2949,7 +2965,7 @@
   "title": "THE MISSING SECOND",
   "hint": "You only need one more second.",
   "egg": "",
-  "n": 185,
+  "n": 186,
   "desc": "L'orologio è fermo alle 11:59:59: scorri in su la cifra dei secondi per arrivare a mezzogiorno.",
   "hints": [
    "You only need one more second.",
@@ -2965,7 +2981,7 @@
   "title": "MIRROR TWINS",
   "hint": "Reflection can be useful.",
   "egg": "",
-  "n": 186,
+  "n": 187,
   "desc": "Fai scorrere lo specchio finché la chiave riflessa combacia con la serratura.",
   "hints": [
    "Reflection can be useful.",
@@ -2981,7 +2997,7 @@
   "title": "THE HUNGRY PRINTER",
   "hint": "The printer doesn't need special paper.",
   "egg": "",
-  "n": 187,
+  "n": 188,
   "desc": "La stampante vuole carta: infila il foglio INSTRUCTIONS nella fessura.",
   "hints": [
    "The printer doesn't need special paper.",
@@ -2997,7 +3013,7 @@
   "title": "FINGER MAZE",
   "hint": "Your finger is blocking the view.",
   "egg": "",
-  "n": 188,
+  "n": 189,
   "desc": "Tieni un dito sull'impronta per renderla trasparente e col secondo dito guida il topolino.",
   "hints": [
    "Your finger is blocking the view.",
@@ -3013,7 +3029,7 @@
   "title": "FALSE FINISH",
   "hint": "The race isn't really over.",
   "egg": "",
-  "n": 189,
+  "n": 190,
   "desc": "Non premere NEXT: aspetta il topolino nascosto che passa il traguardo e toccalo.",
   "hints": [
    "The race isn't really over.",
@@ -3029,7 +3045,7 @@
   "title": "HEARTBEAT",
   "hint": "Listen with your hands.",
   "egg": "",
-  "n": 190,
+  "n": 191,
   "desc": "Senti la vibrazione corto-corto-lungo e ripetila toccando il cuore.",
   "hints": [
    "Listen with your hands.",
@@ -3045,7 +3061,7 @@
   "title": "THE WRONG SHADOW",
   "hint": "The monster isn't real.",
   "egg": "",
-  "n": 191,
+  "n": 192,
   "desc": "Sposta la lampada davanti al gatto: l'ombra da mostro finisce dietro di lui e il topo passa.",
   "hints": [
    "The monster isn't real.",
@@ -3061,7 +3077,7 @@
   "title": "THE IMPOSSIBLE SCALE",
   "hint": "Size matters here.",
   "egg": "",
-  "n": 192,
+  "n": 193,
   "desc": "Ingrandisci la piuma con due dita finché bilancia l'elefante.",
   "hints": [
    "Size matters here.",
@@ -3077,7 +3093,7 @@
   "title": "REWIND REALITY",
   "hint": "The accident already happened.",
   "egg": "",
-  "n": 193,
+  "n": 194,
   "desc": "Riavvolgi il filmato prima della caduta, metti in pausa e sposta il vaso al sicuro.",
   "hints": [
    "The accident already happened.",
@@ -3093,7 +3109,7 @@
   "title": "THE STICKY FINGER",
   "hint": "The coin won't leave your finger.",
   "egg": "",
-  "n": 194,
+  "n": 195,
   "desc": "La moneta resta attaccata al dito: tienila e con un altro dito porta la cassaforte sotto.",
   "hints": [
    "The coin won't leave your finger.",
@@ -3109,7 +3125,7 @@
   "title": "THE GUILTY BUTTON",
   "hint": "Someone is hiding something.",
   "egg": "",
-  "n": 195,
+  "n": 196,
   "desc": "Tieni premuti i pulsanti per farli sudare: quello con la goccia metallica nasconde la chiave.",
   "hints": [
    "Someone is hiding something.",
@@ -3125,7 +3141,7 @@
   "title": "THE INVISIBLE STAIRS",
   "hint": "The steps are there.",
   "egg": "",
-  "n": 196,
+  "n": 197,
   "desc": "Tocca lo spazio vuoto per trovare i 4 gradini invisibili, poi porta l'omino alla porta.",
   "hints": [
    "The steps are there.",
@@ -3141,7 +3157,7 @@
   "title": "LIE DETECTOR",
   "hint": "The robot may not be trustworthy.",
   "egg": "",
-  "n": 197,
+  "n": 198,
   "desc": "Non rispondere al robot: trascina la macchina della verità su di lui.",
   "hints": [
    "The robot may not be trustworthy.",
@@ -3157,7 +3173,7 @@
   "title": "TOO BRIGHT!",
   "hint": "He hates the light.",
   "egg": "",
-  "n": 198,
+  "n": 199,
   "desc": "Chiudi le tende sulle finestre, poi porta il vampiro alla bara.",
   "hints": [
    "He hates the light.",
@@ -3168,12 +3184,28 @@
   "eggHow": ""
  },
  {
+  "folder": "Toni8",
+  "id": "toni_beauty_filter",
+  "title": "TONI'S BEAUTY FILTER",
+  "hint": "Toni was already beautiful.",
+  "egg": "",
+  "n": 200,
+  "desc": "Ogni filtro migliora una cosa e ne peggiora un'altra: sposta il pannello dei filtri e premi il pulsantino NO FILTER nascosto sotto. Toni era già bellissimo.",
+  "hints": [
+   "Toni was already beautiful.",
+   "More filters aren't helping.",
+   "Disable every filter."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
   "folder": "UnfairRace",
   "id": "unfair_race",
   "title": "UNFAIR RACE",
   "hint": "You can't make the snail faster.",
   "egg": "",
-  "n": 199,
+  "n": 201,
   "desc": "Lumaca contro lepre: prima del via sposta il traguardo davanti alla lumaca.",
   "hints": [
    "You can't make the snail faster.",
@@ -3189,7 +3221,7 @@
   "title": "THE BOTTOMLESS CUP",
   "hint": "Something is leaking.",
   "egg": "",
-  "n": 200,
+  "n": 202,
   "desc": "Tieni un dito sul buco del bicchiere e con l'altro apri il rubinetto fino alla tacca.",
   "hints": [
    "Something is leaking.",
@@ -3205,7 +3237,7 @@
   "title": "THE DIRTY SECRET",
   "hint": "The screen needs cleaning.",
   "egg": "dirty_secret",
-  "n": 201,
+  "n": 203,
   "desc": "Strofina lo schermo sporco: oltre il 95% compare il pulsante EXIT.",
   "hints": [
    "The screen needs cleaning.",
@@ -3221,7 +3253,7 @@
   "title": "THE FAKE VIRUS",
   "hint": "Only one is the real virus.",
   "egg": "",
-  "n": 202,
+  "n": 204,
   "desc": "Trova il virus originale (starnutisce ogni 5 s) e trascinalo nel cestino.",
   "hints": [
    "Only one is the real virus.",
@@ -3237,7 +3269,7 @@
   "title": "SLOW MOTION",
   "hint": "Everything is moving too fast.",
   "egg": "",
-  "n": 203,
+  "n": 205,
   "desc": "Tieni due dita ferme per rallentare il tempo e con un terzo sposta la paratia sulla palla.",
   "hints": [
    "Everything is moving too fast.",
@@ -3253,7 +3285,7 @@
   "title": "THE OVERWORKED ROBOT",
   "hint": "Two hands aren't enough.",
   "egg": "",
-  "n": 204,
+  "n": 206,
   "desc": "Raggruppa i 4 interruttori a coppie sotto le due mani del robot, poi PRESS.",
   "hints": [
    "Two hands aren't enough.",
@@ -3269,7 +3301,7 @@
   "title": "THE MISSING LETTER",
   "hint": "The sign is incomplete.",
   "egg": "",
-  "n": 205,
+  "n": 207,
   "desc": "OPEN THE G_TE: trascina la A nascosta nella nuvola nel buco del cartello.",
   "hints": [
    "The sign is incomplete.",
@@ -3285,7 +3317,7 @@
   "title": "ANTI-GRAVITY TAXI",
   "hint": "The taxi needs to go up.",
   "egg": "",
-  "n": 206,
+  "n": 208,
   "desc": "Ruota la freccia della gravità verso l'alto e il taxi sale alla piattaforma.",
   "hints": [
    "The taxi needs to go up.",
@@ -3301,7 +3333,7 @@
   "title": "THE SILENT DISCO",
   "hint": "One dancer knows the rhythm.",
   "egg": "",
-  "n": 207,
+  "n": 209,
   "desc": "Solo il ballerino blu tiene il ritmo: tocca il pavimento tre volte con la sua cadenza.",
   "hints": [
    "One dancer knows the rhythm.",
@@ -3317,7 +3349,7 @@
   "title": "THE DOOR THAT LIES",
   "hint": "The doors have feelings.",
   "egg": "",
-  "n": 208,
+  "n": 210,
   "desc": "Scambia le targhe delle porte: la vera uscita si spaventa quando riceve DANGER.",
   "hints": [
    "The doors have feelings.",
@@ -3333,7 +3365,7 @@
   "title": "INVISIBLE BUTTON",
   "hint": "You can't see everything.",
   "egg": "",
-  "n": 209,
+  "n": 211,
   "desc": "Striscia il dito al buio: la vibrazione cresce vicino al pulsante invisibile, poi tocca.",
   "hints": [
    "You can't see everything.",
@@ -3349,7 +3381,7 @@
   "title": "THE SECOND KEY",
   "hint": "You need a copy.",
   "egg": "",
-  "n": 210,
+  "n": 212,
   "desc": "Metti la chiave davanti allo specchio e tocca il riflesso: diventa la seconda chiave.",
   "hints": [
    "You need a copy.",
@@ -3365,7 +3397,7 @@
   "title": "SHADOW THIEF",
   "hint": "Even invisible people cast shadows here.",
   "egg": "",
-  "n": 211,
+  "n": 213,
   "desc": "Il ladro è invisibile ma ha l'ombra: accendi il lampione verso cui va.",
   "hints": [
    "Even invisible people cast shadows here.",
@@ -3381,7 +3413,7 @@
   "title": "THE BROKEN RULER",
   "hint": "The ruler can still be useful.",
   "egg": "",
-  "n": 212,
+  "n": 214,
   "desc": "Ricomponi il righello rotto e porta il ponte esattamente a 7 unità.",
   "hints": [
    "The ruler can still be useful.",
@@ -3397,7 +3429,7 @@
   "title": "THE BACKWARD SONG",
   "hint": "Something sounds reversed.",
   "egg": "",
-  "n": 213,
+  "n": 215,
   "desc": "L'uccellino canta al contrario: suona le 4 note in ordine inverso.",
   "hints": [
    "Something sounds reversed.",
@@ -3413,7 +3445,7 @@
   "title": "DON'T BLINK!",
   "hint": "She moves when nobody is watching.",
   "egg": "",
-  "n": 214,
+  "n": 216,
   "desc": "Tieni premuto l'occhio WATCH e con un altro dito porta la chiave alla porta.",
   "hints": [
    "She moves when nobody is watching.",
@@ -3429,7 +3461,7 @@
   "title": "THE STUPID GENIUS",
   "hint": "The machine might be unnecessary.",
   "egg": "",
-  "n": 215,
+  "n": 217,
   "desc": "Ignora la macchina gigante dello scienziato e tocca direttamente il pulsantino rosso.",
   "hints": [
    "The machine might be unnecessary.",
@@ -3445,7 +3477,7 @@
   "title": "THE ESCAPING CURSOR",
   "hint": "The cursor is faster than you.",
   "egg": "",
-  "n": 216,
+  "n": 218,
   "desc": "Il cursore scappa: trascina il bersaglio sotto la sua punta.",
   "hints": [
    "The cursor is faster than you.",
@@ -3461,7 +3493,7 @@
   "title": "UPSIDE-DOWN CODE",
   "hint": "You're looking at the code from the wrong angle.",
   "egg": "",
-  "n": 217,
+  "n": 219,
   "desc": "Il codice è stampato capovolto: capovolgi il telefono, leggilo e digitalo.",
   "hints": [
    "You're looking at the code from the wrong angle.",
@@ -3477,7 +3509,7 @@
   "title": "THE HUMAN CHARGER",
   "hint": "There is energy on the screen.",
   "egg": "",
-  "n": 218,
+  "n": 220,
   "desc": "Trascina il fulmine della scritta LOW POWER sul robot quattro volte prima che si spenga.",
   "hints": [
    "There is energy on the screen.",
@@ -3493,7 +3525,7 @@
   "title": "ADPOCALYPSE",
   "hint": "The close button isn't helping.",
   "egg": "adpocalypse",
-  "n": 219,
+  "n": 221,
   "desc": "La X della pubblicità finta scappa: trascina tutto il banner fuori dallo schermo.",
   "hints": [
    "The close button isn't helping.",
@@ -3509,7 +3541,7 @@
   "title": "THE GLASS CAGE",
   "hint": "The glass has an opening.",
   "egg": "",
-  "n": 220,
+  "n": 222,
   "desc": "Ruota la campana di vetro con due dita finché l'apertura guarda il topo.",
   "hints": [
    "The glass has an opening.",
@@ -3525,7 +3557,7 @@
   "title": "THE INVISIBLE INK",
   "hint": "The paper isn't empty.",
   "egg": "",
-  "n": 221,
+  "n": 223,
   "desc": "Muovi il phon sul foglio senza fermarti per rivelare la mappa a inchiostro simpatico.",
   "hints": [
    "The paper isn't empty.",
@@ -3541,7 +3573,7 @@
   "title": "THE LAST DROP",
   "hint": "The bottle isn't completely empty.",
   "egg": "",
-  "n": 222,
+  "n": 224,
   "desc": "Inclina il telefono per portare l'ultima goccia dal tappo al foro, poi tocca per farla cadere sulla pianta.",
   "hints": [
    "The bottle isn't completely empty.",
@@ -3552,12 +3584,28 @@
   "eggHow": ""
  },
  {
+  "folder": "Toni9",
+  "id": "toni_personal_trainer",
+  "title": "TONI'S PERSONAL TRAINER",
+  "hint": "Toni needs motivation.",
+  "egg": "",
+  "n": 225,
+  "desc": "Guida Toni con il biscotto lungo il percorso senza farglielo mangiare: lo segue, salta i tre ostacoli e arriva al traguardo.",
+  "hints": [
+   "Toni needs motivation.",
+   "Food works better than commands.",
+   "Lead him with the biscuit, but keep it away from his mouth."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
   "folder": "TheAngryKeyboard",
   "id": "the_angry_keyboard",
   "title": "THE ANGRY KEYBOARD",
   "hint": "Typing isn't working.",
   "egg": "",
-  "n": 223,
+  "n": 226,
   "desc": "Premere i tasti fa perdere lettere alla tastiera (5 pressioni = esplode): trascina le lettere O, P, E, N dai tasti nella casella della risposta, in ordine.",
   "hints": [
    "Typing isn't working.",
@@ -3573,7 +3621,7 @@
   "title": "THE COWARDLY DRAGON",
   "hint": "He needs a scare.",
   "egg": "",
-  "n": 224,
+  "n": 227,
   "desc": "Il drago ha paura del fuoco: trascina il sole dietro di lui, basso e vicino; l'ombra mostruosa sul muro lo spaventa e starnutisce una fiammata che brucia la barricata.",
   "hints": [
    "He needs a scare.",
@@ -3589,7 +3637,7 @@
   "title": "HIDDEN FREQUENCY",
   "hint": "The lock reacts to sound.",
   "egg": "",
-  "n": 225,
+  "n": 228,
   "desc": "Gira piano la manopola senza numeri guardando la vibrazione della serratura: fermati sulle tre frequenze giuste (casuali) finché le tre luci diventano verdi.",
   "hints": [
    "The lock reacts to sound.",
@@ -3605,7 +3653,7 @@
   "title": "THE CROOKED BRIDGE",
   "hint": "The bridge is badly aligned.",
   "egg": "",
-  "n": 226,
+  "n": 229,
   "desc": "Con un dito il ponte bascula: con due dita porta entrambe le estremità all'altezza delle piattaforme, poi tocca il topo che attraversa.",
   "hints": [
    "The bridge is badly aligned.",
@@ -3621,7 +3669,7 @@
   "title": "THE FINAL WRONG ANSWER",
   "hint": "The correct answer may not be a door.",
   "egg": "",
-  "n": 227,
+  "n": 230,
   "desc": "Tre porte (3, 4, FISH) sono tutte sbagliate: trascina giù il cartello della domanda, che rivela un buco nel muro dove salta il topo.",
   "hints": [
    "The correct answer may not be a door.",
@@ -3637,7 +3685,7 @@
   "title": "THE IMPATIENT CLOCK",
   "hint": "The hands won't stay still.",
   "egg": "",
-  "n": 228,
+  "n": 231,
   "desc": "Le lancette tornano indietro: tieni la lancetta dei minuti sul 12 con un dito, porta quella delle ore sul 12 con l'altro e stacca le dita insieme.",
   "hints": [
    "The hands won't stay still.",
@@ -3653,7 +3701,7 @@
   "title": "THE FROZEN WATERFALL",
   "hint": "Sunlight can melt ice.",
   "egg": "",
-  "n": 229,
+  "n": 232,
   "desc": "Trascina la lente nella luce del sole e orientala finché il raggio scioglie la cascata ghiacciata (4 s): il topo prende la chiave.",
   "hints": [
    "Sunlight can melt ice.",
@@ -3669,7 +3717,7 @@
   "title": "THE FAKE CHECKPOINT",
   "hint": "The checkpoint isn't where it should be.",
   "egg": "",
-  "n": 230,
+  "n": 233,
   "desc": "Il checkpoint rispedisce l'eroe all'inizio: trascina la bandierina sopra la porta finale, poi premi GO.",
   "hints": [
    "The checkpoint isn't where it should be.",
@@ -3685,7 +3733,7 @@
   "title": "THE TWO-FINGER PIANIST",
   "hint": "These notes must sound together.",
   "egg": "",
-  "n": 231,
+  "n": 234,
   "desc": "Il leggio chiede tre accordi (C+E, D+A, F+B), ma il secondo tasto è timido e sparisce se toccato da solo: tieni premuto il primo e premi il secondo con un altro dito.",
   "hints": [
    "These notes must sound together.",
@@ -3701,7 +3749,7 @@
   "title": "THE MOON THIEF",
   "hint": "Hide what he wants.",
   "egg": "",
-  "n": 232,
+  "n": 235,
   "desc": "Un ladro col retino vuole rubare la luna: trascinala dietro una nuvola, poi porta la nuvola fuori dallo schermo; il ladro non la trova e si arrende.",
   "hints": [
    "Hide what he wants.",
@@ -3717,7 +3765,7 @@
   "title": "BACK TO THE FUTURE",
   "hint": "The door hasn't been built yet.",
   "egg": "",
-  "n": 233,
+  "n": 236,
   "desc": "La porta esisterà solo il 29 ottobre: sfoglia il calendario-macchina del tempo con swipe verso l'alto fino al giorno esatto (se resti fermo torna indietro di un giorno).",
   "hints": [
    "The door hasn't been built yet.",
@@ -3733,7 +3781,7 @@
   "title": "THE THREE IDIOTS",
   "hint": "They aren't working together.",
   "egg": "",
-  "n": 234,
+  "n": 237,
   "desc": "Tre omini spingono un masso verso una buca, ma uno guarda dalla parte sbagliata: ruotalo con due dita finché tutti guardano la buca, poi tocca il fischietto.",
   "hints": [
    "They aren't working together.",
@@ -3749,7 +3797,7 @@
   "title": "THE SHY STAR",
   "hint": "She's shy, but also vain.",
   "egg": "",
-  "n": 235,
+  "n": 238,
   "desc": "La stellina timida scappa se la tocchi: trascina lo specchio davanti alla nuvola dove si nasconde; si vede riflessa e, vanitosa, si accende.",
   "hints": [
    "She's shy, but also vain.",
@@ -3765,7 +3813,7 @@
   "title": "THE BROKEN INTERNET",
   "hint": "The connection is physically broken.",
   "egg": "",
-  "n": 236,
+  "n": 239,
   "desc": "NO INTERNET: metti i tre spezzoni di cavo tra computer e router facendo combaciare i connettori (un tocco li gira), poi premi CONNECT.",
   "hints": [
    "The connection is physically broken.",
@@ -3781,7 +3829,7 @@
   "title": "THE LAUGHING LOCK",
   "hint": "The lock won't stop laughing.",
   "egg": "",
-  "n": 237,
+  "n": 240,
   "desc": "Il lucchetto ride e la chiave rimbalza: tieni premuta la maniglia finché si stanca e sbadiglia, poi infila la chiave nella bocca aperta.",
   "hints": [
    "The lock won't stop laughing.",
@@ -3797,12 +3845,92 @@
   "title": "THE FAKE BOSS",
   "hint": "The boss isn't what he seems.",
   "egg": "",
-  "n": 238,
+  "n": 241,
   "desc": "Schiva gli attacchi del boss gigante trascinando l'eroe, e intanto trascina via la sua barra della vita: senza sapere quanto è forte diventa un pupazzetto e scappa.",
   "hints": [
    "The boss isn't what he seems.",
    "His strength is displayed somewhere.",
    "Remove the health bar."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheGreatEscape",
+  "id": "the_great_escape",
+  "title": "THE GREAT ESCAPE",
+  "hint": "There might be a way under the floor.",
+  "egg": "mouse_union",
+  "n": 242,
+  "desc": "Il topo è in cella e il gatto carceriere dorme a turni: mentre dorme porta il cucchiaino sulla piastrella smossa, che si alza e apre il tunnel verso l'uscita.",
+  "hints": [
+   "There might be a way under the floor.",
+   "Look for a loose tile.",
+   "Use the spoon to lift the tile and open a tunnel."
+  ],
+  "eggName": "Mouse Union",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheImpossibleShot",
+  "id": "the_impossible_shot",
+  "title": "THE IMPOSSIBLE SHOT",
+  "hint": "A straight shot won't work.",
+  "egg": "",
+  "n": 243,
+  "desc": "Fionda e canestro dietro due muretti sfalsati: serve un tiro di sponda con due rimbalzi (dopo 3 errori compare la traiettoria).",
+  "hints": [
+   "A straight shot won't work.",
+   "Use the walls.",
+   "Aim for two rebounds before the basket."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheEndlessStaircase",
+  "id": "the_endless_staircase",
+  "title": "THE ENDLESS STAIRCASE",
+  "hint": "The top keeps moving away.",
+  "egg": "",
+  "n": 244,
+  "desc": "La scala è infinita e la cima si allontana: trascina la parola TOP giù fino all'omino, la scala si accorcia e lui arriva in vetta.",
+  "hints": [
+   "The top keeps moving away.",
+   "Maybe the goal can move closer.",
+   "Drag the word TOP down to the character."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "AlmostThere",
+  "id": "almost_there",
+  "title": "ALMOST THERE",
+  "hint": "Only one point is missing.",
+  "egg": "",
+  "n": 245,
+  "desc": "Il contatore dice 99/100: trascina giù la barra \"/\" e tocca il puntino nascosto sotto per l'ultimo punto.",
+  "hints": [
+   "Only one point is missing.",
+   "Look between the numbers.",
+   "Move the slash and tap the hidden dot."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Toni10",
+  "id": "toni_final_exam",
+  "title": "TONI'S FINAL EXAM",
+  "hint": "Toni isn't a normal student.",
+  "egg": "",
+  "n": 246,
+  "desc": "L'esame finale di Toni: 2+2 = BISCUIT, trova il bicchiere col biscotto, poi trascina giù il diploma fino a lui. CERTIFIED GOOD BOY!",
+  "hints": [
+   "Toni isn't a normal student.",
+   "Food is his answer to almost everything.",
+   "Choose BISCUIT, remember the biscuit and move the diploma toward Toni."
   ],
   "eggName": "",
   "eggHow": ""
