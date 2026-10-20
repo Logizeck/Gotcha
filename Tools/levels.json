@@ -3550,5 +3550,133 @@
   ],
   "eggName": "",
   "eggHow": ""
+ },
+ {
+  "folder": "TheAngryKeyboard",
+  "id": "the_angry_keyboard",
+  "title": "THE ANGRY KEYBOARD",
+  "hint": "Typing isn't working.",
+  "egg": "",
+  "n": 223,
+  "desc": "Premere i tasti fa perdere lettere alla tastiera (5 pressioni = esplode): trascina le lettere O, P, E, N dai tasti nella casella della risposta, in ordine.",
+  "hints": [
+   "Typing isn't working.",
+   "The keys themselves can move.",
+   "Drag O, P, E and N into the answer box."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheCowardlyDragon",
+  "id": "the_cowardly_dragon",
+  "title": "THE COWARDLY DRAGON",
+  "hint": "He needs a scare.",
+  "egg": "",
+  "n": 224,
+  "desc": "Il drago ha paura del fuoco: trascina il sole dietro di lui, basso e vicino; l'ombra mostruosa sul muro lo spaventa e starnutisce una fiammata che brucia la barricata.",
+  "hints": [
+   "He needs a scare.",
+   "His shadow can frighten him.",
+   "Move the sun to enlarge the dragon's shadow."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "HiddenFrequency",
+  "id": "hidden_frequency",
+  "title": "HIDDEN FREQUENCY",
+  "hint": "The lock reacts to sound.",
+  "egg": "",
+  "n": 225,
+  "desc": "Gira piano la manopola senza numeri guardando la vibrazione della serratura: fermati sulle tre frequenze giuste (casuali) finché le tre luci diventano verdi.",
+  "hints": [
+   "The lock reacts to sound.",
+   "Watch the vibration indicator.",
+   "Tune until each of the three lights turns green."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheCrookedBridge",
+  "id": "the_crooked_bridge",
+  "title": "THE CROOKED BRIDGE",
+  "hint": "The bridge is badly aligned.",
+  "egg": "",
+  "n": 226,
+  "desc": "Con un dito il ponte bascula: con due dita porta entrambe le estremità all'altezza delle piattaforme, poi tocca il topo che attraversa.",
+  "hints": [
+   "The bridge is badly aligned.",
+   "Both ends can move.",
+   "Adjust the two ends at the same time."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheFinalWrongAnswer",
+  "id": "the_final_wrong_answer",
+  "title": "THE FINAL WRONG ANSWER",
+  "hint": "The correct answer may not be a door.",
+  "egg": "",
+  "n": 227,
+  "desc": "Tre porte (3, 4, FISH) sono tutte sbagliate: trascina giù il cartello della domanda, che rivela un buco nel muro dove salta il topo.",
+  "hints": [
+   "The correct answer may not be a door.",
+   "The question is covering something.",
+   "Move the question itself."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheImpatientClock",
+  "id": "the_impatient_clock",
+  "title": "THE IMPATIENT CLOCK",
+  "hint": "The hands won't stay still.",
+  "egg": "",
+  "n": 228,
+  "desc": "Le lancette tornano indietro: tieni la lancetta dei minuti sul 12 con un dito, porta quella delle ore sul 12 con l'altro e stacca le dita insieme.",
+  "hints": [
+   "The hands won't stay still.",
+   "Hold one while moving the other.",
+   "Use two fingers, then release them together."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheFrozenWaterfall",
+  "id": "the_frozen_waterfall",
+  "title": "THE FROZEN WATERFALL",
+  "hint": "Sunlight can melt ice.",
+  "egg": "",
+  "n": 229,
+  "desc": "Trascina la lente nella luce del sole e orientala finché il raggio scioglie la cascata ghiacciata (4 s): il topo prende la chiave.",
+  "hints": [
+   "Sunlight can melt ice.",
+   "The lens can focus light.",
+   "Align the lens and hold the beam on the frozen waterfall."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheFakeCheckpoint",
+  "id": "the_fake_checkpoint",
+  "title": "THE FAKE CHECKPOINT",
+  "hint": "The checkpoint isn't where it should be.",
+  "egg": "",
+  "n": 230,
+  "desc": "Il checkpoint rispedisce l'eroe all'inizio: trascina la bandierina sopra la porta finale, poi premi GO.",
+  "hints": [
+   "The checkpoint isn't where it should be.",
+   "Try moving the flag.",
+   "Put the checkpoint flag at the exit."
+  ],
+  "eggName": "",
+  "eggHow": ""
  }
 ]

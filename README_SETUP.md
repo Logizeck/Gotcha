@@ -267,6 +267,19 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.46
+- **Livelli 223-230**: altri 8 livelli della specifica "105-200" (blocco 5):
+- **223 The Angry Keyboard** — Premere i tasti fa perdere lettere alla tastiera (5 pressioni = esplode): trascina le lettere O, P, E, N dai tasti nella casella della risposta, in ordine.
+- **224 The Cowardly Dragon** — Il drago ha paura del fuoco: trascina il sole dietro di lui, basso e vicino; l'ombra mostruosa sul muro lo spaventa e starnutisce una fiammata che brucia la barricata.
+- **225 Hidden Frequency** — Gira piano la manopola senza numeri guardando la vibrazione della serratura: fermati sulle tre frequenze giuste (casuali) finché le tre luci diventano verdi.
+- **226 The Crooked Bridge** — Con un dito il ponte bascula: con due dita porta entrambe le estremità all'altezza delle piattaforme, poi tocca il topo che attraversa.
+- **227 The Final Wrong Answer** — Tre porte (3, 4, FISH) sono tutte sbagliate: trascina giù il cartello della domanda, che rivela un buco nel muro dove salta il topo.
+- **228 The Impatient Clock** — Le lancette tornano indietro: tieni la lancetta dei minuti sul 12 con un dito, porta quella delle ore sul 12 con l'altro e stacca le dita insieme.
+- **229 The Frozen Waterfall** — Trascina la lente nella luce del sole e orientala finché il raggio scioglie la cascata ghiacciata (4 s): il topo prende la chiave.
+- **230 The Fake Checkpoint** — Il checkpoint rispedisce l'eroe all'inizio: trascina la bandierina sopra la porta finale, poi premi GO.
+- Musica: Hidden Frequency e The Frozen Waterfall nel dungeon, The Cowardly Dragon tra gli animali.
+- Versione del costruttore 49.
+
 ## Versione 0.45
 - **Livello 25 (Toni STUCK!) ora si supera**: il burro veniva rimesso sul tavolo prima di controllare dove era
   stato lasciato, quindi non ungeva mai Toni. Ora vale se lasciato su Toni, vicino al sedere o alla gattaiola;

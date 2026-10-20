@@ -85,6 +85,9 @@ Livelli 183-214 — specifica "105-200", blocchi 2-3:
 Livelli 215-222 — specifica "105-200", blocco 4:
 215 The Stupid Genius · 216 The Escaping Cursor · 217 Upside-Down Code · 218 The Human Charger · 219 Adpocalypse · 220 The Glass Cage · 221 The Invisible Ink · 222 The Last Drop.
 
+Livelli 223-230 — specifica "105-200", blocco 5:
+223 The Angry Keyboard · 224 The Cowardly Dragon · 225 Hidden Frequency · 226 The Crooked Bridge · 227 The Final Wrong Answer · 228 The Impatient Clock · 229 The Frozen Waterfall · 230 The Fake Checkpoint.
+
 Free to play: si gioca gratis; nel **negozio** (SHOP) si possono comprare **1 ora di vite infinite (0,99 €)** e
 **niente pubblicità per sempre (4,99 €)**. Vedi README_SETUP.md per la configurazione degli acquisti.
 
