@@ -348,3 +348,14 @@ Prima versione! 150 enigmi a trabocchetto in cui ogni livello è un tranello. In
 
 Nota: anche con un account senza vincoli, la **prima revisione** di un'app nuova può richiedere diversi giorni:
 invia in produzione il prima possibile, non il 25.
+
+
+## Notifiche (dalla versione 0.42)
+- Il gioco usa il pacchetto **Mobile Notifications** di Unity (`com.unity.mobile.notifications`, già nel
+  `Packages/manifest.json`) per un promemoria locale "I'm missing you! <3" 24 ore dopo l'ultimo accesso, solo tra le
+  08:00 e le 22:00. Nessun server, nessun dato inviato.
+- Su Android 13+ serve il permesso `POST_NOTIFICATIONS`: il gioco lo chiede dopo il primo livello superato. Il
+  giocatore può spegnere i promemoria da Impostazioni → REMINDERS.
+- In Unity: Edit → Project Settings → Mobile Notifications → Android: aggiungi un'icona piccola (bianca su
+  trasparente, es. il "G!" del logo) con id `icon_0`, altrimenti Android mostra un quadratino.
+- Data safety: le notifiche sono locali, non serve dichiarare raccolta dati per questo.

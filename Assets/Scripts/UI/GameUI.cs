@@ -21,7 +21,7 @@ namespace Gotcha.UI
         public static bool TitleShown => current != null && current.titlePanel != null && current.titlePanel.activeSelf;
 
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.41";
+        public const string Version = "0.42";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
@@ -43,6 +43,8 @@ namespace Gotcha.UI
         Text titleText;
         GameObject hintPanel, menuPanel, resultPanel, completedPanel, titlePanel, settingsPanel, betaPanel;
         InputField betaInput;
+        GameObject dailyPanel;
+        Text dailyLabel, dailyBody, remindersLabel;
         Text betaStatus, betaActionLabel;
         Text menuHeader, menuBackLabel, continueLabel, settingsMusicLabel, settingsInfo, resetLabel;
         GameObject continueButton, menuMusicRow, shopPanel;
@@ -87,6 +89,7 @@ namespace Gotcha.UI
             flow.GameCompleted += OnGameCompleted;
             flow.OutOfLives += OnOutOfLives;
             HintWallet.Changed += RefreshHint;
+            DailyReward.Earned += OnDailyEarned;
             ShowTitle();
         }
 
@@ -105,6 +108,7 @@ namespace Gotcha.UI
             flow.GameCompleted -= OnGameCompleted;
             flow.OutOfLives -= OnOutOfLives;
             HintWallet.Changed -= RefreshHint;
+            DailyReward.Earned -= OnDailyEarned;
             if (flow.Lives != null) flow.Lives.Changed -= OnLivesChanged;
         }
 
@@ -162,6 +166,7 @@ namespace Gotcha.UI
                 resultBody.text = lives > 0 ? "Not quite. Try again.\nLives left: " + lives : "Not quite...\nand you're out of lives!";
             }
             resultButton.text = solved ? "NEXT" : "RETRY";
+            if (solved && !DailyReward.DoneToday) resultBody.text += "\nDaily goal: " + DailyReward.LevelsToday + " / " + DailyReward.LevelsNeeded;
             // Easter egg trovato per la prima volta: il video degli ultimi secondi (con l'audio) è pronto, e condividerlo
             // vale un premio. La proposta arriva una volta sola per segreto.
             bool clip = !string.IsNullOrEmpty(eggId) && ClipRecorder.Instance != null && ClipRecorder.Instance.HasClip && EasterEggs.OfferShareOnce(eggId);
@@ -281,6 +286,7 @@ namespace Gotcha.UI
             int resume = flow.ResumeIndex;
             continueButton.SetActive(resume > 0);
             continueLabel.text = "CONTINUE (LEVEL " + (resume + 1) + ")";
+            if (dailyLabel != null) dailyLabel.text = DailyReward.Status();
         }
 
         void NewGame() { flow.TryStartLevel(0); }
@@ -299,12 +305,29 @@ namespace Gotcha.UI
             resetLabel.text = "RESET PROGRESS";
             RefreshMusicLabel();
             settingsInfo.text = "Levels: " + Mathf.Min(SaveData.HighestUnlocked + 1, flow.LevelCount) + " / " + flow.LevelCount +
-                "\nEaster eggs found: " + SaveData.EasterEggCount + "\nVersion " + Version + (BetaMode.Active ? "  ·  BETA MODE ON" : "");
+                "\nEaster eggs found: " + SaveData.EasterEggCount + "\nVersion " + Version + (BetaMode.Active ? "  -  BETA MODE ON" : "");
 #if GOTCHA_ADMOB && !UNITY_EDITOR
             privacyButton.SetActive(Gotcha.Ads.AdMobProvider.PrivacyOptionsRequired);
 #endif
             settingsPanel.SetActive(true);
             if (!titlePanel.activeSelf) flow.Paused = true;
+        }
+
+        // ---------- Obiettivo giornaliero e promemoria ----------
+
+        void OnDailyEarned(int day, string reward)
+        {
+            dailyBody.text = (day > 1 ? "Day " + day + " in a row!\n" : "You beat 5 levels today!\n") + "Reward: " + reward +
+                "\n\nCome back tomorrow for: " + DailyReward.RewardText(day + 1);
+            dailyPanel.SetActive(true);
+            dailyPanel.transform.SetAsLastSibling();   // sopra il pannello del risultato che compare subito dopo
+            Gotcha.Components.Sfx.Play(this, "ding", 0.8f);
+        }
+
+        void ToggleReminders()
+        {
+            ComebackNotifier.Enabled = !ComebackNotifier.Enabled;
+            remindersLabel.text = ComebackNotifier.Enabled ? "REMINDERS: ON" : "REMINDERS: OFF";
         }
 
         // ---------- Beta tester ----------
@@ -773,6 +796,8 @@ namespace Gotcha.UI
             Place(CreateButton(titleArea, "LEVEL SELECTION", Dark, OpenLevelSelection).transform, new Vector2(0.17f, 0.21f), new Vector2(0.83f, 0.275f));
             Place(CreateButton(titleArea, "SHOP", new Color(0.95f, 0.7f, 0.15f), OpenShop).transform, new Vector2(0.17f, 0.13f), new Vector2(0.83f, 0.195f));
             Place(CreateButton(titleArea, "SETTINGS", EggColor, OpenSettings).transform, new Vector2(0.17f, 0.05f), new Vector2(0.83f, 0.115f));
+            dailyLabel = CreateText(titleArea, "", 34, Color.white, FontStyle.Normal);
+            Place(dailyLabel.transform, new Vector2(0.05f, 0.0f), new Vector2(0.95f, 0.045f));
             titlePanel.SetActive(false);
 
             // Hint
@@ -833,7 +858,10 @@ namespace Gotcha.UI
             Place(settingsInfo.transform, new Vector2(0.08f, 0.47f), new Vector2(0.92f, 0.65f));
             Button reset = CreateButton(setCard, "RESET PROGRESS", Accent, ResetProgress);
             resetLabel = reset.GetComponentInChildren<Text>();
-            Place(reset.transform, new Vector2(0.12f, 0.22f), new Vector2(0.88f, 0.33f));
+            Place(reset.transform, new Vector2(0.12f, 0.235f), new Vector2(0.88f, 0.325f));
+            Button reminders = CreateButton(setCard, ComebackNotifier.Enabled ? "REMINDERS: ON" : "REMINDERS: OFF", Dark, ToggleReminders);
+            remindersLabel = reminders.GetComponentInChildren<Text>();
+            Place(reminders.transform, new Vector2(0.2f, 0.17f), new Vector2(0.8f, 0.225f));
             Place(CreateButton(setCard, "BETA TESTING", new Color(0.45f, 0.4f, 0.55f), OpenBeta).transform, new Vector2(0.25f, 0.405f), new Vector2(0.75f, 0.465f));
 #if GOTCHA_ADMOB && !UNITY_EDITOR
             // GDPR: chi ha dato (o negato) il consenso alla pubblicità deve poterlo cambiare
@@ -841,6 +869,14 @@ namespace Gotcha.UI
             Place(privacyButton.transform, new Vector2(0.2f, 0.338f), new Vector2(0.8f, 0.398f));
 #endif
             Place(CreateButton(setCard, "BACK", Dark, CloseSettings).transform, new Vector2(0.25f, 0.06f), new Vector2(0.75f, 0.16f));
+
+            // Obiettivo giornaliero raggiunto
+            RectTransform dailyCard;
+            dailyPanel = CreateOverlay("DailyPanel", out dailyCard, 760);
+            AddHeader(dailyCard, "DAILY GOAL!");
+            dailyBody = CreateText(dailyCard, "", 50, Ink, FontStyle.Normal);
+            Place(dailyBody.transform, new Vector2(0.08f, 0.3f), new Vector2(0.92f, 0.75f));
+            Place(CreateButton(dailyCard, "YAY!", Accent, () => dailyPanel.SetActive(false)).transform, new Vector2(0.3f, 0.07f), new Vector2(0.7f, 0.22f));
 
             // Beta tester: password → vite e hint infiniti, niente pubblicità
             RectTransform betaCard;

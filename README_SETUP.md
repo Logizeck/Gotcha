@@ -266,6 +266,19 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.42
+- **Pubblicità**: una ogni 5 livelli superati OPPURE ogni 140 secondi di gioco (prima erano 180), quella che
+  arriva prima; parte sempre alla fine del livello in corso, sia dopo una vittoria sia dopo una sconfitta (chi resta
+  bloccato più di 140 s su un livello la vede al termine del tentativo).
+- **Promemoria "I'm missing you! <3"**: notifica locale 24 ore dopo l'ultimo accesso, solo tra le 08:00 e le 22:00
+  (se cade di notte arriva alle 08:00). Il permesso si chiede dopo il primo livello superato; si spegne da
+  Impostazioni → REMINDERS. Pacchetto Unity Mobile Notifications (vedi PLAY_STORE.md per l'icona).
+- **Obiettivo giornaliero**: supera 5 livelli nello stesso giorno per un premio; i giorni consecutivi formano una
+  serie e il premio cresce (1 hint, 5 min di vite infinite, 2 hint, 10 min, 3 hint, 15 min, poi 5 hint + 30 min al
+  7° giorno, e il ciclo riparte). Saltare un giorno azzera la serie. Il progresso è nella schermata del titolo, nel
+  pannello del risultato e in un pannello "DAILY GOAL!" quando si vince il premio.
+- Versione del costruttore 45.
+
 ## Versione 0.41
 - **Livelli 151-182**: i primi 32 livelli della specifica "105-200" (blocchi 1 e 2), messi in coda a quelli esistenti
   (i livelli di Toni della specifica arriveranno con i pacchetti successivi):

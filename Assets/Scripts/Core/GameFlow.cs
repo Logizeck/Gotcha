@@ -61,6 +61,7 @@ namespace Gotcha.Core
             Lives = GetComponent<LivesManager>();
             if (Lives == null) Lives = gameObject.AddComponent<LivesManager>();
             if (GetComponent<StoreManager>() == null) gameObject.AddComponent<StoreManager>();   // acquisti in-app
+            if (GetComponent<ComebackNotifier>() == null) gameObject.AddComponent<ComebackNotifier>();   // "I'm missing you! <3"
             // Mentre il gioco è aperto lo schermo non si spegne e non si abbassa (molti livelli si giocano
             // senza toccarlo: inclinazione, attesa...). Su Android è il flag KEEP_SCREEN_ON.
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
@@ -161,7 +162,12 @@ namespace Gotcha.Core
                 else ClipRecorder.Instance.Stop();   // la clip resta pronta per la condivisione
             }
             Ads.RegisterLevelResult(result == LevelResult.Solved);
-            if (result == LevelResult.Solved) SaveData.UnlockUpTo(CurrentIndex + 1);
+            if (result == LevelResult.Solved)
+            {
+                SaveData.UnlockUpTo(CurrentIndex + 1);
+                DailyReward.RegisterSolved();   // obiettivo del giorno: 5 livelli superati
+                if (ComebackNotifier.Instance != null) ComebackNotifier.Instance.AskPermissionOnce();
+            }
             if (!string.IsNullOrEmpty(eggId)) SaveData.AddEasterEgg(eggId);
             if (result == LevelResult.Failed && (string.IsNullOrEmpty(eggId) || easterEggCostsLife)) Lives.LoseLife();
             LevelFinished?.Invoke(CurrentDefinition, result, eggId);
@@ -169,7 +175,8 @@ namespace Gotcha.Core
 
         /// <summary>
         /// Da chiamare quando il giocatore preme "Avanti"/"Riprova" (dopo l'eventuale schermata di condivisione).
-        /// Se è dovuta, la pubblicità parte qui, solo dopo un livello superato: mai tra un tentativo e l'altro.
+        /// Se è dovuta (5 livelli superati o 140 s di gioco dall'ultima), la pubblicità parte qui, alla fine del
+        /// livello, sia dopo una vittoria sia dopo una sconfitta.
         /// </summary>
         public void Continue()
         {
@@ -180,8 +187,7 @@ namespace Gotcha.Core
                 GameCompleted?.Invoke();
                 return;
             }
-            if (lastResult == LevelResult.Solved) Ads.TryShowBreak(() => TryStartLevel(next));
-            else TryStartLevel(next);
+            Ads.TryShowBreak(() => TryStartLevel(next));
         }
     }
 }

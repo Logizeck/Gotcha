@@ -34,17 +34,18 @@ namespace Gotcha.Ads
     }
 
     /// <summary>
-    /// Regola: pubblicità ogni 5 livelli superati OPPURE dopo 3 minuti di gioco attivo (timer invisibile),
+    /// Regola: pubblicità ogni 5 livelli superati OPPURE dopo 140 secondi di gioco attivo (timer invisibile),
     /// quello che avviene prima. Entrambi i contatori si azzerano dopo ogni pubblicità mostrata.
-    /// La pubblicità parte solo in TryShowBreak (cioè tra un livello e l'altro). Se non è pronta,
-    /// i contatori restano e si riprova al livello successivo.
+    /// La pubblicità parte solo in TryShowBreak, cioè alla fine del livello in corso (superato o fallito): chi resta
+    /// bloccato più di 140 s su un livello la vede al termine del tentativo. Se non è pronta, i contatori restano e
+    /// si riprova alla fine del livello successivo.
     /// </summary>
     public class AdBreakManager
     {
         IAdProvider provider;
 
         public int LevelsInterval { get; set; } = 5;
-        public float SecondsInterval { get; set; } = 180f;   // 3 minuti di gioco attivo
+        public float SecondsInterval { get; set; } = 140f;   // 140 secondi di gioco attivo
         public int LevelsSinceAd { get; private set; }
         public float PlaySecondsSinceAd { get; private set; }
 
