@@ -6,11 +6,12 @@ using Gotcha.Core;
 namespace Gotcha.Levels
 {
     /// <summary>
-    /// Livello 20 — si parte! Ci sono DUE taniche, "H" e "O", e l'indicatore del carburante ha tre finestrelle:
-    /// H, H, O (la ricetta è... H2O!). 1) Trascina le taniche sul bocchettone del razzo: ogni travaso è una dose
-    /// (2 di H e 1 di O, in qualsiasi ordine). Una dose di troppo (es. due O) e la miscela fa "fizz": l'indicatore
-    /// si svuota e si ricomincia. 2) Alza il coperchio di sicurezza del pulsante (tocco); 3) tieni premuto il
-    /// pulsante per tutto il conto alla rovescia 3-2-1: se lo lasci, "ABORT!". Senza carburante fa solo "pfff".
+    /// Livello 20 — si parte! Ci sono DUE taniche, "H" e "O", e l'indicatore del carburante ha tre finestrelle
+    /// vuote: la ricetta non è scritta da nessuna parte (è... H2O!). 1) Trascina le taniche sul bocchettone del razzo:
+    /// ogni travaso è una dose e riempie la finestrella successiva con la sua lettera; dopo tre dosi il serbatoio è
+    /// pieno, qualunque cosa ci sia dentro. 2) Alza il coperchio di sicurezza del pulsante (tocco); 3) tieni premuto il
+    /// pulsante per tutto il conto alla rovescia 3-2-1: se lo lasci, "ABORT!". Al decollo, con H, H, O il razzo parte;
+    /// con qualsiasi altra miscela (es. una H e due O) ESPLODE e il livello è perso. Senza carburante fa solo "pfff".
     /// </summary>
     public class RocketLevel : LevelController
     {
@@ -18,10 +19,11 @@ namespace Gotcha.Levels
         [SerializeField] Collider2D fuelInlet;        // bocchettone sul razzo
         [SerializeField] Draggable2D canH;
         [SerializeField] Draggable2D canO;
-        [SerializeField] Transform[] cellFills;       // H, H, O: scala y da 0 a 1, ancorate in basso
+        [SerializeField] Transform[] cellFills;       // tre dosi in ordine di travaso: scala y da 0 a 1, ancorate in basso
         [SerializeField] SpriteRenderer[] cellBars;
         [SerializeField] TextMesh[] cellLetters;
-        [SerializeField] SmokeEmitter fizz;           // bollicine della miscela sbagliata
+        [SerializeField] SmokeEmitter fizz;           // bollicine sul bocchettone quando la miscela è sbagliata (sfrigola)
+        [SerializeField] Transform boom;              // esplosione (nascosta finché non serve)
         [SerializeField] TapButton cover;
         [SerializeField] Transform coverHinge;
         [SerializeField] Collider2D launchButton;
@@ -36,11 +38,12 @@ namespace Gotcha.Levels
         static readonly Color OColor = new Color(1f, 0.48f, 0.24f);
 
         bool fueled, coverOpen, launched, holdingBefore, pouring;
-        readonly bool[] filled = new bool[3];
+        readonly char[] dose = new char[3];   // 'H', 'O' o 0 (vuota), in ordine di travaso
+        int doses;
+        bool RightMix => doses == 3 && System.Array.FindAll(dose, c => c == 'H').Length == 2;
         float held, pfffCooldown;
         Camera cam;
         Vector3 buttonScale, rocketBase, homeH, homeO;
-        int fizzles;
 
         public override void OnLevelStart()
         {
@@ -55,6 +58,7 @@ namespace Gotcha.Levels
             if (launchVisual != null) buttonScale = launchVisual.localScale;
             if (countdown != null) countdown.text = "";
             if (bubble != null) bubble.Hide();
+            if (boom != null) boom.gameObject.SetActive(false);
         }
 
         void OnDestroy()
@@ -64,13 +68,18 @@ namespace Gotcha.Levels
             if (canO != null) canO.Dropped -= OnCanDropped;
         }
 
-        /// <summary>Livello della finestrella i (0..1), colore della sua dose e lettera accesa.</summary>
+        /// <summary>Livello della finestrella i (0..1), colore e lettera della dose che contiene.</summary>
         void SetCell(int i, float level)
         {
+            char c = dose[i];
             if (cellFills != null && i < cellFills.Length && cellFills[i] != null) cellFills[i].localScale = new Vector3(1f, level, 1f);
-            if (cellBars != null && i < cellBars.Length && cellBars[i] != null) cellBars[i].color = i < 2 ? HColor : OColor;
+            if (cellBars != null && i < cellBars.Length && cellBars[i] != null) cellBars[i].color = c == 'O' ? OColor : HColor;
+            // le finestrelle sono vuote: la lettera compare solo quando la dose è dentro (la ricetta va indovinata)
             if (cellLetters != null && i < cellLetters.Length && cellLetters[i] != null)
-                cellLetters[i].color = new Color(1f, 1f, 1f, level > 0.5f ? 1f : 0.45f);
+            {
+                cellLetters[i].text = level > 0.5f && c != 0 ? c.ToString() : "";
+                cellLetters[i].color = Color.white;
+            }
         }
 
         Vector3 Home(Draggable2D can) => can == canH ? homeH : homeO;
@@ -105,7 +114,7 @@ namespace Gotcha.Levels
             can.enabled = true;
         }
 
-        /// <summary>Una dose: la tanica si inclina sul bocchettone e la sua finestrella si riempie (o trabocca).</summary>
+        /// <summary>Una dose: la tanica si inclina sul bocchettone e la finestrella successiva si riempie.</summary>
         IEnumerator Pour(Draggable2D can)
         {
             pouring = true;
@@ -116,63 +125,30 @@ namespace Gotcha.Levels
             Vector3 from = t.position;
             for (float k = 0f; k < 1f; k += Time.deltaTime / 0.15f) { t.position = Vector3.Lerp(from, spout, k); yield return null; }
             t.position = spout;
-            int cell = isH ? (!filled[0] ? 0 : !filled[1] ? 1 : -1) : (!filled[2] ? 2 : -1);
+            int cell = doses;
+            dose[cell] = isH ? 'H' : 'O';
             float lastGlug = 0f;
             for (float k = 0f; k < 1f; k += Time.deltaTime / 0.9f)
             {
                 t.localRotation = Quaternion.Euler(0, 0, Mathf.Lerp(0f, 70f, Mathf.Min(1f, k * 4f)) + Mathf.Sin(k * 40f) * 3f);
-                if (cell >= 0) SetCell(cell, Mathf.Clamp01((k - 0.2f) / 0.8f));
+                SetCell(cell, Mathf.Clamp01((k - 0.2f) / 0.8f));
                 if (k - lastGlug > 0.3f) { lastGlug = k; Sfx.Play(this, "pop", 0.35f); }
                 yield return null;
             }
             yield return GoHome(can, 0.3f);
-            if (cell >= 0)
+            doses++;
+            SetCell(cell, 1f);
+            Haptics.Light();
+            if (doses == 3)
             {
-                filled[cell] = true;
-                SetCell(cell, 1f);
-                Haptics.Light();
-                if (filled[0] && filled[1] && filled[2])
-                {
-                    fueled = true;
-                    Sfx.Play(this, "ding", 0.7f);
-                    if (bubble != null) { bubble.Show("H + H + O = H2O?! It runs on WATER?!"); StartCoroutine(HideLater(2.4f)); }
-                }
-                else if (bubble != null) { bubble.Show(isH ? "Glug glug! One H." : "Glug glug! One O."); StartCoroutine(HideLater(1f)); }
+                fueled = true;
+                Sfx.Play(this, "ding", 0.7f);
+                // non si dice se la miscela è giusta: lo scopre il decollo. Se è sbagliata, il bocchettone sfrigola appena
+                if (!RightMix && fizz != null) fizz.Play();
+                if (bubble != null) { bubble.Show("Tank full! Ready for launch?"); StartCoroutine(HideLater(1.6f)); }
             }
-            else yield return Fizzle(isH);
+            else if (bubble != null) { bubble.Show(isH ? "Glug glug! One H." : "Glug glug! One O."); StartCoroutine(HideLater(1f)); }
             pouring = false;
-        }
-
-        /// <summary>Miscela sbagliata: bollicine, "fizz" e l'indicatore si svuota.</summary>
-        IEnumerator Fizzle(bool tooMuchH)
-        {
-            fizzles++;
-            string[] hLines = { "Pfffzzz! Too much H. Not rocket science... oh wait, it is.", "Fizzle! H, H, H? That's a hiccup, not fuel." };
-            string[] oLines = { "Fizzle! Too much O. Now it's just fizzy air.", "Pssshh! O-O... that's a surprised face, not fuel." };
-            string[] lines = tooMuchH ? hLines : oLines;
-            if (bubble != null) bubble.Show(lines[(fizzles - 1) % lines.Length]);
-            Sfx.Play(this, "buzz", 0.6f);
-            Haptics.Medium();
-            if (fizz != null) fizz.Play();
-            float[] start = new float[3];
-            for (int i = 0; i < 3; i++) start[i] = cellFills != null && i < cellFills.Length && cellFills[i] != null ? cellFills[i].localScale.y : 0f;
-            for (float k = 0f; k < 1f; k += Time.deltaTime / 1.1f)
-            {
-                for (int i = 0; i < 3; i++)
-                {
-                    SetCell(i, start[i] * (1f - k));
-                    if (cellBars != null && i < cellBars.Length && cellBars[i] != null)
-                        cellBars[i].color = Mathf.Repeat(k * 6f, 1f) < 0.5f ? new Color(0.55f, 0.9f, 0.4f) : (i < 2 ? HColor : OColor);   // ribolle verdognolo
-                }
-                if (rocket != null) rocket.localPosition = rocketBase + new Vector3(Mathf.Sin(Time.time * 45f) * 0.02f * (1f - k), 0f, 0f);
-                yield return null;
-            }
-            if (rocket != null) rocket.localPosition = rocketBase;
-            if (fizz != null) fizz.Stop();
-            for (int i = 0; i < 3; i++) { filled[i] = false; SetCell(i, 0f); }
-            yield return new WaitForSeconds(0.8f);
-            if (bubble != null && !launched && !pouring) bubble.Show("Recipe: H, H, O. Try again!");
-            StartCoroutine(HideLater(1.6f));
         }
 
         void OnCover(TapButton b)
@@ -222,7 +198,7 @@ namespace Gotcha.Levels
                 float left = countSeconds - held;
                 if (countdown != null) { countdown.text = Mathf.CeilToInt(left).ToString(); countdown.color = new Color(1f, 0.9f, 0.4f); }
                 if (rocket != null) rocket.localPosition = rocketBase + new Vector3(Mathf.Sin(Time.time * 60f) * 0.015f * held, 0f, 0f);
-                if (left <= 0f) StartCoroutine(Launch());
+                if (left <= 0f) StartCoroutine(RightMix ? Launch() : Explode());
             }
             else if (holdingBefore && fueled && held > 0f)
             {
@@ -236,8 +212,8 @@ namespace Gotcha.Levels
         IEnumerator Pfff()
         {
             pfffCooldown = 1.5f;
-            bool some = filled[0] || filled[1] || filled[2];
-            if (bubble != null) bubble.Show(some ? "Pfff... the recipe says H, H, O!" : "Pfff... no fuel!");
+            bool some = doses > 0;
+            if (bubble != null) bubble.Show(some ? "Pfff... not enough fuel!" : "Pfff... no fuel!");
             Haptics.Light();
             if (smoke != null) smoke.Play();
             yield return new WaitForSeconds(0.3f);
@@ -250,6 +226,7 @@ namespace Gotcha.Levels
         {
             Haptics.Heavy();
             launched = true;
+            if (bubble != null) bubble.Show("H + H + O = H2O?! It runs on WATER?!");
             if (countdown != null) { countdown.text = "LIFT OFF!"; countdown.color = new Color(0.5f, 1f, 0.55f); }
             if (flame != null) flame.gameObject.SetActive(true);
             if (smoke != null) { smoke.puffsPerSecond *= 2f; smoke.Play(); }
@@ -272,6 +249,44 @@ namespace Gotcha.Levels
             }
             yield return new WaitForSeconds(0.3f);
             Win();
+        }
+
+        /// <summary>Miscela sbagliata: il razzo trema, si gonfia e... KABOOM. Livello perso.</summary>
+        IEnumerator Explode()
+        {
+            launched = true;
+            if (countdown != null) { countdown.text = "UH-OH..."; countdown.color = new Color(1f, 0.35f, 0.35f); }
+            if (bubble != null) bubble.Show(System.Array.FindAll(dose, c => c == 'O').Length > 1 ? "Too much O! That's not fuel..." : "Too much H! That's not fuel...");
+            if (flame != null) flame.gameObject.SetActive(true);
+            // sobbalza sulla rampa sempre più forte e si gonfia
+            Vector3 scale = rocket.localScale;
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 1.1f)
+            {
+                rocket.localPosition = rocketBase + new Vector3(Mathf.Sin(Time.time * 70f) * 0.05f * k, Random.Range(0f, 0.08f) * k, 0f);
+                rocket.localScale = new Vector3(scale.x * (1f + 0.15f * k), scale.y * (1f + 0.08f * k), scale.z);
+                if (k > 0.5f) Haptics.Pulse(30, 120);
+                yield return null;
+            }
+            Haptics.Heavy();
+            Sfx.Play(this, "clunk", 1f);
+            Sfx.Play(this, "whoosh", 1f);
+            if (countdown != null) { countdown.text = "KABOOM!"; countdown.color = new Color(1f, 0.55f, 0.15f); }
+            if (bubble != null) bubble.Show("KABOOM! *cough* Wrong mix...");
+            rocket.localScale = scale;
+            rocket.gameObject.SetActive(false);
+            if (fizz != null) fizz.Stop();
+            if (smoke != null) { smoke.transform.position = rocket.position; smoke.puffsPerSecond = 40f; smoke.startScale = 1.4f; smoke.Play(); }
+            if (boom != null)
+            {
+                boom.position = new Vector3(rocket.position.x, rocket.position.y, boom.position.z);
+                boom.gameObject.SetActive(true);
+                Vector3 bs = boom.localScale;
+                for (float k = 0f; k < 1f; k += Time.deltaTime / 0.35f) { boom.localScale = bs * Mathf.Lerp(0.2f, 1.2f, k); yield return null; }
+                boom.localScale = bs;
+            }
+            yield return new WaitForSeconds(1.2f);
+            if (smoke != null) smoke.Stop();
+            Fail();
         }
 
         IEnumerator HideLater(float seconds)

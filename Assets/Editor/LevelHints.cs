@@ -38,7 +38,7 @@ public static partial class LevelHints
         { "dark_maze", new[] { "The light follows the ball. Holes hide in the dark; the laser guards the key.", "Find the key first (bottom right, past the laser: wait for it to switch off), then go up and left and through the gate to the star. Don't hug the walls where the holes are." } },
         { "hidden_safe", new[] { "Shake the phone. Then... that back is SO dusty. Blow!", "Shake the phone to drop the painting, blow into the microphone to clear the dust off its back, read the code and type it on the safe." } },
         { "bedtime", new[] { "Light, sound... and hands off.", "Switch off the lamp, turn the phone volume to zero, then don't touch for a few seconds." } },
-        { "lift_off", new[] { "Look at the fuel gauge: H, H, O. One pour = one dose.", "Drag the H can to the rocket twice and the O can once, flip up the cover, then hold the launch button through the countdown." } },
+        { "lift_off", new[] { "The right mix is the most famous formula of all: H2O. One pour = one dose.", "Drag the H can to the rocket twice and the O can once, flip up the cover, then hold the launch button through the countdown." } },
         { "low_battery", new[] { "The robot wants a charger... or a workout.", "Plug your phone into a real charger, or spin the crank until the battery is full." } },
         { "hot_soup", new[] { "Blow on it like real soup.", "Blow into the microphone until the thermometer is low, then give the soup to the mouse." } },
         { "frozen_key", new[] { "Rub the ice quickly.", "Rub the ice block with your finger until it melts, pinch the key smaller, open the door." } },

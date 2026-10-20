@@ -307,14 +307,14 @@
   "folder": "Rocket",
   "id": "lift_off",
   "title": "LIFT OFF",
-  "hint": "Rockets need fuel. And launch buttons are always protected.",
+  "hint": "Rockets need fuel... in the right mix. And launch buttons are always protected.",
   "egg": "",
   "n": 20,
-  "desc": "Due taniche H e O: servono 2 dosi di H e 1 di O (H2O!), poi coperchio e conto alla rovescia.",
+  "desc": "Due taniche H e O e tre finestrelle vuote: la miscela giusta è H, H, O (H2O!), poi coperchio e conto alla rovescia. Con un'altra miscela il razzo esplode al decollo.",
   "hints": [
-   "Rockets need fuel. And launch buttons are always protected.",
-   "Fuel first.",
-   "Drag the fuel can to the rocket, flip up the cover, then press the launch button."
+   "Rockets need fuel... in the right mix. And launch buttons are always protected.",
+   "The right mix is the most famous formula of all: H2O. One pour = one dose.",
+   "Drag the H can to the rocket twice and the O can once, flip up the cover, then hold the launch button through the countdown."
   ],
   "eggName": "",
   "eggHow": ""

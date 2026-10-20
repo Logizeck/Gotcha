@@ -267,6 +267,14 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.55
+- **Livello 20 (razzo)**: le finestrelle del carburante sono vuote, niente più H, H, O scritte in anticipo: la
+  ricetta va indovinata. Si può versare qualsiasi combinazione di 3 dosi (ogni dose riempie la finestrella
+  successiva con la sua lettera); con H, H, O il razzo decolla, con qualsiasi altra miscela (es. una H e due O)
+  trema, si gonfia ed **esplode** al decollo: livello perso. Il secondo suggerimento parla di H2O.
+- La build per Google Play mette i simboli di debug del codice nativo dentro l'AAB (report di crash leggibili).
+- Versione del costruttore 53.
+
 ## Versione 0.54
 - **minSdkVersion 24** (Android 7.0) invece di 23: la protezione automatica di Play la richiede. Esclude solo i
   telefoni con Android 6.

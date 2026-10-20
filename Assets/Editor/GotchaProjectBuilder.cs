@@ -31,7 +31,7 @@ public static partial class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 52;
+    const int BuilderVersion = 53;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -2382,7 +2382,7 @@ public static partial class GotchaProjectBuilder
         CircleCollider2D inlet = cap.AddComponent<CircleCollider2D>();
         inlet.radius = 0.7f;
 
-        // due taniche: H e O (la ricetta è H, H, O)
+        // due taniche: H e O (la ricetta giusta è H, H, O; con un'altra miscela il razzo esplode al decollo)
         Draggable2D FuelCan(string name, string sprite, Vector2 pos)
         {
             var can = new GameObject(name);
@@ -2419,7 +2419,7 @@ public static partial class GotchaProjectBuilder
         // pannello di lancio: carburante, coperchio di sicurezza, pulsante
         TextMesh fuelLabel = Label(root.transform, new Vector2(-2.5f, -3.05f), 8, "FUEL", 0.03f);
         fuelLabel.color = Color.white;
-        // indicatore a 3 finestrelle: H, H, O
+        // indicatore a 3 finestrelle, vuote: la ricetta (H, H, O) va indovinata, la lettera compare a dose versata
         var gauge = new GameObject("FuelGauge").transform;
         gauge.SetParent(root.transform, false);
         gauge.localPosition = new Vector3(-1.25f, -3.05f, 0);
@@ -2428,7 +2428,6 @@ public static partial class GotchaProjectBuilder
         var cellFills = new List<Transform>();
         var cellBars = new List<SpriteRenderer>();
         var cellLetters = new List<TextMesh>();
-        string[] recipe = { "H", "H", "O" };
         for (int i = 0; i < 3; i++)
         {
             float x = -0.6f + i * 0.6f;
@@ -2438,8 +2437,8 @@ public static partial class GotchaProjectBuilder
             cf.localPosition = new Vector3(x, -0.25f, 0);
             cellBars.Add(Bar(cf, "Bar", new Vector2(0f, 0.25f), new Vector2(0.46f, 0.5f), Color.white, 7));
             cellFills.Add(cf);
-            TextMesh letter = Label(gauge, new Vector2(x, 0f), 9, recipe[i], 0.05f);
-            letter.color = new Color(1f, 1f, 1f, 0.45f);
+            TextMesh letter = Label(gauge, new Vector2(x, 0f), 9, "", 0.05f);
+            letter.color = Color.white;
             cellLetters.Add(letter);
         }
 
@@ -2456,6 +2455,10 @@ public static partial class GotchaProjectBuilder
         coverButton.pressedScaleY = 0.95f;
 
         TextMesh countdown = Label(root.transform, new Vector2(0, 3.1f), 30, "", 0.13f);
+        // esplosione per la miscela sbagliata
+        Transform boom = Art(root.transform, "Boom", "boom", 31, false, new Vector2(0.3f, -1.2f));
+        boom.localScale = Vector3.one * 1.6f;
+        boom.gameObject.SetActive(false);
         SpeechBubble bubble = Bubble(root.transform, new Vector2(1.75f, 0.9f));
         bubble.transform.localScale = Vector3.one * 0.5f;
 
@@ -2467,6 +2470,7 @@ public static partial class GotchaProjectBuilder
         SetArray(level, "cellBars", cellBars.ToArray());
         SetArray(level, "cellLetters", cellLetters.ToArray());
         SetField(level, "fizz", fizz);
+        SetField(level, "boom", boom);
         SetField(level, "cover", coverButton);
         SetField(level, "coverHinge", cover.transform);
         SetField(level, "launchButton", launchCol);
