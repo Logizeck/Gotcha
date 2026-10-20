@@ -22,7 +22,7 @@ namespace Gotcha.UI
         public static bool TitleShown => current != null && current.titlePanel != null && current.titlePanel.activeSelf;
 
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.56";
+        public const string Version = "0.57";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
@@ -58,8 +58,9 @@ namespace Gotcha.UI
         Text hintBody, menuEggs, resultTitle, resultBody, resultButton, musicLabel, shareLabel;
         Button shareButton;
         // hint a pagamento, premio per la condivisione degli Easter egg
-        Text hintWalletLabel, hintRevealLabel, shopHints3Label, shopHints15Label;
-        Button hintRevealButton;
+        Text hintWalletLabel, hintRevealLabel, shopHints3Label, shopHints15Label, hintPageLabel;
+        Button hintRevealButton, hintPrevButton, hintNextButton;
+        int hintPage;   // pagina del libretto dei suggerimenti (0 = la prima)
         GameObject rewardPanel;
         string lastEggId;
         RectTransform pagesContent;
@@ -122,6 +123,7 @@ namespace Gotcha.UI
             if (menuPanel.activeSelf || settingsPanel.activeSelf) RefreshMusicLabel();   // si aggiorna se alzi il volume col menu aperto
 
             if (shopPanel.activeSelf) RefreshShop();
+            if (hintPanel.activeSelf && !shopPanel.activeSelf) SwipeHints();
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 if (rewardPanel.activeSelf) { }   // il premio va scelto
@@ -298,7 +300,7 @@ namespace Gotcha.UI
         void OpenHint()
         {
             if (flow.CurrentDefinition == null || resultPanel.activeSelf) return;
-            RefreshHint();
+            RefreshHint(true);   // si apre sull'ultimo suggerimento sbloccato
             menuPanel.SetActive(false);
             hintPanel.SetActive(true);
             flow.Paused = true;
@@ -313,15 +315,34 @@ namespace Gotcha.UI
             return def.hints != null && def.hints.Length > 0 ? def.hints : new[] { def.hint };
         }
 
-        /// <summary>Suggerimenti già sbloccati, saldo e pulsante: prossimo hint, oppure pubblicità se il saldo è a zero.</summary>
-        void RefreshHint()
+        /// <summary>
+        /// Libretto dei suggerimenti: una pagina per suggerimento sbloccato, sfogliabile con le frecce (o con uno
+        /// swipe), nella sua area riservata: il testo si rimpicciolisce per starci e non va mai sopra al resto.
+        /// Sotto: saldo e pulsante per il prossimo suggerimento (o la pubblicità se il saldo è a zero).
+        /// </summary>
+        void RefreshHint() => RefreshHint(false);
+
+        void RefreshHint(bool toLatest)
         {
             if (hintBody == null || flow.CurrentDefinition == null) return;
             string[] hints = CurrentHints();
             int shown = Mathf.Min(HintWallet.Revealed(flow.CurrentDefinition.levelId), hints.Length);
-            var sb = new System.Text.StringBuilder();
-            for (int i = 0; i < shown; i++) sb.Append(i > 0 ? "\n\n" : "").Append(i + 1).Append(") ").Append(hints[i]);
-            hintBody.text = shown == 0 ? "Stuck? This level has " + hints.Length + " hints,\nfrom a little nudge to the solution." : sb.ToString();
+            if (toLatest) hintPage = shown - 1;
+            hintPage = Mathf.Clamp(hintPage, 0, Mathf.Max(0, shown - 1));
+            if (shown == 0)
+            {
+                hintPageLabel.text = "";
+                hintBody.text = "Stuck? This level has " + hints.Length + " hints,\nfrom a little nudge to the solution.";
+            }
+            else
+            {
+                hintPageLabel.text = "HINT " + (hintPage + 1) + " / " + hints.Length + (shown < hints.Length ? "   (" + shown + " unlocked)" : "");
+                hintBody.text = hints[hintPage];
+            }
+            hintPrevButton.gameObject.SetActive(shown > 1);
+            hintNextButton.gameObject.SetActive(shown > 1);
+            hintPrevButton.interactable = hintPage > 0;
+            hintNextButton.interactable = hintPage < shown - 1;
             hintWalletLabel.text = BetaMode.Active ? "Your hints: unlimited (beta)" : "Your hints: " + HintWallet.Balance;
             bool more = shown < hints.Length;
             // senza hint e senza pubblicità pronta il pulsante sparisce: restano quelli del negozio
@@ -334,11 +355,37 @@ namespace Gotcha.UI
             hintRevealButton.interactable = true;
         }
 
+        void TurnHintPage(int delta)
+        {
+            hintPage += delta;
+            RefreshHint();
+        }
+
+        Vector2 hintSwipeStart;
+        bool hintSwiping;
+
+        /// <summary>Sfogliare il libretto dei suggerimenti con uno swipe orizzontale, come le pagine di un libro.</summary>
+        void SwipeHints()
+        {
+            if (!PointerInput.TryGetPrimary(out Vector2 p, out bool began, out bool ended)) { hintSwiping = false; return; }
+            if (began) { hintSwipeStart = p; hintSwiping = true; }
+            if (!hintSwiping || !ended) return;
+            hintSwiping = false;
+            Vector2 d = p - hintSwipeStart;
+            float min = Screen.width * 0.15f;
+            if (Mathf.Abs(d.x) > min && Mathf.Abs(d.x) > Mathf.Abs(d.y) * 1.5f)
+            {
+                int before = hintPage;
+                TurnHintPage(d.x < 0f ? 1 : -1);
+                if (hintPage != before) Haptics.Tap();
+            }
+        }
+
         void RevealHint()
         {
             LevelDefinition def = flow.CurrentDefinition;
             if (def == null) return;
-            if (BetaMode.Active || HintWallet.Balance > 0) { HintWallet.TryReveal(def.levelId, CurrentHints().Length); RefreshHint(); return; }
+            if (BetaMode.Active || HintWallet.Balance > 0) { HintWallet.TryReveal(def.levelId, CurrentHints().Length); RefreshHint(true); return; }
             hintRevealButton.interactable = false;
             flow.Ads.ShowRewarded(ok =>
             {
@@ -893,8 +940,16 @@ namespace Gotcha.UI
             RectTransform hintCard;
             hintPanel = CreateOverlay("HintPanel", out hintCard, 1250);
             AddHeader(hintCard, "HINTS");
+            // libretto: numero di pagina, testo nella sua area riservata (si rimpicciolisce, non sborda), frecce ai lati
+            hintPageLabel = CreateText(hintCard, "", 36, EggColor, FontStyle.Bold);
+            Place(hintPageLabel.transform, new Vector2(0.08f, 0.785f), new Vector2(0.92f, 0.835f));
             hintBody = CreateText(hintCard, "", 46, Ink, FontStyle.Normal);
-            Place(hintBody.transform, new Vector2(0.08f, 0.44f), new Vector2(0.92f, 0.84f));
+            hintBody.verticalOverflow = VerticalWrapMode.Truncate;   // con "Overflow" il best fit non rimpicciolisce in altezza
+            Place(hintBody.transform, new Vector2(0.15f, 0.45f), new Vector2(0.85f, 0.78f));
+            hintPrevButton = CreateButton(hintCard, "<", Dark, () => TurnHintPage(-1));
+            Place(hintPrevButton.transform, new Vector2(0.02f, 0.56f), new Vector2(0.135f, 0.67f));
+            hintNextButton = CreateButton(hintCard, ">", Dark, () => TurnHintPage(1));
+            Place(hintNextButton.transform, new Vector2(0.865f, 0.56f), new Vector2(0.98f, 0.67f));
             hintWalletLabel = CreateText(hintCard, "", 40, Ink, FontStyle.Normal);
             Place(hintWalletLabel.transform, new Vector2(0.08f, 0.37f), new Vector2(0.92f, 0.43f));
             hintRevealButton = CreateButton(hintCard, "", Accent, RevealHint);

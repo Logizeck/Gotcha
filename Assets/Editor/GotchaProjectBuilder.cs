@@ -31,7 +31,7 @@ public static partial class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 53;
+    const int BuilderVersion = 54;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -941,7 +941,11 @@ public static partial class GotchaProjectBuilder
         var bubbleGo = new GameObject("Bubble");
         bubbleGo.transform.SetParent(parent, false);
         bubbleGo.transform.localPosition = pos;
-        Art(bubbleGo.transform, "Art", "bubble", 60);
+        // fumetto 9-slice: SpeechBubble ne calcola la misura sul testo, la punta della codina resta ferma
+        Transform art = Art(bubbleGo.transform, "Art", "bubble_box", 60, false);
+        SpriteRenderer artSr = art.GetComponent<SpriteRenderer>();
+        artSr.drawMode = SpriteDrawMode.Sliced;
+        artSr.size = new Vector2(3.1f, 1.57f);
         TextMesh text = Label(bubbleGo.transform, new Vector2(0, 0.07f), 61, fit: false);   // il fumetto si adatta da solo
         SpeechBubble bubble = bubbleGo.AddComponent<SpeechBubble>();
         bubble.text = text;
@@ -4949,7 +4953,9 @@ public static partial class GotchaProjectBuilder
         importer.textureType = TextureImporterType.Sprite;
         importer.spriteImportMode = SpriteImportMode.Single;
         importer.spritePixelsPerUnit = p.Ppu;
-        importer.spriteBorder = Vector4.one * art.Border;
+        importer.spriteBorder = art.Borders != null
+            ? new Vector4(art.Borders[0], art.Borders[1], art.Borders[2], art.Borders[3])
+            : Vector4.one * art.Border;
         importer.alphaIsTransparency = true;
         importer.mipmapEnabled = false;
         // Editor e PC: senza compressione. Android: ASTC 4x4 (8 bit per pixel invece di 32): l'APK e la memoria

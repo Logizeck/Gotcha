@@ -605,6 +605,19 @@ namespace Gotcha.EditorArt
             return new DoodleArt("puff", p);
         }
 
+        /// <summary>
+        /// Fumetto 9-slice che si adatta al testo: corpo arrotondato e codina in basso a sinistra, tutta dentro
+        /// l'angolo in basso a sinistra (che non si deforma). Costanti condivise con SpeechBubble (BubbleBox*).
+        /// </summary>
+        public static DoodleArt BubbleBox()
+        {
+            var p = new DoodlePainter(-0.75f, -0.75f, 0.75f, 0.5f, 100) { Ink = 0.05f, Wobble = 0f };
+            Sdf bubble = Sd.Union(Sd.Box(0f, 0f, 0.7f, 0.45f, 0.28f), Sd.Polygon(-0.44f, -0.36f, -0.14f, -0.36f, -0.55f, -0.72f));
+            p.Shape(bubble, Rgba.White);
+            // bordi in pixel (100 px = 1 unità): a sinistra e sotto c'è anche la codina
+            return new DoodleArt("bubble_box", p, 66, 58, 33, 33);
+        }
+
         /// <summary>Fumetto con codina in basso a sinistra.</summary>
         public static DoodleArt Bubble()
         {

@@ -267,6 +267,17 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.57
+- **Fumetti su misura**: nuovo disegno 9-slice `bubble_box` (bordi diversi per lato: la codina sta tutta
+  nell'angolo in basso a sinistra, che non si deforma). `SpeechBubble` misura il testo quando Unity l'ha davvero
+  aggiornato (aspetta finché la misura resta uguale per due fotogrammi), va a capo oltre `maxTextWidth` e costruisce
+  il fumetto della misura del testo più i margini: niente più misura fissa né testo che sborda. La punta della
+  codina resta ferma su chi parla e il fumetto cresce verso l'alto e a destra; se esce dallo schermo si sposta.
+- **Suggerimenti a libretto**: una pagina per suggerimento sbloccato ("HINT 2 / 3"), frecce < > ai lati o swipe
+  orizzontale per sfogliare; il testo sta nella sua area riservata (si rimpicciolisce, non va più sopra a saldo e
+  pulsanti). Il pannello si apre sull'ultimo suggerimento sbloccato.
+- Versione del costruttore 54.
+
 ## Versione 0.56
 - **Sicurezza (rifiuto di Google Play "Device and Network Abuse")**: Unity 2022.3.62f1 ha la falla CVE-2025-59489.
   Il progetto passa a **Unity 2022.3.62f2**; il menu *Gotcha > Build Google Play AAB* si rifiuta di partire con

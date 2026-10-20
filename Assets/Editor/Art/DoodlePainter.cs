@@ -310,7 +310,10 @@ namespace Gotcha.EditorArt
         public string Name;
         public DoodlePainter Painter;
         public int Border;   // 0 = nessun 9-slice
+        public int[] Borders;   // bordi 9-slice diversi per lato, in pixel: sinistra, sotto, destra, sopra (null = Border)
         public DoodleArt(string name, DoodlePainter painter, int border = 0) { Name = name; Painter = painter; Border = border; }
+        public DoodleArt(string name, DoodlePainter painter, int left, int bottom, int right, int top)
+        { Name = name; Painter = painter; Borders = new[] { left, bottom, right, top }; }
     }
 
     /// <summary>Raccolta di disegni con nome (usata dal builder e dall'anteprima fuori da Unity).</summary>
@@ -325,7 +328,7 @@ namespace Gotcha.EditorArt
                 DoodleSprites.MazeNeon(), DoodleSprites.ChromeBall(), DoodleSprites.BallShadow(), DoodleSprites.Goal(),
                 DoodleSprites.SnowBackdrop(), DoodleSprites.SnowBase(), DoodleSprites.SnowMiddle(), DoodleSprites.SnowArm(-1), DoodleSprites.SnowArm(1), DoodleSprites.SnowHead(),
                 DoodleSprites.SnowHat(), DoodleSprites.Blush(), DoodleSprites.Puddle(),
-                DoodleSprites.Carrot(), DoodleSprites.Coal(), DoodleSprites.Puff(), DoodleSprites.Bubble(),
+                DoodleSprites.Carrot(), DoodleSprites.Coal(), DoodleSprites.Puff(), DoodleSprites.Bubble(), DoodleSprites.BubbleBox(),
                 DoodleSprites.NightRoom(), DoodleSprites.SleepingCat(), DoodleSprites.CatEyesOpen(), DoodleSprites.Alert(),
                 DoodleSprites.Zzz(), DoodleSprites.Heart(), DoodleSprites.BigButton(), DoodleSprites.Fish(),
                 DoodleSprites.Kitchen(), DoodleSprites.Board(), DoodleSprites.Apple(), DoodleSprites.AppleHalf(-1),
