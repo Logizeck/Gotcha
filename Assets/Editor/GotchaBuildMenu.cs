@@ -184,6 +184,7 @@ public static class GotchaBuildMenu
         string prevKeystore = PlayerSettings.Android.keystoreName, prevKsPass = PlayerSettings.Android.keystorePass;
         string prevAlias = PlayerSettings.Android.keyaliasName, prevAliasPass = PlayerSettings.Android.keyaliasPass;
         bool prevBundle = EditorUserBuildSettings.buildAppBundle;
+        AndroidCreateSymbols prevSymbols = EditorUserBuildSettings.androidCreateSymbols;
         BuildReport report;
         try
         {
@@ -193,6 +194,8 @@ public static class GotchaBuildMenu
             PlayerSettings.Android.keyaliasName = signing.keyAlias;
             PlayerSettings.Android.keyaliasPass = signing.keyAliasPass;
             EditorUserBuildSettings.buildAppBundle = true;
+            // simboli di debug del codice nativo dentro l'AAB: Play Console li usa per leggere crash e ANR
+            EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Public;
 
             var options = new BuildPlayerOptions
             {
@@ -214,6 +217,7 @@ public static class GotchaBuildMenu
             PlayerSettings.Android.keyaliasName = prevAlias;
             PlayerSettings.Android.keyaliasPass = prevAliasPass;
             EditorUserBuildSettings.buildAppBundle = prevBundle;
+            EditorUserBuildSettings.androidCreateSymbols = prevSymbols;
         }
 
         BuildSummary summary = report.summary;

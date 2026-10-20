@@ -41,7 +41,9 @@ Scelte fatte per questa beta: pacchetto **`com.gotcha.zeck`**, **niente acquisti
 7. **Per ricaricare** una correzione: aumenta `GameUI.Version` (es. "0.54.1" → versionCode 5401) e ripeti il punto 4.
 
 Se la build fallisce, copia il primo errore rosso della Console (spesso Gradle o SDK) e mandamelo.
-Avvisi che Play Console può mostrare e che **non bloccano** il test interno: file di debug simbolici mancanti,
+Avvisi che Play Console può mostrare e che **non bloccano** il test interno: "nessun file di deoffuscamento"
+(R8 è spento di proposito, vedi sezione 6: non c'è nulla da caricare), simboli di debug mancanti (dalla 0.54 il
+menu li mette dentro l'AAB da solo),
 dichiarazioni dei contenuti ancora da compilare (servono per la produzione, sezioni 7-10).
 
 ---
