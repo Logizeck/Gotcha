@@ -22,7 +22,7 @@ namespace Gotcha.UI
         public static bool TitleShown => current != null && current.titlePanel != null && current.titlePanel.activeSelf;
 
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.51";
+        public const string Version = "0.52";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
@@ -45,7 +45,7 @@ namespace Gotcha.UI
         GameObject hintPanel, menuPanel, resultPanel, completedPanel, titlePanel, settingsPanel, betaPanel;
         InputField betaInput;
         GameObject dailyPanel;
-        Text dailyLabel, dailyBody, remindersLabel;
+        Text dailyLabel, dailyBody, remindersLabel, vibrationLabel;
         Text betaStatus, betaActionLabel;
         Text menuHeader, menuBackLabel, continueLabel, settingsMusicLabel, settingsInfo, resetLabel;
         GameObject continueButton, menuMusicRow, shopPanel;
@@ -180,6 +180,8 @@ namespace Gotcha.UI
             // livello perso (non un segreto trovato): la schermata GOTCHA! ti prende in giro
             if (mockRoutine != null) { StopCoroutine(mockRoutine); EndMock(); }
             if (!solved && string.IsNullOrEmpty(eggId)) mockRoutine = StartCoroutine(Mock());
+            else if (solved) Haptics.Success();
+            else Haptics.Medium();   // segreto trovato
         }
 
         static readonly string[] Taunts =
@@ -199,7 +201,7 @@ namespace Gotcha.UI
         System.Collections.IEnumerator Mock()
         {
             Sfx.Play(this, "mock_laugh", 0.9f);
-            Haptics.Light();
+            Haptics.Fail();
             RectTransform title = (RectTransform)resultTitle.transform;
             RectTransform area = (RectTransform)resultPanel.transform;
             string[] words = { "HA!", "HA!", "HAHA!", "HA!", "HA!", "HA-HA!" };
@@ -402,6 +404,13 @@ namespace Gotcha.UI
             dailyPanel.SetActive(true);
             dailyPanel.transform.SetAsLastSibling();   // sopra il pannello del risultato che compare subito dopo
             Gotcha.Components.Sfx.Play(this, "ding", 0.8f);
+        }
+
+        void ToggleVibration()
+        {
+            Haptics.Enabled = !Haptics.Enabled;
+            vibrationLabel.text = Haptics.Enabled ? "VIBRATION: ON" : "VIBRATION: OFF";
+            if (Haptics.Enabled) Haptics.Medium();   // per sentire subito com'è
         }
 
         void ToggleReminders()
@@ -941,7 +950,10 @@ namespace Gotcha.UI
             Place(reset.transform, new Vector2(0.12f, 0.235f), new Vector2(0.88f, 0.325f));
             Button reminders = CreateButton(setCard, ComebackNotifier.Enabled ? "REMINDERS: ON" : "REMINDERS: OFF", Dark, ToggleReminders);
             remindersLabel = reminders.GetComponentInChildren<Text>();
-            Place(reminders.transform, new Vector2(0.2f, 0.17f), new Vector2(0.8f, 0.225f));
+            Place(reminders.transform, new Vector2(0.08f, 0.17f), new Vector2(0.49f, 0.225f));
+            Button vibration = CreateButton(setCard, Haptics.Enabled ? "VIBRATION: ON" : "VIBRATION: OFF", Dark, ToggleVibration);
+            vibrationLabel = vibration.GetComponentInChildren<Text>();
+            Place(vibration.transform, new Vector2(0.51f, 0.17f), new Vector2(0.92f, 0.225f));
             Place(CreateButton(setCard, "BETA TESTING", new Color(0.45f, 0.4f, 0.55f), OpenBeta).transform, new Vector2(0.25f, 0.405f), new Vector2(0.75f, 0.465f));
 #if GOTCHA_ADMOB && !UNITY_EDITOR
             // GDPR: chi ha dato (o negato) il consenso alla pubblicità deve poterlo cambiare
@@ -1101,7 +1113,7 @@ namespace Gotcha.UI
             rt.localRotation = Quaternion.Euler(0, 0, ((label.GetHashCode() & 7) - 3.5f) * 0.7f);
             Button b = rt.gameObject.AddComponent<Button>();
             b.targetGraphic = img;
-            b.onClick.AddListener(() => onClick());
+            b.onClick.AddListener(() => { Haptics.Tap(); onClick(); });
 
             Text t = CreateText(rt, label, 48, Color.white, FontStyle.Bold);
             Place(t.transform, Vector2.zero, Vector2.one);

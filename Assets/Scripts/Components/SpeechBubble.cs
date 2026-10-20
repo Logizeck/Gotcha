@@ -67,33 +67,75 @@ namespace Gotcha.Components
             if (art != null) { art.localScale = artBaseScale; art.localPosition = artBasePos; }
             if (text == null) { yield return Pop(); yield break; }
             text.transform.localScale = textBaseScale;
+            text.transform.localPosition = new Vector3(text.transform.localPosition.x, textBaseY, text.transform.localPosition.z);
             text.text = message;
-            yield return null;   // il mesh del testo è pronto dal frame successivo
+            yield return Settle();   // il mesh del testo si aggiorna con qualche fotogramma di ritardo
 
             // 1) va a capo sulle parole se la riga è troppo lunga
             Vector2 size = LocalSize();
             if (size.x > maxTextWidth && message.Length > 1)
             {
-                text.text = Wrap(message, size.x, maxTextWidth);
-                yield return null;
+                text.text = Wrap(message, maxTextWidth);
+                yield return Settle();
                 size = LocalSize();
             }
 
             // 2) se non entra ancora, si allarga il fumetto (il testo resta grande e leggibile); il testo si
             //    rimpicciolisce solo se il fumetto diventerebbe più largo dello schermo
             float maxGrowX = MaxGrowX();
-            float ts = Mathf.Min(1f, maxGrowX * maxTextWidth / Mathf.Max(size.x, 0.0001f));
+            float ts = Mathf.Min(1f, maxGrowX * maxTextWidth / Mathf.Max(size.x * 1.15f, 0.0001f));
             text.transform.localScale = textBaseScale * ts;
-            if (art != null)
+            Grow(size * ts, 1.15f, 1.2f);
+
+            // 3) verifica sul fumetto vero: finché il testo esce dal corpo del fumetto, lo si allarga ancora
+            for (int pass = 0; pass < 3 && art != null; pass++)
             {
-                float gx = Mathf.Max(1f, size.x * ts / maxTextWidth * 1.08f), gy = Mathf.Max(1f, size.y * ts / maxTextHeight * 1.1f);
-                art.localScale = new Vector3(artBaseScale.x * gx, artBaseScale.y * gy, artBaseScale.z);
-                // il corpo del fumetto sta un po' sopra il centro del disegno (sotto c'è la codina)
+                yield return null;
+                Vector2 over = Overflow();
+                if (over.x <= 1.001f && over.y <= 1.001f) break;
+                art.localScale = new Vector3(art.localScale.x * Mathf.Max(1f, over.x * 1.05f), art.localScale.y * Mathf.Max(1f, over.y * 1.05f), art.localScale.z);
+                float gy = art.localScale.y / artBaseScale.y;
                 Vector3 tp = text.transform.localPosition;
                 text.transform.localPosition = new Vector3(tp.x, textBaseY + (gy - 1f) * bodyOffset, tp.z);
             }
             yield return Pop();
             KeepOnScreen();
+        }
+
+        static IEnumerator Settle()
+        {
+            for (int i = 0; i < 3; i++) yield return null;
+        }
+
+        /// <summary>Allarga il disegno del fumetto per contenere un testo di queste dimensioni (coordinate del fumetto).</summary>
+        void Grow(Vector2 textSize, float marginX, float marginY)
+        {
+            if (art == null) return;
+            float gx = Mathf.Max(1f, textSize.x / maxTextWidth * marginX), gy = Mathf.Max(1f, textSize.y / maxTextHeight * marginY);
+            art.localScale = new Vector3(artBaseScale.x * gx, artBaseScale.y * gy, artBaseScale.z);
+            // il corpo del fumetto sta un po' sopra il centro del disegno (sotto c'è la codina)
+            Vector3 tp = text.transform.localPosition;
+            text.transform.localPosition = new Vector3(tp.x, textBaseY + (gy - 1f) * bodyOffset, tp.z);
+        }
+
+        /// <summary>
+        /// Quanto il testo supera il corpo del fumetto (1 = entra giusto): il corpo è il disegno senza la codina in
+        /// basso e senza il bordo arrotondato.
+        /// </summary>
+        Vector2 Overflow()
+        {
+            SpriteRenderer sr = art.GetComponent<SpriteRenderer>();
+            MeshRenderer mr = text.GetComponent<MeshRenderer>();
+            if (sr == null || mr == null) return Vector2.one;
+            Bounds a = sr.bounds, t = mr.bounds;
+            if (t.size.x <= 0f) return Vector2.one;
+            // disegno "bubble": corpo tra il 20% e il 94% dell'altezza (sotto c'è la codina), 90% della larghezza;
+            // tolti bordo e angoli arrotondati restano circa 80% x 60%
+            float bodyW = a.size.x * 0.8f, bodyH = a.size.y * 0.6f;
+            float bodyCy = a.min.y + a.size.y * 0.572f;
+            float needH = Mathf.Max(t.size.y, 2f * Mathf.Max(t.max.y - bodyCy, bodyCy - t.min.y));
+            float needW = Mathf.Max(t.size.x, 2f * Mathf.Max(t.max.x - a.center.x, a.center.x - t.min.x));
+            return new Vector2(needW / Mathf.Max(bodyW, 1e-4f), needH / Mathf.Max(bodyH, 1e-4f));
         }
 
         /// <summary>Di quanto può allargarsi il fumetto prima di uscire dallo schermo (in larghezza).</summary>
@@ -154,10 +196,14 @@ namespace Gotcha.Components
         }
 
         /// <summary>A capo sulle parole: la larghezza di ogni parola è stimata in proporzione ai caratteri.</summary>
-        static string Wrap(string message, float lineWidth, float maxWidth)
+        string Wrap(string message, float maxWidth)
         {
+            // larghezza media di un carattere misurata sul testo attuale (riga più lunga / suoi caratteri)
+            string[] lines = text.text.Split('\n');
+            int longest = 1;
+            foreach (string l in lines) longest = Mathf.Max(longest, l.Length);
+            float perChar = LocalSize().x / longest;
             string flat = message.Replace("\n", " ");
-            float perChar = lineWidth / Mathf.Max(1, flat.Length);
             string[] words = flat.Split(' ');
             var sb = new System.Text.StringBuilder();
             float x = 0f;

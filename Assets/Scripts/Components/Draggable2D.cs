@@ -49,6 +49,7 @@ namespace Gotcha.Components
                 Active = this;
                 dragging = true;
                 offset = (Vector2)transform.position - world;
+                Haptics.Tap();
                 DragStarted?.Invoke(this);
             }
 
@@ -107,6 +108,7 @@ namespace Gotcha.Components
                 if (s != null && s.TryAccept(this)) { slot = s; break; }
             }
             if (slot == null && returnOnMiss) transform.position = startPos;
+            if (slot != null) Haptics.Light();   // si aggancia: "clic"
             Dropped?.Invoke(this, slot);
         }
     }

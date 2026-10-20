@@ -267,6 +267,17 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.52
+- **Vibrazione rifatta**: su Android usa VibrationEffect con durata e intensità e la categoria "gioco" (la vecchia
+  vibrate(ms) su molti telefoni recenti veniva ignorata); il permesso VIBRATE viene aggiunto al manifest a ogni
+  build (`Assets/Editor/GotchaAndroidManifest.cs`). Nuovi feedback: tocco dei pulsanti, presa e aggancio degli
+  oggetti trascinati, doppio colpetto alla vittoria, tre scossoni con la risata alla sconfitta.
+  In Impostazioni: **VIBRATION: ON/OFF** (accanto a REMINDERS).
+- **Fumetti**: il testo veniva misurato prima che Unity aggiornasse il suo disegno (un fotogramma invece di tre),
+  quindi il fumetto si adattava al testo precedente e quello nuovo sbordava. Ora aspetta il testo vero, va a capo
+  con la larghezza reale dei caratteri e alla fine controlla sul fumetto disegnato che il testo stia nel corpo
+  (senza codina e angoli), allargandolo ancora se serve.
+
 ## Versione 0.51 (beta per il test interno di Google Play)
 - **Password beta: tutti i livelli aperti** nell'elenco dei livelli (oltre a vite e suggerimenti infiniti e niente
   pubblicità), così se un livello si blocca si possono provare gli altri. Togliendo la password torna il blocco
