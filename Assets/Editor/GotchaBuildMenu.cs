@@ -138,8 +138,32 @@ public static class GotchaBuildMenu
         return s;
     }
 
+    /// <summary>
+    /// Unity con la falla di sicurezza CVE-2025-59489 (Google Play rifiuta l'app per "Device and Network Abuse"):
+    /// per la serie 2022.3 la prima versione corretta è 2022.3.62f2 (le xLTS dalla 2022.3.67f2).
+    /// </summary>
+    public static bool IsVulnerableUnity(string version)
+    {
+        // formato "2022.3.62f1"
+        string[] p = version.Split('.');
+        if (p.Length < 3 || p[0] != "2022" || p[1] != "3") return false;   // le altre serie: vedi l'avviso di Unity
+        int i = 0;
+        while (i < p[2].Length && char.IsDigit(p[2][i])) i++;
+        if (!int.TryParse(p[2].Substring(0, i), out int patch)) return false;
+        int.TryParse(p[2].Length > i + 1 ? p[2].Substring(i + 1) : "0", out int build);
+        return patch < 62 || (patch == 62 && build < 2);
+    }
+
     static void BuildRelease()
     {
+        if (IsVulnerableUnity(Application.unityVersion))
+        {
+            EditorUtility.DisplayDialog("Gotcha! – Unity da aggiornare",
+                "Questo Unity (" + Application.unityVersion + ") ha la falla di sicurezza CVE-2025-59489: Google Play rifiuta " +
+                "l'app (\"Device and Network Abuse\").\n\nDa Unity Hub installa Unity 2022.3.62f2 (o una 2022.3 più recente), " +
+                "apri il progetto con quella versione e rifai la build. Dettagli in PLAY_STORE.md.", "OK");
+            return;
+        }
         ReleaseSigning signing = LoadSigning(out string problem);
         if (signing == null)
         {

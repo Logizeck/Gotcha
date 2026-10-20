@@ -267,6 +267,11 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.56
+- **Sicurezza (rifiuto di Google Play "Device and Network Abuse")**: Unity 2022.3.62f1 ha la falla CVE-2025-59489.
+  Il progetto passa a **Unity 2022.3.62f2**; il menu *Gotcha > Build Google Play AAB* si rifiuta di partire con
+  un Unity vulnerabile. Va ricaricata la nuova build in **tutti** i canali in cui c'era la 5500.
+
 ## Versione 0.55
 - **Livello 20 (razzo)**: le finestrelle del carburante sono vuote, niente più H, H, O scritte in anticipo: la
   ricetta va indovinata. Si può versare qualsiasi combinazione di 3 dosi (ogni dose riempie la finestrella
