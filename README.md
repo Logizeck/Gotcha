@@ -79,6 +79,9 @@ Livelli 129-150 — rompicapi compositi a più fasi (Toni al 150):
 Livelli 151-182 — specifica "105-200", blocchi 1-2:
 151 Don'T Touch Me! · 152 Balloon Surgery · 153 The Lazy Elevator · 154 Phone Sandwich · 155 Left Behind · 156 Sleeping Guard · 157 The Broken Compass · 158 Fake Update · 159 Glass Floor · 160 Tiny Thief · 161 The Silent Alarm · 162 Black Hole · 163 Gravity Resigned · 164 The Cheap Magician · 165 Don'T Wake The Bomb · 166 The Upside-Down King · 167 One Too Many · 168 Reverse Parking · 169 The Stubborn Door · 170 Zero Gravity Dinner · 171 The Forgotten Password · 172 The Shrinking Room · 173 Paperwork Nightmare · 174 Battery Vampire · 175 The Fourth Wall · 176 Hot Potato · 177 Shake To Undo · 178 The Lonely Cloud · 179 Ghost Selfie · 180 Magnet Mayhem · 181 The Fake Crash · 182 Rainbow Thief.
 
+Livelli 183-214 — specifica "105-200", blocchi 2-3:
+183 Pixel Rebellion · 184 Cold Coffee · 185 The Missing Second · 186 Mirror Twins · 187 The Hungry Printer · 188 Finger Maze · 189 False Finish · 190 Heartbeat · 191 The Wrong Shadow · 192 The Impossible Scale · 193 Rewind Reality · 194 The Sticky Finger · 195 The Guilty Button · 196 The Invisible Stairs · 197 Lie Detector · 198 Too Bright! · 199 Unfair Race · 200 The Bottomless Cup · 201 The Dirty Secret · 202 The Fake Virus · 203 Slow Motion · 204 The Overworked Robot · 205 The Missing Letter · 206 Anti-Gravity Taxi · 207 The Silent Disco · 208 The Door That Lies · 209 Invisible Button · 210 The Second Key · 211 Shadow Thief · 212 The Broken Ruler · 213 The Backward Song · 214 Don'T Blink!.
+
 Free to play: si gioca gratis; nel **negozio** (SHOP) si possono comprare **1 ora di vite infinite (0,99 €)** e
 **niente pubblicità per sempre (4,99 €)**. Vedi README_SETUP.md per la configurazione degli acquisti.
 

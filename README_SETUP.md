@@ -266,6 +266,42 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.43
+- **Livelli 183-214**: altri 32 livelli della specifica "105-200" (blocchi 2 e 3), in coda:
+- **183 Pixel Rebellion** — Zooma col pizzico sul puntino luminoso finché diventa una creaturina di pixel e toccala. Easter egg *Pixel Rebellion*: Con lo zoom oltre il 600% tocca 5 volte in fretta l'occhio sinistro della creatura: i pixel scioperano.
+- **184 Cold Coffee** — Metti la tazza sotto la lampada e tieni premuto HEAT, rilascia perché il termometro si fermi nel verde.
+- **185 The Missing Second** — L'orologio è fermo alle 11:59:59: scorri in su la cifra dei secondi per arrivare a mezzogiorno.
+- **186 Mirror Twins** — Fai scorrere lo specchio finché la chiave riflessa combacia con la serratura.
+- **187 The Hungry Printer** — La stampante vuole carta: infila il foglio INSTRUCTIONS nella fessura.
+- **188 Finger Maze** — Tieni un dito sull'impronta per renderla trasparente e col secondo dito guida il topolino.
+- **189 False Finish** — Non premere NEXT: aspetta il topolino nascosto che passa il traguardo e toccalo.
+- **190 Heartbeat** — Senti la vibrazione corto-corto-lungo e ripetila toccando il cuore.
+- **191 The Wrong Shadow** — Sposta la lampada davanti al gatto: l'ombra da mostro finisce dietro di lui e il topo passa.
+- **192 The Impossible Scale** — Ingrandisci la piuma con due dita finché bilancia l'elefante.
+- **193 Rewind Reality** — Riavvolgi il filmato prima della caduta, metti in pausa e sposta il vaso al sicuro.
+- **194 The Sticky Finger** — La moneta resta attaccata al dito: tienila e con un altro dito porta la cassaforte sotto.
+- **195 The Guilty Button** — Tieni premuti i pulsanti per farli sudare: quello con la goccia metallica nasconde la chiave.
+- **196 The Invisible Stairs** — Tocca lo spazio vuoto per trovare i 4 gradini invisibili, poi porta l'omino alla porta.
+- **197 Lie Detector** — Non rispondere al robot: trascina la macchina della verità su di lui.
+- **198 Too Bright!** — Chiudi le tende sulle finestre, poi porta il vampiro alla bara.
+- **199 Unfair Race** — Lumaca contro lepre: prima del via sposta il traguardo davanti alla lumaca.
+- **200 The Bottomless Cup** — Tieni un dito sul buco del bicchiere e con l'altro apri il rubinetto fino alla tacca.
+- **201 The Dirty Secret** — Strofina lo schermo sporco: oltre il 95% compare il pulsante EXIT. Easter egg *The Dirty Secret*: Strofina per 8 s la macchia tonda in basso a sinistra: si apre una botola con l'omino che sporca il vetro.
+- **202 The Fake Virus** — Trova il virus originale (starnutisce ogni 5 s) e trascinalo nel cestino.
+- **203 Slow Motion** — Tieni due dita ferme per rallentare il tempo e con un terzo sposta la paratia sulla palla.
+- **204 The Overworked Robot** — Raggruppa i 4 interruttori a coppie sotto le due mani del robot, poi PRESS.
+- **205 The Missing Letter** — OPEN THE G_TE: trascina la A nascosta nella nuvola nel buco del cartello.
+- **206 Anti-Gravity Taxi** — Ruota la freccia della gravità verso l'alto e il taxi sale alla piattaforma.
+- **207 The Silent Disco** — Solo il ballerino blu tiene il ritmo: tocca il pavimento tre volte con la sua cadenza.
+- **208 The Door That Lies** — Scambia le targhe delle porte: la vera uscita si spaventa quando riceve DANGER.
+- **209 Invisible Button** — Striscia il dito al buio: la vibrazione cresce vicino al pulsante invisibile, poi tocca.
+- **210 The Second Key** — Metti la chiave davanti allo specchio e tocca il riflesso: diventa la seconda chiave.
+- **211 Shadow Thief** — Il ladro è invisibile ma ha l'ombra: accendi il lampione verso cui va.
+- **212 The Broken Ruler** — Ricomponi il righello rotto e porta il ponte esattamente a 7 unità.
+- **213 The Backward Song** — L'uccellino canta al contrario: suona le 4 note in ordine inverso.
+- **214 Don'T Blink!** — Tieni premuto l'occhio WATCH e con un altro dito porta la chiave alla porta.
+- Versione del costruttore 46.
+
 ## Versione 0.42
 - **Pubblicità**: una ogni 5 livelli superati OPPURE ogni 140 secondi di gioco (prima erano 180), quella che
   arriva prima; parte sempre alla fine del livello in corso, sia dopo una vittoria sia dopo una sconfitta (chi resta

@@ -2910,5 +2910,517 @@
   ],
   "eggName": "",
   "eggHow": ""
+ },
+ {
+  "folder": "PixelRebellion",
+  "id": "pixel_rebellion",
+  "title": "PIXEL REBELLION",
+  "hint": "The creature is smaller than it looks.",
+  "egg": "pixel_rebellion",
+  "n": 183,
+  "desc": "Zooma col pizzico sul puntino luminoso finché diventa una creaturina di pixel e toccala.",
+  "hints": [
+   "The creature is smaller than it looks.",
+   "Zoom in.",
+   "Enlarge the glowing pixel and tap the creature."
+  ],
+  "eggName": "Pixel Rebellion",
+  "eggHow": "Con lo zoom oltre il 600% tocca 5 volte in fretta l'occhio sinistro della creatura: i pixel scioperano."
+ },
+ {
+  "folder": "ColdCoffee",
+  "id": "cold_coffee",
+  "title": "COLD COFFEE",
+  "hint": "Coffee needs warmth.",
+  "egg": "",
+  "n": 184,
+  "desc": "Metti la tazza sotto la lampada e tieni premuto HEAT, rilascia perché il termometro si fermi nel verde.",
+  "hints": [
+   "Coffee needs warmth.",
+   "Use the lamp.",
+   "Put the cup beneath the lamp and stop heating in the green zone."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheMissingSecond",
+  "id": "the_missing_second",
+  "title": "THE MISSING SECOND",
+  "hint": "You only need one more second.",
+  "egg": "",
+  "n": 185,
+  "desc": "L'orologio è fermo alle 11:59:59: scorri in su la cifra dei secondi per arrivare a mezzogiorno.",
+  "hints": [
+   "You only need one more second.",
+   "The display can move.",
+   "Swipe the seconds upward once."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "MirrorTwins",
+  "id": "mirror_twins",
+  "title": "MIRROR TWINS",
+  "hint": "Reflection can be useful.",
+  "egg": "",
+  "n": 186,
+  "desc": "Fai scorrere lo specchio finché la chiave riflessa combacia con la serratura.",
+  "hints": [
+   "Reflection can be useful.",
+   "Align the reflected key.",
+   "Move the mirror until the reflected key matches the lock."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheHungryPrinter",
+  "id": "the_hungry_printer",
+  "title": "THE HUNGRY PRINTER",
+  "hint": "The printer doesn't need special paper.",
+  "egg": "",
+  "n": 187,
+  "desc": "La stampante vuole carta: infila il foglio INSTRUCTIONS nella fessura.",
+  "hints": [
+   "The printer doesn't need special paper.",
+   "Look for something made of paper.",
+   "Feed the instructions sheet into the printer."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "FingerMaze",
+  "id": "finger_maze",
+  "title": "FINGER MAZE",
+  "hint": "Your finger is blocking the view.",
+  "egg": "",
+  "n": 188,
+  "desc": "Tieni un dito sull'impronta per renderla trasparente e col secondo dito guida il topolino.",
+  "hints": [
+   "Your finger is blocking the view.",
+   "Keep one finger on the print.",
+   "Hold the fingerprint with one finger and guide the character with another."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "FalseFinish",
+  "id": "false_finish",
+  "title": "FALSE FINISH",
+  "hint": "The race isn't really over.",
+  "egg": "",
+  "n": 189,
+  "desc": "Non premere NEXT: aspetta il topolino nascosto che passa il traguardo e toccalo.",
+  "hints": [
+   "The race isn't really over.",
+   "Someone is still running.",
+   "Wait for the mouse and tap him at the finish line."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Heartbeat",
+  "id": "heartbeat",
+  "title": "HEARTBEAT",
+  "hint": "Listen with your hands.",
+  "egg": "",
+  "n": 190,
+  "desc": "Senti la vibrazione corto-corto-lungo e ripetila toccando il cuore.",
+  "hints": [
+   "Listen with your hands.",
+   "The vibration has a rhythm.",
+   "Repeat two short beats followed by one long beat."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheWrongShadow",
+  "id": "the_wrong_shadow",
+  "title": "THE WRONG SHADOW",
+  "hint": "The monster isn't real.",
+  "egg": "",
+  "n": 191,
+  "desc": "Sposta la lampada davanti al gatto: l'ombra da mostro finisce dietro di lui e il topo passa.",
+  "hints": [
+   "The monster isn't real.",
+   "Light changes shadows.",
+   "Move the lamp to put the shadow behind the cat."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheImpossibleScale",
+  "id": "the_impossible_scale",
+  "title": "THE IMPOSSIBLE SCALE",
+  "hint": "Size matters here.",
+  "egg": "",
+  "n": 192,
+  "desc": "Ingrandisci la piuma con due dita finché bilancia l'elefante.",
+  "hints": [
+   "Size matters here.",
+   "The feather can change.",
+   "Enlarge the feather until the scale balances."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "RewindReality",
+  "id": "rewind_reality",
+  "title": "REWIND REALITY",
+  "hint": "The accident already happened.",
+  "egg": "",
+  "n": 193,
+  "desc": "Riavvolgi il filmato prima della caduta, metti in pausa e sposta il vaso al sicuro.",
+  "hints": [
+   "The accident already happened.",
+   "Time can move backwards.",
+   "Rewind before the fall and move the vase."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheStickyFinger",
+  "id": "the_sticky_finger",
+  "title": "THE STICKY FINGER",
+  "hint": "The coin won't leave your finger.",
+  "egg": "",
+  "n": 194,
+  "desc": "La moneta resta attaccata al dito: tienila e con un altro dito porta la cassaforte sotto.",
+  "hints": [
+   "The coin won't leave your finger.",
+   "Move the destination instead.",
+   "Hold the coin and drag the safe beneath it."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheGuiltyButton",
+  "id": "the_guilty_button",
+  "title": "THE GUILTY BUTTON",
+  "hint": "Someone is hiding something.",
+  "egg": "",
+  "n": 195,
+  "desc": "Tieni premuti i pulsanti per farli sudare: quello con la goccia metallica nasconde la chiave.",
+  "hints": [
+   "Someone is hiding something.",
+   "Watch how they react under pressure.",
+   "Hold each button and identify the metallic tear."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheInvisibleStairs",
+  "id": "the_invisible_stairs",
+  "title": "THE INVISIBLE STAIRS",
+  "hint": "The steps are there.",
+  "egg": "",
+  "n": 196,
+  "desc": "Tocca lo spazio vuoto per trovare i 4 gradini invisibili, poi porta l'omino alla porta.",
+  "hints": [
+   "The steps are there.",
+   "Touch the empty space.",
+   "Locate the four invisible platforms and follow them."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "LieDetector",
+  "id": "lie_detector",
+  "title": "LIE DETECTOR",
+  "hint": "The robot may not be trustworthy.",
+  "egg": "",
+  "n": 197,
+  "desc": "Non rispondere al robot: trascina la macchina della verità su di lui.",
+  "hints": [
+   "The robot may not be trustworthy.",
+   "Test the interrogator.",
+   "Drag the detector onto the robot."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TooBright",
+  "id": "too_bright",
+  "title": "TOO BRIGHT!",
+  "hint": "He hates the light.",
+  "egg": "",
+  "n": 198,
+  "desc": "Chiudi le tende sulle finestre, poi porta il vampiro alla bara.",
+  "hints": [
+   "He hates the light.",
+   "Make the room darker.",
+   "Close the curtains over the windows, then lead the vampire to the coffin."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "UnfairRace",
+  "id": "unfair_race",
+  "title": "UNFAIR RACE",
+  "hint": "You can't make the snail faster.",
+  "egg": "",
+  "n": 199,
+  "desc": "Lumaca contro lepre: prima del via sposta il traguardo davanti alla lumaca.",
+  "hints": [
+   "You can't make the snail faster.",
+   "You can change the race.",
+   "Move the finish line next to the snail."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheBottomlessCup",
+  "id": "the_bottomless_cup",
+  "title": "THE BOTTOMLESS CUP",
+  "hint": "Something is leaking.",
+  "egg": "",
+  "n": 200,
+  "desc": "Tieni un dito sul buco del bicchiere e con l'altro apri il rubinetto fino alla tacca.",
+  "hints": [
+   "Something is leaking.",
+   "Cover the hole.",
+   "Hold the hole with one finger while filling with the other."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheDirtySecret",
+  "id": "the_dirty_secret",
+  "title": "THE DIRTY SECRET",
+  "hint": "The screen needs cleaning.",
+  "egg": "dirty_secret",
+  "n": 201,
+  "desc": "Strofina lo schermo sporco: oltre il 95% compare il pulsante EXIT.",
+  "hints": [
+   "The screen needs cleaning.",
+   "Follow the dirt with your finger.",
+   "Rub away enough dirt to reveal the exit."
+  ],
+  "eggName": "The Dirty Secret",
+  "eggHow": "Strofina per 8 s la macchia tonda in basso a sinistra: si apre una botola con l'omino che sporca il vetro."
+ },
+ {
+  "folder": "TheFakeVirus",
+  "id": "the_fake_virus",
+  "title": "THE FAKE VIRUS",
+  "hint": "Only one is the real virus.",
+  "egg": "",
+  "n": 202,
+  "desc": "Trova il virus originale (starnutisce ogni 5 s) e trascinalo nel cestino.",
+  "hints": [
+   "Only one is the real virus.",
+   "Watch their behavior.",
+   "Catch the one that sneezes."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "SlowMotion",
+  "id": "slow_motion",
+  "title": "SLOW MOTION",
+  "hint": "Everything is moving too fast.",
+  "egg": "",
+  "n": 203,
+  "desc": "Tieni due dita ferme per rallentare il tempo e con un terzo sposta la paratia sulla palla.",
+  "hints": [
+   "Everything is moving too fast.",
+   "Try holding two fingers down.",
+   "Slow time with two fingers, then move the barrier."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheOverworkedRobot",
+  "id": "the_overworked_robot",
+  "title": "THE OVERWORKED ROBOT",
+  "hint": "Two hands aren't enough.",
+  "egg": "",
+  "n": 204,
+  "desc": "Raggruppa i 4 interruttori a coppie sotto le due mani del robot, poi PRESS.",
+  "hints": [
+   "Two hands aren't enough.",
+   "Move the switches closer together.",
+   "Group the switches so each hand presses two."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheMissingLetter",
+  "id": "the_missing_letter",
+  "title": "THE MISSING LETTER",
+  "hint": "The sign is incomplete.",
+  "egg": "",
+  "n": 205,
+  "desc": "OPEN THE G_TE: trascina la A nascosta nella nuvola nel buco del cartello.",
+  "hints": [
+   "The sign is incomplete.",
+   "Look for the missing letter.",
+   "Take the A from the cloud and place it into G_TE."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "AntiGravityTaxi",
+  "id": "anti_gravity_taxi",
+  "title": "ANTI-GRAVITY TAXI",
+  "hint": "The taxi needs to go up.",
+  "egg": "",
+  "n": 206,
+  "desc": "Ruota la freccia della gravità verso l'alto e il taxi sale alla piattaforma.",
+  "hints": [
+   "The taxi needs to go up.",
+   "Gravity doesn't have to point down.",
+   "Rotate the gravity arrow upward."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheSilentDisco",
+  "id": "the_silent_disco",
+  "title": "THE SILENT DISCO",
+  "hint": "One dancer knows the rhythm.",
+  "egg": "",
+  "n": 207,
+  "desc": "Solo il ballerino blu tiene il ritmo: tocca il pavimento tre volte con la sua cadenza.",
+  "hints": [
+   "One dancer knows the rhythm.",
+   "Follow his timing.",
+   "Tap the floor to match the dancer in blue."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheDoorThatLies",
+  "id": "the_door_that_lies",
+  "title": "THE DOOR THAT LIES",
+  "hint": "The doors have feelings.",
+  "egg": "",
+  "n": 208,
+  "desc": "Scambia le targhe delle porte: la vera uscita si spaventa quando riceve DANGER.",
+  "hints": [
+   "The doors have feelings.",
+   "Their reactions reveal something.",
+   "Move the labels and watch which door reacts differently."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "InvisibleButton",
+  "id": "invisible_button",
+  "title": "INVISIBLE BUTTON",
+  "hint": "You can't see everything.",
+  "egg": "",
+  "n": 209,
+  "desc": "Striscia il dito al buio: la vibrazione cresce vicino al pulsante invisibile, poi tocca.",
+  "hints": [
+   "You can't see everything.",
+   "Feel the vibrations.",
+   "Slide your finger until vibration intensity peaks, then tap."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheSecondKey",
+  "id": "the_second_key",
+  "title": "THE SECOND KEY",
+  "hint": "You need a copy.",
+  "egg": "",
+  "n": 210,
+  "desc": "Metti la chiave davanti allo specchio e tocca il riflesso: diventa la seconda chiave.",
+  "hints": [
+   "You need a copy.",
+   "A mirror can make two.",
+   "Reflect the key, then tap its reflection."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "ShadowThief",
+  "id": "shadow_thief",
+  "title": "SHADOW THIEF",
+  "hint": "Even invisible people cast shadows here.",
+  "egg": "",
+  "n": 211,
+  "desc": "Il ladro è invisibile ma ha l'ombra: accendi il lampione verso cui va.",
+  "hints": [
+   "Even invisible people cast shadows here.",
+   "Follow the moving shadow.",
+   "Illuminate the lamp the shadow is approaching."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheBrokenRuler",
+  "id": "the_broken_ruler",
+  "title": "THE BROKEN RULER",
+  "hint": "The ruler can still be useful.",
+  "egg": "",
+  "n": 212,
+  "desc": "Ricomponi il righello rotto e porta il ponte esattamente a 7 unità.",
+  "hints": [
+   "The ruler can still be useful.",
+   "Match the broken markings.",
+   "Reassemble it, then set the bridge to seven units."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheBackwardSong",
+  "id": "the_backward_song",
+  "title": "THE BACKWARD SONG",
+  "hint": "Something sounds reversed.",
+  "egg": "",
+  "n": 213,
+  "desc": "L'uccellino canta al contrario: suona le 4 note in ordine inverso.",
+  "hints": [
+   "Something sounds reversed.",
+   "Start from the last note.",
+   "Play the four notes in reverse order."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "DontBlink",
+  "id": "dont_blink",
+  "title": "DON'T BLINK!",
+  "hint": "She moves when nobody is watching.",
+  "egg": "",
+  "n": 214,
+  "desc": "Tieni premuto l'occhio WATCH e con un altro dito porta la chiave alla porta.",
+  "hints": [
+   "She moves when nobody is watching.",
+   "Keep watching while taking the key.",
+   "Maintain eye contact or hold the watch button while dragging the key."
+  ],
+  "eggName": "",
+  "eggHow": ""
  }
 ]
