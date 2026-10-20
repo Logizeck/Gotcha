@@ -3422,5 +3422,133 @@
   ],
   "eggName": "",
   "eggHow": ""
+ },
+ {
+  "folder": "TheStupidGenius",
+  "id": "the_stupid_genius",
+  "title": "THE STUPID GENIUS",
+  "hint": "The machine might be unnecessary.",
+  "egg": "",
+  "n": 215,
+  "desc": "Ignora la macchina gigante dello scienziato e tocca direttamente il pulsantino rosso.",
+  "hints": [
+   "The machine might be unnecessary.",
+   "What is the machine actually doing?",
+   "Tap the target button directly."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheEscapingCursor",
+  "id": "the_escaping_cursor",
+  "title": "THE ESCAPING CURSOR",
+  "hint": "The cursor is faster than you.",
+  "egg": "",
+  "n": 216,
+  "desc": "Il cursore scappa: trascina il bersaglio sotto la sua punta.",
+  "hints": [
+   "The cursor is faster than you.",
+   "Move the target instead.",
+   "Drag the target onto the cursor."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "UpsideDownCode",
+  "id": "upside_down_code",
+  "title": "UPSIDE-DOWN CODE",
+  "hint": "You're looking at the code from the wrong angle.",
+  "egg": "",
+  "n": 217,
+  "desc": "Il codice è stampato capovolto: capovolgi il telefono, leggilo e digitalo.",
+  "hints": [
+   "You're looking at the code from the wrong angle.",
+   "Turn the device.",
+   "Rotate the phone and read the numbers."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheHumanCharger",
+  "id": "the_human_charger",
+  "title": "THE HUMAN CHARGER",
+  "hint": "There is energy on the screen.",
+  "egg": "",
+  "n": 218,
+  "desc": "Trascina il fulmine della scritta LOW POWER sul robot quattro volte prima che si spenga.",
+  "hints": [
+   "There is energy on the screen.",
+   "Look for the lightning symbol.",
+   "Drag the lightning bolt to the robot four times."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "Adpocalypse",
+  "id": "adpocalypse",
+  "title": "ADPOCALYPSE",
+  "hint": "The close button isn't helping.",
+  "egg": "adpocalypse",
+  "n": 219,
+  "desc": "La X della pubblicità finta scappa: trascina tutto il banner fuori dallo schermo.",
+  "hints": [
+   "The close button isn't helping.",
+   "You can move the entire ad.",
+   "Drag the banner out of the screen."
+  ],
+  "eggName": "Adpocalypse",
+  "eggHow": "Tocca la X finta esattamente 7 volte in 15 secondi prima di spostare il banner: arrivano pubblicità assurde e le X scioperano."
+ },
+ {
+  "folder": "TheGlassCage",
+  "id": "the_glass_cage",
+  "title": "THE GLASS CAGE",
+  "hint": "The glass has an opening.",
+  "egg": "",
+  "n": 220,
+  "desc": "Ruota la campana di vetro con due dita finché l'apertura guarda il topo.",
+  "hints": [
+   "The glass has an opening.",
+   "Look underneath it.",
+   "Rotate the dome until the exit faces the mouse."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheInvisibleInk",
+  "id": "the_invisible_ink",
+  "title": "THE INVISIBLE INK",
+  "hint": "The paper isn't empty.",
+  "egg": "",
+  "n": 221,
+  "desc": "Muovi il phon sul foglio senza fermarti per rivelare la mappa a inchiostro simpatico.",
+  "hints": [
+   "The paper isn't empty.",
+   "Heat can reveal hidden ink.",
+   "Move the hair dryer across the sheet without stopping."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheLastDrop",
+  "id": "the_last_drop",
+  "title": "THE LAST DROP",
+  "hint": "The bottle isn't completely empty.",
+  "egg": "",
+  "n": 222,
+  "desc": "Inclina il telefono per portare l'ultima goccia dal tappo al foro, poi tocca per farla cadere sulla pianta.",
+  "hints": [
+   "The bottle isn't completely empty.",
+   "Check the cap.",
+   "Tilt the phone to free the last drop."
+  ],
+  "eggName": "",
+  "eggHow": ""
  }
 ]

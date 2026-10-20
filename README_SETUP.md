@@ -266,6 +266,18 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.44
+- **Livelli 215-222**: altri 8 livelli della specifica "105-200" (blocco 4):
+- **215 The Stupid Genius** — Ignora la macchina gigante dello scienziato e tocca direttamente il pulsantino rosso.
+- **216 The Escaping Cursor** — Il cursore scappa: trascina il bersaglio sotto la sua punta.
+- **217 Upside-Down Code** — Il codice è stampato capovolto: capovolgi il telefono, leggilo e digitalo.
+- **218 The Human Charger** — Trascina il fulmine della scritta LOW POWER sul robot quattro volte prima che si spenga.
+- **219 Adpocalypse** — La X della pubblicità finta scappa: trascina tutto il banner fuori dallo schermo. Easter egg *Adpocalypse*: Tocca la X finta esattamente 7 volte in 15 secondi prima di spostare il banner: arrivano pubblicità assurde e le X scioperano.
+- **220 The Glass Cage** — Ruota la campana di vetro con due dita finché l'apertura guarda il topo.
+- **221 The Invisible Ink** — Muovi il phon sul foglio senza fermarti per rivelare la mappa a inchiostro simpatico.
+- **222 The Last Drop** — Inclina il telefono per portare l'ultima goccia dal tappo al foro, poi tocca per farla cadere sulla pianta.
+- Versione del costruttore 47.
+
 ## Versione 0.43
 - **Livelli 183-214**: altri 32 livelli della specifica "105-200" (blocchi 2 e 3), in coda:
 - **183 Pixel Rebellion** — Zooma col pizzico sul puntino luminoso finché diventa una creaturina di pixel e toccala. Easter egg *Pixel Rebellion*: Con lo zoom oltre il 600% tocca 5 volte in fretta l'occhio sinistro della creatura: i pixel scioperano.

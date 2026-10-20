@@ -82,6 +82,9 @@ Livelli 151-182 — specifica "105-200", blocchi 1-2:
 Livelli 183-214 — specifica "105-200", blocchi 2-3:
 183 Pixel Rebellion · 184 Cold Coffee · 185 The Missing Second · 186 Mirror Twins · 187 The Hungry Printer · 188 Finger Maze · 189 False Finish · 190 Heartbeat · 191 The Wrong Shadow · 192 The Impossible Scale · 193 Rewind Reality · 194 The Sticky Finger · 195 The Guilty Button · 196 The Invisible Stairs · 197 Lie Detector · 198 Too Bright! · 199 Unfair Race · 200 The Bottomless Cup · 201 The Dirty Secret · 202 The Fake Virus · 203 Slow Motion · 204 The Overworked Robot · 205 The Missing Letter · 206 Anti-Gravity Taxi · 207 The Silent Disco · 208 The Door That Lies · 209 Invisible Button · 210 The Second Key · 211 Shadow Thief · 212 The Broken Ruler · 213 The Backward Song · 214 Don'T Blink!.
 
+Livelli 215-222 — specifica "105-200", blocco 4:
+215 The Stupid Genius · 216 The Escaping Cursor · 217 Upside-Down Code · 218 The Human Charger · 219 Adpocalypse · 220 The Glass Cage · 221 The Invisible Ink · 222 The Last Drop.
+
 Free to play: si gioca gratis; nel **negozio** (SHOP) si possono comprare **1 ora di vite infinite (0,99 €)** e
 **niente pubblicità per sempre (4,99 €)**. Vedi README_SETUP.md per la configurazione degli acquisti.
 
