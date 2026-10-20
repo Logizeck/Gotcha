@@ -60,7 +60,8 @@ public static class GotchaBuildMenu
     {
         PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, InviteService.PackageName);
         ApplyVersion();
-        PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel23;
+        // API 24 (Android 7.0): minimo richiesto dalla protezione automatica di Play (Play Integrity)
+        PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel24;
         // API 36 (Android 16): obbligatoria per le app nuove dal 31/8/2026. Il cast compila anche su Unity 2022.3,
         // dove il valore non è nell'elenco (serve la piattaforma 36 installata nell'Android SDK)
         PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)36;
