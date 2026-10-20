@@ -267,6 +267,9 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.48
+- Schermata di fallimento: solo "HA!" che saltano fuori (niente più "QUA!").
+
 ## Versione 0.47
 - **Schermata GOTCHA! che prende in giro** a ogni livello perso (non quando si trova un segreto): risata da
   cartone animato sintetizzata ("qua, qua, qua-ha-ha-ha-ha!", suono `mock_laugh` in Sfx), il titolo GOTCHA!

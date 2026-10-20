@@ -22,7 +22,7 @@ namespace Gotcha.UI
         public static bool TitleShown => current != null && current.titlePanel != null && current.titlePanel.activeSelf;
 
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.47";
+        public const string Version = "0.48";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
@@ -202,7 +202,7 @@ namespace Gotcha.UI
             Haptics.Light();
             RectTransform title = (RectTransform)resultTitle.transform;
             RectTransform area = (RectTransform)resultPanel.transform;
-            string[] words = { "HA!", "HA!", "HA!", "HAHA!", "HA!", "QUA!" };
+            string[] words = { "HA!", "HA!", "HAHA!", "HA!", "HA!", "HA-HA!" };
             var born = new System.Collections.Generic.List<float>();
             var rise = new System.Collections.Generic.List<Vector2>();
             float next = 0.62f, start = Time.unscaledTime;
