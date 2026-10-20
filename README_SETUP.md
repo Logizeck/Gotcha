@@ -267,6 +267,13 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.47
+- **Schermata GOTCHA! che prende in giro** a ogni livello perso (non quando si trova un segreto): risata da
+  cartone animato sintetizzata ("qua, qua, qua-ha-ha-ha-ha!", suono `mock_laugh` in Sfx), il titolo GOTCHA!
+  sghignazza (sobbalzi a tempo e dondolio), tanti "HA!" saltano fuori intorno alla finestra e svaniscono salendo,
+  e una frase di scherno a caso ("Nice try, genius!", "So close... NOT!", ...) sopra le vite rimaste.
+- Versione del costruttore 50.
+
 ## Versione 0.46
 - **Livelli 223-230**: altri 8 livelli della specifica "105-200" (blocco 5):
 - **223 The Angry Keyboard** — Premere i tasti fa perdere lettere alla tastiera (5 pressioni = esplode): trascina le lettere O, P, E, N dai tasti nella casella della risposta, in ordine.

@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Gotcha.Components;
 using Gotcha.Core;
 using Gotcha.Sensors;
 using Gotcha.Levels;
@@ -21,7 +22,7 @@ namespace Gotcha.UI
         public static bool TitleShown => current != null && current.titlePanel != null && current.titlePanel.activeSelf;
 
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.46";
+        public const string Version = "0.47";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
@@ -163,7 +164,8 @@ namespace Gotcha.UI
             else
             {
                 int lives = flow.Lives != null ? flow.Lives.Lives : 1;
-                resultBody.text = lives > 0 ? "Not quite. Try again.\nLives left: " + lives : "Not quite...\nand you're out of lives!";
+                string taunt = Taunts[UnityEngine.Random.Range(0, Taunts.Length)];
+                resultBody.text = taunt + "\n" + (lives > 0 ? "Lives left: " + lives : "...and you're out of lives!");
             }
             resultButton.text = solved ? "NEXT" : "RETRY";
             if (solved && !DailyReward.DoneToday) resultBody.text += "\nDaily goal: " + DailyReward.LevelsToday + " / " + DailyReward.LevelsNeeded;
@@ -175,6 +177,84 @@ namespace Gotcha.UI
             shareButton.interactable = true;
             if (clip) resultBody.text += "\nShare the video: 3 min of infinite lives or 1 free hint!";
             resultPanel.SetActive(true);
+            // livello perso (non un segreto trovato): la schermata GOTCHA! ti prende in giro
+            if (mockRoutine != null) { StopCoroutine(mockRoutine); EndMock(); }
+            if (!solved && string.IsNullOrEmpty(eggId)) mockRoutine = StartCoroutine(Mock());
+        }
+
+        static readonly string[] Taunts =
+        {
+            "HA-HA! Got you!", "Nice try, genius!", "So close... NOT!", "Was that your best move?",
+            "We saw that. Everyone saw that.", "Oops! Better luck next time!", "The level wins this round!",
+            "Even the cat saw that coming!",
+        };
+
+        Coroutine mockRoutine;
+        readonly System.Collections.Generic.List<Text> mockHas = new System.Collections.Generic.List<Text>();
+
+        /// <summary>
+        /// "Qua, qua, qua-ha-ha-ha!": risata da cartone, GOTCHA! che sghignazza (sobbalzi e dondolio) e tanti "HA!"
+        /// che saltano fuori intorno alla finestra e svaniscono salendo.
+        /// </summary>
+        System.Collections.IEnumerator Mock()
+        {
+            Sfx.Play(this, "mock_laugh", 0.9f);
+            Haptics.Light();
+            RectTransform title = (RectTransform)resultTitle.transform;
+            RectTransform area = (RectTransform)resultPanel.transform;
+            string[] words = { "HA!", "HA!", "HA!", "HAHA!", "HA!", "QUA!" };
+            var born = new System.Collections.Generic.List<float>();
+            var rise = new System.Collections.Generic.List<Vector2>();
+            float next = 0.62f, start = Time.unscaledTime;
+            int spawned = 0;
+            while (true)
+            {
+                float t = Time.unscaledTime - start;
+                if (t > 2.4f) break;
+                // GOTCHA! ride: piccoli sobbalzi a tempo con la risata, poi si calma
+                float calm = Mathf.Clamp01(1f - (t - 1.5f) / 0.6f);
+                title.localScale = Vector3.one * (1f + Mathf.Abs(Mathf.Sin(t * Mathf.PI * 8.7f)) * 0.12f * calm);
+                title.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(t * 11f) * 7f * calm);
+                if (t >= next && spawned < 7)
+                {
+                    next += 0.115f;
+                    Text ha = CreateText(area, words[spawned % words.Length], 64 + UnityEngine.Random.Range(0, 30), spawned % 2 == 0 ? Accent : EggColor, FontStyle.Bold);
+                    ha.raycastTarget = false;
+                    var rt = (RectTransform)ha.transform;
+                    float side = spawned % 2 == 0 ? -1f : 1f;
+                    var pos = new Vector2(0.5f + side * UnityEngine.Random.Range(0.28f, 0.4f), UnityEngine.Random.Range(0.25f, 0.8f));
+                    rt.anchorMin = rt.anchorMax = pos;
+                    rt.sizeDelta = new Vector2(300, 120);
+                    rt.anchoredPosition = Vector2.zero;
+                    rt.localRotation = Quaternion.Euler(0, 0, side * -UnityEngine.Random.Range(8f, 22f));
+                    mockHas.Add(ha);
+                    born.Add(t);
+                    rise.Add(new Vector2(side * UnityEngine.Random.Range(10f, 40f), UnityEngine.Random.Range(110f, 170f)));
+                    spawned++;
+                }
+                for (int i = 0; i < mockHas.Count; i++)
+                {
+                    if (mockHas[i] == null) continue;
+                    float a = (t - born[i]) / 1.1f;
+                    var rt = (RectTransform)mockHas[i].transform;
+                    rt.anchoredPosition = rise[i] * a;
+                    rt.localScale = Vector3.one * (a < 0.15f ? Mathf.Lerp(0.3f, 1.2f, a / 0.15f) : Mathf.Lerp(1.2f, 1f, Mathf.Clamp01((a - 0.15f) / 0.2f)));
+                    Color c = mockHas[i].color;
+                    c.a = Mathf.Clamp01(1f - (a - 0.6f) / 0.4f);
+                    mockHas[i].color = c;
+                }
+                yield return null;
+            }
+            EndMock();
+        }
+
+        void EndMock()
+        {
+            mockRoutine = null;
+            foreach (Text ha in mockHas) if (ha != null) Destroy(ha.gameObject);
+            mockHas.Clear();
+            resultTitle.transform.localScale = Vector3.one;
+            resultTitle.transform.localRotation = Quaternion.identity;
         }
 
         void ShareClip()
