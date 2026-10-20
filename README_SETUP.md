@@ -267,6 +267,12 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.53
+- **Livello 134 (Space Station), fase 3**: la lampada non lampeggiava mai. Il lampeggio partiva un istante prima
+  del passaggio alla fase 3, vedeva la fase sbagliata e si fermava subito (niente lampi, niente segni sul nastro).
+  Ora parte dopo: la lampada lampeggia il codice (corto/lungo) in ciclo, i segni compaiono sul nastro e ogni lampo
+  si sente anche come vibrazione corta o lunga.
+
 ## Versione 0.52
 - **Vibrazione rifatta**: su Android usa VibrationEffect con durata e intensità e la categoria "gioco" (la vecchia
   vibrate(ms) su molti telefoni recenti veniva ignorata); il permesso VIBRATE viene aggiunto al manifest a ogni

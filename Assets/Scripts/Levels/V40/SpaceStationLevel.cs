@@ -259,9 +259,9 @@ namespace Gotcha.Levels
             for (int i = 0; i < 3; i++) { int k = Random.Range(0, pool.Count); code[i] = pool[k]; pool.RemoveAt(k); }
             yield return hud.Next(2, "STAGE 3: LAUNCH CODE", "Decode the blinking lamp with the table. Type the code!");
             Display();
-            StartCoroutine(Blink());
-            stage = 2;
+            stage = 2;   // prima di Blink(): il lampeggio gira solo finché si è nella fase 2
             busy = false;
+            StartCoroutine(Blink());
         }
 
         // ---------- fase 3: il codice ----------
@@ -292,6 +292,7 @@ namespace Gotcha.Levels
                         float w = isLong ? longW : shortW;
                         lampGlow.enabled = true;
                         Sfx.Play(this, isLong ? "lamp_long" : "lamp", 0.25f);
+                        Haptics.Pulse(isLong ? 380 : 90, isLong ? 200 : 160);   // il lampo si sente anche in mano
                         if (mark < tapeMarks.Length)
                         {
                             SpriteRenderer m = tapeMarks[mark++];
