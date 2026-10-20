@@ -267,6 +267,19 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.49
+- **Livelli 231-238**: altri 8 livelli della specifica "105-200" (blocco 6):
+- **231 The Two-finger Pianist** — Il leggio chiede tre accordi (C+E, D+A, F+B), ma il secondo tasto è timido e sparisce se toccato da solo: tieni premuto il primo e premi il secondo con un altro dito.
+- **232 The Moon Thief** — Un ladro col retino vuole rubare la luna: trascinala dietro una nuvola, poi porta la nuvola fuori dallo schermo; il ladro non la trova e si arrende.
+- **233 Back to the Future** — La porta esisterà solo il 29 ottobre: sfoglia il calendario-macchina del tempo con swipe verso l'alto fino al giorno esatto (se resti fermo torna indietro di un giorno).
+- **234 The Three Idiots** — Tre omini spingono un masso verso una buca, ma uno guarda dalla parte sbagliata: ruotalo con due dita finché tutti guardano la buca, poi tocca il fischietto.
+- **235 The Shy Star** — La stellina timida scappa se la tocchi: trascina lo specchio davanti alla nuvola dove si nasconde; si vede riflessa e, vanitosa, si accende.
+- **236 The Broken Internet** — NO INTERNET: metti i tre spezzoni di cavo tra computer e router facendo combaciare i connettori (un tocco li gira), poi premi CONNECT.
+- **237 The Laughing Lock** — Il lucchetto ride e la chiave rimbalza: tieni premuta la maniglia finché si stanca e sbadiglia, poi infila la chiave nella bocca aperta.
+- **238 The Fake Boss** — Schiva gli attacchi del boss gigante trascinando l'eroe, e intanto trascina via la sua barra della vita: senza sapere quanto è forte diventa un pupazzetto e scappa.
+- Musica: The Laughing Lock nel dungeon, The Shy Star tra gli animali.
+- Versione del costruttore 51.
+
 ## Versione 0.48
 - Schermata di fallimento: solo "HA!" che saltano fuori (niente più "QUA!").
 

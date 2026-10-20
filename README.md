@@ -88,6 +88,9 @@ Livelli 215-222 — specifica "105-200", blocco 4:
 Livelli 223-230 — specifica "105-200", blocco 5:
 223 The Angry Keyboard · 224 The Cowardly Dragon · 225 Hidden Frequency · 226 The Crooked Bridge · 227 The Final Wrong Answer · 228 The Impatient Clock · 229 The Frozen Waterfall · 230 The Fake Checkpoint.
 
+Livelli 231-238 — specifica "105-200", blocco 6:
+231 The Two-finger Pianist · 232 The Moon Thief · 233 Back to the Future · 234 The Three Idiots · 235 The Shy Star · 236 The Broken Internet · 237 The Laughing Lock · 238 The Fake Boss.
+
 Free to play: si gioca gratis; nel **negozio** (SHOP) si possono comprare **1 ora di vite infinite (0,99 €)** e
 **niente pubblicità per sempre (4,99 €)**. Vedi README_SETUP.md per la configurazione degli acquisti.
 

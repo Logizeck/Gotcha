@@ -31,7 +31,7 @@ public static partial class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 50;
+    const int BuilderVersion = 51;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -624,8 +624,8 @@ public static partial class GotchaProjectBuilder
     /// </summary>
     static MusicTrack MusicFor(string folder)
     {
-        string[] dungeon = { "KeyDoor", "Maze", "TrapMaze", "DarkMaze", "WaspMaze", "ArtTheft", "FrozenKey", "Maze2", "TrapMaze2", "DarkMaze2", "WaspMaze6", "TrapMaze3", "DarkMaze3", "WaspMaze3", "TwoDoors", "MirrorMaze", "Magnet", "DotToDot", "Sokoban", "Claw", "LockPattern", "Heist", "TreasureMap", "SnowGlobe", "Museum", "Cookie2", "MagnetMayhem", "StubbornDoor", "TheSilentAlarm", "TheUpsideDownKing", "SleepingGuard", "TheBrokenCompass", "TheGuiltyButton", "MirrorTwins", "FingerMaze", "TheMissingLetter", "TheDoorThatLies", "TheSecondKey", "DontBlink", "UpsideDownCode", "TheInvisibleInk", "HiddenFrequency", "TheFrozenWaterfall" };
-        string[] animals = { "Idle", "Volume", "Roach", "Snowman", "Defend", "Bedtime", "Campfire", "Plant", "Shell", "Sunny", "CatEyes", "Copycat", "Shell2", "Defend2", "Plant2", "Copycat2", "Wasp2", "CatEyes2", "Campfire2", "Flashlight", "Bridge", "Chicken", "TheGlassCage", "TheLastDrop", "TheBackwardSong", "UnfairRace", "Heartbeat", "TheWrongShadow", "OneTooMany", "TheLonelyCloud", "RainbowThief", "Seasons", "Submarine", "Detective", "Elevator", "Fishing", "Sheep", "Giraffe", "WaterJugs", "Untangle", "Snake", "AirHockey", "Copycat3", "Shell3", "Defend3", "Plant3", "Tightrope", "Wasp3", "CatEyes3", "Fireflies", "Sneaky", "Whack", "Laser", "Rhythm", "Pipes", "Slide", "WhereMouse", "Carousel", "Toni1", "Toni2", "Toni3", "Toni4", "Toni5", "Toni6", "TheCowardlyDragon" };
+        string[] dungeon = { "KeyDoor", "Maze", "TrapMaze", "DarkMaze", "WaspMaze", "ArtTheft", "FrozenKey", "Maze2", "TrapMaze2", "DarkMaze2", "WaspMaze6", "TrapMaze3", "DarkMaze3", "WaspMaze3", "TwoDoors", "MirrorMaze", "Magnet", "DotToDot", "Sokoban", "Claw", "LockPattern", "Heist", "TreasureMap", "SnowGlobe", "Museum", "Cookie2", "MagnetMayhem", "StubbornDoor", "TheSilentAlarm", "TheUpsideDownKing", "SleepingGuard", "TheBrokenCompass", "TheGuiltyButton", "MirrorTwins", "FingerMaze", "TheMissingLetter", "TheDoorThatLies", "TheSecondKey", "DontBlink", "UpsideDownCode", "TheInvisibleInk", "HiddenFrequency", "TheFrozenWaterfall", "TheLaughingLock" };
+        string[] animals = { "Idle", "Volume", "Roach", "Snowman", "Defend", "Bedtime", "Campfire", "Plant", "Shell", "Sunny", "CatEyes", "Copycat", "Shell2", "Defend2", "Plant2", "Copycat2", "Wasp2", "CatEyes2", "Campfire2", "Flashlight", "Bridge", "Chicken", "TheGlassCage", "TheLastDrop", "TheBackwardSong", "UnfairRace", "Heartbeat", "TheWrongShadow", "OneTooMany", "TheLonelyCloud", "RainbowThief", "Seasons", "Submarine", "Detective", "Elevator", "Fishing", "Sheep", "Giraffe", "WaterJugs", "Untangle", "Snake", "AirHockey", "Copycat3", "Shell3", "Defend3", "Plant3", "Tightrope", "Wasp3", "CatEyes3", "Fireflies", "Sneaky", "Whack", "Laser", "Rhythm", "Pipes", "Slide", "WhereMouse", "Carousel", "Toni1", "Toni2", "Toni3", "Toni4", "Toni5", "Toni6", "TheCowardlyDragon", "TheShyStar" };
         string[] kitchen = { "Apple", "Cookie", "Birthday", "Soup", "Rope", "Pizza", "PizzaChef", "Pancake", "AppleCatch", "Pancake2", "Birthday2", "AppleCatch2", "Morning", "KitchenEscape", "Potion", "IceCream", "HotPotato", "ZeroGravityDinner", "PhoneSandwich", "ColdCoffee", "TheBottomlessCup" };
         if (System.Array.IndexOf(dungeon, folder) >= 0) return MusicTrack.Dungeon;
         if (System.Array.IndexOf(animals, folder) >= 0) return MusicTrack.Animals;

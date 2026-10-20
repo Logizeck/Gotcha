@@ -3678,5 +3678,133 @@
   ],
   "eggName": "",
   "eggHow": ""
+ },
+ {
+  "folder": "TheTwoFingerPianist",
+  "id": "the_two_finger_pianist",
+  "title": "THE TWO-FINGER PIANIST",
+  "hint": "These notes must sound together.",
+  "egg": "",
+  "n": 231,
+  "desc": "Il leggio chiede tre accordi (C+E, D+A, F+B), ma il secondo tasto è timido e sparisce se toccato da solo: tieni premuto il primo e premi il secondo con un altro dito.",
+  "hints": [
+   "These notes must sound together.",
+   "Use more than one finger.",
+   "Hold the first key and press the second simultaneously."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheMoonThief",
+  "id": "the_moon_thief",
+  "title": "THE MOON THIEF",
+  "hint": "Hide what he wants.",
+  "egg": "",
+  "n": 232,
+  "desc": "Un ladro col retino vuole rubare la luna: trascinala dietro una nuvola, poi porta la nuvola fuori dallo schermo; il ladro non la trova e si arrende.",
+  "hints": [
+   "Hide what he wants.",
+   "The clouds can conceal the moon.",
+   "Move the moon behind a cloud and take the cloud away."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "BackToTheFuture",
+  "id": "back_to_the_future",
+  "title": "BACK TO THE FUTURE",
+  "hint": "The door hasn't been built yet.",
+  "egg": "",
+  "n": 233,
+  "desc": "La porta esisterà solo il 29 ottobre: sfoglia il calendario-macchina del tempo con swipe verso l'alto fino al giorno esatto (se resti fermo torna indietro di un giorno).",
+  "hints": [
+   "The door hasn't been built yet.",
+   "Time can move forward.",
+   "Swipe the calendar to the exact date on the sign."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheThreeIdiots",
+  "id": "the_three_idiots",
+  "title": "THE THREE IDIOTS",
+  "hint": "They aren't working together.",
+  "egg": "",
+  "n": 234,
+  "desc": "Tre omini spingono un masso verso una buca, ma uno guarda dalla parte sbagliata: ruotalo con due dita finché tutti guardano la buca, poi tocca il fischietto.",
+  "hints": [
+   "They aren't working together.",
+   "One of them is facing the wrong way.",
+   "Rotate the wrong character and blow the virtual whistle."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheShyStar",
+  "id": "the_shy_star",
+  "title": "THE SHY STAR",
+  "hint": "She's shy, but also vain.",
+  "egg": "",
+  "n": 235,
+  "desc": "La stellina timida scappa se la tocchi: trascina lo specchio davanti alla nuvola dove si nasconde; si vede riflessa e, vanitosa, si accende.",
+  "hints": [
+   "She's shy, but also vain.",
+   "Let her see herself.",
+   "Place the mirror where the star can see her reflection."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheBrokenInternet",
+  "id": "the_broken_internet",
+  "title": "THE BROKEN INTERNET",
+  "hint": "The connection is physically broken.",
+  "egg": "",
+  "n": 236,
+  "desc": "NO INTERNET: metti i tre spezzoni di cavo tra computer e router facendo combaciare i connettori (un tocco li gira), poi premi CONNECT.",
+  "hints": [
+   "The connection is physically broken.",
+   "Follow the cable.",
+   "Join the three cable segments in the correct order."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheLaughingLock",
+  "id": "the_laughing_lock",
+  "title": "THE LAUGHING LOCK",
+  "hint": "The lock won't stop laughing.",
+  "egg": "",
+  "n": 237,
+  "desc": "Il lucchetto ride e la chiave rimbalza: tieni premuta la maniglia finché si stanca e sbadiglia, poi infila la chiave nella bocca aperta.",
+  "hints": [
+   "The lock won't stop laughing.",
+   "Make it tired.",
+   "Hold the handle until it yawns, then insert the key."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "TheFakeBoss",
+  "id": "the_fake_boss",
+  "title": "THE FAKE BOSS",
+  "hint": "The boss isn't what he seems.",
+  "egg": "",
+  "n": 238,
+  "desc": "Schiva gli attacchi del boss gigante trascinando l'eroe, e intanto trascina via la sua barra della vita: senza sapere quanto è forte diventa un pupazzetto e scappa.",
+  "hints": [
+   "The boss isn't what he seems.",
+   "His strength is displayed somewhere.",
+   "Remove the health bar."
+  ],
+  "eggName": "",
+  "eggHow": ""
  }
 ]
