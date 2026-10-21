@@ -53,7 +53,7 @@ namespace Gotcha.Levels
 #if UNITY_6000_0_OR_NEWER
             puck.linearDamping = 0.25f;
 #else
-            puck.drag = 0.25f;
+            puck.SetLinearDrag(0.25f);
 #endif
             pupilHome = new Vector3[pupils.Length];
             for (int i = 0; i < pupils.Length; i++) pupilHome[i] = pupils[i].localPosition;
@@ -70,7 +70,7 @@ namespace Gotcha.Levels
 #if UNITY_6000_0_OR_NEWER
             return rb.linearVelocity;
 #else
-            return rb.velocity;
+            return rb.GetVelocity();
 #endif
         }
 
@@ -79,7 +79,7 @@ namespace Gotcha.Levels
 #if UNITY_6000_0_OR_NEWER
             rb.linearVelocity = v;
 #else
-            rb.velocity = v;
+            rb.SetVelocity(v);
 #endif
         }
 

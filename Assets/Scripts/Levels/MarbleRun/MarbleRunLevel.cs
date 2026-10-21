@@ -60,7 +60,7 @@ namespace Gotcha.Levels
 #if UNITY_6000_0_OR_NEWER
             marble.linearVelocity = Vector2.zero;
 #else
-            marble.velocity = Vector2.zero;
+            marble.SetVelocity(Vector2.zero);
 #endif
             rolling = false;
         }
@@ -76,7 +76,7 @@ namespace Gotcha.Levels
 #if UNITY_6000_0_OR_NEWER
             marble.linearVelocity = v;
 #else
-            marble.velocity = v;
+            marble.SetVelocity(v);
 #endif
             marble.WakeUp();
             rolling = true;
@@ -146,7 +146,7 @@ namespace Gotcha.Levels
 #if UNITY_6000_0_OR_NEWER
             return marble.linearVelocity;
 #else
-            return marble.velocity;
+            return marble.GetVelocity();
 #endif
         }
 
@@ -173,7 +173,7 @@ namespace Gotcha.Levels
 #if UNITY_6000_0_OR_NEWER
             marble.linearVelocity = Vector2.zero;
 #else
-            marble.velocity = Vector2.zero;
+            marble.SetVelocity(Vector2.zero);
 #endif
             Transform t = marble.transform;
             Vector3 from = t.position, scale = t.localScale;
@@ -206,7 +206,7 @@ namespace Gotcha.Levels
 #if UNITY_6000_0_OR_NEWER
             marble.linearVelocity = Vector2.zero;
 #else
-            marble.velocity = Vector2.zero;
+            marble.SetVelocity(Vector2.zero);
 #endif
             marble.angularVelocity = 0f;
             if (confetti != null) confetti.Play();

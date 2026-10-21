@@ -296,7 +296,7 @@ namespace Gotcha.Levels
 #if UNITY_6000_0_OR_NEWER
             ball.linearVelocity = Vector2.zero;
 #else
-            ball.velocity = Vector2.zero;
+            ball.SetVelocity(Vector2.zero);
 #endif
             ball.position = ball.transform.position;
             ball.simulated = true;

@@ -5,19 +5,22 @@ Questa guida va seguita dall'alto in basso. Le parti che il codice fa già da so
 
 ---
 
-## ▶ Beta interna (versione 0.58) — passo passo
+## ▶ Beta interna (versione 0.59) — passo passo
 
 Obiettivo: caricare l'AAB nel canale **Test interno** di Play Console (fino a 100 tester, niente revisione lunga,
 niente vincolo dei 12 tester/14 giorni, che vale solo per passare alla produzione).
 Scelte fatte per questa beta: pacchetto **`com.gotcha.zeck`**, **niente acquisti in-app** (il pacchetto Unity IAP
 è stato tolto: il negozio risponde "Store not available"), pubblicità reali assenti (nessun AdMob).
 
-0. **Unity 2022.3.62f2 o più recente** (obbligatorio): le versioni precedenti hanno la falla di sicurezza
-   CVE-2025-59489 e Google Play rifiuta l'app per "Device and Network Abuse". Unity Hub > Installs > Install
-   Editor (se non compare: <https://unity.com/releases/editor/archive> o la pagina dell'avviso
-   <https://unity.com/security/sept-2025-01>), con **Android Build Support** (OpenJDK, SDK & NDK).
-   Il menu della build AAB si rifiuta di partire con una versione vulnerabile.
-1. **Aggiorna il progetto**: `git pull`, poi apri il progetto con **Unity 2022.3.62f2** (o più recente). All'apertura il builder
+0. **Unity 6.3 LTS** (dalla versione 0.59 il progetto è per Unity 6.3): Unity Hub > Installs > Install Editor >
+   **Unity 6.3 (LTS)** con **Android Build Support** + **OpenJDK** + **Android SDK & NDK Tools**. Poi in
+   *Edit > Preferences > External Tools* lascia spuntate le quattro caselle "installed with Unity (recommended)".
+   (Le versioni di Unity senza la correzione CVE-2025-59489 vengono rifiutate da Google Play: il menu della build
+   AAB si rifiuta di partire con quelle.)
+1. **Aggiorna il progetto**: `git pull`, poi in Unity Hub *Add > Add project from disk* (se serve) e apri il
+   progetto con **Unity 6.3**. La prima apertura chiede di aggiornare il progetto alla nuova versione: **Continue**
+   (ci vuole qualche minuto: Unity ricostruisce la cartella Library). Se compare il dialogo sull'Input ("Active
+   Input Handling"), scegli di riavviare. All'apertura il builder
    rigenera da solo scena e livelli (versione del costruttore 52). Se non parte: menu **Gotcha > Build Scene and
    Levels**. In *Window > Package Manager* "In App Purchasing" non deve più esserci (lo toglie `Packages/manifest.json`).
 2. **Android SDK Platform 36** (target API 36 obbligatorio): alla prima build Unity può proporre
@@ -31,19 +34,21 @@ Scelte fatte per questa beta: pacchetto **`com.gotcha.zeck`**, **niente acquisti
    `keytool -genkeypair -v -keystore gotcha-upload.keystore -alias gotcha -keyalg RSA -keysize 2048 -validity 10000`
    Poi crea `ReleaseSigning.json` nella cartella del progetto (è già escluso da git):
    `{"keystorePath":"gotcha-upload.keystore","keystorePass":"...","keyAlias":"gotcha","keyAliasPass":"..."}`
-4. **Crea l'AAB**: menu **Gotcha > Build Google Play AAB** → salva `Builds/Gotcha-0.58.aab`
-   (versionCode **5800**, pacchetto `com.gotcha.zeck`, firmato, define `GOTCHA_RELEASE`).
+4. *(una volta sola, Unity 6)* **File > Build Profiles > Android**: *Debug Symbols* = **Symbol Table** (così Play
+   Console non segnala i simboli mancanti).
+5. **Crea l'AAB**: menu **Gotcha > Build Google Play AAB** → salva `Builds/Gotcha-0.59.aab`
+   (versionCode **5900**, pacchetto `com.gotcha.zeck`, firmato, define `GOTCHA_RELEASE`).
    Errori della finestra "Build Settings" (GUILayout) non c'entrano: usa sempre questo menu.
-5. **Play Console**: *Crea app* → nome "Gotcha!", lingua predefinita Inglese (US), **Gioco**, **Senza costi**,
+6. **Play Console**: *Crea app* → nome "Gotcha!", lingua predefinita Inglese (US), **Gioco**, **Senza costi**,
    accetta le dichiarazioni. Poi *Testa e rilascia > Test > Test interno*:
    - scheda **Tester**: crea un elenco email con i tuoi tester (anche solo il tuo Gmail) e salva;
-   - **Crea nuova release** → accetta **Play App Signing** (consigliato) → carica `Gotcha-0.58.aab` →
-     nome release "0.58 beta", note di rilascio brevi → *Avanti* → *Salva e pubblica*.
+   - **Crea nuova release** → accetta **Play App Signing** (consigliato) → carica `Gotcha-0.59.aab` →
+     nome release "0.59 beta", note di rilascio brevi → *Avanti* → *Salva e pubblica*.
    - Torna su *Tester* e copia il **link di partecipazione**: i tester lo aprono col proprio account, accettano e
      installano dal Play Store (la prima volta può volerci qualche minuto).
-6. **Sul telefono**: Impostazioni del gioco → **BETA** → password `Zeckrulez` → tutti i livelli aperti, vite e
+7. **Sul telefono**: Impostazioni del gioco → **BETA** → password `Zeckrulez` → tutti i livelli aperti, vite e
    suggerimenti infiniti, niente pubblicità. Così, se un livello si blocca, si passa agli altri.
-7. **Per ricaricare** una correzione: aumenta `GameUI.Version` (es. "0.58.1" → versionCode 5801) e ripeti il punto 4.
+8. **Per ricaricare** una correzione: aumenta `GameUI.Version` (es. "0.59.1" → versionCode 5901) e ripeti il punto 5.
 
 Se la build fallisce, copia il primo errore rosso della Console (spesso Gradle o SDK) e mandamelo.
 Avvisi che Play Console può mostrare e che **non bloccano** il test interno: "nessun file di deoffuscamento"

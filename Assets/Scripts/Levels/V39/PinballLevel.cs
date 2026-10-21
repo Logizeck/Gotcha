@@ -89,7 +89,7 @@ namespace Gotcha.Levels
 #if UNITY_6000_0_OR_NEWER
             return rb.linearVelocity;
 #else
-            return rb.velocity;
+            return rb.GetVelocity();
 #endif
         }
 
@@ -98,7 +98,7 @@ namespace Gotcha.Levels
 #if UNITY_6000_0_OR_NEWER
             rb.linearVelocity = v;
 #else
-            rb.velocity = v;
+            rb.SetVelocity(v);
 #endif
         }
 

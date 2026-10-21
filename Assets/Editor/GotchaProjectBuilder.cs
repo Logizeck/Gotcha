@@ -31,7 +31,7 @@ public static partial class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 54;
+    const int BuilderVersion = 55;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -460,7 +460,7 @@ public static partial class GotchaProjectBuilder
 #if UNITY_6000_0_OR_NEWER
         rb.linearDamping = 1.1f;
 #else
-        rb.drag = 1.1f;
+        rb.SetLinearDrag(1.1f);
 #endif
         ChromeBall chrome = ball.AddComponent<ChromeBall>();
         chrome.background = new Color(0.04f, 0.055f, 0.11f);
@@ -3997,7 +3997,7 @@ public static partial class GotchaProjectBuilder
 #if UNITY_6000_0_OR_NEWER
         marble.linearDamping = 0.05f;   // la biglia deve rotolare libera sulle rampe
 #else
-        marble.drag = 0.05f;
+        marble.SetLinearDrag(0.05f);
 #endif
         marble.bodyType = RigidbodyType2D.Kinematic;
 
@@ -4870,7 +4870,11 @@ public static partial class GotchaProjectBuilder
         // Icona: se c'è il logo originale in Assets/Art/Icon/AppIcon.png si usa quello, altrimenti la versione disegnata
         Texture2D icon = AssetDatabase.LoadAssetAtPath<Texture2D>(CustomIconPath);
         if (icon == null && sprites.TryGetValue("app_icon", out Sprite drawn)) icon = drawn.texture;
+#if UNITY_2021_2_OR_NEWER
+        if (icon != null) PlayerSettings.SetIcons(UnityEditor.Build.NamedBuildTarget.Unknown, new[] { icon }, IconKind.Any);
+#else
         if (icon != null) PlayerSettings.SetIconsForTargetGroup(BuildTargetGroup.Unknown, new[] { icon });
+#endif
 
         PlayerSettings.productName = "Gotcha!";
         PlayerSettings.companyName = "Gotcha";
@@ -4878,7 +4882,11 @@ public static partial class GotchaProjectBuilder
         // pacchetto (InviteService.PackageName), versione da GameUI.Version, API 36, IL2CPP, ARM64 + ARMv7
         GotchaBuildMenu.ApplyStoreSettings();
         // codice C# non usato tolto dalla build (Assets/link.xml protegge ciò che si carica per nome, es. lo store IAP)
+#if UNITY_2021_2_OR_NEWER
+        PlayerSettings.SetManagedStrippingLevel(UnityEditor.Build.NamedBuildTarget.Android, ManagedStrippingLevel.Medium);
+#else
         PlayerSettings.SetManagedStrippingLevel(BuildTargetGroup.Android, ManagedStrippingLevel.Medium);
+#endif
         PlayerSettings.stripEngineCode = true;
         AssetDatabase.SaveAssets();
         EnsureLegacyInput();

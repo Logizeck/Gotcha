@@ -2,6 +2,9 @@
 using System;
 using System.IO;
 using UnityEditor;
+#if UNITY_2021_2_OR_NEWER
+using UnityEditor.Build;
+#endif
 using UnityEditor.Build.Reporting;
 using UnityEngine;
 using Gotcha.Core;
@@ -58,15 +61,23 @@ public static class GotchaBuildMenu
     /// <summary>Impostazioni richieste da Google Play (le usa anche il builder in ConfigurePlayer).</summary>
     public static void ApplyStoreSettings()
     {
+#if UNITY_2021_2_OR_NEWER
+        PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, InviteService.PackageName);
+#else
         PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, InviteService.PackageName);
+#endif
         ApplyVersion();
         // API 24 (Android 7.0): minimo richiesto dalla protezione automatica di Play (Play Integrity)
-        PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel24;
+        PlayerSettings.Android.minSdkVersion = (AndroidSdkVersions)24;
         // API 36 (Android 16): obbligatoria per le app nuove dal 31/8/2026. Il cast compila anche su Unity 2022.3,
         // dove il valore non è nell'elenco (serve la piattaforma 36 installata nell'Android SDK)
         PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)36;
         // 64 bit obbligatorio su Google Play
+#if UNITY_2021_2_OR_NEWER
+        PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
+#else
         PlayerSettings.SetScriptingBackend(BuildTargetGroup.Android, ScriptingImplementation.IL2CPP);
+#endif
         PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64 | AndroidArchitecture.ARMv7;
         // minify (R8) resta spento: toglierebbe le classi Java chiamate per nome (GotchaKeys, GotchaVideo)
     }
@@ -160,7 +171,7 @@ public static class GotchaBuildMenu
         {
             EditorUtility.DisplayDialog("Gotcha! – Unity da aggiornare",
                 "Questo Unity (" + Application.unityVersion + ") ha la falla di sicurezza CVE-2025-59489: Google Play rifiuta " +
-                "l'app (\"Device and Network Abuse\").\n\nDa Unity Hub installa Unity 2022.3.62f2 (o una 2022.3 più recente), " +
+                "l'app (\"Device and Network Abuse\").\n\nDa Unity Hub installa Unity 6.3 LTS (consigliato) o almeno 2022.3.62f2, " +
                 "apri il progetto con quella versione e rifai la build. Dettagli in PLAY_STORE.md.", "OK");
             return;
         }
@@ -178,7 +189,7 @@ public static class GotchaBuildMenu
         }
 
 #if UNITY_2021_2_OR_NEWER
-        string defines = PlayerSettings.GetScriptingDefineSymbols(UnityEditor.Build.NamedBuildTarget.Android);
+        string defines = PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.Android);
 #else
         string defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(BuildTargetGroup.Android);
 #endif
@@ -208,7 +219,9 @@ public static class GotchaBuildMenu
         string prevKeystore = PlayerSettings.Android.keystoreName, prevKsPass = PlayerSettings.Android.keystorePass;
         string prevAlias = PlayerSettings.Android.keyaliasName, prevAliasPass = PlayerSettings.Android.keyaliasPass;
         bool prevBundle = EditorUserBuildSettings.buildAppBundle;
+#if !UNITY_6000_0_OR_NEWER
         AndroidCreateSymbols prevSymbols = EditorUserBuildSettings.androidCreateSymbols;
+#endif
         BuildReport report;
         try
         {
@@ -219,7 +232,10 @@ public static class GotchaBuildMenu
             PlayerSettings.Android.keyaliasPass = signing.keyAliasPass;
             EditorUserBuildSettings.buildAppBundle = true;
             // simboli di debug del codice nativo dentro l'AAB: Play Console li usa per leggere crash e ANR
+            // (in Unity 6 si impostano una volta nel Build Profile Android: Debug Symbols = Symbol Table / Full)
+#if !UNITY_6000_0_OR_NEWER
             EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Public;
+#endif
 
             var options = new BuildPlayerOptions
             {
@@ -241,7 +257,9 @@ public static class GotchaBuildMenu
             PlayerSettings.Android.keyaliasName = prevAlias;
             PlayerSettings.Android.keyaliasPass = prevAliasPass;
             EditorUserBuildSettings.buildAppBundle = prevBundle;
+#if !UNITY_6000_0_OR_NEWER
             EditorUserBuildSettings.androidCreateSymbols = prevSymbols;
+#endif
         }
 
         BuildSummary summary = report.summary;

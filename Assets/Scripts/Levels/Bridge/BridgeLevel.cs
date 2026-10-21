@@ -124,8 +124,8 @@ namespace Gotcha.Levels
             get => mouse.linearVelocity;
             set => mouse.linearVelocity = value;
 #else
-            get => mouse.velocity;
-            set => mouse.velocity = value;
+            get => mouse.GetVelocity();
+            set => mouse.SetVelocity(value);
 #endif
         }
 

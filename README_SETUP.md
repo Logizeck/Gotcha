@@ -267,6 +267,16 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.59 — Unity 6.3 LTS
+- **Il progetto passa a Unity 6.3 LTS** (supporto ufficiale per Android 16 / API 36, strumenti di build Android più
+  recenti, pagine da 16 KB, compatibile con Unity IAP 5 per rimettere gli acquisti).
+- `Packages/manifest.json`: `com.unity.ugui` 2.0.0 (quella di Unity 6).
+- Fisica 2D: `Physics2DCompat` (GetVelocity / SetVelocity / SetLinearDrag) al posto di `velocity`/`drag`, che in
+  Unity 6 si chiamano `linearVelocity`/`linearDamping`: niente API obsolete, quindi Unity non riscrive i file sul PC.
+- Impostazioni di build con `NamedBuildTarget` (pacchetto, IL2CPP, stripping, icona, define). In Unity 6 i simboli
+  di debug si impostano una volta nel Build Profile Android (Debug Symbols = Symbol Table).
+- Versione del costruttore 55 (all'apertura con Unity 6 scena e livelli si rigenerano).
+
 ## Versione 0.58
 - **Fumetti**: un fumetto senza testo non compare più all'avvio del livello (es. Sweet Dreams). Il testo veniva
   disegnato più in alto del centro "teorico" della riga (font Luckiest Guy) e usciva dall'alto: ora, dopo aver

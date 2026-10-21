@@ -381,7 +381,7 @@ public static partial class GotchaProjectBuilder
 #if UNITY_6000_0_OR_NEWER
         rb.linearDamping = 0.8f;
 #else
-        rb.drag = 0.8f;
+        rb.SetLinearDrag(0.8f);
 #endif
         TiltGravity tilt = stages[1].AddComponent<TiltGravity>();
         tilt.strength = 14f;
