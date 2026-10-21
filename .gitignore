@@ -12,6 +12,12 @@
 *.apk
 *.aab
 
+# file che Unity crea e riscrive da solo sul PC: non vanno nella repository (evitano conflitti a ogni pull)
+*.meta
+.vsconfig
+/ProjectSettings/
+/Packages/packages-lock.json
+
 # generati dal builder (Gotcha! → Build): non vanno nella repository
 /Assets/Art/Generated/
 /Assets/Art/Generated.meta
