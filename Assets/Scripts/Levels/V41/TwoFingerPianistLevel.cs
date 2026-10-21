@@ -49,7 +49,9 @@ namespace Gotcha.Levels
 
         void ShowChord()
         {
-            chordText.text = Names[Chords[chord, 0]] + " + " + Names[Chords[chord, 1]];
+            // dopo l'ultimo accordo non c'è un accordo da mostrare (prima andava fuori dalla tabella e il livello si
+            // bloccava sull'ultima nota): restano solo i pallini tutti verdi
+            if (chord < Chords.GetLength(0)) chordText.text = Names[Chords[chord, 0]] + " + " + Names[Chords[chord, 1]];
             for (int i = 0; i < progressDots.Length; i++)
                 progressDots[i].color = i < chord ? new Color(0.45f, 0.85f, 0.4f) : new Color(1f, 1f, 1f, 0.35f);
         }

@@ -267,6 +267,10 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.60
+- **The Two-Finger Pianist**: dopo il terzo accordo il livello si bloccava sull'ultima nota (cercava di mostrare un
+  quarto accordo inesistente, andava in errore e restava fermo). Ora parte il gran finale e il livello si supera.
+
 ## Versione 0.59 — Unity 6.3 LTS
 - **Il progetto passa a Unity 6.3 LTS** (supporto ufficiale per Android 16 / API 36, strumenti di build Android più
   recenti, pagine da 16 KB, compatibile con Unity IAP 5 per rimettere gli acquisti).
