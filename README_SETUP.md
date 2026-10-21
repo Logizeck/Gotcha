@@ -267,6 +267,12 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.58
+- **Fumetti**: un fumetto senza testo non compare più all'avvio del livello (es. Sweet Dreams). Il testo veniva
+  disegnato più in alto del centro "teorico" della riga (font Luckiest Guy) e usciva dall'alto: ora, dopo aver
+  costruito il fumetto, si controlla il testo disegnato davvero, lo si centra nel corpo e, se non ci sta, il fumetto
+  si allarga ancora. La misura aspetta che il testo sia cambiato (non legge più quella del testo precedente).
+
 ## Versione 0.57
 - **Fumetti su misura**: nuovo disegno 9-slice `bubble_box` (bordi diversi per lato: la codina sta tutta
   nell'angolo in basso a sinistra, che non si deforma). `SpeechBubble` misura il testo quando Unity l'ha davvero

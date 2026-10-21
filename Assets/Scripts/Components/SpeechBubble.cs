@@ -43,6 +43,14 @@ namespace Gotcha.Components
         float textBaseY;
         bool artInit;
 
+        bool showing;
+
+        /// <summary>All'avvio del livello un fumetto senza testo non si vede: compare solo quando qualcuno parla.</summary>
+        void Awake()
+        {
+            if (!showing && (text == null || string.IsNullOrEmpty(text.text))) gameObject.SetActive(false);
+        }
+
         void Init()
         {
             if (appliedShift != Vector3.zero) { transform.position -= appliedShift; appliedShift = Vector3.zero; }
@@ -85,6 +93,7 @@ namespace Gotcha.Components
                 voice.pitch = Random.Range(0.93f, 1.08f);
                 voice.PlayOneShot(CatVoice.For(message), 0.9f);
             }
+            showing = true;   // Awake (alla prima attivazione) non deve rinasconderlo
             gameObject.SetActive(true);
             StopAllCoroutines();
             StartCoroutine(ShowRoutine(message));
@@ -102,14 +111,16 @@ namespace Gotcha.Components
             transform.localScale = baseScale * 0.001f;
             if (text == null) { yield return Pop(); yield break; }
             text.transform.localScale = textBaseScale;
+            Vector2 before = LocalSize();
             text.text = message;
-            yield return Measure();
+            yield return Measure(before);
 
             // 1) a capo sulle parole se la riga è troppo lunga
             if (measured.x > maxTextWidth && message.Length > 1)
             {
+                before = LocalSize();
                 text.text = Wrap(message, maxTextWidth);
-                yield return Measure();
+                yield return Measure(before);
             }
 
             // 2) il testo si rimpicciolisce solo se il fumetto diventerebbe più largo dello schermo
@@ -120,8 +131,13 @@ namespace Gotcha.Components
             text.transform.localScale = textBaseScale * ts;
             size *= ts;
 
-            // 3) il fumetto della misura del testo
+            // 3) il fumetto della misura del testo, poi verifica sul testo disegnato davvero (il font disegna le lettere
+            //    più in alto della riga "teorica": si centra il disegno vero e, se serve, si allarga ancora)
             Layout(size);
+            for (int pass = 0; pass < 4 && Sliced; pass++)
+            {
+                if (!FitCheck()) break;
+            }
             yield return Pop();
             KeepOnScreen();
         }
@@ -162,19 +178,59 @@ namespace Gotcha.Components
 
         /// <summary>
         /// Misura il testo quando il suo mesh è davvero aggiornato: Unity lo rigenera con qualche fotogramma di
-        /// ritardo, quindi si aspetta finché la misura resta uguale per due fotogrammi di fila (al massimo 12).
+        /// ritardo. Si aspetta che la misura cambi rispetto al testo di prima (o al massimo 6 fotogrammi, se il nuovo
+        /// testo ha la stessa misura) e poi che resti uguale per due fotogrammi di fila.
         /// </summary>
-        IEnumerator Measure()
+        IEnumerator Measure(Vector2 before)
         {
             Vector2 last = new Vector2(-1f, -1f);
-            for (int i = 0; i < 12; i++)
+            bool changed = false;
+            for (int i = 0; i < 20; i++)
             {
                 yield return null;
                 Vector2 now = LocalSize();
-                if (i >= 1 && now.x > 0f && (now - last).sqrMagnitude < 1e-6f) { measured = now; yield break; }
+                if (!changed)
+                {
+                    if ((now - before).sqrMagnitude > 1e-6f || i >= 5) changed = true;
+                    else continue;
+                }
+                if (now.x > 0f && (now - last).sqrMagnitude < 1e-6f) { measured = now; yield break; }
                 last = now;
             }
             measured = last;
+        }
+
+        /// <summary>
+        /// Controlla il testo disegnato rispetto al corpo del fumetto: lo centra (spostandolo di quanto il disegno
+        /// delle lettere è fuori centro) e, se non ci sta, allarga il fumetto. Restituisce true se ha cambiato qualcosa.
+        /// </summary>
+        bool FitCheck()
+        {
+            MeshRenderer mr = text.GetComponent<MeshRenderer>();
+            if (mr == null || artSr == null) return false;
+            Vector3 ls = transform.lossyScale;
+            float sx = Mathf.Max(Mathf.Abs(ls.x), 1e-6f), sy = Mathf.Max(Mathf.Abs(ls.y), 1e-6f);
+            Bounds t = mr.bounds;
+            Vector2 tc = transform.InverseTransformPoint(t.center);
+            Vector2 tsz = new Vector2(t.size.x / sx, t.size.y / sy);
+            float w = artSr.size.x, h = artSr.size.y;
+            Vector2 c = art.localPosition;
+            float bodyCy = c.y + ((h * 0.5f - BodyInsetTop) + (-h * 0.5f + BodyInsetBottom)) * 0.5f;
+            float innerW = w - 2f * (BodyInsetX + PadX), innerH = h - BodyInsetTop - BodyInsetBottom - 2f * PadY;
+            if (tsz.x > innerW + 0.01f || tsz.y > innerH + 0.01f)
+            {
+                // più grande: si rifà il fumetto sul testo misurato adesso (il centraggio al giro dopo)
+                Layout(new Vector2(Mathf.Max(tsz.x, innerW), Mathf.Max(tsz.y, innerH)));
+                return true;
+            }
+            bool changed = false;
+            Vector2 off = new Vector2(c.x - tc.x, bodyCy - tc.y);
+            if (off.sqrMagnitude > 1e-4f)
+            {
+                text.transform.localPosition += new Vector3(off.x, off.y, 0f);
+                changed = true;
+            }
+            return changed;
         }
 
         /// <summary>Larghezza massima del fumetto (coordinate del fumetto) per restare nello schermo.</summary>
