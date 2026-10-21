@@ -89,25 +89,6 @@ namespace Gotcha.EditorArt
 
         // ---------- 89: il puzzle ----------
 
-        /// <summary>Ritratto quadrato del gatto (3.6 x 3.6) da tagliare a tasselli: colori diversi in ogni zona.</summary>
-        public static DoodleArt PuzzleCat()
-        {
-            var p = new DoodlePainter(-1.8f, -1.8f, 1.8f, 1.8f, 90) { Ink = 0.05f };
-            p.FillFunc(Sd.Box(0, 0, 1.8f, 1.8f), (x, y) => Rgba.Lerp(Rgba.Hex("FFB3C0"), Rgba.Hex("8FCDF2"), Clamp((x + y + 3.6f) / 7.2f)));
-            Body(p, Sd.Circle(1.2f, 1.25f, 0.35f), Rgba.Hex("FFE14A"), Rgba.Hex("FFC93C"));
-            Body(p, Sd.Box(0, -1.55f, 1.8f, 0.3f), Leaf, LeafShade);
-            foreach (float s in new[] { -1f, 1f }) Body(p, Sd.Polygon(s * 0.25f, 0.7f, s * 0.95f, 1.35f, s * 0.9f, 0.3f), Rgba.Hex("FF9A3D"), Rgba.Hex("E2731E"));
-            Body(p, Sd.Ellipse(0, 0.05f, 1.0f, 0.85f), Rgba.Hex("FF9A3D"), Rgba.Hex("E2731E"));
-            foreach (float s in new[] { -1f, 1f }) { p.Shape(Sd.Ellipse(s * 0.38f, 0.2f, 0.18f, 0.22f), Rgba.Hex("B6F25A"), 0.03f); p.Fill(Sd.Ellipse(s * 0.38f, 0.2f, 0.05f, 0.17f), Ink); }
-            p.Shape(Sd.Polygon(-0.1f, -0.15f, 0.1f, -0.15f, 0, -0.28f), Rgba.Hex("FF5A7A"), 0.02f);
-            p.InkLine(0.03f, -0.25f, -0.42f, 0f, -0.32f, 0.25f, -0.42f);
-            foreach (float s in new[] { -1f, 1f }) for (int i = 0; i < 3; i++) p.InkLine(0.02f, s * 0.45f, -0.25f + i * 0.08f, s * 1.15f, -0.2f + i * 0.14f);
-            p.Shape(Sd.Box(0, -0.85f, 0.4f, 0.08f, 0.04f), Rgba.Hex("E8433F"), 0.02f);   // collarino
-            p.Fill(Sd.Circle(0, -0.97f, 0.08f), Gold);
-            p.Shape(Sd.Box(0, 0, 1.78f, 1.78f), Rgba.Clear, 0.06f);
-            return new DoodleArt("puzzle_cat", p);
-        }
-
         // ---------- 95: memory ----------
 
         public static DoodleArt Card(bool face)

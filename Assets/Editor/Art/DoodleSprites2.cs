@@ -384,19 +384,6 @@ namespace Gotcha.EditorArt
             return new DoodleArt("rocket", p);
         }
 
-        /// <summary>Tanica del carburante rossa (centro 0,0).</summary>
-        public static DoodleArt FuelCan()
-        {
-            var p = new DoodlePainter(-0.48f, -0.55f, 0.48f, 0.62f, 140) { Ink = 0.04f };
-            Sdf can = Sd.Box(0, -0.08f, 0.38f, 0.44f, 0.08f);
-            Body(p, can, Rgba.Hex("E23B3B"), Rgba.Hex("B22A2A"));
-            p.Shape(Sd.Subtract(Sd.Box(-0.12f, 0.42f, 0.2f, 0.11f, 0.06f), Sd.Box(-0.12f, 0.42f, 0.11f, 0.04f, 0.03f)), Rgba.Hex("B22A2A"), 0.025f);   // maniglia
-            p.Shape(Sd.Box(0.24f, 0.44f, 0.07f, 0.1f, 0.02f), Rgba.Hex("FFC93C"), 0.025f);
-            p.InkLine(0.03f, -0.22f, 0.1f, 0.22f, -0.3f);
-            p.InkLine(0.03f, -0.22f, -0.3f, 0.22f, 0.1f);
-            return new DoodleArt("fuel_can", p);
-        }
-
         /// <summary>Coperchio di sicurezza trasparente del pulsante di lancio, incernierato in alto (0,0 = cerniera).</summary>
         public static DoodleArt SafetyCover()
         {

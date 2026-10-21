@@ -82,7 +82,7 @@ namespace Gotcha.EditorArt
 
         // ---------- Livello 20: si parte! (H + H + O) ----------
 
-        /// <summary>Tanica con la lettera grande: "fuel_can_h" azzurra, "fuel_can_o" arancione (stesso ingombro di "fuel_can").</summary>
+        /// <summary>Tanica con la lettera grande: "fuel_can_h" azzurra, "fuel_can_o" arancione.</summary>
         public static DoodleArt FuelCanLetter(bool hydrogen)
         {
             var p = new DoodlePainter(-0.48f, -0.55f, 0.48f, 0.62f, 140) { Ink = 0.04f };

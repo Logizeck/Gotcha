@@ -11,7 +11,7 @@ namespace Gotcha.EditorArt
             SokFloor(), SokWall(), SokCrate(), SokGlow(), SokMark(), SokPawShadow(), SokButton(),
             SnakeBoard(), SnakeHead(), SnakeTongue(), SnakeBody(), SnakeTail(),
             PinBackdrop(), PinFlipper(), PinBumper(false), PinBumper(true), PinCat(false), PinCat(true), PinPlunger(),
-            HockeyTable(), HockeyMallet(), HockeyPawMallet(), HockeyPuck(), HockeyBigPaw(),
+            HockeyMallet(), HockeyPawMallet(), HockeyPuck(), HockeyBigPaw(),
             DunkGym(), DunkBall(), DunkHoopBack(), DunkHoopFront(),
         };
 
@@ -330,30 +330,6 @@ namespace Gotcha.EditorArt
         }
 
         // ---------- Air hockey ----------
-
-        /// <summary>Tavolo da air hockey (5.2×7.4, centro 0,0): bordo blu, linea di metà campo, porte larghe 1.5 in alto e in basso.</summary>
-        public static DoodleArt HockeyTable()
-        {
-            const float hx = 2.5f, hy = 3.6f;
-            var p = new DoodlePainter(-hx - 0.2f, -hy - 0.2f, hx + 0.2f, hy + 0.2f, 50) { Ink = 0.06f, Wobble = 0.004f };
-            p.Shape(Sd.Box(0, 0, hx + 0.16f, hy + 0.16f, 0.35f), Rgba.Hex("3A6FD8"));
-            p.FillFunc(Sd.Box(0, 0, hx, hy, 0.25f), (x, y) => Rgba.Lerp(Rgba.Hex("F2FAFF"), Rgba.Hex("D8EEFA"), (float)Math.Abs(y) / hy));
-            for (float x = -2.2f; x <= 2.21f; x += 0.4f)
-                for (float y = -3.3f; y <= 3.31f; y += 0.4f)
-                    p.Fill(Sd.Circle(x, y, 0.018f), Rgba.Hex("A9C6DA"));
-            Rgba red = Rgba.Hex("E5484D"), blue = Rgba.Hex("3A6FD8");
-            p.Line(red, 0.05f, -hx, 0, hx, 0);
-            p.Fill(Sd.Subtract(Sd.Circle(0, 0, 0.62f), Sd.Circle(0, 0, 0.57f)), red);
-            p.Fill(Sd.Circle(0, 0, 0.08f), red);
-            foreach (float s in new[] { -1f, 1f })
-            {
-                p.Fill(Sd.Intersect(Sd.Subtract(Sd.Circle(0, s * hy, 1.05f), Sd.Circle(0, s * hy, 1.0f)), Sd.Box(0, 0, hx, hy)), blue);
-                p.Line(blue, 0.04f, -hx, s * 1.9f, hx, s * 1.9f);
-                // porta: fessura scura nel bordo
-                p.Shape(Sd.Box(0, s * (hy + 0.08f), 0.75f, 0.14f, 0.06f), Rgba.Hex("1D1A33"), 0.04f);
-            }
-            return new DoodleArt("hockey_table", p);
-        }
 
         /// <summary>Mazzuolo del giocatore visto dall'alto (raggio 0.38, centro 0,0).</summary>
         public static DoodleArt HockeyMallet()

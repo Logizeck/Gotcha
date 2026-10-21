@@ -618,15 +618,6 @@ namespace Gotcha.EditorArt
             return new DoodleArt("bubble_box", p, 66, 58, 33, 33);
         }
 
-        /// <summary>Fumetto con codina in basso a sinistra.</summary>
-        public static DoodleArt Bubble()
-        {
-            var p = new DoodlePainter(-1.55f, -0.85f, 1.55f, 0.72f, 100) { Ink = 0.06f };
-            Sdf bubble = Sd.Union(Sd.Box(0, 0.05f, 1.4f, 0.58f, 0.42f), Sd.Polygon(-0.55f, -0.4f, -0.1f, -0.4f, -0.85f, -0.8f));
-            p.Shape(bubble, Rgba.White);
-            return new DoodleArt("bubble", p);
-        }
-
         // ---------- Livello 4: non fare niente ----------
 
         static readonly Rgba CatOrange = Rgba.Hex("F6A04D"), CatShade = Rgba.Hex("D9792A"), CatPink = Rgba.Hex("FF9BB0");
