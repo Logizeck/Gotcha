@@ -9,7 +9,7 @@ namespace Gotcha.Levels
     /// <summary>
     /// Livello "Box Pusher" — Sokoban nel magazzino. Il topolino si muove di una casella per swipe (o toccando verso
     /// una direzione) e spinge le casse di formaggio se dietro c'è spazio. Tre casse sui tre segni rossi = festa del
-    /// formaggio. Sorpresa: ogni tanto una zampa di gatto entra da destra su una casella (ombra un secondo prima):
+    /// formaggio. Sorpresa: ogni tanto una zampa di gatto entra di lato su una casella a caso (ombra un secondo prima):
     /// se il topolino è lì viene spedito alla partenza. Soluzione (25 mosse): ←↑↑↑↑ ↓→→↓→ ↑↑←↑← ←↓↓↓↓ →→↓→↑.
     /// ANNULLA e RICOMINCIA sempre disponibili.
     /// </summary>
@@ -54,6 +54,8 @@ namespace Gotcha.Levels
         Vector2Int[] boxes, boxStart;
         bool busy, done;
         float pawT, mouseFace = 1f;
+        Vector2Int pawCell = PawCell;   // casella che la zampa colpisce in questo giro (cambia a ogni colpo)
+        readonly List<Vector2Int> floor = new List<Vector2Int>();
         Vector3 mouseScale, pawOut, pawIn;
         Vector2 downPos;
         bool tracking, swiped;
@@ -70,12 +72,11 @@ namespace Gotcha.Levels
                     if (ch == '.') goals.Add(new Vector2Int(c, r));
                     if (ch == '$') bx.Add(new Vector2Int(c, r));
                     if (ch == '@') start = new Vector2Int(c, r);
+                    if (ch != '#') floor.Add(new Vector2Int(c, r));
                 }
             boxStart = bx.ToArray();
             mouseScale = mouse.localScale;
-            Vector2 pc = CellPos(PawCell.x, PawCell.y);
-            pawIn = new Vector3(pc.x + 0.1f, pc.y, 0f);
-            pawOut = new Vector3(pc.x + 2.9f, pc.y, 0f);
+            AimPaw(RandomPawCell());
             paw.localPosition = pawOut;
             SetShadow(0f);
             undoButton.Pressed += _ => Undo();
@@ -194,11 +195,32 @@ namespace Gotcha.Levels
             if (Time.timeScale > 0f) ReadInput();
         }
 
+        /// <summary>
+        /// La zampa punta una casella: entra dal lato più vicino (destra o sinistra), l'ombra di avviso va sulla casella.
+        /// </summary>
+        void AimPaw(Vector2Int cell)
+        {
+            pawCell = cell;
+            Vector2 pc = CellPos(cell.x, cell.y);
+            float side = cell.x >= 3 ? 1f : -1f;
+            pawIn = new Vector3(pc.x + 0.1f * side, pc.y, 0f);
+            pawOut = new Vector3(pc.x + 3.6f * side, pc.y, 0f);
+            paw.localRotation = Quaternion.Euler(0, 0, -90f * side);
+            pawShadow.transform.localPosition = new Vector3(pc.x, pc.y, pawShadow.transform.localPosition.z);
+        }
+
+        /// <summary>Una casella libera a caso (mai due volte di fila la stessa, mai la partenza).</summary>
+        Vector2Int RandomPawCell()
+        {
+            var options = floor.FindAll(c => c != pawCell && c != start);
+            return options.Count > 0 ? options[Random.Range(0, options.Count)] : PawCell;
+        }
+
         void UpdatePaw(float dt)
         {
             pawT += dt;
             float cycle = pawIdle + pawWarn + pawStrike;
-            if (pawT >= cycle) pawT -= cycle;
+            if (pawT >= cycle) { pawT -= cycle; AimPaw(RandomPawCell()); }
             if (pawT < pawIdle) { SetShadow(0f); paw.localPosition = pawOut; return; }
             if (pawT < pawIdle + pawWarn)
             {
@@ -212,7 +234,7 @@ namespace Gotcha.Levels
             float reach = s < 0.2f ? s / 0.2f : s > 0.7f ? 1f - (s - 0.7f) / 0.3f : 1f;
             paw.localPosition = Vector3.Lerp(pawOut, pawIn, reach);
             SetShadow(1f - s);
-            if (reach > 0.8f && me == PawCell && !busy) StartCoroutine(Bonk());
+            if (reach > 0.8f && me == pawCell && !busy) StartCoroutine(Bonk());
         }
 
         void SetShadow(float a)
@@ -254,7 +276,7 @@ namespace Gotcha.Levels
             while (q.Count > 0)
             {
                 Vector2Int p = q.Dequeue();
-                if (BoxAt(p) < 0 && p != PawCell) return p;
+                if (BoxAt(p) < 0 && p != pawCell) return p;
                 foreach (Vector2Int d in dirs)
                 {
                     Vector2Int n = p + d;

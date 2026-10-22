@@ -35,6 +35,7 @@ namespace Gotcha.Core
             { "dirty_secret", "The Dirty Secret" },
             { "adpocalypse", "Adpocalypse" },
             { "mouse_union", "Mouse Union" },
+            { "true_monster_pug", "The Real Monster Is The Pug" },
         };
 
         public static string Name(string id)

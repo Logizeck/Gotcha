@@ -249,8 +249,8 @@
   "desc": "Labirinto circolare a inclinazione: buche e laser sul percorso obbligato, una trappola ogni 45°.",
   "hints": [
    "A round maze: go around the rings to the star in the middle. Mind the holes... and the lasers keep a rhythm.",
-   "The gaps in the rings alternate top and bottom.",
-   "Tilt around the rings through the gaps, wait for the lasers to switch off, avoid the holes."
+   "Every hole leaves a gap on the other side. Enter the ring gaps at a slant.",
+   "Go left around the outer ring, up through the top gap, right around the middle ring, in through the bottom gap. Pass each hole on the free side and wait for the lasers to switch off."
   ],
   "eggName": "",
   "eggHow": ""
@@ -259,14 +259,14 @@
   "folder": "DarkMaze",
   "id": "dark_maze",
   "title": "IN THE DARK",
-  "hint": "Who turned off the lights? Every locked gate has a key somewhere.",
+  "hint": "Who turned off the lights? Every locked gate has a key somewhere... and watch your step.",
   "egg": "",
   "n": 17,
   "desc": "Labirinto al buio: trova la chiave (oltre il laser), evita le 3 buche nascoste, poi l'uscita.",
   "hints": [
-   "Who turned off the lights? Every locked gate has a key somewhere.",
-   "The light follows the ball.",
-   "Find the key first (it opens the gate), then roll through the gate to the star."
+   "Who turned off the lights? Every locked gate has a key somewhere... and watch your step.",
+   "The light follows the ball. Holes hide in the dark; the laser guards the key.",
+   "Find the key first (bottom right, past the laser: wait for it to switch off), then go up and left and through the gate to the star. Don't hug the walls where the holes are."
   ],
   "eggName": "",
   "eggHow": ""
@@ -275,14 +275,14 @@
   "folder": "Safe",
   "id": "hidden_safe",
   "title": "HIDDEN SAFE",
-  "hint": "That painting is stuck to the wall. Maybe a good shake would help?",
+  "hint": "That painting is stuck to the wall. Maybe a good shake would help? (Paintings collect a lot of dust...)",
   "egg": "",
   "n": 18,
   "desc": "Scuoti per far cadere il quadro, SOFFIA via la polvere dal retro per leggere il codice, apri la cassaforte.",
   "hints": [
-   "That painting is stuck to the wall. Maybe a good shake would help?",
-   "Shake the phone.",
-   "Shake the phone to drop the painting, read the code on its back, type it on the safe."
+   "That painting is stuck to the wall. Maybe a good shake would help? (Paintings collect a lot of dust...)",
+   "Shake the phone. Then... that back is SO dusty. Blow!",
+   "Shake the phone to drop the painting, blow into the microphone to clear the dust off its back, read the code and type it on the safe."
   ],
   "eggName": "",
   "eggHow": ""
@@ -518,7 +518,7 @@
   "hint": "Grandma's recipe is on the chalkboard: exactly those, nothing more!",
   "egg": "spicy_pizza",
   "n": 33,
-  "desc": "Segui la ricetta (casuale) disegnata sulla lavagna, inforna, taglia e servi.",
+  "desc": "Segui la ricetta (casuale, mai l'ananas) disegnata sulla lavagna, inforna, taglia e servi. Con l'ananas la nonna ti prende in giro.",
   "hints": [
    "Grandma's recipe is on the chalkboard: exactly those, nothing more!",
    "Read the board carefully.",
@@ -627,13 +627,13 @@
   "folder": "MarbleRun",
   "id": "marble_run",
   "title": "MARBLE RUN",
-  "hint": "Draw up to three ramps. Hold GO longer for a stronger push!",
+  "hint": "Draw up to three ramps. Hold GO longer for a stronger push... and you get ONE shot!",
   "egg": "",
   "n": 40,
   "desc": "Disegna le rampe e porta la biglia nella tazza: un solo tiro!",
   "hints": [
-   "Draw up to three ramps. Hold GO longer for a stronger push!",
-   "Ramps guide the marble.",
+   "Draw up to three ramps. Hold GO longer for a stronger push... and you get ONE shot!",
+   "Ramps guide the marble. Check your path before pressing GO: there's no second try.",
    "Draw a ramp from the marble down to the cup, then hold GO for a medium push."
   ],
   "eggName": "",
@@ -867,13 +867,13 @@
   "folder": "MarbleRun2",
   "id": "marble_run_2",
   "title": "MARBLE RUN 2",
-  "hint": "Right to left now, over a taller wall.",
+  "hint": "Right to left now, over a taller wall. Still just ONE shot!",
   "egg": "glass_smash",
   "n": 55,
   "desc": "Come il 40, da destra a sinistra e muretto più alto: un solo tiro.",
   "hints": [
-   "Right to left now, over a taller wall.",
-   "Go over, not through.",
+   "Right to left now, over a taller wall. Still just ONE shot!",
+   "Go over, not through. One shot only, so aim well.",
    "Draw a ramp that climbs over the wall, then a strong GO."
   ],
   "eggName": "Shattered Screen",
@@ -986,7 +986,7 @@
   "hints": [
    "Your finger is a torch. Find the light switch... and don't shine on whatever sleeps up there.",
    "The switch is on a wall.",
-   "Sweep the torch along the walls, find the switch and tap it; avoid the bats."
+   "Sweep the torch over the empty wall, find the switch and tap it; never linger on the bats."
   ],
   "eggName": "",
   "eggHow": ""
@@ -1459,14 +1459,14 @@
   "folder": "Slide",
   "id": "slide_puzzle",
   "title": "SLIDE PUZZLE",
-  "hint": "Tap a tile next to the hole to slide it. Fix the portrait before the cat wakes up!",
+  "hint": "Tap a tile next to the hole to slide it. Fix Toni's portrait before he wakes up!",
   "egg": "",
   "n": 92,
   "desc": "Ricomponi il ritratto di Toni a tasselli: finito, Toni lecca lo schermo.",
   "hints": [
-   "Tap a tile next to the hole to slide it. Fix the portrait before the cat wakes up!",
+   "Tap a tile next to the hole to slide it. Fix Toni's portrait before he wakes up!",
    "Corners first.",
-   "Slide tiles into the hole to rebuild the cat's portrait, row by row."
+   "Slide tiles into the hole to rebuild Toni's portrait, row by row. Use the little numbers."
   ],
   "eggName": "",
   "eggHow": ""
@@ -1497,8 +1497,8 @@
   "desc": "Comandi allo specchio (la legenda mostra le frecce invertite), poi anche su/giù.",
   "hints": [
    "Guide the mouse along the path. Your finger moves him... the wrong way round.",
-   "Everything is reversed.",
-   "Move your finger the opposite way of where the mouse should go."
+   "Check the panel at the bottom: red arrows are swapped.",
+   "At first only LEFT and RIGHT are swapped; after the second mirror UP and DOWN are swapped too. Move slowly."
   ],
   "eggName": "",
   "eggHow": ""
@@ -1571,14 +1571,14 @@
   "folder": "BubbleNumbers",
   "id": "bubble_count",
   "title": "BUBBLE COUNT",
-  "hint": "Pop the bubbles from 1 to 8. Careful: some numbers are upside down.",
+  "hint": "Pop the bubbles from 1 to 9. Careful: not every number is written with digits.",
   "egg": "",
   "n": 99,
   "desc": "Scoppia le bolle da 1 a 8 (numeri scritti in modi diversi, alcuni capovolti). Il 9 non serve.",
   "hints": [
-   "Pop the bubbles from 1 to 8. Careful: some numbers are upside down.",
+   "Pop the bubbles from 1 to 9. Careful: not every number is written with digits.",
    "Read upside down too.",
-   "Pop 1 to 8 in order; some are written as words, dots or upside down."
+   "Pop 1 to 9 in order: words, Roman numbers, sums, a paw print (4 toes + 1 pad = 5) and upside-down digits."
   ],
   "eggName": "",
   "eggHow": ""
@@ -1606,7 +1606,7 @@
   "hint": "Drag the mouse to the cheese without being lit by the torch. Furniture casts shadows. Don't run!",
   "egg": "",
   "n": 101,
-  "desc": "Trascina il topolino al formaggio fuori dalla torcia del cane, dietro i mobili, senza correre.",
+  "desc": "Trascina il topolino al formaggio fuori dalla torcia del gatto di guardia, dietro i mobili (6, messi a caso), senza correre.",
   "hints": [
    "Drag the mouse to the cheese without being lit by the torch. Furniture casts shadows. Don't run!",
    "Shadows are safe.",
@@ -1683,12 +1683,12 @@
   "folder": "WaterJugs",
   "id": "four_liters",
   "title": "FOUR LITERS",
-  "hint": "A 5 and a 3 can make a 4. Pour back and forth.",
+  "hint": "Drag a jug under the tap to fill it. A 5 and a 3 can make a 4: pour back and forth.",
   "egg": "",
   "n": 106,
   "desc": "Il gatto vuole ESATTAMENTE 4 litri: caraffe da 5 L e 3 L, rubinetto, lavandino e ciotola.",
   "hints": [
-   "A 5 and a 3 can make a 4. Pour back and forth.",
+   "Drag a jug under the tap to fill it. A 5 and a 3 can make a 4: pour back and forth.",
    "Fill the 5 L jug and pour it into the 3 L one: 2 L stay in the big jug.",
    "Fill 5, pour into 3, empty 3, pour the 2 L into 3, fill 5, top up the 3: 4 L stay in the 5 L jug. Pour it in the bowl."
   ],
@@ -1750,11 +1750,11 @@
   "hint": "Not every wobble is a fish.",
   "egg": "",
   "n": 110,
-  "desc": "Tira solo al morso vero (cerchi grandi e '!'): bastano 2 pesci, 5 tentativi.",
+  "desc": "Tira solo quando il galleggiante va tutto sott'acqua con lo spruzzo; rana, foglia e papera sono finte. 3 pesci.",
   "hints": [
    "Not every wobble is a fish.",
-   "Twitches, frogs, leaves and ducks are fake-outs.",
-   "Tap only when the bobber goes fully under with a splash and a \"!\". The boot is free."
+   "Small twitches, frogs, leaves and ducks are fake-outs. Big rings mean a real fish is coming.",
+   "Wait for the big rings, then tap when the bobber goes fully under with a splash and a big \"!\". Two fish win; the boot is free."
   ],
   "eggName": "",
   "eggHow": ""
@@ -1814,7 +1814,7 @@
   "hint": "Swipe to push the cheese crates onto the red marks.",
   "egg": "",
   "n": 114,
-  "desc": "Sokoban: spingi le 3 casse di formaggio sui segni rossi; attento alla zampa del gatto che ogni tanto colpisce una casella.",
+  "desc": "Sokoban: spingi le 3 casse di formaggio sui segni rossi; attento alla zampa del gatto che colpisce una casella a caso (ombra prima).",
   "hints": [
    "Swipe to push the cheese crates onto the red marks.",
    "A crate pushed into a corner is stuck forever: plan the order (UNDO is free). Watch the shadow on the right, a paw is coming!",
@@ -1862,11 +1862,11 @@
   "hint": "Drag your mallet and score 3 goals before the cat does.",
   "egg": "",
   "n": 117,
-  "desc": "Air hockey contro il gatto (lento e distratto), primo a 3; sul 2-0 tocca lo zampone per farlo ritirare.",
+  "desc": "Air hockey contro il gatto, primo a 3 gol; sul 2-0 il gatto bara con lo zampone: toccalo per farlo ritirare.",
   "hints": [
    "Drag your mallet and score 3 goals before the cat does.",
-   "Hit the puck when the cat's paw is away. Bank shots off the side walls fool it.",
-   "At 2-0 the cat blocks its goal with a big paw: tap the paw to boop it away, then shoot quickly!"
+   "The cat is slow and gets distracted: aim for the corners of its wide goal when it looks away.",
+   "At 2-0 the cat blocks its goal with a big paw: tap near the paw to boop it away, then shoot quickly while it sulks!"
   ],
   "eggName": "",
   "eggHow": ""
@@ -2166,11 +2166,11 @@
   "hint": "Listen carefully, look closely, then accuse.",
   "egg": "",
   "n": 136,
-  "desc": "Giallo: ascolta gli alibi, ingrandisci la scena per trovare 3 indizi, ammanetta il bugiardo.",
+  "desc": "Giallo: ascolta gli alibi, ingrandisci la foto e trova 3 indizi che scagionano due sospettati e smascherano il bugiardo, poi ammanettalo.",
   "hints": [
    "Listen carefully, look closely, then accuse.",
-   "Compare each alibi with the case fact and with how the suspect LOOKS.",
-   "Dry dog in the rain, crumbs on the cookie-hater, or a 'flightless' parrot that's flying: cuff the liar."
+   "Each clue clears two suspects and points at one: compare it with the alibis (tap a clue icon to read it again).",
+   "Cake: dry dog prints but the dog 'slept in the rain'. Cookies: cat whiskers in the crumbs. Pie: a feather on the top shelf from the 'flightless' parrot. Cuff the liar."
   ],
   "eggName": "",
   "eggHow": ""
@@ -2294,7 +2294,7 @@
   "hint": "Watch the windsock before you fire.",
   "egg": "",
   "n": 144,
-  "desc": "Cannone pirata: angolo, potenza e vento per colpire 3 bersagli, poi aggancia il forziere col rampino.",
+  "desc": "Cannone pirata: angolo e potenza con la traiettoria arcobaleno (il vento può cambiare a metà volo), colpisci 3 bersagli, poi aggancia il forziere.",
   "hints": [
    "Watch the windsock before you fire.",
    "Wind pushes the ball: aim against it. Power goes up AND down - release at the right moment.",
@@ -2579,14 +2579,14 @@
   "folder": "BlackHole",
   "id": "black_hole",
   "title": "BLACK HOLE",
-  "hint": "Small problems sometimes need big solutions.",
+  "hint": "It keeps growing... what if it went the other way?",
   "egg": "",
   "n": 162,
-  "desc": "Allarga il buco nero col pizzico finché supera lo schermo: YOU ESCAPED.",
+  "desc": "Il buco nero cresce e inghiotte i pianeti: stringi due dita sopra (pizzico verso l'interno) finché collassa in un puntino e sparisce.",
   "hints": [
-   "Small problems sometimes need big solutions.",
-   "Make the black hole bigger.",
-   "Pinch outward until it fills the screen."
+   "It keeps growing... what if it went the other way?",
+   "Make the black hole smaller.",
+   "Pinch two fingers together on it until it collapses into a dot."
   ],
   "eggName": "",
   "eggHow": ""
@@ -3430,7 +3430,7 @@
   "hint": "Something sounds reversed.",
   "egg": "",
   "n": 215,
-  "desc": "L'uccellino canta al contrario: suona le 4 note in ordine inverso.",
+  "desc": "L'uccellino canta la sua melodia al contrario (lo dice, e le caselle si riempiono da destra): suona le 4 note in ordine inverso.",
   "hints": [
    "Something sounds reversed.",
    "Start from the last note.",
@@ -3904,12 +3904,108 @@
   "eggHow": ""
  },
  {
+  "folder": "HwWerepug",
+  "id": "hw_werepug",
+  "title": "TONI THE WERE-PUG",
+  "hint": "Maybe the problem isn't Toni...",
+  "egg": "",
+  "n": 245,
+  "desc": "La luna piena trasforma Toni in carlino mannaro: apri la scatola, prendi l'unico biscotto tondo e mettilo davanti alla luna finché la copre; la luce si spegne e Toni torna normale.",
+  "hints": [
+   "Maybe the problem isn't Toni...",
+   "The full moon causes the transformation.",
+   "Cover the moon completely with the biscuit."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "HwPumpkin",
+  "id": "hw_pumpkin",
+  "title": "THE PERFECT PUMPKIN",
+  "hint": "A carved pumpkin isn't enough for Halloween.",
+  "egg": "",
+  "n": 246,
+  "desc": "Intaglia a mano libera due occhi, naso e bocca, accendi la candela con l'accendino, mettila nella zucca e, come ultima mossa, spegni la luce: la zucca si illumina, prende vita e sorride.",
+  "hints": [
+   "A carved pumpkin isn't enough for Halloween.",
+   "It needs something to light it from the inside.",
+   "Light the candle, put it in the pumpkin and switch off the room light."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "HwGhost",
+  "id": "hw_ghost",
+  "title": "THE GHOST WHO CAN'T SCARE",
+  "hint": "The ghost doesn't look very convincing.",
+  "egg": "",
+  "n": 247,
+  "desc": "Il BOO non funziona: trascina via il lenzuolo (il fantasma resta invisibile) e mettilo sull'uomo, che si vede fantasma nello specchio e si spaventa.",
+  "hints": [
+   "The ghost doesn't look very convincing.",
+   "Maybe the sheet could be useful to someone else.",
+   "Take the sheet off the ghost and put it on the man."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "HwWitch",
+  "id": "hw_witch",
+  "title": "THE WITCH AND THE IMPOSSIBLE POTION",
+  "hint": "All the ingredients seem wrong.",
+  "egg": "",
+  "n": 248,
+  "desc": "Gli ingredienti danno solo reazioni comiche: trascina la parola BEAUTIFUL della frase nel calderone; pozione rosa, la strega diventa glamour (il nasone resta) e si fa un selfie.",
+  "hints": [
+   "All the ingredients seem wrong.",
+   "The answer might already be right in front of your eyes.",
+   "Drag the word 'beautiful' into the cauldron."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "HwZombie",
+  "id": "hw_zombie",
+  "title": "THE VEGETARIAN ZOMBIE",
+  "hint": "Maybe the problem isn't what he eats.",
+  "egg": "",
+  "n": 249,
+  "desc": "Cervello e hamburger rifiutati, il broccolo mangiato ma non basta: tocca le lettere del fumetto finché resta BRAIN, poi trascina il fumetto su un broccolo.",
+  "hints": [
+   "Maybe the problem isn't what he eats.",
+   "Read carefully what he's saying.",
+   "Turn BRAAAINS into BRAIN and drag the balloon onto the broccoli."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "HwTrickOrTreat",
+  "id": "hw_trick_or_treat",
+  "title": "TRICK OR TREAT!",
+  "hint": "The old lady recognises every visitor.",
+  "egg": "true_monster_pug",
+  "n": 250,
+  "desc": "Il campanello dà UN cioccolatino: componi un unico mostro (zombie davanti alla porta, Toni sotto i vestiti, zucca come testa, il fantasma avvolge tutti, la strega mette cappello e incantesimo) e suona. Easter egg: stacca il braccio dello zombie, daglielo a Toni, porta Toni sullo zerbino e suona con la mano.",
+  "hints": [
+   "The old lady recognises every visitor.",
+   "Maybe the five monsters could show up as one.",
+   "Combine the five characters into one costume and ring the bell."
+  ],
+  "eggName": "The Real Monster Is The Pug",
+  "eggHow": "Stacca il braccio dello zombie, daglielo a Toni (lo tiene in bocca), porta Toni sullo zerbino davanti alla porta e trascina la mano dello zombie sul campanello."
+ },
+ {
   "folder": "AlmostThere",
   "id": "almost_there",
   "title": "ALMOST THERE",
   "hint": "Only one point is missing.",
   "egg": "",
-  "n": 245,
+  "n": 251,
   "desc": "Il contatore dice 99/100: trascina giù la barra \"/\" e tocca il puntino nascosto sotto per l'ultimo punto.",
   "hints": [
    "Only one point is missing.",
@@ -3925,7 +4021,7 @@
   "title": "TONI'S FINAL EXAM",
   "hint": "Toni isn't a normal student.",
   "egg": "",
-  "n": 246,
+  "n": 252,
   "desc": "L'esame finale di Toni: 2+2 = BISCUIT, trova il bicchiere col biscotto, poi trascina giù il diploma fino a lui. CERTIFIED GOOD BOY!",
   "hints": [
    "Toni isn't a normal student.",

@@ -513,7 +513,7 @@ public static partial class LevelHints
         { "kitchen_escape", new[] { "The drawer opens. In the tray, drop one item onto another to combine them.", "String on magnet, then fish in the drain. Key on the lock, then pinch the white child-lock with two fingers." } },
         { "space_station", new[] { "Energy must flow from the reactor (left) to the dish (bottom right). Then tilt slowly and HOLD still.", "Decode each blink group with the table: short = small dash, long = long dash. Gaps separate the 3 digits." } },
         { "treasure_map", new[] { "The island compass is turned: N is where its red arrow points, not up. Wrong steps send you back.", "Rub the X fast. For the lock, tap the little map (top left): corner symbols 1, 2, 3 in order." } },
-        { "detective", new[] { "Compare each alibi with the case fact and with how the suspect LOOKS.", "Dry dog in the rain, crumbs on the cookie-hater, or a 'flightless' parrot that's flying: cuff the liar." } },
+        { "detective", new[] { "Each clue clears two suspects and points at one: compare it with the alibis (tap a clue icon to read it again).", "Cake: dry dog prints but the dog 'slept in the rain'. Cookies: cat whiskers in the crumbs. Pie: a feather on the top shelf from the 'flightless' parrot. Cuff the liar." } },
     };
 }
 #endif

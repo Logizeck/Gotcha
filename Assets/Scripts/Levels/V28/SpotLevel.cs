@@ -31,29 +31,54 @@ namespace Gotcha.Levels
         public override void OnLevelStart()
         {
             cam = Camera.main;
-            var idx = new List<int>();
-            for (int i = 0; i < top.Length; i++) idx.Add(i);
-            for (int k = 0; k < differences; k++)
+            // ogni differenza va su un oggetto dove SI VEDE: niente moneta capovolta o ruotata, niente cuore capovolto...
+            var types = new List<int> { Hide, Recolor, Flip, Bigger, Rotate };
+            for (int k = types.Count - 1; k > 0; k--) { int j = Random.Range(0, k + 1); (types[k], types[j]) = (types[j], types[k]); }
+            var free = new List<int>();
+            for (int i = 0; i < top.Length; i++) free.Add(i);
+            for (int k = 0; k < differences && free.Count > 0; k++)
             {
-                int j = Random.Range(0, idx.Count);
-                diff.Add(idx[j]);
-                idx.RemoveAt(j);
-            }
-            for (int k = 0; k < diff.Count; k++)
-            {
+                int type = types[k % types.Count];
+                var ok = free.FindAll(i => (Allowed(top[i].name) & type) != 0);
+                if (ok.Count == 0) { type = Hide; ok = free; }
+                int item = ok[Random.Range(0, ok.Count)];
+                free.Remove(item);
+                diff.Add(item);
                 // a volte la differenza è nel disegno di sopra
-                Transform t = Random.value < 0.5f ? bottom[diff[k]] : top[diff[k]];
-                switch (k % 5)
-                {
-                    case 0: t.gameObject.SetActive(false); break;
-                    case 1: foreach (SpriteRenderer sr in t.GetComponentsInChildren<SpriteRenderer>()) sr.color = new Color(0.45f, 0.75f, 1f); break;
-                    case 2: t.localScale = new Vector3(-t.localScale.x, t.localScale.y, 1f); break;
-                    case 3: t.localScale *= 1.35f; break;
-                    default: t.localRotation = Quaternion.Euler(0, 0, 35f); break;
-                }
+                Apply(Random.value < 0.5f ? bottom[item] : top[item], type);
             }
             Count();
             if (bubble != null) { bubble.Show("Five differences. Look closely!"); StartCoroutine(HideLater(2f)); }
+        }
+
+        const int Hide = 1, Recolor = 2, Flip = 4, Bigger = 8, Rotate = 16;
+
+        /// <summary>Differenze che si notano su ciascun oggetto (nome = sprite).</summary>
+        static int Allowed(string item)
+        {
+            switch (item)
+            {
+                case "coin": case "balloon": return Hide | Recolor | Bigger;
+                case "heart": case "apple": case "bell": case "cherry": return Hide | Recolor | Bigger | Rotate;
+                default: return Hide | Recolor | Flip | Bigger | Rotate;   // tazza, carota, formaggio, pesce, nota
+            }
+        }
+
+        static void Apply(Transform t, int type)
+        {
+            switch (type)
+            {
+                case Hide: t.gameObject.SetActive(false); break;
+                case Recolor:
+                    // colore ben diverso: blu sugli oggetti rossi/arancioni, verde acceso sugli altri
+                    bool warm = t.name == "apple" || t.name == "heart" || t.name == "cherry" || t.name == "carrot";
+                    Color c = warm ? new Color(0.3f, 0.55f, 1f) : new Color(0.35f, 0.95f, 0.35f);
+                    foreach (SpriteRenderer sr in t.GetComponentsInChildren<SpriteRenderer>()) sr.color = c;
+                    break;
+                case Flip: t.localScale = new Vector3(-t.localScale.x, t.localScale.y, 1f); break;
+                case Bigger: t.localScale *= 1.5f; break;
+                default: t.localRotation = Quaternion.Euler(0, 0, 60f); break;
+            }
         }
 
         void Count() { counter.text = found.Count + " / " + differences + "      X " + wrong + "/" + maxWrong; }

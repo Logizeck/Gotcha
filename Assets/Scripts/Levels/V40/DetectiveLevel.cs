@@ -8,10 +8,11 @@ namespace Gotcha.Levels
     /// <summary>
     /// Livello "Detective" — tre sospettati (gatto, cane, pappagallo) e un caso a caso fra tre. 1) Tocca ogni sospettato
     /// per sentire il suo alibi. 2) Lente d'ingrandimento: allarga due dita sulla foto della scena del crimine e tocca i 3
-    /// indizi minuscoli (impronte di fango, una piuma, briciole) — si possono toccare solo ingranditi. 3) Trascina le
-    /// manette su chi ha mentito: il suo alibi contraddice ciò che si vede (il cane "ha dormito in giardino sotto la
-    /// pioggia" ma è asciutto; il gatto "odia i biscotti" ma ha le briciole sui baffi; il pappagallo "non può volare"
-    /// ma sta svolazzando). Accusa sbagliata = un tentativo in meno (3).
+    /// indizi minuscoli (impronte, una piuma, briciole) — si possono toccare solo ingranditi. Ogni indizio dice qualcosa
+    /// di preciso SU QUESTO CASO: due scagionano gli innocenti e uno smaschera il bugiardo (es. caso della torta: impronte
+    /// di cane ASCIUTTE accanto alla torta, ma il cane dice di aver dormito sotto la pioggia). Gli indizi trovati restano
+    /// scritti in alto e si possono rileggere toccando le icone. 3) Trascina le manette su chi ha mentito. Accusa
+    /// sbagliata = un tentativo in meno (3).
     /// </summary>
     public class DetectiveLevel : LevelController
     {
@@ -32,6 +33,26 @@ namespace Gotcha.Levels
             "Meow... the fancy fish was out of stock, OK?!",
             "SQUAWK! A miracle! My wing is healed! ...Also I ate the pie.",
         };
+        // indizi per caso (impronte, piuma, briciole): frase completa e appunto breve
+        static readonly string[][] ClueText =
+        {
+            new[] { "Big DOG paw prints right by the cake... and they're totally DRY!",
+                    "The parrot's feather is inside its cage: the parrot stayed home all night.",
+                    "Cake crumbs leading to the DOG bed." },
+            new[] { "Muddy DOG paw prints going to the garden, not the kitchen.",
+                    "A green feather on the windowsill: the parrot really was singing there.",
+                    "Cookie crumbs... with a few CAT whiskers stuck in them!" },
+            new[] { "Paw prints stop at the bottom of the shelf: no paws climbed up there.",
+                    "A green feather on the TOP shelf, right next to the pie!",
+                    "Pie crumbs fell from up high... like something FLEW away with it." },
+        };
+        static readonly string[][] ClueNotes =
+        {
+            new[] { "dry dog prints", "parrot stayed in", "crumbs to dog bed" },
+            new[] { "dog went to garden", "parrot on sill", "cat whiskers in crumbs" },
+            new[] { "no paws up the shelf", "feather on top shelf", "crumbs fell from above" },
+        };
+
         static readonly string[][] Protests =
         {
             new[] { "Me?! I'm innocent AND fabulous.", "Me?! I'm a good boy! The goodest!", "Squawk! LAWYER! I want a LAWYER!" },
@@ -216,7 +237,7 @@ namespace Gotcha.Levels
                 if (moved) { photo.position += (Vector3)delta; Clamp(); }
                 lastDrag = w;
             }
-            if (ended && dragging && !moved) TapPhoto(w);
+            if (ended && dragging && !moved && !TapClueIcon(w)) TapPhoto(w);
             if (ended) dragging = false;
         }
 
@@ -242,14 +263,14 @@ namespace Gotcha.Levels
             clueIcons[i].color = Color.white;
             Sfx.Play(this, "ding", 0.7f);
             Haptics.Light();
-            string[] names = { "Muddy paw prints!", "A green feather!", "Cookie crumbs!" };
-            Say(names[i], null, 1.4f);
+            Say("CLUE: " + ClueText[caseId][i], null, 3.2f);
+            ShowNotes();
             Transform m = clueMarks[i].transform;
             Vector3 s = m.localScale;
             for (float k = 0f; k < 1f; k += Time.deltaTime / 0.35f) { m.localScale = s * (1f + Mathf.Sin(k * Mathf.PI) * 0.6f); yield return null; }
             m.localScale = s;
             if (!(found[0] && found[1] && found[2])) { busy = false; yield break; }
-            yield return new WaitForSeconds(1.0f);
+            yield return new WaitForSeconds(2.6f);
             // si torna alla foto intera e poi alla fila dei sospettati
             float from = zoom;
             Vector3 p0 = photo.localPosition;
@@ -272,6 +293,26 @@ namespace Gotcha.Levels
             busy = false;
         }
 
+        /// <summary>In alto: il caso, il fatto e gli appunti sugli indizi trovati.</summary>
+        void ShowNotes()
+        {
+            var notes = new System.Collections.Generic.List<string>();
+            for (int i = 0; i < found.Length; i++) if (found[i]) notes.Add(ClueNotes[caseId][i]);
+            caseText.text = Titles[caseId] + "\n" + Facts[caseId] + (notes.Count > 0 ? "\nClues: " + string.Join(", ", notes) : "");
+        }
+
+        /// <summary>Toccando l'icona di un indizio trovato si rilegge che cosa dice.</summary>
+        bool TapClueIcon(Vector2 w)
+        {
+            for (int i = 0; i < clueIcons.Length; i++)
+            {
+                if (!found[i] || Vector2.Distance(w, clueIcons[i].transform.position) > 0.35f) continue;
+                Say(ClueText[caseId][i], null, 3.2f);
+                return true;
+            }
+            return false;
+        }
+
         // ---------- fase 3: l'accusa ----------
 
         void UpdateAccuse()
@@ -286,6 +327,7 @@ namespace Gotcha.Levels
             {
                 if (PointerInput.IsOverUi()) return;
                 if (Vector2.Distance(w, cuffs.position) < 0.7f) { holdingCuffs = true; cuffOffset = (Vector2)cuffs.position - w; return; }
+                if (TapClueIcon(w)) return;
                 int s = SuspectAt(w);
                 if (s >= 0) Hear(s);
                 return;

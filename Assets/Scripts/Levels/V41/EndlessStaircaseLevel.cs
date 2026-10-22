@@ -154,6 +154,12 @@ namespace Gotcha.Levels
             busy = false;
         }
 
+        static IEnumerator HideAfter(System.Collections.Generic.List<Transform> list, float seconds)
+        {
+            yield return new WaitForSeconds(seconds);
+            foreach (Transform t in list) if (t != null) t.gameObject.SetActive(false);
+        }
+
         IEnumerator Summit()
         {
             busy = true;
@@ -162,8 +168,10 @@ namespace Gotcha.Levels
             stepsText.text = "STEPS TO THE TOP: 1";
             // la scala si comprime: i gradini sopra l'omino spariscono e la vetta arriva lì
             Vector3 top = climber.position + (Vector3)stepDelta;
+            var vanishing = new System.Collections.Generic.List<Transform>();
             foreach (Transform s in steps)
-                if (s.position.x > climber.position.x + 0.3f) StartCoroutine(S41LKit.ScaleTo(s, new Vector3(1f, 0.01f, 1f), 0.4f));
+                if (s.position.x > climber.position.x + 0.3f) { vanishing.Add(s); StartCoroutine(S41LKit.ScaleTo(s, new Vector3(1f, 0.01f, 1f), 0.4f)); }
+            StartCoroutine(HideAfter(vanishing, 0.45f));   // schiacciati restava una riga d'inchiostro: poi spariscono del tutto
             summit.position = top;
             summit.gameObject.SetActive(true);
             Vector3 ss = summit.localScale;

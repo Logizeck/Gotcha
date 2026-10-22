@@ -6,9 +6,10 @@ using Gotcha.Core;
 namespace Gotcha.Levels
 {
     /// <summary>
-    /// Livello 97 — il topo furtivo. Il cane di guardia gira la torcia di qua e di là. Trascina il topolino fino al
-    /// formaggio restando al buio: i mobili fanno ombra (dietro al divano la luce non arriva). E piano: se il topo corre,
-    /// le zampette fanno rumore e il cane si gira verso di lui. (Nel codice "cat" e "fish" sono il topo e il formaggio.)
+    /// Livello 101 — il topo furtivo. Il gatto di guardia gira la torcia di qua e di là. Trascina il topolino fino al
+    /// formaggio restando al buio: i mobili (sei, messi a caso a ogni partita) fanno ombra. E piano: se il topo corre,
+    /// le zampette fanno rumore e la torcia scatta verso di lui. (Nel codice "cat" e "fish" sono il topo e il
+    /// formaggio, "dog" è il gatto di guardia.)
     /// </summary>
     public class SneakyCatLevel : LevelController
     {
@@ -20,7 +21,16 @@ namespace Gotcha.Levels
         [SerializeField] SpriteRenderer noiseIcon;
         [SerializeField] SpeechBubble bubble;
         [SerializeField] float halfAngle = 20f, length = 7f;
-        [SerializeField] float sweepRange = 65f, sweepSpeed = 0.55f;
+        [SerializeField] float sweepRange = 65f, sweepSpeed = 0.8f;
+        [Tooltip("Gradi al secondo della torcia: in perlustrazione e quando sente il topo.")]
+        [SerializeField] float sweepTurn = 110f, chaseTurn = 200f;
+        [Tooltip("Posti possibili dei mobili (coordinate del livello): ne vengono usati tanti quanti i mobili, a caso.")]
+        [SerializeField] Vector2[] furnitureSlots =
+        {
+            new Vector2(-1.2f, 0.9f), new Vector2(0.9f, 0.95f), new Vector2(-0.1f, -0.15f), new Vector2(1.6f, -0.5f),
+            new Vector2(-1.65f, -0.9f), new Vector2(0.45f, -1.6f), new Vector2(-0.8f, -2.4f), new Vector2(1.7f, -2.25f),
+            new Vector2(-2.0f, 0.1f),
+        };
         [SerializeField] float maxQuiet = 2.6f, catSpeed = 6f;
 
         float look, sweepClock, seen, noise;
@@ -31,7 +41,25 @@ namespace Gotcha.Levels
         {
             cam = Camera.main;
             sweepClock = Random.Range(0f, 6f);
+            PlaceFurniture();
             if (bubble != null) { bubble.Show("Psst... the cheese. Quietly."); StartCoroutine(HideLater(2f)); }
+        }
+
+        /// <summary>Mobili in posti a caso; il divano (largo) solo dove c'è spazio ai lati.</summary>
+        void PlaceFurniture()
+        {
+            var free = new System.Collections.Generic.List<Vector2>(furnitureSlots);
+            for (int i = free.Count - 1; i > 0; i--) { int j = Random.Range(0, i + 1); (free[i], free[j]) = (free[j], free[i]); }
+            foreach (Collider2D f in furniture)
+            {
+                if (f == null || free.Count == 0) continue;
+                bool wide = f is BoxCollider2D b && b.size.x > 1.5f;
+                int k = wide ? free.FindIndex(v => Mathf.Abs(v.x) <= 1.2f) : 0;
+                if (k < 0) k = 0;
+                f.transform.localPosition = new Vector3(free[k].x, free[k].y, f.transform.localPosition.z);
+                free.RemoveAt(k);
+            }
+            Physics2D.SyncTransforms();
         }
 
         bool Lit(Vector2 p)
@@ -49,12 +77,12 @@ namespace Gotcha.Levels
         {
             if (done || IsFinished) return;
             float dt = Time.deltaTime;
-            // il cane: spazza, ma se sente rumore punta verso il gatto
+            // il gatto di guardia: spazza con la torcia, ma se sente rumore la punta verso il topo
             Vector2 toCat = cat.position - cone.position;
             float catAngle = Vector2.SignedAngle(Vector2.down, toCat);
             sweepClock += dt;
             float want = noise > 1f ? catAngle : Mathf.Sin(sweepClock * sweepSpeed) * sweepRange;
-            look = Mathf.MoveTowardsAngle(look, want, (noise > 1f ? 90f : 60f) * dt);
+            look = Mathf.MoveTowardsAngle(look, want, (noise > 1f ? chaseTurn : sweepTurn) * dt);
             cone.localRotation = Quaternion.Euler(0, 0, look);
 
             float moved = 0f;
@@ -72,7 +100,7 @@ namespace Gotcha.Levels
             }
             else holding = false;
             float speed = moved / Mathf.Max(dt, 1e-4f);
-            noise = Mathf.Max(0f, noise + (speed > maxQuiet ? dt * 3f : -dt * 1.5f));
+            noise = Mathf.Max(0f, noise + (speed > maxQuiet ? dt * 5f : -dt * 1.5f));   // sente subito il topo che corre
             if (noiseIcon != null) noiseIcon.color = new Color(1f, 1f, 1f, Mathf.Clamp01(noise));
 
             seen = Lit(cat.position) ? seen + dt : 0f;
@@ -84,7 +112,8 @@ namespace Gotcha.Levels
         {
             done = true;
             Sfx.Play(this, "bonk", 1f);
-            if (bubble != null) bubble.Show("WOOF! WOOF! I SEE YOU!");
+            Haptics.Medium();
+            if (bubble != null) bubble.Show("MEOW! I SEE YOU, LITTLE MOUSE!");
             Vector3 d = dog.position;
             for (float k = 0f; k < 0.8f; k += Time.deltaTime) { dog.position = d + Vector3.up * Mathf.Abs(Mathf.Sin(k * 20f)) * 0.15f; yield return null; }
             yield return new WaitForSeconds(0.6f);

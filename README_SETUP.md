@@ -267,6 +267,35 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.61 — Speciale Halloween
+- **Livelli 245-250, speciale Halloween** (Almost There e l'esame finale di Toni scalano al 251 e al 252):
+- **245 Toni the Were-pug** — La luna piena trasforma Toni in carlino mannaro: apri la scatola, prendi l'unico biscotto tondo e mettilo davanti alla luna finché la copre; la luce si spegne e Toni torna normale.
+- **246 The Perfect Pumpkin** — Intaglia a mano libera due occhi, naso e bocca, accendi la candela con l'accendino, mettila nella zucca e, come ultima mossa, spegni la luce: la zucca si illumina, prende vita e sorride.
+- **247 The Ghost who Can't Scare** — Il BOO non funziona: trascina via il lenzuolo (il fantasma resta invisibile) e mettilo sull'uomo, che si vede fantasma nello specchio e si spaventa.
+- **248 The Witch and the Impossible Potion** — Gli ingredienti danno solo reazioni comiche: trascina la parola BEAUTIFUL della frase nel calderone; pozione rosa, la strega diventa glamour (il nasone resta) e si fa un selfie.
+- **249 The Vegetarian Zombie** — Cervello e hamburger rifiutati, il broccolo mangiato ma non basta: tocca le lettere del fumetto finché resta BRAIN, poi trascina il fumetto su un broccolo.
+- **250 Trick Or Treat!** — Il campanello dà UN cioccolatino: componi un unico mostro (zombie davanti alla porta, Toni sotto i vestiti, zucca come testa, il fantasma avvolge tutti, la strega mette cappello e incantesimo) e suona. Easter egg: stacca il braccio dello zombie, daglielo a Toni, porta Toni sullo zerbino e suona con la mano.
+  Ogni livello ha una macchina a stati in `Assets/Scripts/Levels/Halloween/Logic/` (C# puro, assembly
+  `Gotcha.Halloween.Logic`), separata da input e grafica. 110 test NUnit in `Assets/Tests/EditMode/` (eseguiti fuori
+  da Unity: tutti superati); in Unity compaiono nel Test Runner aggiungendo il pacchetto *Test Framework*.
+  Easter egg *The Real Monster Is The Pug* (250).
+- **Musica di Halloween** (nuovo brano `Halloween.ogg`) per lo speciale e per i livelli con mostri, fantasmi,
+  vampiri e draghi: Two Doors, Knock Knock, Haunted House, Battery Vampire, Too Bright, Ghost Selfie,
+  The Wrong Shadow, The Cowardly Dragon, The Fake Boss, Heartbeat, Rhythm.
+- **Puzzle degli Easter egg**: pulsante "TONI'S PUZZLE" nel menu dei livelli; immagine di Toni in palestra in 50
+  pezzi (5 x 10), un pezzo per ogni Easter egg trovato (in ordine sparso fisso). Oggi gli Easter egg sono 19.
+- **Correzioni**: 194 il gatto non vola più; 33 l'ananas non è mai nella ricetta e se lo metti vieni preso in giro
+  (frase su misura anche nella schermata GOTCHA!, `LevelController.Fail(taunt)`); 35/57/87 inclinazione misurata in
+  angoli rispetto a come tieni il telefono all'inizio (media dei primi istanti); 82 differenze sempre visibili;
+  101 guardia gatto, 6 mobili in posti casuali, torcia più reattiva; 113 (e tutti i fumetti ruotati) il testo si
+  misura nelle coordinate del fumetto; 114 la zampa colpisce caselle casuali; 136 indizi coerenti col caso, appunti
+  in alto e rilettura toccando le icone; 140 tronco lungo prima del primo scambio, scambi più vicini; 142 guardiano
+  davanti, gatto dietro le statue e nascosto all'inizio; 144 traiettoria arcobaleno con bersaglio evidenziato, scia
+  del colpo, raffiche di vento a metà volo; 162 il buco nero cresce e si vince rimpicciolendolo; 215 l'uccellino dice
+  che canta al contrario e le caselle si riempiono da destra; 222 niente urti quando l'apertura è davanti al topo;
+  244 i gradini schiacciati spariscono del tutto.
+- Versione del costruttore 56.
+
 ## Versione 0.60
 - **The Two-Finger Pianist**: dopo il terzo accordo il livello si bloccava sull'ultima nota (cercava di mostrare un
   quarto accordo inesistente, andava in errore e restava fermo). Ora parte il gran finale e il livello si supera.

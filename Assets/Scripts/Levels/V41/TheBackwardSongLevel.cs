@@ -5,9 +5,10 @@ using Gotcha.Components;
 namespace Gotcha.Levels
 {
     /// <summary>
-    /// Livello "The backward song" — un uccellino cerca di ricordare una melodia di 4 note ma la canta al contrario.
-    /// Bisogna ascoltarla (i tasti si illuminano) e suonare i quattro tasti in ordine INVERSO, senza fretta. Toccando
-    /// l'uccellino la ricanta. Tre sequenze sbagliate = sconfitta.
+    /// Livello "The backward song" — un uccellino ha imparato la sua melodia di 4 note allo specchio e la canta al
+    /// contrario (lo dice, e mentre canta le caselle della melodia si riempiono da DESTRA a sinistra). Bisogna ascoltarla
+    /// (i tasti si illuminano) e suonare i quattro tasti in ordine INVERSO, senza fretta. Toccando l'uccellino la
+    /// ricanta. Tre sequenze sbagliate = sconfitta.
     /// </summary>
     public class TheBackwardSongLevel : LevelController
     {
@@ -59,23 +60,27 @@ namespace Gotcha.Levels
         IEnumerator Intro()
         {
             busy = true;
-            S41HKit.Say(bubble, "Tweet! My song goes like... this?");
-            yield return new WaitForSeconds(1.2f);
+            S41HKit.Say(bubble, "Tweet! I learned my song in a mirror... so I sing it BACKWARDS!");
+            yield return new WaitForSeconds(2.2f);
             yield return StartCoroutine(Sing(heard, false));
-            S41HKit.Say(bubble, "Hmm, sounds odd. Help me? (tap me to hear it again)");
+            S41HKit.Say(bubble, "Play it the RIGHT way round for me! (tap me to hear it again)");
             busy = false;
         }
 
         IEnumerator Sing(int[] seq, bool happy)
         {
+            // cantando al contrario, le caselle della melodia si riempiono da destra a sinistra: si vede che va girata
+            if (!happy) for (int d = 0; d < inputDots.Length; d++) inputDots[d].color = new Color(1f, 1f, 1f, 0.35f);
             for (int i = 0; i < seq.Length; i++)
             {
+                if (!happy && inputDots.Length >= seq.Length) inputDots[inputDots.Length - 1 - i].color = PadColor[seq[i]];
                 Light(seq[i], true);
                 StartCoroutine(S41HKit.Move(bird, birdHome + Vector3.up * (happy ? 0.3f : 0.12f), 0.12f));
                 yield return new WaitForSeconds(0.35f);
                 bird.localPosition = birdHome;
                 yield return new WaitForSeconds(0.25f);
             }
+            if (!happy) { yield return new WaitForSeconds(0.8f); UpdateTexts(); }   // le caselle tornano per la risposta
         }
 
         /// <summary>Accende un tasto e fa partire la sua nota (e una notina dal becco se canta l'uccello).</summary>

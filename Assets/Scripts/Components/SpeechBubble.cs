@@ -208,11 +208,7 @@ namespace Gotcha.Components
         {
             MeshRenderer mr = text.GetComponent<MeshRenderer>();
             if (mr == null || artSr == null) return false;
-            Vector3 ls = transform.lossyScale;
-            float sx = Mathf.Max(Mathf.Abs(ls.x), 1e-6f), sy = Mathf.Max(Mathf.Abs(ls.y), 1e-6f);
-            Bounds t = mr.bounds;
-            Vector2 tc = transform.InverseTransformPoint(t.center);
-            Vector2 tsz = new Vector2(t.size.x / sx, t.size.y / sy);
+            TextBox(out Vector2 tc, out Vector2 tsz);
             float w = artSr.size.x, h = artSr.size.y;
             Vector2 c = art.localPosition;
             float bodyCy = c.y + ((h * 0.5f - BodyInsetTop) + (-h * 0.5f + BodyInsetBottom)) * 0.5f;
@@ -283,9 +279,30 @@ namespace Gotcha.Components
         /// <summary>Dimensioni del testo nelle coordinate del fumetto (indipendenti dalla scala del fumetto).</summary>
         Vector2 LocalSize()
         {
-            Vector3 b = text.GetComponent<MeshRenderer>().bounds.size;
+            TextBox(out _, out Vector2 size);
+            return size;
+        }
+
+        /// <summary>
+        /// Centro e dimensioni del testo disegnato nelle coordinate del fumetto. Si usano i limiti LOCALI del testo: quelli
+        /// "del mondo" sono allineati allo schermo e, con il fumetto ruotato (es. telefono girato), scambierebbero
+        /// larghezza e altezza, e il fumetto verrebbe costruito nell'orientamento sbagliato.
+        /// </summary>
+        void TextBox(out Vector2 center, out Vector2 size)
+        {
+            MeshRenderer mr = text.GetComponent<MeshRenderer>();
+#if UNITY_2021_2_OR_NEWER
+            Bounds lb = mr.localBounds;
+            Transform tt = text.transform;
+            // il testo è figlio diretto del fumetto: basta la sua scala locale
+            size = new Vector2(lb.size.x * Mathf.Abs(tt.localScale.x), lb.size.y * Mathf.Abs(tt.localScale.y));
+            center = transform.InverseTransformPoint(tt.TransformPoint(lb.center));
+#else
+            Bounds b = mr.bounds;
             Vector3 l = transform.lossyScale;
-            return new Vector2(b.x / Mathf.Max(Mathf.Abs(l.x), 1e-6f), b.y / Mathf.Max(Mathf.Abs(l.y), 1e-6f));
+            size = new Vector2(b.size.x / Mathf.Max(Mathf.Abs(l.x), 1e-6f), b.size.y / Mathf.Max(Mathf.Abs(l.y), 1e-6f));
+            center = transform.InverseTransformPoint(b.center);
+#endif
         }
 
         /// <summary>A capo sulle parole: la larghezza di ogni parola è stimata dalla larghezza media misurata.</summary>
