@@ -33,10 +33,12 @@ namespace Gotcha.Levels
         int falls;
         Vector2 vaseOffset;
         Vector3 tableSpot;
+        float catBaseY;   // altezza dei piedi: il saltello della camminata parte sempre da qui
 
         protected override void Begin()
         {
             tableSpot = vase.localPosition;
+            catBaseY = cat.localPosition.y;
             Marks(false);
             UpdateUi();
             SetTime(t);
@@ -134,7 +136,7 @@ namespace Gotcha.Levels
         /// <summary>Ricostruisce la scena registrata all'istante t (0..1).</summary>
         void SetTime(float time)
         {
-            cat.localPosition = new Vector3(Mathf.Lerp(-0.6f, 1.15f, Mathf.Clamp01(time / SwatT)), cat.localPosition.y, 0f) + Vector3.up * (time < SwatT ? Mathf.Abs(Mathf.Sin(time * 60f)) * 0.04f : 0f);
+            cat.localPosition = new Vector3(Mathf.Lerp(-0.6f, 1.15f, Mathf.Clamp01(time / SwatT)), catBaseY, 0f) + Vector3.up * (time < SwatT ? Mathf.Abs(Mathf.Sin(time * 60f)) * 0.04f : 0f);
             if (catArt != null) catArt.sprite = time > SwatT - 0.02f && time < PushT + 0.06f ? catSwat : catWalk;
             if (saved)
             {

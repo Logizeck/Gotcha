@@ -88,10 +88,11 @@ namespace Gotcha.Levels
             if (bubble != null) { bubble.Show("Pizza time! Grandma's recipe is on the board."); StartCoroutine(HideLater(2.4f)); }
         }
 
-        /// <summary>3 o 4 ingredienti a caso (sempre almeno pomodoro o mozzarella); il peperoncino mai.</summary>
+        /// <summary>3 o 4 ingredienti a caso (sempre almeno pomodoro o mozzarella); peperoncino e ananas mai.</summary>
         void PickRecipe()
         {
             var pool = new List<string>(RecipePool);
+            pool.Remove("pineapple");   // la nonna non ha mai messo l'ananas sulla pizza
             for (int i = pool.Count - 1; i > 0; i--) { int j = Random.Range(0, i + 1); (pool[i], pool[j]) = (pool[j], pool[i]); }
             int n = Random.Range(3, 5);
             var pick = pool.GetRange(0, n);
@@ -360,8 +361,16 @@ namespace Gotcha.Levels
             }
             else
             {
-                string why = extra && added.Contains("pineapple") && System.Array.IndexOf(required, "pineapple") < 0 ? "PINEAPPLE?! Yuck!"
-                    : extra ? "Yuck! That's not on the board!" : "Hmm... something's missing.";
+                if (added.Contains("pineapple"))
+                {
+                    // l'ananas non è mai nella ricetta: chi lo mette viene preso in giro (anche nella schermata GOTCHA!)
+                    const string Gross = "Pineapple on pizza?! Want some ketchup on it too? GROSS!";
+                    if (bubble != null) bubble.Show(Gross);
+                    yield return new WaitForSeconds(2.4f);
+                    Fail(Gross);
+                    yield break;
+                }
+                string why = extra ? "Yuck! That's not on the board!" : "Hmm... something's missing.";
                 if (bubble != null) bubble.Show(why);
                 yield return new WaitForSeconds(1.6f);
                 Fail();

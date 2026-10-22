@@ -49,7 +49,10 @@ namespace Gotcha.Levels
         int balls = 6, hooks = 3, hits, windIndex;
         bool[] hit;
         bool aiming, charging, sinking;
-        float chargeT, powerValue;
+        float chargeT, powerValue, lastPower = 0.6f;
+        LineRenderer preview, trail;          // traiettoria prevista (arcobaleno) e scia del colpo
+        Transform previewTarget;               // il bersaglio che la traiettoria prevista colpisce
+        readonly System.Collections.Generic.List<Vector3> trailPts = new System.Collections.Generic.List<Vector3>();
 
         public override void OnLevelStart()
         {
@@ -65,6 +68,9 @@ namespace Gotcha.Levels
             chest.gameObject.SetActive(false);
             foreach (Transform c in coins) c.gameObject.SetActive(false);
             foreach (Transform b in bubbles) b.gameObject.SetActive(false);
+            preview = MakeLine("Preview", 0.09f, 22);
+            trail = MakeLine("Trail", 0.06f, 21);
+            foreach (Transform d in aimDots) d.gameObject.SetActive(false);   // al loro posto la traiettoria completa
             SetWind(Winds[0]);
             SetAngle(45f);
             power.localScale = new Vector3(1f, 0f, 1f);
@@ -94,6 +100,96 @@ namespace Gotcha.Levels
             for (int i = 0; i < aimDots.Length; i++) aimDots[i].position = muzzle.position + (Vector3)(dir * (0.35f + i * 0.32f));
         }
 
+        // ---------- traiettoria arcobaleno e raffiche ----------
+
+        LineRenderer MakeLine(string name, float width, int order)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(transform, false);
+            LineRenderer lr = go.AddComponent<LineRenderer>();
+            lr.useWorldSpace = true;
+            lr.material = new Material(Shader.Find("Sprites/Default"));
+            lr.widthMultiplier = width;
+            lr.numCapVertices = 4;
+            lr.numCornerVertices = 2;
+            lr.sortingOrder = order;
+            var g = new Gradient();
+            g.SetKeys(
+                new[] { new GradientColorKey(new Color(1f, 0.3f, 0.3f), 0f), new GradientColorKey(new Color(1f, 0.65f, 0.2f), 0.2f),
+                        new GradientColorKey(new Color(1f, 0.95f, 0.3f), 0.4f), new GradientColorKey(new Color(0.4f, 0.95f, 0.45f), 0.6f),
+                        new GradientColorKey(new Color(0.35f, 0.7f, 1f), 0.8f), new GradientColorKey(new Color(0.75f, 0.45f, 1f), 1f) },
+                new[] { new GradientAlphaKey(0.95f, 0f), new GradientAlphaKey(0.85f, 0.7f), new GradientAlphaKey(0.35f, 1f) });
+            lr.colorGradient = g;
+            lr.positionCount = 0;
+            return lr;
+        }
+
+        /// <summary>
+        /// Traiettoria prevista con il vento di ADESSO (una raffica durante il volo può spostarla): arco arcobaleno
+        /// fino al punto d'arrivo, e il bersaglio che verrebbe colpito pulsa.
+        /// </summary>
+        void UpdatePreview(float p)
+        {
+            if (preview == null) return;
+            Vector2 dir = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
+            Vector2 v = dir * Mathf.Lerp(minSpeed, maxSpeed, p);
+            Vector2 pos = muzzle.position;
+            var pts = new System.Collections.Generic.List<Vector3> { pos };
+            Transform aimed = null;
+            const float dt = 1f / 60f;
+            for (int i = 0; i < 300 && aimed == null; i++)
+            {
+                v += new Vector2(wind, -gravity) * dt;
+                pos += v * dt;
+                if (i % 2 == 0) pts.Add(pos);
+                if (chest.gameObject.activeInHierarchy) { if (Vector2.Distance(pos, chest.position) < 0.55f) aimed = chest; }
+                else for (int t = 0; t < targets.Length; t++)
+                        if (!hit[t] && Vector2.Distance(pos, targets[t].position) < hitRadius) { aimed = targets[t]; break; }
+                if (pos.y < waterY && v.y < 0f && pos.x > -0.8f) break;
+                if (pos.y < -5.5f || Mathf.Abs(pos.x) > 3.3f || pos.y > 9f) break;
+            }
+            pts.Add(pos);
+            preview.positionCount = pts.Count;
+            preview.SetPositions(pts.ToArray());
+            if (previewTarget != aimed) { if (previewTarget != null) previewTarget.localScale = TargetScale(previewTarget); previewTarget = aimed; }
+            if (previewTarget != null) previewTarget.localScale = TargetScale(previewTarget) * (1f + 0.12f * Mathf.Abs(Mathf.Sin(clock * 8f)));
+        }
+
+        readonly System.Collections.Generic.Dictionary<Transform, Vector3> targetScales = new System.Collections.Generic.Dictionary<Transform, Vector3>();
+        Vector3 TargetScale(Transform t)
+        {
+            if (!targetScales.TryGetValue(t, out Vector3 s)) { s = t.localScale; targetScales[t] = s; }
+            return s;
+        }
+
+        void HidePreview()
+        {
+            if (preview != null) preview.positionCount = 0;
+            if (previewTarget != null) { previewTarget.localScale = TargetScale(previewTarget); previewTarget = null; }
+        }
+
+        void StartTrail(Vector2 p) { trailPts.Clear(); trailPts.Add(p); if (trail != null) trail.positionCount = 0; }
+
+        void AddTrail(Vector2 p)
+        {
+            if (trail == null || ((Vector2)trailPts[trailPts.Count - 1] - p).sqrMagnitude < 0.01f) return;
+            trailPts.Add(p);
+            trail.positionCount = trailPts.Count;
+            trail.SetPositions(trailPts.ToArray());
+        }
+
+        /// <summary>Dal secondo colpo in poi, a volte una raffica cambia il vento a metà volo.</summary>
+        float GustTime() => windIndex > 0 && Random.value < 0.4f ? Random.Range(0.35f, 0.7f) : float.MaxValue;
+
+        void Gust()
+        {
+            float w;
+            do w = Winds[Random.Range(0, Winds.Length)]; while (Mathf.Approximately(w, wind));
+            SetWind(w);
+            Say("GUST! The wind changed!", 1.2f);
+            Sfx.Play(this, "whoosh", 0.6f);
+        }
+
         void Update()
         {
             clock += Time.deltaTime;
@@ -111,10 +207,11 @@ namespace Gotcha.Levels
         bool AimAndCharge(out float shotPower)
         {
             shotPower = 0f;
+            UpdatePreview(charging ? powerValue : lastPower);
             if (!PointerInput.TryGetPrimary(out Vector2 sp, out bool began, out bool ended))
             {
                 aiming = false;
-                if (charging) { charging = false; shotPower = powerValue; return true; }
+                if (charging) { charging = false; shotPower = powerValue; lastPower = powerValue; HidePreview(); return true; }
                 return false;
             }
             Vector2 w = PointerInput.ToWorld(cam, sp);
@@ -136,7 +233,7 @@ namespace Gotcha.Levels
                 powerValue = Mathf.PingPong(chargeT / 0.9f, 1f);
                 power.localScale = new Vector3(1f, powerValue, 1f);
                 powerFill.color = Color.Lerp(new Color(1f, 0.85f, 0.25f), new Color(0.95f, 0.25f, 0.2f), powerValue);
-                if (ended) { charging = false; fireArt.localScale = Vector3.one; shotPower = powerValue; return true; }
+                if (ended) { charging = false; fireArt.localScale = Vector3.one; shotPower = powerValue; lastPower = powerValue; HidePreview(); return true; }
             }
             return false;
         }
@@ -182,11 +279,16 @@ namespace Gotcha.Levels
             Vector2 pos = muzzle.position;
             ball.gameObject.SetActive(true);
             int struck = -1;
+            float flight = 0f, gustAt = GustTime();
+            StartTrail(pos);
             while (true)
             {
+                flight += Time.deltaTime;
+                if (flight >= gustAt) { gustAt = float.MaxValue; Gust(); }
                 v += new Vector2(wind, -gravity) * Time.deltaTime;
                 pos += v * Time.deltaTime;
                 ball.position = pos;
+                AddTrail(pos);
                 for (int i = 0; i < targets.Length; i++)
                     if (!hit[i] && Vector2.Distance(pos, targets[i].position) < hitRadius) { struck = i; break; }
                 if (struck >= 0) break;
@@ -335,8 +437,13 @@ namespace Gotcha.Levels
             hook.gameObject.SetActive(true);
             rope.gameObject.SetActive(true);
             bool caught = false;
+            float flight = 0f, gustAt = GustTime();
+            StartTrail(pos);
             while (true)
             {
+                flight += Time.deltaTime;
+                if (flight >= gustAt) { gustAt = float.MaxValue; Gust(); }
+                AddTrail(pos);
                 v += new Vector2(wind, -gravity) * Time.deltaTime;
                 pos += v * Time.deltaTime;
                 hook.position = pos;

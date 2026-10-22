@@ -27,6 +27,7 @@ namespace Gotcha.UI
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
         [SerializeField] Sprite heartSprite;     // cuori delle vite
+        [SerializeField] Sprite puzzleSprite;    // immagine del puzzle degli Easter egg (Toni in palestra)
 
         // Palette "doodle": inchiostro scuro, corallo, verde acqua, carta
         static readonly Color Accent = new Color(1f, 0.36f, 0.42f);
@@ -42,7 +43,9 @@ namespace Gotcha.UI
         Rect lastSafeArea;
 
         Text titleText;
-        GameObject hintPanel, menuPanel, resultPanel, completedPanel, titlePanel, settingsPanel, betaPanel;
+        GameObject hintPanel, menuPanel, resultPanel, completedPanel, titlePanel, settingsPanel, betaPanel, puzzlePanel;
+        RectTransform puzzleGrid;
+        Text puzzleInfo;
         InputField betaInput;
         GameObject dailyPanel;
         Text dailyLabel, dailyBody, remindersLabel, vibrationLabel;
@@ -130,6 +133,7 @@ namespace Gotcha.UI
                 else if (shopPanel.activeSelf) CloseShop();
                 else if (livesPanel.activeSelf) CloseLives();
                 else if (betaPanel.activeSelf) betaPanel.SetActive(false);
+                else if (puzzlePanel.activeSelf) puzzlePanel.SetActive(false);
                 else if (settingsPanel.activeSelf) CloseSettings();
                 else if (hintPanel.activeSelf) CloseOverlay(hintPanel);
                 else if (menuPanel.activeSelf) CloseMenu();
@@ -161,12 +165,13 @@ namespace Gotcha.UI
             resultTitle.text = solved ? "SOLVED!" : "GOTCHA!";
             lastEggId = eggId;
             string secret = string.IsNullOrEmpty(eggId) ? "" : "\"" + EasterEggs.Name(eggId) + "\"";
-            if (solved) resultBody.text = string.IsNullOrEmpty(eggId) ? "Nice one." : "Solved... AND you found the secret\n" + secret + "!";
-            else if (!string.IsNullOrEmpty(eggId)) resultBody.text = "Secret found:\n" + secret + "!";
+            if (solved) resultBody.text = string.IsNullOrEmpty(eggId) ? "Nice one." : "Solved... AND you found the secret\n" + secret + "!\nPuzzle: " + EggPuzzle.Unlocked + " / " + EggPuzzle.Pieces + " pieces";
+            else if (!string.IsNullOrEmpty(eggId)) resultBody.text = "Secret found:\n" + secret + "!\nPuzzle: " + EggPuzzle.Unlocked + " / " + EggPuzzle.Pieces + " pieces";
             else
             {
                 int lives = flow.Lives != null ? flow.Lives.Lives : 1;
-                string taunt = Taunts[UnityEngine.Random.Range(0, Taunts.Length)];
+                string custom = flow.Current != null ? flow.Current.FailTaunt : null;
+                string taunt = !string.IsNullOrEmpty(custom) ? custom : Taunts[UnityEngine.Random.Range(0, Taunts.Length)];
                 resultBody.text = taunt + "\n" + (lives > 0 ? "Lives left: " + lives : "...and you're out of lives!");
             }
             resultButton.text = solved ? "NEXT" : "RETRY";
@@ -296,6 +301,43 @@ namespace Gotcha.UI
         }
 
         // ---------- Azioni ----------
+
+        /// <summary>Il puzzle: i pezzi scoperti mostrano la loro parte dell'immagine, gli altri un punto di domanda.</summary>
+        void OpenPuzzle()
+        {
+            for (int i = puzzleGrid.childCount - 1; i >= 0; i--) Destroy(puzzleGrid.GetChild(i).gameObject);
+            float w = 1f / EggPuzzle.Cols, h = 1f / EggPuzzle.Rows;
+            Texture tex = puzzleSprite != null ? puzzleSprite.texture : null;
+            for (int r = 0; r < EggPuzzle.Rows; r++)
+                for (int c = 0; c < EggPuzzle.Cols; c++)
+                {
+                    var min = new Vector2(c * w, 1f - (r + 1) * h);
+                    RectTransform cell = CreateRect("Piece", puzzleGrid, min, min + new Vector2(w, h));
+                    cell.offsetMin = new Vector2(2, 2);
+                    cell.offsetMax = new Vector2(-2, -2);
+                    if (EggPuzzle.IsUnlocked(c, r) && tex != null)
+                    {
+                        RawImage img = cell.gameObject.AddComponent<RawImage>();
+                        img.texture = tex;
+                        img.uvRect = new Rect(min.x, min.y, w, h);
+                        img.raycastTarget = false;
+                    }
+                    else
+                    {
+                        Image back = cell.gameObject.AddComponent<Image>();
+                        SetSprite(back);
+                        back.color = new Color(Ink.r, Ink.g, Ink.b, 0.85f);
+                        back.raycastTarget = false;
+                        Text q = CreateText(cell, "?", 50, new Color(1f, 1f, 1f, 0.45f), FontStyle.Bold);
+                        Place(q.transform, Vector2.zero, Vector2.one);
+                        q.raycastTarget = false;
+                    }
+                }
+            puzzleInfo.text = EggPuzzle.Complete
+                ? "COMPLETE! Toni is the strongest pug in the world!"
+                : EggPuzzle.Unlocked + " / " + EggPuzzle.Pieces + " pieces. Every Easter egg you find unlocks one!";
+            puzzlePanel.SetActive(true);
+        }
 
         void OpenHint()
         {
@@ -611,7 +653,7 @@ namespace Gotcha.UI
             menuBackLabel.text = menuFromTitle ? "BACK" : "RESUME";
             menuMusicRow.SetActive(!menuFromTitle);
             RebuildLevelList();
-            menuEggs.text = "Easter eggs found: " + SaveData.EasterEggCount + "   ·   v" + Version;
+            menuEggs.text = "TONI'S PUZZLE: " + EggPuzzle.Unlocked + " / " + EggPuzzle.Pieces;
             RefreshMusicLabel();
             hintPanel.SetActive(false);
             menuPanel.SetActive(true);
@@ -962,8 +1004,11 @@ namespace Gotcha.UI
             RectTransform menuCard;
             menuPanel = CreateOverlay("MenuPanel", out menuCard, 1500);
             menuHeader = AddHeader(menuCard, "MENU");
-            menuEggs = CreateText(menuCard, "", 46, Ink, FontStyle.Normal);
-            Place(menuEggs.transform, new Vector2(0.08f, 0.76f), new Vector2(0.92f, 0.84f));
+            // il puzzle degli Easter egg: ogni segreto trovato è un pezzo
+            Button puzzleButton = CreateButton(menuCard, "", EggColor, OpenPuzzle);
+            menuEggs = puzzleButton.GetComponentInChildren<Text>();
+            menuEggs.fontSize = 44;
+            Place(puzzleButton.transform, new Vector2(0.12f, 0.77f), new Vector2(0.88f, 0.835f));
             // livelli a pagine da 10, scorrevoli con lo swipe (o con le frecce)
             pageLabel = CreateText(menuCard, "", 40, Ink, FontStyle.Bold);
             Place(pageLabel.transform, new Vector2(0.2f, 0.715f), new Vector2(0.8f, 0.765f));
@@ -990,6 +1035,17 @@ namespace Gotcha.UI
             Button back = CreateButton(menuCard, "RESUME", Accent, CloseMenu);
             menuBackLabel = back.GetComponentInChildren<Text>();
             Place(back.transform, new Vector2(0.25f, 0.05f), new Vector2(0.75f, 0.13f));
+
+            // Puzzle degli Easter egg
+            RectTransform puzzleCard;
+            puzzlePanel = CreateOverlay("PuzzlePanel", out puzzleCard, 1640);
+            AddHeader(puzzleCard, "TONI'S PUZZLE");
+            puzzleInfo = CreateText(puzzleCard, "", 40, Ink, FontStyle.Normal);
+            Place(puzzleInfo.transform, new Vector2(0.06f, 0.82f), new Vector2(0.94f, 0.88f));
+            puzzleGrid = CreateRect("Grid", puzzleCard, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
+            puzzleGrid.sizeDelta = new Vector2(560, 1120);
+            puzzleGrid.anchoredPosition = new Vector2(0, 10);
+            Place(CreateButton(puzzleCard, "CLOSE", Dark, () => puzzlePanel.SetActive(false)).transform, new Vector2(0.3f, 0.025f), new Vector2(0.7f, 0.09f));
 
             // Impostazioni
             RectTransform setCard;

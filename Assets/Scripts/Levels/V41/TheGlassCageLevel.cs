@@ -53,7 +53,8 @@ namespace Gotcha.Levels
                 {
                     // nuova direzione, mai già davanti all'apertura (niente vittorie per caso)
                     float a = mouseAngle + Random.Range(-70f, 70f);
-                    if (Mathf.Abs(Mathf.DeltaAngle(a, gapAngle)) > 60f) mouseAngle = a;
+                    // e non si gira mentre il giocatore sta ruotando la campana (l'apertura potrebbe essere già a posto)
+                    if (!gesture && Mathf.Abs(Mathf.DeltaAngle(a, gapAngle)) > 60f) mouseAngle = a;
                 }
                 targetR = nearPhase ? 1.0f : 0.45f;
                 phaseUntil = clock + (nearPhase ? 1.8f : 2.2f);
@@ -96,10 +97,14 @@ namespace Gotcha.Levels
                 gestureTurned += Mathf.Abs(turn);
                 dome.localRotation = Quaternion.Euler(0, 0, gapAngle);
                 if (Mathf.Repeat(gapAngle, 12f) < Mathf.Abs(turn)) Sfx.Play(this, "tick", 0.3f);
-                if (near && gestureTurned > 8f && bumpCooldown <= 0f) { StartCoroutine(Bump()); return; }
+                float off = Mathf.Abs(Mathf.DeltaAngle(gapAngle, mouseAngle));
+                // l'apertura arriva davanti al naso: il topo esce subito (prima contava come un urto e si perdeva)
+                if (near && off < AlignTolerance) { StartCoroutine(WalkOut()); return; }
+                // urta solo se contro il naso passa il VETRO (non l'apertura)
+                if (near && off > AlignTolerance + 12f && gestureTurned > 8f && bumpCooldown <= 0f) { StartCoroutine(Bump()); return; }
             }
 
-            // apertura allineata col topo: esce
+            // apertura allineata col topo (dita staccate): esce
             if (!gesture && Mathf.Abs(turn) < 0.01f && mouseR > 0.35f && Mathf.Abs(Mathf.DeltaAngle(gapAngle, mouseAngle)) < AlignTolerance)
                 StartCoroutine(WalkOut());
         }

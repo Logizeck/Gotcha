@@ -23,14 +23,16 @@ namespace Gotcha.Levels
         [SerializeField] SpeechBubble catBubble;
         [SerializeField] SpeechBubble mouseBubble;
         [SerializeField] float holdSeconds = 3f;
-        [SerializeField] float sensitivity = 2.2f;
+        [Tooltip("Gradi di inclinazione (rispetto a come tieni il telefono all'inizio) per lo sguardo tutto da un lato.")]
+        [SerializeField] float fullTiltDegrees = 22f;
         [SerializeField] float maxAngle = 24f;
         [Header("Topolino che cambia tana (0 = resta fermo)")]
         [SerializeField] float hopEvery = 0f;
         [SerializeField] int maxHops = 6;
 
         Vector3[] pupilHome;
-        Vector2 baseline, gaze;
+        Vector2 baseline, baselineSum, gaze;
+        int baselineCount;
         float held, hopTimer;
         int hops, spotIndex;
         bool done, primed, hopping;
@@ -100,10 +102,24 @@ namespace Gotcha.Levels
                     StartCoroutine(Hop());
                 }
             }
+            // Angoli veri di inclinazione (gradi), non i valori grezzi dell'accelerometro: quelli si "saturano" quando il
+            // telefono è quasi verticale o quasi piatto e certe direzioni non si raggiungevano più. "Dritto" = la media
+            // di come tieni il telefono nei primi istanti (non il primo fotogramma, che può essere ancora vuoto).
             Vector3 t = SensorHub.Instance != null ? SensorHub.Instance.Tilt : Vector3.zero;
-            Vector2 tilt = new Vector2(t.x, t.y);
-            if (!primed) { primed = true; baseline = tilt; }   // "dritto" = come tieni il telefono all'inizio
-            Vector2 target = Vector2.ClampMagnitude((tilt - baseline) * sensitivity, 1f);
+            Vector2 target = Vector2.zero;
+            if (t.sqrMagnitude > 0.04f)
+            {
+                Vector2 ang = TiltAngles(t);
+                if (!primed)
+                {
+                    baselineSum += ang;
+                    baselineCount++;
+                    baseline = baselineSum / baselineCount;
+                    if (baselineCount >= 12) primed = true;
+                }
+                Vector2 delta = new Vector2(Mathf.DeltaAngle(baseline.x, ang.x), Mathf.DeltaAngle(baseline.y, ang.y));
+                target = Vector2.ClampMagnitude(delta / fullTiltDegrees, 1f);
+            }
             gaze = Vector2.Lerp(gaze, target, 1f - Mathf.Exp(-10f * Time.deltaTime));
             for (int i = 0; i < pupils.Length; i++) pupils[i].localPosition = pupilHome[i] + (Vector3)(gaze * maxOffset);
 
@@ -116,6 +132,14 @@ namespace Gotcha.Levels
             if (looking && held > 0.6f && mouseBubble != null && !mouseBubble.gameObject.activeSelf) mouseBubble.Show("Eek!");
             if (!looking && mouseBubble != null && mouseBubble.gameObject.activeSelf) mouseBubble.Hide();
             if (held >= holdSeconds) StartCoroutine(Caught());
+        }
+
+        /// <summary>Inclinazione laterale e avanti/indietro in gradi, senza limiti a ±90 per l'avanti/indietro.</summary>
+        static Vector2 TiltAngles(Vector3 g)
+        {
+            float roll = Mathf.Atan2(g.x, Mathf.Sqrt(g.y * g.y + g.z * g.z)) * Mathf.Rad2Deg;
+            float pitch = Mathf.Atan2(g.y, -g.z) * Mathf.Rad2Deg;
+            return new Vector2(roll, pitch);
         }
 
         IEnumerator Caught()

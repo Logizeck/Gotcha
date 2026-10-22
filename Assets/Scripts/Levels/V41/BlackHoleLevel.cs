@@ -6,10 +6,10 @@ using Gotcha.Core;
 namespace Gotcha.Levels
 {
     /// <summary>
-    /// Livello "Black hole" — un buco nero sta inghiottendo tre pianetini che gli girano attorno a spirale; il comando
-    /// dice "STOP THE BLACK HOLE". Il trucco: non si ferma, si INGRANDISCE. Soluzione: pizzico verso l'esterno sul buco
-    /// nero finché il suo bordo supera i bordi dello schermo: si mangia tutta la scena, schermo bianco "YOU ESCAPED".
-    /// Sconfitta: i tre pianeti vengono inghiottiti dalla spirale prima che il buco sia abbastanza grande.
+    /// Livello "Black hole" — un buco nero sta inghiottendo tre pianetini che gli girano attorno a spirale, e intanto
+    /// cresce; il comando dice "STOP THE BLACK HOLE". Soluzione: RIMPICCIOLIRLO stringendo due dita sopra (pizzico
+    /// verso l'interno) finché collassa in un puntino e sparisce con un "pop": i pianeti superstiti sono salvi. Allargare
+    /// le dita lo fa crescere e i pianeti spariscono prima. Sconfitta: tutti e tre i pianeti inghiottiti.
     /// (Editor: rotella del mouse.)
     /// </summary>
     public class BlackHoleLevel : LevelController
@@ -23,7 +23,9 @@ namespace Gotcha.Levels
         [SerializeField] TextMesh escapedText;
         [SerializeField] SpeechBubble bubble;
         [SerializeField] SpriteRenderer[] hearts;                   // un cuore per pianeta
-        [SerializeField] float startRadius = 0.55f, escapeRadius = 6.1f;
+        [SerializeField] float startRadius = 0.55f, collapseRadius = 0.13f;
+        [Tooltip("Quanto cresce da solo il buco nero (unità al secondo).")]
+        [SerializeField] float growRate = 0.035f;
 
         Camera cam;
         float radius, clock, pinchStart, radiusStart;
@@ -67,11 +69,12 @@ namespace Gotcha.Levels
             clock += dt;
             if (swirl != null) swirl.Rotate(0f, 0f, -90f * dt);
 
-            // pizzico: il buco cresce (esponenziale, così basta un gesto o due)
+            // il buco nero cresce da solo; il pizzico lo ridimensiona (esponenziale, così basta un gesto o due)
+            if (!pinching) radius = Mathf.Min(radius + growRate * dt, 3f);
             if (PointerInput.TryGetPinch(out float d))
             {
                 if (!pinching) { pinching = true; pinchStart = Mathf.Max(d, 1f); radiusStart = radius; }
-                else radius = Mathf.Clamp(radiusStart * Mathf.Pow(d / pinchStart, 1.8f), 0.35f, 8f);
+                else radius = Mathf.Clamp(radiusStart * Mathf.Pow(d / pinchStart, 1.8f), 0.05f, 3f);
             }
             else
             {
@@ -80,7 +83,7 @@ namespace Gotcha.Levels
             }
 #if UNITY_EDITOR
             float wheel = Input.mouseScrollDelta.y;
-            if (Mathf.Abs(wheel) > 0.01f) radius = Mathf.Clamp(radius * (1f + wheel * 0.15f), 0.35f, 8f);
+            if (Mathf.Abs(wheel) > 0.01f) radius = Mathf.Clamp(radius * (1f + wheel * 0.15f), 0.05f, 3f);
 #endif
             ApplyRadius();
 
@@ -94,10 +97,10 @@ namespace Gotcha.Levels
                 float stretch = Mathf.Clamp01(1f - (orbit[i] - radius) / 1.2f);
                 planets[i].localRotation = Quaternion.Euler(0f, 0f, angle[i] * Mathf.Rad2Deg);
                 planets[i].localScale = new Vector3(1f - stretch * 0.3f, 1f + stretch * 0.4f, 1f) * scales[i];
-                if (orbit[i] < radius * 0.9f) StartCoroutine(Swallow(i, radius < startRadius * 2.2f));
+                if (orbit[i] < radius * 0.9f) StartCoroutine(Swallow(i, true));
             }
 
-            if (radius >= escapeRadius) { StartCoroutine(Escape()); return; }
+            if (radius <= collapseRadius) { StartCoroutine(Collapse()); return; }
             if (natural >= planets.Length) StartCoroutine(Doomed());
         }
 
@@ -132,20 +135,36 @@ namespace Gotcha.Levels
             Fail();
         }
 
-        IEnumerator Escape()
+        /// <summary>Il buco nero collassa in un puntino e sparisce: i pianeti rimasti tornano tranquilli in orbita.</summary>
+        IEnumerator Collapse()
         {
             busy = true;
             if (bubble != null) bubble.Hide();
-            foreach (Transform p in planets) if (p != null) p.gameObject.SetActive(false);
             Haptics.Heavy();
-            Sfx.Play(this, "whoosh", 0.9f);
+            Sfx.Play(this, "pop", 1f);
             float r0 = radius;
-            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.6f) { radius = Mathf.Lerp(r0, 9f, k); ApplyRadius(); yield return null; }
-            yield return new WaitForSeconds(0.6f);
-            yield return Kit41B.Fade(whiteout, 1f, 0.5f);
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.35f) { radius = Mathf.Lerp(r0, 0f, k); ApplyRadius(); yield return null; }
+            hole.gameObject.SetActive(false);
+            if (swirl != null) swirl.gameObject.SetActive(false);
             Sfx.Play(this, "ding", 0.8f);
+            // i pianeti salvi si allontanano piano e smettono di deformarsi
+            var from = new Vector3[planets.Length];
+            for (int i = 0; i < planets.Length; i++) from[i] = planets[i].localPosition;
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 1.2f)
+            {
+                for (int i = 0; i < planets.Length; i++)
+                {
+                    if (gone[i]) continue;
+                    Vector3 dir = (from[i] - hole.localPosition).normalized;
+                    planets[i].localPosition = from[i] + dir * Mathf.SmoothStep(0f, 1f, k) * 0.8f;
+                    planets[i].localScale = Vector3.Lerp(planets[i].localScale, Vector3.one * scales[i], k);
+                }
+                yield return null;
+            }
             if (escapedText != null)
             {
+                escapedText.text = "BLACK HOLE STOPPED!";
+                escapedText.color = new Color(1f, 0.93f, 0.55f);   // sullo spazio buio (niente più schermo bianco)
                 escapedText.gameObject.SetActive(true);
                 Transform e = escapedText.transform;
                 Vector3 s = e.localScale;

@@ -216,14 +216,16 @@ public static partial class GotchaProjectBuilder
         Transform guard = Child(r, "Guard", new Vector2(0.3f, -2.25f)).transform;
         Transform guardArt = Child(guard, "Flip", Vector2.zero).transform;
         guardArt.localScale = Vector3.one * 0.9f;
-        Art(guardArt, "Art", "mu_guard", -8, false);
+        // ordine: gatto (3) dietro le statue (5), luce della torcia (6) sopra, guardiano (8) davanti a tutto
+        Art(guardArt, "Art", "mu_guard", 8, false);
         Transform apex = Child(guardArt, "Apex", new Vector2(0.8f, 1.12f)).transform;
-        SpriteRenderer cone = Art(apex, "Cone", "mu_cone", -7, false).GetComponent<SpriteRenderer>();
+        SpriteRenderer cone = Art(apex, "Cone", "mu_cone", 6, false).GetComponent<SpriteRenderer>();
         TextMesh countdown = Label(guard, new Vector2(0f, 2.35f), 30, "3", 0.12f);
         countdown.color = new Color(1f, 0.85f, 0.3f);
         Transform zzz = Art(guard, "Zzz", "zzz", 30, false, new Vector2(0.35f, 2.15f));
 
-        Transform cat = Child(r, "Cat", new Vector2(-2.3f, -2.95f)).transform;
+        // il gatto parte nascosto dietro la prima statua: all'inizio il guardiano non può vederlo
+        Transform cat = Child(r, "Cat", new Vector2(-1.0f, -2.95f)).transform;
         Transform catArt = Child(cat, "Flip", Vector2.zero).transform;
         Art(catArt, "Art", "mu_burglar", 3, false);
         var col = cat.gameObject.AddComponent<BoxCollider2D>();

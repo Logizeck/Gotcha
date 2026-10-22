@@ -24,6 +24,12 @@ namespace Gotcha.Levels
 
         protected void Win() { Finish(LevelResult.Solved, null); }
         protected void Fail() { Finish(LevelResult.Failed, null); }
+
+        /// <summary>Frase di scherno su misura per la schermata GOTCHA! (al posto di quella a caso).</summary>
+        public string FailTaunt { get; private set; }
+
+        /// <summary>Sconfitta con una presa in giro specifica (es. l'ananas sulla pizza).</summary>
+        protected void Fail(string taunt) { FailTaunt = taunt; Fail(); }
         /// <summary>Vittoria che svela anche un Easter egg (es. il robot che si evolve).</summary>
         protected void WinWithEgg(string eggId) { Finish(LevelResult.Solved, eggId); }
 

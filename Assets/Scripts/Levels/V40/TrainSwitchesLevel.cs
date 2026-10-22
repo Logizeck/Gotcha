@@ -19,16 +19,17 @@ namespace Gotcha.Levels
         /// <summary>Tratti di binario (coordinate del livello): 0 tronco, 1-2 dallo scambio A, 3-4 da B, 5-6 da C, 7 ultimo tratto blu.</summary>
         public static readonly Vector2[][] Segs =
         {
-            new[] { new Vector2(0f, 2.75f), new Vector2(0f, 1.5f) },
-            new[] { new Vector2(0f, 1.5f), new Vector2(-1.3f, -0.2f) },
-            new[] { new Vector2(0f, 1.5f), new Vector2(1.3f, -0.2f) },
+            // tronco lungo e a curve: c'è il tempo di guardare il colore e preparare gli scambi
+            new[] { new Vector2(0f, 2.75f), new Vector2(-1.9f, 2.45f), new Vector2(-1.9f, 1.6f), new Vector2(0f, 0.85f) },
+            new[] { new Vector2(0f, 0.85f), new Vector2(-1.3f, -0.2f) },
+            new[] { new Vector2(0f, 0.85f), new Vector2(1.3f, -0.2f) },
             new[] { new Vector2(-1.3f, -0.2f), new Vector2(-2.0f, -1.3f), new Vector2(-2.0f, -3.0f) },
             new[] { new Vector2(-1.3f, -0.2f), new Vector2(0f, -1.9f) },
             new[] { new Vector2(1.3f, -0.2f), new Vector2(0f, -1.9f) },
             new[] { new Vector2(1.3f, -0.2f), new Vector2(2.0f, -1.3f), new Vector2(2.0f, -3.0f) },
             new[] { new Vector2(0f, -1.9f), new Vector2(0f, -3.0f) },
         };
-        public static readonly Vector2[] SwitchAt = { new Vector2(0f, 1.5f), new Vector2(-1.3f, -0.2f), new Vector2(1.3f, -0.2f) };
+        public static readonly Vector2[] SwitchAt = { new Vector2(0f, 0.85f), new Vector2(-1.3f, -0.2f), new Vector2(1.3f, -0.2f) };
         public static readonly Color[] LineColors = { new Color(0.92f, 0.3f, 0.26f), new Color(0.27f, 0.55f, 0.97f), new Color(1f, 0.83f, 0.2f) };
 
         [SerializeField] TextMesh goalText;

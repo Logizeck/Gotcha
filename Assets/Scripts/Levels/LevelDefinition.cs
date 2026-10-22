@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Gotcha.Levels
 {
     /// <summary>Brano di sottofondo di un livello (o del menu).</summary>
-    public enum MusicTrack { Pressure, Dungeon, Animals, Kitchen, Title }
+    public enum MusicTrack { Pressure, Dungeon, Animals, Kitchen, Title, Halloween }
 
     [CreateAssetMenu(menuName = "Gotcha/Level Definition")]
     public class LevelDefinition : ScriptableObject

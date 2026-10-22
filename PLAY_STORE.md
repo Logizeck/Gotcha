@@ -156,7 +156,7 @@ Cosa fa il codice (✅): chiede il consenso UMP (`ConsentInformation.Update` →
 tentativi a intervalli crescenti se la rete manca); il pulsante **PRIVACY OPTIONS** compare nelle Impostazioni
 quando UMP lo richiede (utenti UE). Nell'Editor resta la pubblicità simulata.
 
-Regola delle pause: pubblicità ogni 5 livelli superati o dopo 3 minuti di gioco attivo, mai durante un livello;
+Regola delle pause: pubblicità ogni 5 livelli o dopo 140 secondi, solo alla fine di un livello (vinto o perso), mai durante;
 l'acquisto "remove ads" le toglie (restano solo quelle con premio, volontarie).
 
 ## 5. Acquisti in-app da creare in Play Console

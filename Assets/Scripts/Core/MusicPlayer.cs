@@ -18,7 +18,7 @@ namespace Gotcha.Core
 
         [Tooltip("Brano usato dagli stereo dei livelli 7/19 (non suona come sottofondo).")]
         public AudioClip soundtrack;
-        public AudioClip title, dungeon, animals, kitchen, pressure;
+        public AudioClip title, dungeon, animals, kitchen, pressure, halloween;
         [Range(0f, 1f)] public float volume = 0.6f;
         public float fadeOut = 0.7f, fadeIn = 0.9f;
 
@@ -81,6 +81,7 @@ namespace Gotcha.Core
                 case MusicTrack.Dungeon: c = dungeon; break;
                 case MusicTrack.Animals: c = animals; break;
                 case MusicTrack.Kitchen: c = kitchen; break;
+                case MusicTrack.Halloween: c = halloween != null ? halloween : pressure; break;
                 default: c = pressure; break;
             }
             return c != null ? c : soundtrack;

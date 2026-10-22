@@ -506,19 +506,21 @@ public static partial class GotchaProjectBuilder
         var root = new GameObject("Level_Sneaky");
         SneakyCatLevel level = root.AddComponent<SneakyCatLevel>();
         Art(root.transform, "Floor", "night_floor_bg", -20, false);
-        Transform dog = Child(root.transform, "Dog", new Vector2(0, 2.9f)).transform;
-        Art(dog, "Art", "guard_dog", 8);
+        // il guardiano è un gatto (il topo scappa da un gatto, non da un cane), con la torcia
+        Transform dog = Child(root.transform, "Guard", new Vector2(0, 2.95f)).transform;
+        Art(dog, "Art", "cat", 8).localScale = Vector3.one * 0.55f;
         Transform cone = Child(root.transform, "Cone", new Vector2(0, 2.72f)).transform;
         Transform beam = Art(cone, "Beam", "light_cone", 6, false);
         cone.localScale = Vector3.one * 1.35f;
         beam.GetComponent<SpriteRenderer>().color = new Color(1f, 0.95f, 0.6f);
+        // più mobili: la posizione la sceglie il livello a caso a ogni partita
         var furniture = new List<Collider2D>();
-        foreach (var f in new[] { ("sofa", new Vector2(-1.0f, 0.7f), new Vector2(2.3f, 1.0f)), ("box", new Vector2(1.5f, -0.6f), new Vector2(1f, 0.9f)),
-                     ("box", new Vector2(-1.7f, -1.7f), new Vector2(1f, 0.9f)), ("plant_top", new Vector2(0.6f, -2.3f), new Vector2(0.7f, 0.7f)) })
+        foreach (var f in new[] { ("sofa", new Vector2(2.3f, 1.0f)), ("box", new Vector2(1f, 0.9f)), ("box", new Vector2(1f, 0.9f)),
+                     ("box", new Vector2(1f, 0.9f)), ("plant_top", new Vector2(0.7f, 0.7f)), ("plant_top", new Vector2(0.7f, 0.7f)) })
         {
-            GameObject g = Child(root.transform, f.Item1, f.Item2);
+            GameObject g = Child(root.transform, f.Item1, Vector2.zero);
             Art(g.transform, "Art", f.Item1, 7);
-            g.AddComponent<BoxCollider2D>().size = f.Item3;
+            g.AddComponent<BoxCollider2D>().size = f.Item2;
             furniture.Add(g.GetComponent<BoxCollider2D>());
         }
         Transform mouse = Child(root.transform, "Mouse", new Vector2(-2.2f, -3.4f)).transform;
