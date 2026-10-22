@@ -1,4 +1,4 @@
-#if GOTCHA_IAP
+#if GOTCHA_UNITY_IAP4
 using System;
 using UnityEngine;
 using UnityEngine.Purchasing;

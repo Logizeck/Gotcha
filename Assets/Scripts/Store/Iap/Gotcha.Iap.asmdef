@@ -14,13 +14,13 @@
     "precompiledReferences": [],
     "autoReferenced": false,
     "defineConstraints": [
-        "GOTCHA_IAP"
+        "GOTCHA_UNITY_IAP4"
     ],
     "versionDefines": [
         {
             "name": "com.unity.purchasing",
-            "expression": "4.0.0",
-            "define": "GOTCHA_IAP"
+            "expression": "[4.0.0,5.0.0)",
+            "define": "GOTCHA_UNITY_IAP4"
         }
     ],
     "noEngineReferences": false
