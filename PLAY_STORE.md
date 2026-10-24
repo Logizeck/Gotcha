@@ -5,7 +5,7 @@ Questa guida va seguita dall'alto in basso. Le parti che il codice fa già da so
 
 ---
 
-## ▶ Beta interna (versione 0.61) — passo passo
+## ▶ Beta interna (versione 0.62) — passo passo
 
 Obiettivo: caricare l'AAB nel canale **Test interno** di Play Console (fino a 100 tester, niente revisione lunga,
 niente vincolo dei 12 tester/14 giorni, che vale solo per passare alla produzione).
@@ -36,19 +36,19 @@ Scelte fatte per questa beta: pacchetto **`com.gotcha.zeck`**, **niente acquisti
    `{"keystorePath":"gotcha-upload.keystore","keystorePass":"...","keyAlias":"gotcha","keyAliasPass":"..."}`
 4. *(una volta sola, Unity 6)* **File > Build Profiles > Android**: *Debug Symbols* = **Symbol Table** (così Play
    Console non segnala i simboli mancanti).
-5. **Crea l'AAB**: menu **Gotcha > Build Google Play AAB** → salva `Builds/Gotcha-0.61.aab`
+5. **Crea l'AAB**: menu **Gotcha > Build Google Play AAB** → salva `Builds/Gotcha-0.62.aab`
    (versionCode **6100**, pacchetto `com.gotcha.zeck`, firmato, define `GOTCHA_RELEASE`).
    Errori della finestra "Build Settings" (GUILayout) non c'entrano: usa sempre questo menu.
 6. **Play Console**: *Crea app* → nome "Gotcha!", lingua predefinita Inglese (US), **Gioco**, **Senza costi**,
    accetta le dichiarazioni. Poi *Testa e rilascia > Test > Test interno*:
    - scheda **Tester**: crea un elenco email con i tuoi tester (anche solo il tuo Gmail) e salva;
-   - **Crea nuova release** → accetta **Play App Signing** (consigliato) → carica `Gotcha-0.61.aab` →
-     nome release "0.61 beta", note di rilascio brevi → *Avanti* → *Salva e pubblica*.
+   - **Crea nuova release** → accetta **Play App Signing** (consigliato) → carica `Gotcha-0.62.aab` →
+     nome release "0.62 beta", note di rilascio brevi → *Avanti* → *Salva e pubblica*.
    - Torna su *Tester* e copia il **link di partecipazione**: i tester lo aprono col proprio account, accettano e
      installano dal Play Store (la prima volta può volerci qualche minuto).
 7. **Sul telefono**: Impostazioni del gioco → **BETA** → password `Zeckrulez` → tutti i livelli aperti, vite e
    suggerimenti infiniti, niente pubblicità. Così, se un livello si blocca, si passa agli altri.
-8. **Per ricaricare** una correzione: aumenta `GameUI.Version` (es. "0.61.1" → versionCode 6101) e ripeti il punto 5.
+8. **Per ricaricare** una correzione: aumenta `GameUI.Version` (es. "0.62.1" → versionCode 6201) e ripeti il punto 5.
 
 Se la build fallisce, copia il primo errore rosso della Console (spesso Gradle o SDK) e mandamelo.
 Avvisi che Play Console può mostrare e che **non bloccano** il test interno: "nessun file di deoffuscamento"

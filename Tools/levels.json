@@ -4000,12 +4000,92 @@
   "eggHow": "Stacca il braccio dello zombie, daglielo a Toni (lo tiene in bocca), porta Toni sullo zerbino davanti alla porta e trascina la mano dello zombie sul campanello."
  },
  {
+  "folder": "V62FishingKeys",
+  "id": "v62_fishing_keys",
+  "title": "FISHING FOR KEYS",
+  "hint": "The key is made of metal. What sticks to metal?",
+  "egg": "v62_fish_in_sink",
+  "n": 251,
+  "desc": "The key fell down the sink drain. The fishing rod alone fishes up a boot: stick the magnet on the hook, lower it into the drain, then drag the key to the keyhole.",
+  "hints": [
+   "The key is made of metal. What sticks to metal?",
+   "Your fingers are too big, but a fishing rod reaches down there. It just needs the right bait.",
+   "Drag the magnet from the frying pan onto the hook, then drag the rod over the sink and let go. Bring the key to the lock."
+  ],
+  "eggName": "Something Fishy",
+  "eggHow": "Put the fish from the cat bowl on the hook and lower it into the drain: a piranha waves back."
+ },
+ {
+  "folder": "V62WakeToni",
+  "id": "v62_wake_toni",
+  "title": "WAKE UP, TONI!",
+  "hint": "Noise and light won't do it. Something tastier might.",
+  "egg": "v62_feather_tickle",
+  "n": 252,
+  "desc": "Alarm and lamp don't wake Toni and the cat steals the cookie. Distract the cat with the feather, then hold the cookie under Toni's nose.",
+  "hints": [
+   "Noise and light won't do it. Something tastier might.",
+   "The cookie is the answer, but the cat is too quick. Keep the cat busy first.",
+   "Drag the feather onto the cat, then bring the cookie right under Toni's nose."
+  ],
+  "eggName": "Tickle Attack",
+  "eggHow": "Rub the feather back and forth over sleeping Toni 3 times: he sneezes."
+ },
+ {
+  "folder": "V62AirMail",
+  "id": "v62_air_mail",
+  "title": "AIR MAIL",
+  "hint": "Paper planes can't fly that high. What floats?",
+  "egg": "v62_balloon_cat",
+  "n": 253,
+  "desc": "The paper plane falls short. Tie the letter to the balloon, untie the knot and steer it to the roof by tilting the phone, away from the candle flame.",
+  "hints": [
+   "Paper planes can't fly that high. What floats?",
+   "The balloon could carry the letter... if it weren't tied to the post.",
+   "Drag the letter onto the balloon, tap the knot on the post, then tilt the phone to steer it to the roof. Avoid the candle!"
+  ],
+  "eggName": "Up, Up And Away",
+  "eggHow": "Drag the mouse hiding behind the bush onto the balloon: it flies away waving."
+ },
+ {
+  "folder": "V62MirrorCat",
+  "id": "v62_mirror_cat",
+  "title": "MIRROR, MIRROR",
+  "hint": "That cat ignores everything... except another cat.",
+  "egg": "v62_mirror_pug",
+  "n": 254,
+  "desc": "The cat pushes the vase toward the edge (25 s). Touching, fish and bell don't help: put the mirror in front of the cat, it gets scared of its reflection and runs. If the vase falls: 'Cats 1, You 0.'",
+  "hints": [
+   "That cat ignores everything... except another cat.",
+   "What scares a cat more than anything? Another cat staring back.",
+   "Quick: drag the mirror onto the shelf, right next to the cat, before the vase falls."
+  ],
+  "eggName": "Two Tonis",
+  "eggHow": "Put the mirror in front of sleeping Toni: he barks at the other Toni."
+ },
+ {
+  "folder": "V62Umbrella",
+  "id": "v62_umbrella_bucket",
+  "title": "UPSIDE-DOWN UMBRELLA",
+  "hint": "The glass roof keeps the rain out. Bring the rain in.",
+  "egg": "v62_umbrella_hat",
+  "n": 255,
+  "desc": "The plant is under the glass roof. Open the umbrella, flip it upside down (double tap or round arrow), fill it in the rain, carry it over the plant and tilt/tap to pour.",
+  "hints": [
+   "The glass roof keeps the rain out. Bring the rain in.",
+   "An umbrella keeps the rain out... unless you double-tap it (or press the round arrow) and turn it upside down.",
+   "Tap the umbrella to open it, flip it upside down, fill it under the rain, carry it into the greenhouse over the plant, then tilt the phone (or tap it) to pour."
+  ],
+  "eggName": "Fashion Icon",
+  "eggHow": "Drag the open umbrella onto the mole: it wears it as a hat and spins."
+ },
+ {
   "folder": "AlmostThere",
   "id": "almost_there",
   "title": "ALMOST THERE",
   "hint": "Only one point is missing.",
   "egg": "",
-  "n": 251,
+  "n": 256,
   "desc": "Il contatore dice 99/100: trascina giù la barra \"/\" e tocca il puntino nascosto sotto per l'ultimo punto.",
   "hints": [
    "Only one point is missing.",
@@ -4021,7 +4101,7 @@
   "title": "TONI'S FINAL EXAM",
   "hint": "Toni isn't a normal student.",
   "egg": "",
-  "n": 252,
+  "n": 257,
   "desc": "L'esame finale di Toni: 2+2 = BISCUIT, trova il bicchiere col biscotto, poi trascina giù il diploma fino a lui. CERTIFIED GOOD BOY!",
   "hints": [
    "Toni isn't a normal student.",
