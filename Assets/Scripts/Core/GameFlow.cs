@@ -68,6 +68,20 @@ namespace Gotcha.Core
             // Mentre il gioco è aperto lo schermo non si spegne e non si abbassa (molti livelli si giocano
             // senza toccarlo: inclinazione, attesa...). Su Android è il flag KEEP_SCREEN_ON.
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
+            LockPortrait();
+        }
+
+        /// <summary>
+        /// Solo verticale: molti livelli si giocano inclinando il telefono e, con la rotazione automatica attiva,
+        /// lo schermo girerebbe. Vale anche se le impostazioni del Player del progetto fossero rimaste su Auto Rotation.
+        /// </summary>
+        static void LockPortrait()
+        {
+            Screen.autorotateToPortrait = false;
+            Screen.autorotateToPortraitUpsideDown = false;
+            Screen.autorotateToLandscapeLeft = false;
+            Screen.autorotateToLandscapeRight = false;
+            Screen.orientation = ScreenOrientation.Portrait;
         }
 
         /// <summary>AdMob se il plugin è installato (define GOTCHA_ADMOB); nella build per lo store senza AdMob nessuna

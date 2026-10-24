@@ -43,6 +43,7 @@ namespace Gotcha.UI
         Rect lastSafeArea;
 
         Text titleText;
+        GameObject barMenuButton, barHintButton;   // MENU e HINT della barra: solo dentro i livelli, non al titolo
         GameObject hintPanel, menuPanel, resultPanel, completedPanel, titlePanel, settingsPanel, betaPanel, puzzlePanel;
         RectTransform puzzleGrid;
         Text puzzleInfo;
@@ -50,7 +51,7 @@ namespace Gotcha.UI
         GameObject dailyPanel;
         Text dailyLabel, dailyBody, remindersLabel, vibrationLabel;
         Text betaStatus, betaActionLabel;
-        Text menuHeader, menuBackLabel, continueLabel, settingsMusicLabel, settingsInfo, resetLabel;
+        Text menuHeader, menuBackLabel, continueLabel, titlePuzzleLabel, settingsMusicLabel, settingsInfo, resetLabel;
         GameObject continueButton, menuMusicRow, shopPanel;
         Text shopLivesLabel, shopAdsLabel, shopStatus;
         Button shopAdsButton;
@@ -120,6 +121,8 @@ namespace Gotcha.UI
         void Update()
         {
             if (Screen.safeArea != lastSafeArea) ApplySafeArea();
+            bool inLevel = !titlePanel.activeSelf;
+            if (barMenuButton.activeSelf != inLevel) { barMenuButton.SetActive(inLevel); barHintButton.SetActive(inLevel); }
             if (!livesHooked && flow.Lives != null) { flow.Lives.Changed += OnLivesChanged; livesHooked = true; }
             UpdateHearts();
             if (livesPanel.activeSelf) RefreshLivesPanel();
@@ -457,6 +460,7 @@ namespace Gotcha.UI
             int resume = flow.ResumeIndex;
             continueButton.SetActive(resume > 0);
             continueLabel.text = "CONTINUE (LEVEL " + (resume + 1) + ")";
+            titlePuzzleLabel.text = "TONI'S PUZZLE\n" + EggPuzzle.Unlocked + " / " + EggPuzzle.Pieces;
             if (dailyLabel != null) dailyLabel.text = DailyReward.Status();
         }
 
@@ -924,6 +928,8 @@ namespace Gotcha.UI
             Place(menu.transform, new Vector2(0, 0), new Vector2(0.27f, 1));
             Button hint = CreateButton(bar, "HINT", Accent, OpenHint);
             Place(hint.transform, new Vector2(0.73f, 0), new Vector2(1, 1));
+            barMenuButton = menu.gameObject;
+            barHintButton = hint.gameObject;
             titleText = CreateText(bar, "", 54, Ink, FontStyle.Bold);
             Place(titleText.transform, new Vector2(0.28f, 0), new Vector2(0.72f, 1));
 
@@ -972,7 +978,13 @@ namespace Gotcha.UI
             Place(cont.transform, new Vector2(0.17f, 0.37f), new Vector2(0.83f, 0.435f));
             Place(CreateButton(titleArea, "NEW GAME", Accent, NewGame).transform, new Vector2(0.17f, 0.29f), new Vector2(0.83f, 0.355f));
             Place(CreateButton(titleArea, "LEVEL SELECTION", Dark, OpenLevelSelection).transform, new Vector2(0.17f, 0.21f), new Vector2(0.83f, 0.275f));
-            Place(CreateButton(titleArea, "SHOP", new Color(0.95f, 0.7f, 0.15f), OpenShop).transform, new Vector2(0.17f, 0.13f), new Vector2(0.83f, 0.195f));
+            Place(CreateButton(titleArea, "SHOP", new Color(0.95f, 0.7f, 0.15f), OpenShop).transform, new Vector2(0.17f, 0.13f), new Vector2(0.48f, 0.195f));
+            // i collezionabili di Toni (il puzzle degli Easter egg) anche dal titolo, non solo dal menu dei livelli
+            Button titlePuzzle = CreateButton(titleArea, "TONI'S PUZZLE", new Color(0.55f, 0.35f, 0.85f), OpenPuzzle);
+            titlePuzzleLabel = titlePuzzle.GetComponentInChildren<Text>();
+            titlePuzzleLabel.fontSize = 36;
+            titlePuzzleLabel.resizeTextMaxSize = 36;
+            Place(titlePuzzle.transform, new Vector2(0.52f, 0.13f), new Vector2(0.83f, 0.195f));
             Place(CreateButton(titleArea, "SETTINGS", EggColor, OpenSettings).transform, new Vector2(0.17f, 0.05f), new Vector2(0.83f, 0.115f));
             dailyLabel = CreateText(titleArea, "", 34, Color.white, FontStyle.Normal);
             Place(dailyLabel.transform, new Vector2(0.05f, 0.0f), new Vector2(0.95f, 0.045f));

@@ -67,6 +67,12 @@ public static class GotchaBuildMenu
         PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, InviteService.PackageName);
 #endif
         ApplyVersion();
+        // solo verticale: con la rotazione automatica del telefono attiva lo schermo non deve girare
+        PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
+        PlayerSettings.allowedAutorotateToPortrait = false;
+        PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
+        PlayerSettings.allowedAutorotateToLandscapeLeft = false;
+        PlayerSettings.allowedAutorotateToLandscapeRight = false;
         // API 24 (Android 7.0): minimo richiesto dalla protezione automatica di Play (Play Integrity)
         PlayerSettings.Android.minSdkVersion = (AndroidSdkVersions)24;
         // API 36 (Android 16): obbligatoria per le app nuove dal 31/8/2026. Il cast compila anche su Unity 2022.3,
