@@ -10,7 +10,7 @@ namespace Gotcha.Levels
     /// pioggia e il rubinetto non ha la manopola. L'ombrello aperto sotto la pioggia ripara e basta. Soluzione:
     /// aprirlo (tocco), girarlo a testa in giù (doppio tocco o il pulsante tondo), riempirlo sotto la pioggia, portarlo
     /// sopra la pianta e versare (inclinando il telefono o toccandolo). Versare altrove spreca l'acqua (si riempie di
-    /// nuovo). Easter egg: l'ombrello aperto e dritto sulla talpa, che lo indossa come cappello e fa una giravolta.
+    /// nuovo).
     /// </summary>
     public class V62UmbrellaLevel : V62Level
     {
@@ -29,14 +29,10 @@ namespace Gotcha.Levels
         [SerializeField] SpriteRenderer plantArt;
         [SerializeField] Collider2D plantArea;
         [SerializeField] Collider2D faucetArea;
-        [SerializeField] Transform mole;
-        [SerializeField] Collider2D moleArea;
-        [SerializeField] Transform moleHatSpot;
         [SerializeField] SmokeEmitter rain;
         [SerializeField] SmokeEmitter pourStream;
         [SerializeField] SmokeEmitter sparkle;
         [SerializeField] SmokeEmitter hearts;
-        [SerializeField] SpeechBubble moleBubble;
         [SerializeField] TextMesh infoText;
         [SerializeField] Transform infoHolder;
         [SerializeField] Color thirstyTint = new Color(0.72f, 0.66f, 0.42f);
@@ -51,23 +47,19 @@ namespace Gotcha.Levels
         Camera cam;
         HwDragger drag;
         HwDragger.Item umbrellaItem;
-        HwSay moleSay;
         HwToast toast;
-        Vector3 umbrellaStart, umbrellaScale, waterScale, plantScale;
+        Vector3 waterScale, plantScale;
         Vector2 pressAt;
         float pressTime, lastTap = -10f;
-        bool busy, eggShown, inRain, dryShown, fullShown;
+        bool busy, inRain, dryShown, fullShown;
 
         public override void OnLevelStart()
         {
             cam = Camera.main;
             logic.Reset();
             ResetV62();
-            moleSay = new HwSay(moleBubble);
             toast = new HwToast(infoText, infoHolder);
             drag = new HwDragger(this);
-            umbrellaStart = umbrella.position;
-            umbrellaScale = umbrella.localScale;
             waterScale = water.localScale;
             plantScale = plant.localScale;
             umbrellaItem = drag.Add(umbrella, umbrellaArea, 5);
@@ -84,9 +76,7 @@ namespace Gotcha.Levels
 
         void Update()
         {
-            moleSay.Tick();
             toast.Tick();
-            TickV62();
             float lean = tilt.Update(Time.deltaTime);
             if (IsFinished || busy || logic.InputLocked) return;
             UpdateRain();
@@ -141,11 +131,6 @@ namespace Gotcha.Levels
             bool tap = !lostFinger && Time.time - pressTime < 0.3f && Vector2.Distance(w, pressAt) < TapMove;
             umbrellaItem.Home = umbrella.position;   // resta dove lo si lascia (e si può riprendere)
             if (tap) { TapUmbrella(); return; }
-            if (!lostFinger && logic.Pose == UmbrellaPose.Open && moleArea.OverlapPoint(umbrella.position) && logic.TryHatOnMole())
-            {
-                StartCoroutine(MoleHat());
-                return;
-            }
             if (logic.Pose == UmbrellaPose.Inverted && logic.Water > 0f && plantZone.OverlapPoint(umbrella.position))
                 toast.Show(logic.Full ? "Now pour it! Tilt the phone or tap." : "Not full yet...", 1.6f);
         }
@@ -177,13 +162,6 @@ namespace Gotcha.Levels
             {
                 StartCoroutine(HalloweenKit.Wiggle(plant, 4f, 0.5f, 12f));
                 toast.Show("Water... please...", 1.4f);
-                return;
-            }
-            if (moleArea.OverlapPoint(w))
-            {
-                Sfx.Play(this, "pop", 0.5f);
-                StartCoroutine(HalloweenKit.Pop(mole, 1.1f, 0.25f));
-                moleSay.Show("Nice weather, huh?", 1.6f);
             }
         }
 
@@ -278,35 +256,7 @@ namespace Gotcha.Levels
             toast.Show("Ahhh. Much better!", 2f);
             yield return Celebrate(2.2f);
             if (hearts != null) hearts.Stop();
-            if (logic.TryCompleteBloom()) Victory(logic.EggFound, UmbrellaLogic.EggId);
-        }
-
-        IEnumerator MoleHat()
-        {
-            busy = true;
-            flipButton.gameObject.SetActive(false);
-            yield return HalloweenKit.Move(umbrella, moleHatSpot.position, 0.25f);
-            Transform oldParent = umbrella.parent;
-            umbrella.SetParent(moleHatSpot, true);
-            yield return HalloweenKit.ScaleTo(umbrella, umbrellaScale * 0.55f, 0.2f);
-            moleSay.Show("Ooh, fancy! A hat!", 2f);
-            Sfx.Play(this, "pop", 0.6f);
-            Vector3 ms = mole.localScale;
-            for (float t = 0f; t < 1.4f; t += Time.deltaTime)
-            {
-                mole.localScale = new Vector3(ms.x * Mathf.Cos(t * Mathf.PI * 2f / 0.7f), ms.y, ms.z);   // giravolta
-                yield return null;
-            }
-            mole.localScale = ms;
-            if (!eggShown) { eggShown = true; RevealEgg(UmbrellaLogic.EggId); }
-            yield return new WaitForSeconds(1.0f);
-            // l'ombrello torna al suo posto (aperto)
-            umbrella.SetParent(oldParent, true);
-            StartCoroutine(HalloweenKit.ScaleTo(umbrella, umbrellaScale, 0.3f));
-            yield return HalloweenKit.Move(umbrella, umbrellaStart, 0.4f, 0.4f);
-            umbrellaItem.Home = umbrellaStart;
-            flipButton.gameObject.SetActive(true);
-            busy = false;
+            if (logic.TryCompleteBloom()) Win();
         }
     }
 }

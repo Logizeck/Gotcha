@@ -4004,7 +4004,7 @@
   "id": "v62_fishing_keys",
   "title": "FISHING FOR KEYS",
   "hint": "The key is made of metal. What sticks to metal?",
-  "egg": "v62_fish_in_sink",
+  "egg": "",
   "n": 251,
   "desc": "The key fell down the sink drain. The fishing rod alone fishes up a boot: stick the magnet on the hook, lower it into the drain, then drag the key to the keyhole.",
   "hints": [
@@ -4012,31 +4012,31 @@
    "Your fingers are too big, but a fishing rod reaches down there. It just needs the right bait.",
    "Drag the magnet from the frying pan onto the hook, then drag the rod over the sink and let go. Bring the key to the lock."
   ],
-  "eggName": "Something Fishy",
-  "eggHow": "Put the fish from the cat bowl on the hook and lower it into the drain: a piranha waves back."
+  "eggName": "",
+  "eggHow": ""
  },
  {
-  "folder": "V62WakeToni",
-  "id": "v62_wake_toni",
-  "title": "WAKE UP, TONI!",
-  "hint": "Noise and light won't do it. Something tastier might.",
-  "egg": "v62_feather_tickle",
+  "folder": "V62WakeKitty",
+  "id": "v62_wake_kitty",
+  "title": "WAKE UP, KITTY!",
+  "hint": "Noise and light won't do it. Something tastier might... if it gets there.",
+  "egg": "",
   "n": 252,
-  "desc": "Alarm and lamp don't wake Toni and the cat steals the cookie. Distract the cat with the feather, then hold the cookie under Toni's nose.",
+  "desc": "The cat sleeps through the alarm, the lamp and the feather, and the mouse steals the fish. Put the cheese in front of the mouse hole first (the mouse stays busy eating), then hold the fish under the cat's nose.",
   "hints": [
-   "Noise and light won't do it. Something tastier might.",
-   "The cookie is the answer, but the cat is too quick. Keep the cat busy first.",
-   "Drag the feather onto the cat, then bring the cookie right under Toni's nose."
+   "Noise and light won't do it. Something tastier might... if it gets there.",
+   "The fish is the answer, but the mouse is faster. Give the mouse something better to do first.",
+   "Drag the cheese to the mouse hole, wait until the mouse takes it inside, then bring the fish right under the cat's nose."
   ],
-  "eggName": "Tickle Attack",
-  "eggHow": "Rub the feather back and forth over sleeping Toni 3 times: he sneezes."
+  "eggName": "",
+  "eggHow": ""
  },
  {
   "folder": "V62AirMail",
   "id": "v62_air_mail",
   "title": "AIR MAIL",
   "hint": "Paper planes can't fly that high. What floats?",
-  "egg": "v62_balloon_cat",
+  "egg": "",
   "n": 253,
   "desc": "The paper plane falls short. Tie the letter to the balloon, untie the knot and steer it to the roof by tilting the phone, away from the candle flame.",
   "hints": [
@@ -4044,15 +4044,15 @@
    "The balloon could carry the letter... if it weren't tied to the post.",
    "Drag the letter onto the balloon, tap the knot on the post, then tilt the phone to steer it to the roof. Avoid the candle!"
   ],
-  "eggName": "Up, Up And Away",
-  "eggHow": "Drag the mouse hiding behind the bush onto the balloon: it flies away waving."
+  "eggName": "",
+  "eggHow": ""
  },
  {
   "folder": "V62MirrorCat",
   "id": "v62_mirror_cat",
   "title": "MIRROR, MIRROR",
   "hint": "That cat ignores everything... except another cat.",
-  "egg": "v62_mirror_pug",
+  "egg": "",
   "n": 254,
   "desc": "The cat pushes the vase toward the edge (25 s). Touching, fish and bell don't help: put the mirror in front of the cat, it gets scared of its reflection and runs. If the vase falls: 'Cats 1, You 0.'",
   "hints": [
@@ -4060,15 +4060,15 @@
    "What scares a cat more than anything? Another cat staring back.",
    "Quick: drag the mirror onto the shelf, right next to the cat, before the vase falls."
   ],
-  "eggName": "Two Tonis",
-  "eggHow": "Put the mirror in front of sleeping Toni: he barks at the other Toni."
+  "eggName": "",
+  "eggHow": ""
  },
  {
   "folder": "V62Umbrella",
   "id": "v62_umbrella_bucket",
   "title": "UPSIDE-DOWN UMBRELLA",
   "hint": "The glass roof keeps the rain out. Bring the rain in.",
-  "egg": "v62_umbrella_hat",
+  "egg": "",
   "n": 255,
   "desc": "The plant is under the glass roof. Open the umbrella, flip it upside down (double tap or round arrow), fill it in the rain, carry it over the plant and tilt/tap to pour.",
   "hints": [
@@ -4076,8 +4076,56 @@
    "An umbrella keeps the rain out... unless you double-tap it (or press the round arrow) and turn it upside down.",
    "Tap the umbrella to open it, flip it upside down, fill it under the rain, carry it into the greenhouse over the plant, then tilt the phone (or tap it) to pour."
   ],
-  "eggName": "Fashion Icon",
-  "eggHow": "Drag the open umbrella onto the mole: it wears it as a hat and spins."
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "V63ChainReaction",
+  "id": "v63_chain_reaction",
+  "title": "CHAIN REACTION",
+  "hint": "Every piece pushes the next one. Where does it all start?",
+  "egg": "",
+  "n": 256,
+  "desc": "An unfinished chain machine must ring an unreachable bell. Slots: ball on the shelf, book as ramp, dominoes on the table, candle before the balloon string, then GO: the flame burns the string, the balloon rises and rings the bell. The magnet is a decoy; every wrong setup stops at the first broken link with its own joke. Unlimited tries.",
+  "hints": [
+   "Every piece pushes the next one. Where does it all start?",
+   "Something round starts it, something flat gets it down, something in a row passes it on... and something hot finishes it.",
+   "Ball in the circle on the shelf, book as the ramp, dominoes on the table, candle right before the balloon string. The magnet is a trap. Then GO!"
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "V63LyingClocks",
+  "id": "v63_lying_clocks",
+  "title": "THE LYING CLOCKS",
+  "hint": "Every clock lies. But one of them tells you HOW it lies.",
+  "egg": "",
+  "n": 257,
+  "desc": "The door opens only at the right time. The alarm clock is stopped, the time clock runs double speed, the cuckoo clock is 10-25 min late but sings on the real hour. Watch the cuckoo, work out the delay, set the real current time on the keypad. 3 mistakes: 'Time's up. Literally.'",
+  "hints": [
+   "Every clock lies. But one of them tells you HOW it lies.",
+   "The cuckoo clock is slow, but its bird sings exactly on the REAL hour. Watch where its hands are when it sings.",
+   "When the bird sings it's really HH:00 (count the cuckoos). If the cuckoo clock shows, say, 3:45, it's 15 minutes slow: add 15 to what it shows and type that time, then OK."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "V63ShadowPuppet",
+  "id": "v63_shadow_puppet",
+  "title": "SHADOW PUPPET",
+  "hint": "Dogs are scared of one thing: a really, REALLY big cat.",
+  "egg": "",
+  "n": 258,
+  "desc": "The guard dog is afraid of giant cats. Build a cat shadow on the wall: yarn ball as head, two pizza slices as ears, feather as tail; slide the stand close to the lamp and turn it on. Small cat: 'Aww, a kitten!'. Other shapes get their own reactions; 3 wrong shadows: 'Woof. That means no.'",
+  "hints": [
+   "Dogs are scared of one thing: a really, REALLY big cat.",
+   "Build a cat on the stand: a round head, two pointy ears, a tail. Then switch on the lamp. Size matters!",
+   "Yarn in the head circle, one pizza slice in each ear circle, the feather as the tail. Slide the stand all the way to the lamp, then tap the lamp."
+  ],
+  "eggName": "",
+  "eggHow": ""
  },
  {
   "folder": "AlmostThere",
@@ -4085,7 +4133,7 @@
   "title": "ALMOST THERE",
   "hint": "Only one point is missing.",
   "egg": "",
-  "n": 256,
+  "n": 259,
   "desc": "Il contatore dice 99/100: trascina giù la barra \"/\" e tocca il puntino nascosto sotto per l'ultimo punto.",
   "hints": [
    "Only one point is missing.",
@@ -4101,7 +4149,7 @@
   "title": "TONI'S FINAL EXAM",
   "hint": "Toni isn't a normal student.",
   "egg": "",
-  "n": 257,
+  "n": 260,
   "desc": "L'esame finale di Toni: 2+2 = BISCUIT, trova il bicchiere col biscotto, poi trascina giù il diploma fino a lui. CERTIFIED GOOD BOY!",
   "hints": [
    "Toni isn't a normal student.",

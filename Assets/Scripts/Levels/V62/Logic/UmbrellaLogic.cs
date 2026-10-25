@@ -18,11 +18,10 @@ namespace Gotcha.Levels.V62
     /// Logica pura del livello 255 "Upside-down umbrella": il rubinetto non ha la manopola, l'ombrello aperto sotto la
     /// pioggia ripara e basta. Soluzione: aprirlo, girarlo a testa in giù, riempirlo sotto la pioggia (~4 s), portarlo
     /// sopra la pianta e versare (inclinando o toccando). Versare altrove spreca l'acqua (si riempie di nuovo).
-    /// Easter egg: l'ombrello aperto (dritto) sulla talpa, che lo indossa come cappello. Nessuna dipendenza da Unity.
+    /// Nessuna dipendenza da Unity.
     /// </summary>
     public sealed class UmbrellaLogic
     {
-        public const string EggId = "v62_umbrella_hat";
         /// <summary>Secondi di pioggia per riempire l'ombrello rovesciato.</summary>
         public const float FillSeconds = 4f;
 
@@ -31,7 +30,6 @@ namespace Gotcha.Levels.V62
         /// <summary>Acqua raccolta, da 0 (vuoto) a 1 (pieno).</summary>
         public float Water { get; private set; }
         public int Wasted { get; private set; }
-        public bool EggFound { get; private set; }
         public bool CompletionReported { get; private set; }
 
         public bool InputLocked => State != UmbrellaState.Playing;
@@ -43,7 +41,6 @@ namespace Gotcha.Levels.V62
             Pose = UmbrellaPose.Closed;
             Water = 0f;
             Wasted = 0;
-            EggFound = false;
             CompletionReported = false;
         }
 
@@ -98,14 +95,6 @@ namespace Gotcha.Levels.V62
             }
             Wasted++;
             return overPlant ? PourResult.NotEnough : PourResult.Wasted;
-        }
-
-        /// <summary>L'ombrello aperto e dritto sulla talpa: la talpa lo indossa come cappello. È l'Easter egg.</summary>
-        public bool TryHatOnMole()
-        {
-            if (InputLocked || Pose != UmbrellaPose.Open) return false;
-            EggFound = true;
-            return true;
         }
 
         public bool TryCompleteBloom()

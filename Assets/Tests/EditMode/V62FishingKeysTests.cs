@@ -4,7 +4,7 @@ using Gotcha.Levels.V62;
 
 namespace Gotcha.Tests
 {
-    /// <summary>Livello 251: la chiave nello scarico (calamita sull'amo, stivale, piranha).</summary>
+    /// <summary>Livello 251: la chiave nello scarico (calamita sull'amo, stivale).</summary>
     public class V62FishingKeysTests
     {
         [Test]
@@ -22,8 +22,7 @@ namespace Gotcha.Tests
             Assert.AreEqual(FishingKeysState.Opening, l.State);
             Assert.IsTrue(l.TryCompleteOpening());
             Assert.AreEqual(FishingKeysState.Done, l.State);
-            Assert.IsFalse(l.EggFound);
-        }
+                    }
 
         [Test]
         public void EmptyHook_CatchesBoot_AndRetries()
@@ -65,31 +64,13 @@ namespace Gotcha.Tests
         public void Hook_HoldsOneThing_AndCanBeEmptied()
         {
             var l = new FishingKeysLogic();
-            Assert.IsTrue(l.TryAttach(HookBait.Fish));
+            Assert.IsTrue(l.TryAttach(HookBait.Magnet));
             Assert.IsFalse(l.TryAttach(HookBait.Magnet));
-            Assert.AreEqual(HookBait.Fish, l.TryDetach());
+            Assert.AreEqual(HookBait.Magnet, l.TryDetach());
             Assert.AreEqual(HookBait.None, l.Bait);
             Assert.AreEqual(HookBait.None, l.TryDetach());
             Assert.IsTrue(l.TryAttach(HookBait.Magnet));
             Assert.IsFalse(l.TryAttach(HookBait.None));
-        }
-
-        [Test]
-        public void Egg_FishOnHook_Piranha_ThenContinues()
-        {
-            var l = new FishingKeysLogic();
-            l.TryAttach(HookBait.Fish);
-            Assert.AreEqual(CastResult.Piranha, l.TryCast());
-            Assert.IsFalse(l.EggFound);
-            Assert.IsTrue(l.TryFinishCast());
-            Assert.IsTrue(l.EggFound);
-            Assert.AreEqual(HookBait.None, l.Bait);           // il pesce se l'è mangiato il piranha
-            Assert.AreEqual(FishingKeysState.Idle, l.State);
-            Assert.IsTrue(l.TryAttach(HookBait.Magnet));      // si continua normalmente
-            Assert.AreEqual(CastResult.Key, l.TryCast());
-            l.TryFinishCast(); l.TryPickKey(); l.TryDropKey(true);
-            Assert.IsTrue(l.TryCompleteOpening());
-            Assert.IsTrue(l.EggFound);
         }
 
         [Test]
@@ -121,7 +102,7 @@ namespace Gotcha.Tests
             foreach (FishingKeysState target in Enum.GetValues(typeof(FishingKeysState)))
             {
                 var l = new FishingKeysLogic();
-                l.TryAttach(HookBait.Fish); l.TryCast(); l.TryFinishCast();   // con l'Easter egg
+                l.TryCast(); l.TryFinishCast();   // prima uno stivale
                 if (target >= FishingKeysState.Casting) { l.TryAttach(HookBait.Magnet); l.TryCast(); }
                 if (target >= FishingKeysState.KeyOut) l.TryFinishCast();
                 if (target >= FishingKeysState.HoldingKey) l.TryPickKey();
@@ -131,8 +112,7 @@ namespace Gotcha.Tests
                 l.Reset();
                 Assert.AreEqual(FishingKeysState.Idle, l.State);
                 Assert.AreEqual(HookBait.None, l.Bait);
-                Assert.IsFalse(l.EggFound);
-                Assert.IsFalse(l.CompletionReported);
+                                Assert.IsFalse(l.CompletionReported);
                 Assert.AreEqual(0, l.Boots);
                 Assert.IsTrue(l.TryAttach(HookBait.Magnet));
             }
@@ -148,7 +128,7 @@ namespace Gotcha.Tests
             {
                 switch (rnd.Next(9))
                 {
-                    case 0: l.TryAttach((HookBait)rnd.Next(3)); break;
+                    case 0: l.TryAttach((HookBait)rnd.Next(2)); break;
                     case 1: l.TryDetach(); break;
                     case 2: l.TryCast(); break;
                     case 3: l.TryFinishCast(); break;

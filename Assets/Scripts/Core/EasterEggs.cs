@@ -36,11 +36,6 @@ namespace Gotcha.Core
             { "adpocalypse", "Adpocalypse" },
             { "mouse_union", "Mouse Union" },
             { "true_monster_pug", "The Real Monster Is The Pug" },
-            { "v62_fish_in_sink", "Something Fishy" },
-            { "v62_feather_tickle", "Tickle Attack" },
-            { "v62_balloon_cat", "Up, Up And Away" },
-            { "v62_mirror_pug", "Two Tonis" },
-            { "v62_umbrella_hat", "Fashion Icon" },
         };
 
         public static string Name(string id)

@@ -10,7 +10,6 @@ namespace Gotcha.Levels
     /// secondo (~25 s). Toccarlo lo fa solo arrabbiare (poi spinge più veloce), il pesce lo mangia e riprende, il
     /// campanello lo ignora, il vaso è troppo pesante. Soluzione: lo specchio sulla mensola davanti al gatto, che vede
     /// il suo riflesso, si gonfia, soffia e scappa. Se il vaso cade il livello è perso ("Cats 1, You 0.").
-    /// Easter egg: lo specchio davanti a Toni, che dorme sul tappeto: si sveglia, abbaia al riflesso e si riaddormenta.
     /// </summary>
     public class V62MirrorCatLevel : V62Level
     {
@@ -25,20 +24,13 @@ namespace Gotcha.Levels
         [SerializeField] Transform mirror;
         [SerializeField] Collider2D mirrorArea;
         [SerializeField] GameObject catReflection;
-        [SerializeField] GameObject toniReflection;
         [SerializeField] Transform bell;
         [SerializeField] Collider2D bellArea;
         [SerializeField] SmokeEmitter bellWaves;
         [SerializeField] Transform fish;
         [SerializeField] Collider2D fishArea;
-        [SerializeField] Transform toni;
-        [SerializeField] Collider2D toniArea;
-        [SerializeField] Transform toniFace;
-        [SerializeField] GameObject toniEyes;
-        [SerializeField] SmokeEmitter zzz;
         [SerializeField] SmokeEmitter fur;
         [SerializeField] SpeechBubble catBubble;
-        [SerializeField] SpeechBubble toniBubble;
         [SerializeField] TextMesh infoText;
         [SerializeField] Transform infoHolder;
         [SerializeField] float mirrorReach = 1.05f;
@@ -47,10 +39,10 @@ namespace Gotcha.Levels
         Camera cam;
         HwDragger drag;
         HwDragger.Item mirrorItem, fishItem;
-        HwSay catSay, toniSay;
+        HwSay catSay;
         HwToast toast;
         Vector3 vaseStart, catOffset, catScale;
-        bool busy, eggShown, toniBarking;
+        bool busy;
 
         public override void OnLevelStart()
         {
@@ -58,7 +50,6 @@ namespace Gotcha.Levels
             logic.Reset();
             ResetV62();
             catSay = new HwSay(catBubble);
-            toniSay = new HwSay(toniBubble);
             toast = new HwToast(infoText, infoHolder);
             drag = new HwDragger(this);
             vaseStart = vase.position;
@@ -68,20 +59,15 @@ namespace Gotcha.Levels
             fishItem = drag.Add(fish, fishArea, 5);
             HalloweenKit.Show(shards, false);
             HalloweenKit.Show(catReflection, false);
-            HalloweenKit.Show(toniReflection, false);
-            HalloweenKit.Show(toniEyes, false);
             if (bellWaves != null) bellWaves.Stop();
             if (fur != null) fur.Stop();
-            if (zzz != null) zzz.Play();
             catSay.Show("Push. Push. Push.", 1.8f);
         }
 
         void Update()
         {
             catSay.Tick();
-            toniSay.Tick();
             toast.Tick();
-            TickV62();
             if (IsFinished || busy) return;
             int pushes = logic.Tick(Time.deltaTime);
             if (pushes > 0) Shove();
@@ -149,12 +135,6 @@ namespace Gotcha.Levels
                     StartCoroutine(HalloweenKit.Pop(bell, 1.1f, 0.2f));
                     catSay.Show("...", 1.2f);
                 }
-                return;
-            }
-            if (toniArea.OverlapPoint(w) && !toniBarking)
-            {
-                Sfx.Play(this, "snore", 0.5f);
-                toniSay.Show("Zzz...", 1.2f);
             }
         }
 
@@ -173,12 +153,9 @@ namespace Gotcha.Levels
             }
             if (it == mirrorItem)
             {
-                MirrorTarget target = MirrorTarget.Nowhere;
-                if (!lostFinger && Vector2.Distance(mirror.position, catFace.position) < mirrorReach) target = MirrorTarget.InFrontOfCat;
-                else if (!lostFinger && !toniBarking && Vector2.Distance(mirror.position, toniFace.position) < mirrorReach) target = MirrorTarget.InFrontOfToni;
-                bool scared = logic.TryDropMirror(target);
-                if (scared) { StartCoroutine(CatScared()); return; }
-                if (target == MirrorTarget.InFrontOfToni) { StartCoroutine(ToniBarks()); return; }
+                MirrorTarget target = !lostFinger && Vector2.Distance(mirror.position, catFace.position) < mirrorReach
+                    ? MirrorTarget.InFrontOfCat : MirrorTarget.Nowhere;
+                if (logic.TryDropMirror(target)) { StartCoroutine(CatScared()); return; }
                 drag.SendHome(mirrorItem, 0.35f);
             }
         }
@@ -195,34 +172,6 @@ namespace Gotcha.Levels
             fish.gameObject.SetActive(true);
             fishItem.Enabled = true;
             yield return HalloweenKit.Pop(fish, 1.25f, 0.3f);
-        }
-
-        IEnumerator ToniBarks()
-        {
-            toniBarking = true;
-            mirrorItem.Enabled = false;
-            yield return HalloweenKit.Move(mirror, toniFace.position + new Vector3(-0.55f, 0.1f, 0f), 0.2f);
-            HalloweenKit.Show(toniReflection, true);
-            if (zzz != null) zzz.Stop();
-            yield return new WaitForSeconds(0.3f);
-            HalloweenKit.Show(toniEyes, true);
-            for (int i = 0; i < 2; i++)
-            {
-                Sfx.Play(this, "woof", 0.8f);
-                toniSay.Show(i == 0 ? "WOOF?!" : "WOOF! WOOF! Another Toni!", 1.4f);
-                yield return HalloweenKit.Shake(toni, 0.06f, 0.4f);
-                yield return new WaitForSeconds(0.25f);
-            }
-            if (!eggShown) { eggShown = true; RevealEgg(MirrorCatLogic.EggId); }
-            yield return new WaitForSeconds(0.6f);
-            HalloweenKit.Show(toniEyes, false);
-            HalloweenKit.Show(toniReflection, false);
-            toniSay.Show("...zzz...", 1.2f);
-            if (zzz != null) zzz.Play();
-            drag.SendHome(mirrorItem, 0.4f);
-            yield return new WaitForSeconds(0.4f);
-            mirrorItem.Enabled = true;
-            toniBarking = false;
         }
 
         IEnumerator CatScared()
@@ -251,7 +200,7 @@ namespace Gotcha.Levels
             HalloweenKit.Show(catReflection, false);
             toast.Show("The vase is safe!", 2f);
             yield return Celebrate(2f);
-            if (logic.TryCompleteSave()) Victory(logic.EggFound, MirrorCatLogic.EggId);
+            if (logic.TryCompleteSave()) Win();
         }
 
         IEnumerator VaseFalls()

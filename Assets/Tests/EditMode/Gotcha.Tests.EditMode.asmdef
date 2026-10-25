@@ -5,7 +5,8 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "Gotcha.Halloween.Logic",
-        "Gotcha.V62.Logic"
+        "Gotcha.V62.Logic",
+        "Gotcha.V63.Logic"
     ],
     "includePlatforms": [
         "Editor"

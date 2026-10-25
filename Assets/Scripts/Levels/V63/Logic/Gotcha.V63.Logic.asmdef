@@ -1,0 +1,14 @@
+{
+    "name": "Gotcha.V63.Logic",
+    "rootNamespace": "Gotcha.Levels.V63",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}

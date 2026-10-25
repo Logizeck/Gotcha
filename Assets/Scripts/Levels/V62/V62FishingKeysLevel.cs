@@ -9,7 +9,7 @@ namespace Gotcha.Levels
     /// Livello 251 "Fishing for keys" — la chiave è caduta nello scarico del lavandino e la porta è chiusa. Le dita
     /// nello scarico non ci passano; la canna da pesca calata a vuoto tira su uno stivale. Soluzione: trascinare la
     /// calamita (sulla mensola) sull'amo, poi la canna sopra lo scarico: la chiave sale attaccata alla calamita e va
-    /// portata nella serratura. Easter egg: il pesce della ciotola del gatto sull'amo fa uscire un piranha che saluta.
+    /// portata nella serratura.
     /// </summary>
     public class V62FishingKeysLevel : V62Level
     {
@@ -20,8 +20,6 @@ namespace Gotcha.Levels
         [SerializeField] LineRenderer fishingLine;
         [SerializeField] Transform magnet;
         [SerializeField] Collider2D magnetArea;
-        [SerializeField] Transform fish;
-        [SerializeField] Collider2D fishArea;
         [SerializeField] Collider2D drainZone;      // dove va lasciata la canna (sopra il lavandino)
         [SerializeField] Collider2D drainTapArea;   // lo scarico: il dito non ci passa
         [SerializeField] Transform drainPoint;
@@ -29,7 +27,6 @@ namespace Gotcha.Levels
         [SerializeField] Transform key;
         [SerializeField] Collider2D keyArea;
         [SerializeField] Transform boot;
-        [SerializeField] Transform piranha;
         [SerializeField] Collider2D lockArea;
         [SerializeField] Transform lockPoint;
         [SerializeField] Transform doorPanel;
@@ -47,10 +44,10 @@ namespace Gotcha.Levels
         readonly FishingKeysLogic logic = new FishingKeysLogic();
         Camera cam;
         HwDragger drag;
-        HwDragger.Item rodItem, magnetItem, fishItem, keyItem;
+        HwDragger.Item rodItem, magnetItem, keyItem;
         HwSay say;
         HwToast toast;
-        Vector3 rodHome, magnetHome, fishHome, doorScale;
+        Vector3 rodHome, magnetHome, doorScale;
         bool busy;
 
         public override void OnLevelStart()
@@ -63,16 +60,13 @@ namespace Gotcha.Levels
             drag = new HwDragger(this);
             rodHome = rod.position;
             magnetHome = magnet.position;
-            fishHome = fish.position;
             doorScale = doorPanel.localScale;
             rodItem = drag.Add(rod, rodArea, 1);
             magnetItem = drag.Add(magnet, magnetArea, 5);
-            fishItem = drag.Add(fish, fishArea, 5);
             keyItem = drag.Add(key, keyArea, 8);
             keyItem.Enabled = false;
             key.gameObject.SetActive(false);
             boot.gameObject.SetActive(false);
-            piranha.gameObject.SetActive(false);
             keyGlint.SetActive(true);
             if (splash != null) splash.Stop();
             UpdateLine();
@@ -83,7 +77,6 @@ namespace Gotcha.Levels
         {
             say.Tick();
             toast.Tick();
-            TickV62();
             UpdateLine();
             if (IsFinished || busy || logic.InputLocked) return;
             if (!HalloweenKit.ReadPointer(cam, out Vector2 w, out bool began, out bool ended))
@@ -112,8 +105,8 @@ namespace Gotcha.Levels
 
         void OnPick(HwDragger.Item it)
         {
-            // l'esca presa dall'amo si stacca
-            if ((it == magnetItem || it == fishItem) && it.T.parent == baitSpot)
+            // la calamita presa dall'amo si stacca
+            if (it == magnetItem && it.T.parent == baitSpot)
             {
                 logic.TryDetach();
                 it.T.SetParent(transform, true);
@@ -162,19 +155,18 @@ namespace Gotcha.Levels
                 else drag.SendHome(rodItem, 0.35f);
                 return;
             }
-            if (it == magnetItem || it == fishItem)
+            if (it == magnetItem)
             {
-                HookBait bait = it == magnetItem ? HookBait.Magnet : HookBait.Fish;
-                if (!lostFinger && Vector2.Distance(it.T.position, baitSpot.position) < AttachRadius && logic.TryAttach(bait))
+                if (!lostFinger && Vector2.Distance(it.T.position, baitSpot.position) < AttachRadius && logic.TryAttach(HookBait.Magnet))
                 {
                     Attach(it.T);
                     Sfx.Play(this, "clunk", 0.6f);
                     Haptics.Light();
-                    toast.Show(bait == HookBait.Magnet ? "Clack! The magnet sticks to the hook." : "A fish on a hook. Classic.", 1.6f);
+                    toast.Show("Clack! The magnet sticks to the hook.", 1.6f);
                     return;
                 }
                 if (!lostFinger && drainTapArea.OverlapPoint(it.T.position))
-                    toast.Show(bait == HookBait.Magnet ? "It can't reach the key from here." : "Not without a fishing rod!", 1.6f);
+                    toast.Show("It can't reach the key from here.", 1.6f);
                 drag.SendHome(it, 0.35f);
                 return;
             }
@@ -216,7 +208,7 @@ namespace Gotcha.Levels
             yield return HalloweenKit.Shake(rod, 0.05f, 0.5f);
             Haptics.Light();
             // cosa abbocca
-            Transform caught = result == CastResult.Key ? key : result == CastResult.Piranha ? piranha : boot;
+            Transform caught = result == CastResult.Key ? key : boot;
             if (result == CastResult.Key) { keyGlint.SetActive(false); HookKey(); }
             else
             {
@@ -224,43 +216,31 @@ namespace Gotcha.Levels
                 caught.localPosition = new Vector3(0f, -0.25f, 0f);
                 caught.gameObject.SetActive(true);
             }
-            if (result == CastResult.Piranha) fish.gameObject.SetActive(false);   // se l'è mangiato
             ShowHookContents(true);
             Sfx.Play(this, "pop", 0.6f);
             if (splash != null) StartCoroutine(HalloweenKit.Burst(splash, 0.3f));
             yield return MoveLocal(hook, rest, 0.5f);
             logic.TryFinishCast();
-            switch (result)
+            if (result == CastResult.Key)
             {
-                case CastResult.Key:
-                    Haptics.Medium();
-                    Sfx.Play(this, "ding", 0.7f);
-                    toast.Show("The key! Stuck to the magnet!", 2f);
-                    keyItem.Home = key.position;
-                    keyItem.Enabled = true;
-                    magnetItem.Enabled = false;   // la calamita resta sull'amo: ora conta solo la chiave
-                    fishItem.Enabled = false;
-                    busy = false;
-                    yield break;
-                case CastResult.Piranha:
-                    yield return HalloweenKit.Wiggle(piranha, 18f, 1.0f, 14f);
-                    toast.Show("A piranha?! \"Hi! Thanks for the snack!\"", 2.2f);
-                    RevealEgg(FishingKeysLogic.EggId);
-                    yield return HalloweenKit.Wiggle(piranha, 25f, 1.4f, 20f);
-                    break;
-                default:
-                    Sfx.Play(this, "clunk", 0.5f);
-                    toast.Show("Nice catch. Wrong one.", 1.8f);
-                    yield return HalloweenKit.Wiggle(boot, 8f, 1.2f, 10f);
-                    break;
+                Haptics.Medium();
+                Sfx.Play(this, "ding", 0.7f);
+                toast.Show("The key! Stuck to the magnet!", 2f);
+                keyItem.Home = key.position;
+                keyItem.Enabled = true;
+                magnetItem.Enabled = false;   // la calamita resta sull'amo: ora conta solo la chiave
+                busy = false;
+                yield break;
             }
+            Sfx.Play(this, "clunk", 0.5f);
+            toast.Show("Nice catch. Wrong one.", 1.8f);
+            yield return HalloweenKit.Wiggle(boot, 8f, 1.2f, 10f);
             // quello che non serve torna giù nello scarico; la canna torna al suo posto
             yield return MoveLocal(hook, down, 0.35f);
             caught.gameObject.SetActive(false);
             caught.SetParent(transform, true);
             if (splash != null) StartCoroutine(HalloweenKit.Burst(splash, 0.25f));
             yield return MoveLocal(hook, rest, 0.3f);
-            if (result == CastResult.Piranha) StartCoroutine(RespawnFish());
             yield return HalloweenKit.Move(rod, rodHome, 0.35f, 0.3f);
             rodItem.Enabled = true;
             busy = false;
@@ -278,18 +258,6 @@ namespace Gotcha.Levels
         void ShowHookContents(bool on)
         {
             hook.gameObject.SetActive(on);
-        }
-
-        IEnumerator RespawnFish()
-        {
-            yield return new WaitForSeconds(0.6f);
-            fish.SetParent(transform, true);
-            fish.position = fishHome;
-            fish.localRotation = Quaternion.identity;
-            fish.gameObject.SetActive(true);
-            fishItem.Home = fishHome;
-            Sfx.Play(this, "pop", 0.5f);
-            yield return HalloweenKit.Pop(fish, 1.25f, 0.3f);
         }
 
         IEnumerator OpenDoor()
@@ -315,7 +283,7 @@ namespace Gotcha.Levels
             }
             toast.Show("Click! The door is open!", 1.8f);
             yield return Celebrate(2f);
-            if (logic.TryCompleteOpening()) Victory(logic.EggFound, FishingKeysLogic.EggId);
+            if (logic.TryCompleteOpening()) Win();
         }
 
         static IEnumerator MoveLocal(Transform t, Vector3 to, float seconds)

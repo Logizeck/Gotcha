@@ -6,72 +6,37 @@ using Gotcha.Levels;
 
 /// <summary>
 /// Versione 0.62: cinque livelli "vecchi oggetti, azioni nuove" (251-255, subito dopo lo speciale Halloween).
-/// Riusano gli sprite esistenti (canna da pesca, calamita, Toni, gatto, palloncino, candela, specchio, ombrello...)
-/// in modi inattesi; pochi disegni nuovi (prefisso v62_) in DoodleSpritesV62. Aiuti comuni: quelli di Halloween
-/// (HW_Goal, HW_Obj, HW_Box, HW_Toast, HW_Confetti).
+/// Riusano gli sprite esistenti (canna da pesca, calamita, gatto, topo, palloncino, candela, specchio, ombrello...)
+/// in modi inattesi; pochi disegni nuovi (prefisso v62_/v63_) in DoodleSpritesV62/V63. Aiuti comuni: quelli di
+/// Halloween (HW_Goal, HW_Obj, HW_Box, HW_Toast, HW_Confetti).
+/// 0.63: niente Easter egg in questi livelli e niente Toni (compare solo nei livelli multipli di 25): il 252 è
+/// diventato "Wake up, Kitty!" e dal 254 è sparito Toni che dormiva sul tappeto.
 /// </summary>
 public static partial class GotchaProjectBuilder
 {
     static List<LevelDefinition> Levels62() => new List<LevelDefinition>
     {
         Define("V62FishingKeys", "v62_fishing_keys", "FISHING FOR KEYS", "The key is made of metal. What sticks to metal?",
-            BuildV62FishingKeys(), "v62_fish_in_sink"),
-        Define("V62WakeToni", "v62_wake_toni", "WAKE UP, TONI!", "Noise and light won't do it. Something tastier might.",
-            BuildV62WakeToni(), "v62_feather_tickle"),
+            BuildV62FishingKeys()),
+        Define("V62WakeKitty", "v62_wake_kitty", "WAKE UP, KITTY!", "Noise and light won't do it. Something tastier might... if it gets there.",
+            BuildV62WakeKitty()),
         Define("V62AirMail", "v62_air_mail", "AIR MAIL", "Paper planes can't fly that high. What floats?",
-            BuildV62AirMail(), "v62_balloon_cat"),
+            BuildV62AirMail()),
         Define("V62MirrorCat", "v62_mirror_cat", "MIRROR, MIRROR", "That cat ignores everything... except another cat.",
-            BuildV62MirrorCat(), "v62_mirror_pug"),
+            BuildV62MirrorCat()),
         Define("V62Umbrella", "v62_umbrella_bucket", "UPSIDE-DOWN UMBRELLA", "The glass roof keeps the rain out. Bring the rain in.",
-            BuildV62Umbrella(), "v62_umbrella_hat"),
+            BuildV62Umbrella()),
     };
 
     // ---------- Aiuti comuni ----------
 
-    /// <summary>Fascia "EASTER EGG UNLOCKED" col nome del segreto (lo scrive il livello), nascosta all'avvio.</summary>
-    static GameObject V62_EggBanner(Transform root, out TextMesh name)
-    {
-        Transform banner = Child(root, "EggBanner", new Vector2(0f, 1.85f)).transform;
-        Bar(banner, "Back", Vector2.zero, new Vector2(5.4f, 1.2f), new Color(0.32f, 0.12f, 0.45f, 0.95f), 85);
-        TextMesh b1 = Label(banner, new Vector2(0f, 0.25f), 86, "EASTER EGG UNLOCKED", 0.06f);
-        b1.color = new Color(1f, 0.86f, 0.3f);
-        Fit(b1, 5.1f, 0.5f);
-        name = Label(banner, new Vector2(0f, -0.27f), 86, "SOMETHING FISHY!", 0.05f);
-        name.color = Color.white;
-        Fit(name, 5.1f, 0.42f);
-        return banner.gameObject;
-    }
-
-    /// <summary>Campi comuni dei livelli 0.62: fascia dell'Easter egg, coriandoli, scritta di commento.</summary>
+    /// <summary>Campi comuni dei livelli 0.62/0.63: coriandoli e scritta di commento.</summary>
     static void V62_Wire(Object level, Transform root, Vector2 toastAt)
     {
-        GameObject banner = V62_EggBanner(root, out TextMesh eggName);
-        SetField(level, "eggBanner", banner);
-        SetField(level, "eggName", eggName);
         SetArray(level, "confetti", HW_Confetti(root));
         TextMesh info = HW_Toast(root, toastAt, out Transform infoHolder);
         SetField(level, "infoText", info);
         SetField(level, "infoHolder", infoHolder);
-    }
-
-    /// <summary>Toni sdraiato sul suo cuscino (guarda a sinistra), con occhi aperti e codina da accendere dopo.</summary>
-    static Transform V62_SleepingToni(Transform parent, Vector2 pos, float scale, int order, out Transform body, out GameObject eyesOpen)
-    {
-        Transform toni = Child(parent, "Toni", pos).transform;
-        toni.localScale = Vector3.one * scale;
-        Art(toni, "Cushion", "pug_cushion", order - 1, false);
-        body = Child(toni, "Body", Vector2.zero).transform;
-        Transform tail = Child(body, "Tail", new Vector2(0.98f, 0.36f)).transform;
-        Art(tail, "Art", "pug_tail", order, false);
-        Art(body, "Art", "toni_lie", order + 1);
-        eyesOpen = Child(body, "EyesOpen", Vector2.zero);
-        Art(eyesOpen.transform, "Eyes", "pug_eyes", order + 2, false);
-        Art(eyesOpen.transform, "PupilL", "pug_pupil", order + 3, false, new Vector2(Gotcha.EditorArt.DoodleSprites.PugEyeLX - 0.02f, Gotcha.EditorArt.DoodleSprites.PugEyeY));
-        Art(eyesOpen.transform, "PupilR", "pug_pupil", order + 3, false, new Vector2(Gotcha.EditorArt.DoodleSprites.PugEyeRX - 0.02f, Gotcha.EditorArt.DoodleSprites.PugEyeY));
-        // dorme: occhi chiusi (quelli di "toni_lie") e codina nascosta finché non si alza
-        eyesOpen.SetActive(false);
-        tail.gameObject.SetActive(false);
-        return toni;
     }
 
     // ---------- 251 Fishing for keys ----------
@@ -121,12 +86,10 @@ public static partial class GotchaProjectBuilder
         Transform baitSpot = Child(hook, "BaitSpot", new Vector2(0f, -0.4f)).transform;
         LineRenderer line = Line(root.transform, "FishingLine", 0.022f, new Color(0.17f, 0.13f, 0.2f, 0.9f), 6);
 
-        // calamita attaccata alla padella, pesce nella ciotola del gatto (che dorme lì vicino)
+        // calamita attaccata alla padella, ciotola (vuota) del gatto che dorme lì vicino
         Transform magnet = HW_Obj(root.transform, "Magnet", new Vector2(1.9f, 1.45f), "magnet", 8, 0.9f);
         BoxCollider2D magnetCol = HW_Box(magnet, new Vector2(0.85f, 0.8f), new Vector2(0f, -0.02f));
-        Transform bowl = HW_Obj(root.transform, "CatBowl", new Vector2(0.6f, -3.9f), "cat_bowl", 5, 0.75f);
-        Transform fish = HW_Obj(root.transform, "Fish", new Vector2(0.6f, -3.62f), "fish", 8, 0.9f);
-        BoxCollider2D fishCol = HW_Box(fish, new Vector2(0.95f, 0.65f));
+        HW_Obj(root.transform, "CatBowl", new Vector2(0.6f, -3.9f), "cat_bowl", 5, 0.75f);
         Transform cat = HW_Obj(root.transform, "Cat", new Vector2(-1.3f, -3.75f), "cat", 4, 0.6f);
         BoxCollider2D catCol = HW_Box(cat, new Vector2(3.0f, 1.9f), new Vector2(0f, 0.1f));
         SmokeEmitter zzz = Emitter(root.transform, "Zzz", new Vector2(-1.55f, -3.2f), "zzz", 0.8f, 2.2f, 0.4f, 0.1f, 0.55f, Color.white, 9);
@@ -134,11 +97,10 @@ public static partial class GotchaProjectBuilder
         zzz.growth = 0.9f;
         zzz.Play();
 
-        // quello che si può tirare su: la chiave vera, lo stivale, il piranha
+        // quello che si può tirare su: la chiave vera o lo stivale
         Transform key = HW_Obj(root.transform, "Key", new Vector2(-0.75f, -0.91f), "key", 9, 0.5f);
         BoxCollider2D keyCol = HW_Box(key, new Vector2(1.5f, 0.9f), new Vector2(-0.6f, 0f));
         Transform boot = HW_Obj(root.transform, "Boot", new Vector2(-0.75f, -0.91f), "fish_boot", 9, 0.7f);
-        Transform piranha = HW_Obj(root.transform, "Piranha", new Vector2(-0.75f, -0.91f), "piranha", 9, 0.75f);
 
         HW_Goal(root.transform, "GET THE KEY OUT OF THE DRAIN!");
         SetField(level, "rod", rod);
@@ -148,8 +110,6 @@ public static partial class GotchaProjectBuilder
         SetField(level, "fishingLine", line);
         SetField(level, "magnet", magnet);
         SetField(level, "magnetArea", magnetCol);
-        SetField(level, "fish", fish);
-        SetField(level, "fishArea", fishCol);
         SetField(level, "drainZone", drainZone);
         SetField(level, "drainTapArea", drainTap);
         SetField(level, "drainPoint", drain);
@@ -157,7 +117,6 @@ public static partial class GotchaProjectBuilder
         SetField(level, "key", key);
         SetField(level, "keyArea", keyCol);
         SetField(level, "boot", boot);
-        SetField(level, "piranha", piranha);
         SetField(level, "lockArea", lockCol);
         SetField(level, "lockPoint", keyhole);
         SetField(level, "doorPanel", panel);
@@ -169,73 +128,79 @@ public static partial class GotchaProjectBuilder
         return SaveLevel(root, "V62FishingKeys");
     }
 
-    // ---------- 252 Wake up, Toni! ----------
+    // ---------- 252 Wake up, Kitty! ----------
 
-    static GameObject BuildV62WakeToni()
+    static GameObject BuildV62WakeKitty()
     {
-        var root = new GameObject("Level_V62WakeToni");
-        V62WakeToniLevel level = root.AddComponent<V62WakeToniLevel>();
-        Art(root.transform, "Bedroom", "bedroom_bg", -20, false);
+        var root = new GameObject("Level_V62WakeKitty");
+        V62WakeKittyLevel level = root.AddComponent<V62WakeKittyLevel>();
+        Art(root.transform, "Night", "night_bg", -20, false);
 
-        // Toni che dorme sul cuscino, sul pavimento
-        Transform toni = V62_SleepingToni(root.transform, new Vector2(0.55f, -3.6f), 1f, 3, out Transform body, out GameObject eyesOpen);
-        GameObject eyesHalf = Art(body, "EyesHalf", "pug_eyes_half", 5, false).gameObject;
-        Transform nose = Child(toni, "Nose", new Vector2(-0.8f, 0.22f)).transform;
-        BoxCollider2D toniCol = HW_Box(toni, new Vector2(2.6f, 1.4f), new Vector2(0f, 0.15f));
-        SmokeEmitter sneeze = Emitter(toni, "Sneeze", new Vector2(-1.05f, 0.2f), "puff", 22f, 0.7f, 0.3f, 0.25f, 0.5f, new Color(0.95f, 0.95f, 1f, 0.9f), 20);
-        sneeze.sideDrift = 0.8f;
-        SmokeEmitter zzz = Emitter(root.transform, "Zzz", new Vector2(-0.05f, -2.85f), "zzz", 1.2f, 2.2f, 0.45f, 0.1f, 0.7f, Color.white, 30);
+        // il gatto che dorme sul suo cuscino, sul tappeto (la testa è a sinistra)
+        Transform cat = Child(root.transform, "Cat", new Vector2(0.35f, -3.35f)).transform;
+        cat.localScale = Vector3.one * 0.85f;
+        Art(cat, "Cushion", "v63_cat_cushion", 2, false);
+        Transform body = Child(cat, "Body", Vector2.zero).transform;
+        SpriteRenderer catArt = Art(body, "Art", "cat", 3, false).GetComponent<SpriteRenderer>();
+        Transform tailCover = Art(cat, "TailCover", "v63_cat_tail", 4, false);
+        Transform nose = Child(cat, "Nose", new Vector2(-0.72f, 0.12f)).transform;
+        BoxCollider2D catCol = HW_Box(cat, new Vector2(3.0f, 1.9f), new Vector2(0f, 0.1f));
+        Transform awake = HW_Obj(root.transform, "AwakeCat", new Vector2(0.35f, -3.48f), "roof_cat", 5, 0.9f);
+        SmokeEmitter zzz = Emitter(root.transform, "Zzz", new Vector2(-0.1f, -2.75f), "zzz", 1.2f, 2.2f, 0.45f, 0.1f, 0.6f, Color.white, 30);
         zzz.spinRange = 12f;
         zzz.growth = 0.9f;
         zzz.sideDrift = 0.15f;
-        SmokeEmitter hearts = Emitter(root.transform, "Hearts", new Vector2(0.4f, -2.4f), "heart", 4f, 1.3f, 0.8f, 0.4f, 0.8f, Color.white, 35);
+        SmokeEmitter hearts = Emitter(root.transform, "Hearts", new Vector2(0.4f, -2.2f), "heart", 4f, 1.3f, 0.8f, 0.4f, 0.8f, Color.white, 35);
 
-        // il gatto sveglio sul letto, la piuma sul materasso
-        Transform cat = HW_Obj(root.transform, "Cat", new Vector2(1.2f, -1.95f), "roof_cat", 6, 0.95f);
-        BoxCollider2D catCol = HW_Box(cat, new Vector2(1.3f, 1.35f), new Vector2(0.05f, 0.6f));
-        Transform playSpot = Child(cat, "PlaySpot", new Vector2(-0.45f, 0.25f)).transform;
-        Transform feather = HW_Obj(root.transform, "Feather", new Vector2(-1.75f, -1.75f), "feather", 9, 0.75f);
-        feather.localRotation = Quaternion.Euler(0f, 0f, 15f);
+        // la tana del topo in fondo al muro (il topo si vede solo quando esce)
+        Transform hole = HW_Obj(root.transform, "MouseHole", new Vector2(1.75f, -1.75f), "mouse_hole", 2, 0.8f);
+        BoxCollider2D holeCol = HW_Box(hole, new Vector2(1.3f, 1.3f));
+        Transform mouse = HW_Obj(root.transform, "Mouse", new Vector2(1.75f, -1.8f), "mouse", 11, 0.4f);
+
+        // il pesce sulla mensola, il formaggio sul comodino, la piuma per terra
+        Art(root.transform, "Shelf", "wall_shelf", 1, false, new Vector2(1.35f, 0.35f));
+        Transform fish = HW_Obj(root.transform, "Fish", new Vector2(1.35f, 0.7f), "fish", 10, 1.2f);
+        BoxCollider2D fishCol = HW_Box(fish, new Vector2(0.95f, 0.6f));
+        HW_Obj(root.transform, "Nightstand", new Vector2(-1.6f, -0.88f), "hw_nightstand", 1);
+        Transform cheese = HW_Obj(root.transform, "Cheese", new Vector2(-1.6f, -0.78f), "cheese_wedge", 8, 0.85f);
+        BoxCollider2D cheeseCol = HW_Box(cheese, new Vector2(1.0f, 0.75f), new Vector2(0f, 0.2f));
+        Transform feather = HW_Obj(root.transform, "Feather", new Vector2(-2.05f, -2.75f), "feather", 9, 0.7f);
+        feather.localRotation = Quaternion.Euler(0f, 0f, 10f);
         BoxCollider2D featherCol = HW_Box(feather, new Vector2(1.9f, 1.0f), new Vector2(0.55f, 0.2f));
 
-        // il biscotto sulla mensola, la lampada appesa, la sveglia per terra
-        Art(root.transform, "Shelf", "wall_shelf", 1, false, new Vector2(1.55f, 0.75f));
-        Transform cookie = HW_Obj(root.transform, "Cookie", new Vector2(1.55f, 1.12f), "cookie", 10, 1.1f);
-        CircleCollider2D cookieCol = cookie.gameObject.AddComponent<CircleCollider2D>();
-        cookieCol.radius = 0.36f;
-        Transform lamp = HW_Obj(root.transform, "Lamp", new Vector2(-0.3f, 2.05f), "lamp", 2, 0.75f);
+        // la lampada appesa, la sveglia per terra
+        Transform lamp = HW_Obj(root.transform, "Lamp", new Vector2(0.15f, 1.55f), "lamp", 2, 0.75f);
         BoxCollider2D lampCol = HW_Box(lamp, new Vector2(1.5f, 1.3f), new Vector2(0f, 0.3f));
-        SpriteRenderer lampGlow = Art(root.transform, "LampGlow", "glow", 3, false, new Vector2(-0.3f, 2.0f)).GetComponent<SpriteRenderer>();
+        SpriteRenderer lampGlow = Art(root.transform, "LampGlow", "glow", 3, false, new Vector2(0.15f, 1.5f)).GetComponent<SpriteRenderer>();
         lampGlow.transform.localScale = Vector3.one * 2.2f;
         lampGlow.color = new Color(1f, 0.92f, 0.55f, 0f);
-        SpriteRenderer lampLight = Art(root.transform, "LampLight", "glow", 1, false, new Vector2(-0.3f, 0.8f)).GetComponent<SpriteRenderer>();
+        SpriteRenderer lampLight = Art(root.transform, "LampLight", "glow", 1, false, new Vector2(0.15f, -0.5f)).GetComponent<SpriteRenderer>();
         lampLight.transform.localScale = new Vector3(9f, 9f, 1f);
         lampLight.color = new Color(1f, 0.92f, 0.55f, 0f);
-        Transform alarm = HW_Obj(root.transform, "Alarm", new Vector2(-1.95f, -4.45f), "alarm_clock", 7, 0.42f);
+        Transform alarm = HW_Obj(root.transform, "Alarm", new Vector2(-1.85f, -4.4f), "alarm_clock", 7, 0.42f);
         BoxCollider2D alarmCol = HW_Box(alarm, new Vector2(2.4f, 2.1f), new Vector2(0f, 0.8f));
-        SmokeEmitter waves = Emitter(root.transform, "AlarmWaves", new Vector2(-1.95f, -3.85f), "ring_waves", 6f, 0.5f, 0.3f, 0.05f, 0.35f, Color.white, 20);
+        SmokeEmitter waves = Emitter(root.transform, "AlarmWaves", new Vector2(-1.85f, -3.8f), "ring_waves", 6f, 0.5f, 0.3f, 0.05f, 0.35f, Color.white, 20);
         waves.growth = 0.8f;
         waves.spinRange = 0f;
 
-        HW_Goal(root.transform, "WAKE TONI UP FOR HIS WALK!");
-        SetField(level, "toni", toni);
-        SetField(level, "toniBody", body);
-        SetField(level, "toniArt", body.Find("Art").GetComponent<SpriteRenderer>());
-        SetField(level, "toniLie", sprites["toni_lie"]);
-        SetField(level, "toniStand", sprites["toni_stand"]);
-        SetField(level, "toniArea", toniCol);
-        SetField(level, "nose", nose);
-        SetField(level, "eyesHalf", eyesHalf);
-        SetField(level, "eyesOpen", eyesOpen);
-        SetField(level, "tail", body.Find("Tail"));
-        SetField(level, "zzz", zzz);
-        SetField(level, "sneezePuff", sneeze);
-        SetField(level, "hearts", hearts);
+        HW_Goal(root.transform, "WAKE THE CAT UP FOR DINNER!");
         SetField(level, "cat", cat);
+        SetField(level, "catBody", body);
+        SetField(level, "catArt", catArt);
+        SetField(level, "catSleep", sprites["cat"]);
         SetField(level, "catArea", catCol);
-        SetField(level, "catPlaySpot", playSpot);
-        SetField(level, "cookie", cookie);
-        SetField(level, "cookieArea", cookieCol);
+        SetField(level, "nose", nose);
+        SetField(level, "tailCover", tailCover);
+        SetField(level, "awakeCat", awake);
+        SetField(level, "zzz", zzz);
+        SetField(level, "hearts", hearts);
+        SetField(level, "mouse", mouse);
+        SetField(level, "mouseHole", hole);
+        SetField(level, "holeArea", holeCol);
+        SetField(level, "fish", fish);
+        SetField(level, "fishArea", fishCol);
+        SetField(level, "cheese", cheese);
+        SetField(level, "cheeseArea", cheeseCol);
         SetField(level, "feather", feather);
         SetField(level, "featherArea", featherCol);
         SetField(level, "alarm", alarm);
@@ -244,10 +209,10 @@ public static partial class GotchaProjectBuilder
         SetField(level, "lampArea", lampCol);
         SetField(level, "lampGlow", lampGlow);
         SetField(level, "lampLight", lampLight);
-        SetField(level, "toniBubble", SmallBubble(root.transform, new Vector2(0.25f, -2.35f)));
-        SetField(level, "catBubble", SmallBubble(root.transform, new Vector2(1.2f, -0.4f)));
-        V62_Wire(level, root.transform, new Vector2(0f, 2.45f));
-        return SaveLevel(root, "V62WakeToni");
+        SetField(level, "catBubble", SmallBubble(root.transform, new Vector2(0.1f, -2.15f)));
+        SetField(level, "mouseBubble", SmallBubble(root.transform, new Vector2(1.25f, -0.85f)));
+        V62_Wire(level, root.transform, new Vector2(0f, 2.6f));
+        return SaveLevel(root, "V62WakeKitty");
     }
 
     // ---------- 253 Air mail ----------
@@ -290,11 +255,9 @@ public static partial class GotchaProjectBuilder
         BoxCollider2D candleCol = HW_Box(candle, new Vector2(0.45f, 0.95f), new Vector2(0f, 0.4f));
         Transform flamePoint = Child(candle, "FlamePoint", new Vector2(0f, 0.62f)).transform;
 
-        // aeroplanino per terra, topo dietro il cespuglio
+        // aeroplanino per terra, cespuglio
         Transform plane = HW_Obj(root.transform, "Plane", new Vector2(-0.65f, -4.2f), "paper_plane", 6, 0.8f);
         BoxCollider2D planeCol = HW_Box(plane, new Vector2(1.4f, 0.9f));
-        Transform mouse = HW_Obj(root.transform, "Mouse", new Vector2(1.55f, -3.72f), "mouse", 4, 0.5f);
-        BoxCollider2D mouseCol = HW_Box(mouse, new Vector2(1.6f, 1.4f), new Vector2(0f, 0.25f));
         HW_Obj(root.transform, "Bush", new Vector2(1.65f, -4.45f), "bush", 5, 0.9f);
         Transform ground = Child(root.transform, "Ground", new Vector2(0f, -4.25f)).transform;
         SmokeEmitter pop = Emitter(root.transform, "Pop", new Vector2(-2.0f, -1.9f), "puff", 30f, 0.5f, 0.5f, 0.35f, 0.5f, new Color(1f, 0.45f, 0.45f, 0.9f), 30);
@@ -316,14 +279,10 @@ public static partial class GotchaProjectBuilder
         SetField(level, "roofZone", roofZone);
         SetField(level, "roofCat", roofCat);
         SetField(level, "catPaw", paw);
-        SetField(level, "mouse", mouse);
-        SetField(level, "mouseArt", mouse.Find("Art").GetComponent<SpriteRenderer>());
-        SetField(level, "mouseArea", mouseCol);
         SetField(level, "groundLeft", ground);
         SetField(level, "popPuff", pop);
         SetField(level, "hearts", hearts);
         SetField(level, "catBubble", SmallBubble(root.transform, new Vector2(0.75f, 2.55f)));
-        SetField(level, "mouseBubble", SmallBubble(root.transform, new Vector2(1.1f, -2.6f)));
         V62_Wire(level, root.transform, new Vector2(-0.3f, 0.25f));
         return SaveLevel(root, "V62AirMail");
     }
@@ -368,10 +327,6 @@ public static partial class GotchaProjectBuilder
         catRefl.transform.localScale = new Vector3(-1.7f, 1.7f, 1f);
         catRefl.transform.localPosition = new Vector3(-centers["roof_cat"].x * 1.7f, -1.05f + centers["roof_cat"].y * 1.7f, 0f);
         catRefl.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.7f);
-        GameObject toniRefl = Art(mirror, "ToniReflection", "toni_lie", 9, false).gameObject;
-        toniRefl.transform.localScale = new Vector3(-0.85f, 0.85f, 1f);
-        toniRefl.transform.localPosition = new Vector3(-centers["toni_lie"].x * 0.85f, -0.4f + centers["toni_lie"].y * 0.85f, 0f);
-        toniRefl.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.7f);
         Transform bell = HW_Obj(root.transform, "Bell", new Vector2(-0.45f, -2.1f), "bell", 4, 0.75f);
         BoxCollider2D bellCol = HW_Box(bell, new Vector2(1.1f, 1.0f), new Vector2(0f, 0.4f));
         SmokeEmitter bellWaves = Emitter(root.transform, "BellWaves", new Vector2(-0.45f, -1.35f), "ring_waves", 8f, 0.5f, 0.2f, 0.05f, 0.3f, Color.white, 20);
@@ -380,14 +335,6 @@ public static partial class GotchaProjectBuilder
         HW_Obj(root.transform, "Plate", new Vector2(0.4f, -1.95f), "cat_bowl", 3, 0.55f);
         Transform fish = HW_Obj(root.transform, "Fish", new Vector2(0.4f, -1.78f), "fish", 9, 0.85f);
         BoxCollider2D fishCol = HW_Box(fish, new Vector2(0.95f, 0.7f));
-
-        // Toni che dorme sul tappeto
-        Transform toni = V62_SleepingToni(root.transform, new Vector2(1.0f, -3.9f), 0.85f, 3, out Transform body, out GameObject eyes);
-        Transform toniFace = Child(toni, "Face", new Vector2(-0.85f, 0.35f)).transform;
-        BoxCollider2D toniCol = HW_Box(toni, new Vector2(2.6f, 1.4f), new Vector2(0f, 0.15f));
-        SmokeEmitter zzz = Emitter(root.transform, "Zzz", new Vector2(0.45f, -3.1f), "zzz", 1.2f, 2.2f, 0.45f, 0.1f, 0.6f, Color.white, 30);
-        zzz.spinRange = 12f;
-        zzz.growth = 0.9f;
 
         HW_Goal(root.transform, "SAVE THE VASE!");
         SetField(level, "cat", cat);
@@ -401,20 +348,13 @@ public static partial class GotchaProjectBuilder
         SetField(level, "mirror", mirror);
         SetField(level, "mirrorArea", mirrorCol);
         SetField(level, "catReflection", catRefl);
-        SetField(level, "toniReflection", toniRefl);
         SetField(level, "bell", bell);
         SetField(level, "bellArea", bellCol);
         SetField(level, "bellWaves", bellWaves);
         SetField(level, "fish", fish);
         SetField(level, "fishArea", fishCol);
-        SetField(level, "toni", body);
-        SetField(level, "toniArea", toniCol);
-        SetField(level, "toniFace", toniFace);
-        SetField(level, "toniEyes", eyes);
-        SetField(level, "zzz", zzz);
         SetField(level, "fur", fur);
         SetField(level, "catBubble", SmallBubble(root.transform, new Vector2(0.55f, 2.25f)));
-        SetField(level, "toniBubble", SmallBubble(root.transform, new Vector2(1.25f, -2.85f)));
         V62_Wire(level, root.transform, new Vector2(0f, -0.55f));
         return SaveLevel(root, "V62MirrorCat");
     }
@@ -461,14 +401,10 @@ public static partial class GotchaProjectBuilder
         stream.growth = 0f;
         stream.spinRange = 0f;
 
-        // rubinetto senza manopola su un paletto, talpa nella buca
+        // rubinetto senza manopola su un paletto
         Bar(root.transform, "FaucetPost", new Vector2(-2.35f, -3.05f), new Vector2(0.14f, 1.4f), new Color(0.55f, 0.37f, 0.24f), 1);
         Transform faucet = HW_Obj(root.transform, "Faucet", new Vector2(-1.95f, -2.5f), "v62_faucet_bare", 2);
         BoxCollider2D faucetCol = HW_Box(faucet, new Vector2(1.0f, 0.95f), new Vector2(-0.3f, 0.05f));
-        HW_Obj(root.transform, "MoleHole", new Vector2(0.95f, -4.2f), "gs_molehole", 2, 0.9f);
-        Transform mole = HW_Obj(root.transform, "Mole", new Vector2(0.95f, -4.25f), "gs_mole", 3, 0.75f);
-        BoxCollider2D moleCol = HW_Box(mole, new Vector2(1.7f, 1.9f), new Vector2(0f, 0.6f));
-        Transform hatSpot = Child(mole, "HatSpot", new Vector2(0f, 1.35f)).transform;
 
         HW_Goal(root.transform, "WATER THE PLANT!");
         SetField(level, "umbrella", umbrella);
@@ -486,14 +422,10 @@ public static partial class GotchaProjectBuilder
         SetField(level, "plantArt", plant.Find("Art").GetComponent<SpriteRenderer>());
         SetField(level, "plantArea", plantCol);
         SetField(level, "faucetArea", faucetCol);
-        SetField(level, "mole", mole);
-        SetField(level, "moleArea", moleCol);
-        SetField(level, "moleHatSpot", hatSpot);
         SetField(level, "rain", rain);
         SetField(level, "pourStream", stream);
         SetField(level, "sparkle", sparkle);
         SetField(level, "hearts", hearts);
-        SetField(level, "moleBubble", SmallBubble(root.transform, new Vector2(1.6f, -2.95f)));
         V62_Wire(level, root.transform, new Vector2(0.3f, 2.6f));
         return SaveLevel(root, "V62Umbrella");
     }
@@ -505,8 +437,8 @@ public static partial class LevelHints
     {
         { "v62_fishing_keys", new[] { "Your fingers are too big, but a fishing rod reaches down there. It just needs the right bait.",
             "Drag the magnet from the frying pan onto the hook, then drag the rod over the sink and let go. Bring the key to the lock." } },
-        { "v62_wake_toni", new[] { "The cookie is the answer, but the cat is too quick. Keep the cat busy first.",
-            "Drag the feather onto the cat, then bring the cookie right under Toni's nose." } },
+        { "v62_wake_kitty", new[] { "The fish is the answer, but the mouse is faster. Give the mouse something better to do first.",
+            "Drag the cheese to the mouse hole, wait until the mouse takes it inside, then bring the fish right under the cat's nose." } },
         { "v62_air_mail", new[] { "The balloon could carry the letter... if it weren't tied to the post.",
             "Drag the letter onto the balloon, tap the knot on the post, then tilt the phone to steer it to the roof. Avoid the candle!" } },
         { "v62_mirror_cat", new[] { "What scares a cat more than anything? Another cat staring back.",

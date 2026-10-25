@@ -9,7 +9,6 @@ namespace Gotcha.Levels
     /// Livello 253 "Air mail" — il gatto sul tetto aspetta una lettera. L'aeroplanino di carta cade a metà strada.
     /// Soluzione: legare la lettera al palloncino, toccare il nodo per liberarlo e guidarlo inclinando il telefono
     /// (o col dito) fino al tetto. Se passa sopra la candela scoppia: la lettera cade e il palloncino ricompare legato.
-    /// Easter egg: il topo nascosto dietro il cespuglio, trascinato sul palloncino, vola via salutando.
     /// </summary>
     public class V62AirMailLevel : V62Level
     {
@@ -29,14 +28,10 @@ namespace Gotcha.Levels
         [SerializeField] Collider2D roofZone;
         [SerializeField] Transform roofCat;
         [SerializeField] Transform catPaw;
-        [SerializeField] Transform mouse;
-        [SerializeField] SpriteRenderer mouseArt;      // dietro il cespuglio a riposo, davanti quando si muove
-        [SerializeField] Collider2D mouseArea;
         [SerializeField] Transform groundLeft;       // altezza del prato (dove cade la lettera)
         [SerializeField] SmokeEmitter popPuff;
         [SerializeField] SmokeEmitter hearts;
         [SerializeField] SpeechBubble catBubble;
-        [SerializeField] SpeechBubble mouseBubble;
         [SerializeField] TextMesh infoText;
         [SerializeField] Transform infoHolder;
         [SerializeField] float riseSpeed = 0.55f;
@@ -48,13 +43,12 @@ namespace Gotcha.Levels
         readonly SteadyTilt tilt = new SteadyTilt();
         Camera cam;
         HwDragger drag;
-        HwDragger.Item letterItem, mouseItem;
-        HwSay catSay, mouseSay;
+        HwDragger.Item letterItem;
+        HwSay catSay;
         HwToast toast;
-        Vector3 balloonHome, letterTableHome, planeHome, mouseHome, balloonScale;
-        Transform hanging;    // cosa pende dal palloncino in volo (la lettera o il topo)
-        int mouseOrder;
-        bool busy, planePressed, eggShown;
+        Vector3 balloonHome, letterTableHome, planeHome, balloonScale;
+        Transform hanging;    // cosa pende dal palloncino in volo (la lettera)
+        bool busy, planePressed;
 
         public override void OnLevelStart()
         {
@@ -62,17 +56,13 @@ namespace Gotcha.Levels
             logic.Reset();
             ResetV62();
             catSay = new HwSay(catBubble);
-            mouseSay = new HwSay(mouseBubble);
             toast = new HwToast(infoText, infoHolder);
             drag = new HwDragger(this);
             balloonHome = balloon.position;
             balloonScale = balloon.localScale;
             letterTableHome = letter.position;
             planeHome = plane.position;
-            mouseHome = mouse.position;
-            if (mouseArt != null) mouseOrder = mouseArt.sortingOrder;
             letterItem = drag.Add(letter, letterArea, 5);
-            mouseItem = drag.Add(mouse, mouseArea, 4);
             if (popPuff != null) popPuff.Stop();
             if (hearts != null) hearts.Stop();
             catSay.Show("Any mail for me?", 2f);
@@ -81,12 +71,9 @@ namespace Gotcha.Levels
         void Update()
         {
             catSay.Tick();
-            mouseSay.Tick();
             toast.Tick();
-            TickV62();
             float lean = tilt.Update(Time.deltaTime);
             UpdateString();
-            if (mouseArt != null) mouseArt.sortingOrder = (mouse.position - mouseHome).sqrMagnitude < 0.0025f ? mouseOrder : 9;
             if (IsFinished) return;
             bool havePointer = HalloweenKit.ReadPointer(cam, out Vector2 w, out bool began, out bool ended);
             if (logic.State == AirMailState.Flying && !busy) Fly(lean, havePointer, w);
@@ -162,7 +149,6 @@ namespace Gotcha.Levels
                 {
                     hanging = letter;
                     letterItem.Enabled = false;
-                    mouseItem.Enabled = false;
                     Sfx.Play(this, "pop", 0.6f);
                     Haptics.Light();
                     toast.Show("Tilt the phone to steer!", 2.2f);
@@ -187,7 +173,7 @@ namespace Gotcha.Levels
                 toast.Show("Hot! Keep balloons away.", 1.6f);
                 return;
             }
-            if (roofZone.OverlapPoint(w)) catSay.Show(logic.EggFound ? "Was that a flying mouse?!" : "Mail. Up here. Please.", 1.8f);
+            if (roofZone.OverlapPoint(w)) catSay.Show("Mail. Up here. Please.", 1.8f);
         }
 
         void Drop(HwDragger.Item it, bool lostFinger)
@@ -205,18 +191,6 @@ namespace Gotcha.Levels
                     return;
                 }
                 drag.SendHome(letterItem, 0.35f);
-                return;
-            }
-            if (it == mouseItem)
-            {
-                if (onBalloon && logic.TryMouseOnBalloon())
-                {
-                    mouseItem.Enabled = false;
-                    StartCoroutine(MouseFlies());
-                    return;
-                }
-                if (onBalloon) toast.Show("The balloon is busy with the letter.", 1.6f);
-                drag.SendHome(mouseItem, 0.35f);
             }
         }
 
@@ -269,7 +243,6 @@ namespace Gotcha.Levels
             letterItem.Home = fall;
             yield return Respawn();
             letterItem.Enabled = true;
-            mouseItem.Enabled = true;
             busy = false;
         }
 
@@ -283,38 +256,6 @@ namespace Gotcha.Levels
             balloonArt.SetActive(true);
             Sfx.Play(this, "pop", 0.5f);
             yield return HalloweenKit.ScaleTo(balloon, balloonScale, 0.3f);
-        }
-
-        IEnumerator MouseFlies()
-        {
-            busy = true;
-            hanging = mouse;
-            mouse.SetParent(letterSpot, true);
-            yield return HalloweenKit.Move(mouse, letterSpot.position + Vector3.down * 0.2f, 0.15f);
-            mouseSay.Show("Wheee! Bye-bye!", 2.2f);
-            Sfx.Play(this, "whoosh", 0.7f);
-            if (!eggShown) { eggShown = true; RevealEgg(AirMailLogic.EggId); }
-            Vector3 from = balloon.position;
-            for (float t = 0f; t < 2.6f; t += Time.deltaTime)
-            {
-                balloon.position = from + new Vector3(Mathf.Sin(t * 2.2f) * 0.35f + t * 0.25f, t * 2.4f, 0f);
-                mouse.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(t * 12f) * 15f);   // saluta
-                if (mouseBubble != null) mouseBubble.transform.position = mouse.position + new Vector3(0.3f, 0.6f, 0f);
-                yield return null;
-            }
-            mouseSay.Hide();
-            catSay.Show("...was that a mouse?", 1.8f);
-            // il topo torna (a piedi) dietro il cespuglio, il palloncino ricompare
-            hanging = null;
-            mouse.SetParent(transform, true);
-            mouse.localRotation = Quaternion.identity;
-            mouse.position = mouseHome;
-            balloonArt.SetActive(false);
-            yield return Respawn();
-            logic.TryFinishMouseFlight();
-            yield return HalloweenKit.Pop(mouse, 1.15f, 0.3f);
-            mouseItem.Enabled = true;
-            busy = false;
         }
 
         IEnumerator Deliver()
@@ -335,7 +276,7 @@ namespace Gotcha.Levels
             if (hearts != null) hearts.Play();
             yield return Celebrate(2.2f);
             if (hearts != null) hearts.Stop();
-            if (logic.TryCompleteDelivery()) Victory(logic.EggFound, AirMailLogic.EggId);
+            if (logic.TryCompleteDelivery()) Win();
         }
     }
 }

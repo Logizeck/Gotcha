@@ -18,8 +18,7 @@ namespace Gotcha.Tests
             Assert.AreEqual(0, l.Tick(30f));                 // spaventato: non spinge più
             Assert.IsTrue(l.TryCompleteSave());
             Assert.AreEqual(MirrorCatState.Done, l.State);
-            Assert.IsFalse(l.EggFound);
-        }
+                    }
 
         [Test]
         public void DoingNothing_VaseFallsAfterAbout25Seconds()
@@ -78,20 +77,7 @@ namespace Gotcha.Tests
             var l = new MirrorCatLogic();
             Assert.IsFalse(l.TryDropMirror(MirrorTarget.Nowhere));
             Assert.AreEqual(MirrorCatState.Pushing, l.State);
-            Assert.IsFalse(l.EggFound);
-        }
-
-        [Test]
-        public void Egg_MirrorInFrontOfToni_ThenContinues()
-        {
-            var l = new MirrorCatLogic();
-            Assert.IsFalse(l.TryDropMirror(MirrorTarget.InFrontOfToni));
-            Assert.IsTrue(l.EggFound);
-            Assert.AreEqual(MirrorCatState.Pushing, l.State);
-            Assert.IsTrue(l.TryDropMirror(MirrorTarget.InFrontOfCat));
-            Assert.IsTrue(l.TryCompleteSave());
-            Assert.IsTrue(l.EggFound);
-        }
+                    }
 
         [Test]
         public void Reset_FromEveryState()
@@ -99,7 +85,6 @@ namespace Gotcha.Tests
             foreach (MirrorCatState target in Enum.GetValues(typeof(MirrorCatState)))
             {
                 var l = new MirrorCatLogic();
-                l.TryDropMirror(MirrorTarget.InFrontOfToni);
                 l.TryTouchCat(); l.Tick(5f);
                 switch (target)
                 {
@@ -113,8 +98,7 @@ namespace Gotcha.Tests
                 Assert.AreEqual(MirrorCatState.Pushing, l.State);
                 Assert.AreEqual(0, l.Pushes);
                 Assert.AreEqual(MirrorCatLogic.BaseInterval, l.Interval, 1e-5f);
-                Assert.IsFalse(l.EggFound);
-                Assert.IsFalse(l.CompletionReported);
+                                Assert.IsFalse(l.CompletionReported);
                 Assert.AreEqual(1, l.Tick(1.01f));
             }
         }

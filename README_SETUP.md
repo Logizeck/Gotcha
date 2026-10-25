@@ -267,18 +267,33 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.63 — Livelli 251-260
+- **Livelli 251-255 senza Easter egg** (verranno aggiunti solo dove sono davvero esilaranti) e **senza Toni**, che
+  compare solo nei livelli multipli di 25. Il 252 diventa **Wake Up, Kitty!**: dorme il gatto e il ladro è il topo.
+  Soluzione: il formaggio davanti alla tana (il topo resta a mangiarlo), poi il pesce sotto il naso del gatto.
+  Dal 254 è sparito Toni addormentato.
+- **Livelli nuovi 256-258** (`Assets/Editor/GotchaLevels63.cs`, runtime e logica in `Assets/Scripts/Levels/V63`,
+  test in `Assets/Tests/EditMode/V63*Tests.cs`). Almost There passa al 259, l'esame finale di Toni al 260 (ultimo).
+  - 256 **Chain Reaction**: macchina a catena da completare (palla sulla mensola, libro come rampa, domino sul
+    tavolo, candela sotto il filo del palloncino, poi GO). La calamita è un'esca; ogni montaggio sbagliato si ferma
+    al primo anello rotto con la sua battuta. Tentativi illimitati.
+  - 257 **The Lying Clocks**: sveglia ferma, orologio da timbro che corre il doppio, cucù in ritardo di 10-25 minuti
+    che però canta all'ora vera. Si ricava il ritardo e si imposta l'ora vera sul tastierino. 3 errori: "Time's up. Literally."
+  - 258 **Shadow Puppet**: con gomitolo (testa), due fette di pizza (orecchie) e piuma (coda) davanti alla lampada si
+    proietta l'ombra di un gatto gigante (supporto vicino alla lampada) e il cane da guardia scappa. 3 ombre sbagliate: "Woof. That means 'no'."
+
 ## Versione 0.62 — Vecchi oggetti, azioni nuove
 - **Solo verticale**: con la rotazione automatica del telefono attiva lo schermo non gira più (`GameFlow.LockPortrait`
   a runtime + orientamenti consentiti nelle impostazioni del Player a ogni build). L'inclinazione dei livelli funziona.
 - **Titolo**: MENU e HINT della barra compaiono solo dentro i livelli. Nuovo pulsante **TONI'S PUZZLE n/50** accanto a SHOP.
 - **Livelli 251-255** (`Assets/Editor/GotchaLevels62.cs`, runtime in `Assets/Scripts/Levels/V62`, logica pura in
   `V62/Logic` con test NUnit in `Assets/Tests/EditMode`). Almost There passa al 256, l'esame di Toni al 257 (ultimo).
-  - 251 **Fishing for Keys**: calamita sull'amo, canna nello scarico, chiave nella serratura. Egg *Something Fishy*: il pesce sull'amo, esce un piranha.
+  - 251 **Fishing for Keys**: calamita sull'amo, canna nello scarico, chiave nella serratura.
   - 252 **Wake Up, Toni!**: la piuma al gatto, poi il biscotto sotto il naso di Toni. Egg *Tickle Attack*: piuma strofinata 3 volte su Toni.
   - 253 **Air Mail**: lettera sul palloncino, slegare il nodo, guidarlo al tetto inclinando il telefono (la candela lo fa scoppiare). Egg *Up, Up And Away*: il topo sul palloncino.
   - 254 **Mirror, Mirror**: lo specchio davanti al gatto, che si spaventa del riflesso. Se il vaso cade: "Cats 1, You 0.". Egg *Two Tonis*: lo specchio davanti a Toni.
   - 255 **Upside-Down Umbrella**: aprire l'ombrello, capovolgerlo (doppio tap o freccia tonda), riempirlo sotto la pioggia, versarlo sulla pianta. Egg *Fashion Icon*: l'ombrello aperto sulla talpa.
-- 5 Easter egg nuovi: il puzzle di Toni arriva a 24 pezzi raggiungibili su 50.
+- (Gli Easter egg della 0.62 sono stati tolti nella 0.63.)
 - Unity IAP: l'assembly `Gotcha.Iap` si compila solo con il define `GOTCHA_UNITY_IAP4` (messo da Unity con IAP 4.x installato).
 
 ## Versione 0.61 — Speciale Halloween

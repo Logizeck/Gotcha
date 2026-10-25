@@ -4,7 +4,7 @@ using Gotcha.Levels.V62;
 
 namespace Gotcha.Tests
 {
-    /// <summary>Livello 255: l'ombrello rovesciato (aprire, girare, riempire, versare, talpa).</summary>
+    /// <summary>Livello 255: l'ombrello rovesciato (aprire, girare, riempire, versare).</summary>
     public class V62UmbrellaTests
     {
         static void Fill(UmbrellaLogic l)
@@ -31,8 +31,7 @@ namespace Gotcha.Tests
             Assert.IsTrue(l.InputLocked);
             Assert.IsTrue(l.TryCompleteBloom());
             Assert.AreEqual(UmbrellaState.Done, l.State);
-            Assert.IsFalse(l.EggFound);
-        }
+                    }
 
         [Test]
         public void OpenUpright_InRain_StaysDry()
@@ -97,25 +96,6 @@ namespace Gotcha.Tests
         }
 
         [Test]
-        public void Egg_OpenUmbrellaOnMole_ThenContinues()
-        {
-            var l = new UmbrellaLogic();
-            Assert.IsFalse(l.TryHatOnMole());               // chiuso: no
-            l.TryOpen();
-            l.TryFlip(false, out _);
-            Assert.IsFalse(l.TryHatOnMole());               // rovesciato: no
-            l.TryFlip(false, out _);
-            Assert.IsTrue(l.TryHatOnMole());
-            Assert.IsTrue(l.EggFound);
-            Assert.AreEqual(UmbrellaState.Playing, l.State);
-            l.TryFlip(false, out _);
-            Fill(l);
-            Assert.AreEqual(PourResult.Bloom, l.TryPour(true));
-            Assert.IsTrue(l.TryCompleteBloom());
-            Assert.IsTrue(l.EggFound);
-        }
-
-        [Test]
         public void LockedStates_IgnoreInput()
         {
             var l = new UmbrellaLogic();
@@ -123,7 +103,6 @@ namespace Gotcha.Tests
             Assert.IsFalse(l.TryFlip(true, out _));
             Assert.IsFalse(l.Rain(1f));
             Assert.AreEqual(PourResult.Nothing, l.TryPour(true));
-            Assert.IsFalse(l.TryHatOnMole());
             Assert.IsTrue(l.TryCompleteBloom());
             Assert.IsFalse(l.TryCompleteBloom());
         }
@@ -134,7 +113,7 @@ namespace Gotcha.Tests
             foreach (UmbrellaState target in Enum.GetValues(typeof(UmbrellaState)))
             {
                 var l = new UmbrellaLogic();
-                l.TryOpen(); l.TryHatOnMole(); l.TryFlip(false, out _); l.Rain(1f); l.TryPour(false);
+                l.TryOpen(); l.TryFlip(false, out _); l.Rain(1f); l.TryPour(false);
                 if (target >= UmbrellaState.Blooming) { Fill(l); l.TryPour(true); }
                 if (target >= UmbrellaState.Done) l.TryCompleteBloom();
                 Assert.AreEqual(target, l.State);
@@ -143,8 +122,7 @@ namespace Gotcha.Tests
                 Assert.AreEqual(UmbrellaPose.Closed, l.Pose);
                 Assert.AreEqual(0f, l.Water);
                 Assert.AreEqual(0, l.Wasted);
-                Assert.IsFalse(l.EggFound);
-                Assert.IsFalse(l.CompletionReported);
+                                Assert.IsFalse(l.CompletionReported);
                 Assert.IsTrue(l.TryOpen());
             }
         }
@@ -165,7 +143,6 @@ namespace Gotcha.Tests
                     case 1: l.TryFlip(rnd.Next(2) == 0, out r); break;
                     case 2: l.Rain((float)rnd.NextDouble()); break;
                     case 3: r = l.TryPour(rnd.Next(2) == 0); break;
-                    case 4: l.TryHatOnMole(); break;
                     case 5: if (l.TryCompleteBloom()) completions++; break;
                     case 6: if (rnd.Next(40) == 0) { l.Reset(); completions = 0; } break;
                     default: l.Rain(0.5f); break;

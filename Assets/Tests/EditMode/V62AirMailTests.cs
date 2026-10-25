@@ -4,7 +4,7 @@ using Gotcha.Levels.V62;
 
 namespace Gotcha.Tests
 {
-    /// <summary>Livello 253: la lettera in volo (aeroplanino, palloncino, candela, topo).</summary>
+    /// <summary>Livello 253: la lettera in volo (aeroplanino, palloncino, candela).</summary>
     public class V62AirMailTests
     {
         [Test]
@@ -20,8 +20,7 @@ namespace Gotcha.Tests
             Assert.IsTrue(l.InputLocked);
             Assert.IsTrue(l.TryCompleteDelivery());
             Assert.AreEqual(AirMailState.Done, l.State);
-            Assert.IsFalse(l.EggFound);
-        }
+                    }
 
         [Test]
         public void Plane_FallsShort_AndComesBack()
@@ -74,23 +73,6 @@ namespace Gotcha.Tests
         }
 
         [Test]
-        public void Egg_MouseFliesAway_ThenContinues()
-        {
-            var l = new AirMailLogic();
-            Assert.IsTrue(l.TryMouseOnBalloon());
-            Assert.IsTrue(l.EggFound);
-            Assert.IsTrue(l.InputLocked);
-            Assert.IsFalse(l.TryTieLetter());
-            Assert.IsTrue(l.TryFinishMouseFlight());
-            Assert.AreEqual(AirMailState.Ready, l.State);
-            l.TryTieLetter();
-            Assert.IsFalse(l.TryMouseOnBalloon());          // il palloncino è occupato dalla lettera
-            l.TryReleaseKnot(); l.TryReachRoof();
-            Assert.IsTrue(l.TryCompleteDelivery());
-            Assert.IsTrue(l.EggFound);
-        }
-
-        [Test]
         public void FlameGeometry()
         {
             // palloncino col nodo in (0, 0), raggio 0.5, alto 1.2
@@ -110,21 +92,18 @@ namespace Gotcha.Tests
             foreach (AirMailState target in Enum.GetValues(typeof(AirMailState)))
             {
                 var l = new AirMailLogic();
-                l.TryMouseOnBalloon(); l.TryFinishMouseFlight();
                 switch (target)
                 {
                     case AirMailState.LetterTied: l.TryTieLetter(); break;
                     case AirMailState.Flying: l.TryTieLetter(); l.TryReleaseKnot(); break;
                     case AirMailState.PlaneFlying: l.TryThrowPlane(); break;
-                    case AirMailState.MouseFlying: l.TryMouseOnBalloon(); break;
                     case AirMailState.Delivering: l.TryTieLetter(); l.TryReleaseKnot(); l.TryReachRoof(); break;
                     case AirMailState.Done: l.TryTieLetter(); l.TryReleaseKnot(); l.TryReachRoof(); l.TryCompleteDelivery(); break;
                 }
                 Assert.AreEqual(target, l.State);
                 l.Reset();
                 Assert.AreEqual(AirMailState.Ready, l.State);
-                Assert.IsFalse(l.EggFound);
-                Assert.IsFalse(l.CompletionReported);
+                                Assert.IsFalse(l.CompletionReported);
                 Assert.AreEqual(0, l.Throws);
                 Assert.IsTrue(l.TryThrowPlane());
                 Assert.IsTrue(l.TryLandPlane());
@@ -149,8 +128,8 @@ namespace Gotcha.Tests
                     case 4: l.TryReleaseKnot(); break;
                     case 5: l.TryPop(); break;
                     case 6: l.TryReachRoof(); break;
-                    case 7: l.TryMouseOnBalloon(); break;
-                    case 8: l.TryFinishMouseFlight(); break;
+                    case 7: l.TryPop(); break;
+                    case 8: l.TryLandPlane(); break;
                     case 9: if (l.TryCompleteDelivery()) completions++; break;
                     default: if (rnd.Next(60) == 0) { l.Reset(); completions = 0; } break;
                 }

@@ -11,17 +11,16 @@ namespace Gotcha.Levels.V62
     }
 
     /// <summary>Dove viene lasciato lo specchio.</summary>
-    public enum MirrorTarget { Nowhere, InFrontOfCat, InFrontOfToni }
+    public enum MirrorTarget { Nowhere, InFrontOfCat }
 
     /// <summary>
     /// Logica pura del livello 254 "Mirror, mirror": il gatto spinge il vaso prezioso un po' ogni secondo (~25 s).
     /// Toccarlo lo ferma un attimo ma poi spinge più veloce; il pesce lo mangia e riprende; il campanello lo ignora;
     /// il vaso è troppo pesante. Soluzione: lo specchio sulla mensola davanti al gatto, che si spaventa del riflesso.
-    /// Easter egg: lo specchio davanti a Toni che dorme (abbaia al riflesso). Nessuna dipendenza da Unity.
+    /// Nessuna dipendenza da Unity.
     /// </summary>
     public sealed class MirrorCatLogic
     {
-        public const string EggId = "v62_mirror_pug";
         /// <summary>Spinte che portano il vaso dal centro della mensola al bordo.</summary>
         public const int PushesToFall = 25;
         public const float BaseInterval = 1f;
@@ -36,7 +35,6 @@ namespace Gotcha.Levels.V62
         public float Interval { get; private set; } = BaseInterval;
         public int Touches { get; private set; }
         public int FishEaten { get; private set; }
-        public bool EggFound { get; private set; }
         public bool CompletionReported { get; private set; }
 
         float timer, pause;
@@ -52,7 +50,6 @@ namespace Gotcha.Levels.V62
             Interval = BaseInterval;
             Touches = 0;
             FishEaten = 0;
-            EggFound = false;
             CompletionReported = false;
             timer = pause = 0f;
         }
@@ -110,12 +107,10 @@ namespace Gotcha.Levels.V62
         /// <summary>Il vaso non si sposta: troppo pesante.</summary>
         public bool TryDragVase() => !InputLocked;
 
-        /// <summary>Lo specchio viene lasciato: davanti al gatto lo spaventa (true), davanti a Toni è l'Easter egg.</summary>
+        /// <summary>Lo specchio viene lasciato: davanti al gatto lo spaventa (true), altrove torna al suo posto.</summary>
         public bool TryDropMirror(MirrorTarget target)
         {
-            if (InputLocked) return false;
-            if (target == MirrorTarget.InFrontOfToni) { EggFound = true; return false; }
-            if (target != MirrorTarget.InFrontOfCat) return false;
+            if (InputLocked || target != MirrorTarget.InFrontOfCat) return false;
             State = MirrorCatState.Scared;
             return true;
         }

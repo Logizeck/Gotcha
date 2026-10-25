@@ -7,7 +7,6 @@ namespace Gotcha.Levels.V62
         LetterTied,     // la lettera è legata al palloncino, che è ancora legato
         Flying,         // palloncino libero con la lettera: sale e si guida inclinando
         PlaneFlying,    // l'aeroplanino è in volo (animazione, input bloccato)
-        MouseFlying,    // il topo vola via col palloncino (Easter egg, input bloccato)
         Delivering,     // il gatto prende la lettera (input bloccato)
         Done,
     }
@@ -15,21 +14,17 @@ namespace Gotcha.Levels.V62
     /// <summary>
     /// Logica pura del livello 253 "Air mail": l'aeroplanino cade a metà strada. Soluzione: legare la lettera al
     /// palloncino, toccare il nodo per liberarlo e guidarlo (inclinando) fino al tetto, lontano dalla candela: se ci
-    /// passa sopra scoppia, la lettera cade e il palloncino ricompare legato. Easter egg: il topo dietro il cespuglio
-    /// sul palloncino vola via salutando. Nessuna dipendenza da Unity.
+    /// passa sopra scoppia, la lettera cade e il palloncino ricompare legato. Nessuna dipendenza da Unity.
     /// </summary>
     public sealed class AirMailLogic
     {
-        public const string EggId = "v62_balloon_cat";
-
         public AirMailState State { get; private set; } = AirMailState.Ready;
         public int Throws { get; private set; }
         public int Pops { get; private set; }
-        public bool EggFound { get; private set; }
         public bool CompletionReported { get; private set; }
         AirMailState planeFrom = AirMailState.Ready;   // dove tornare quando l'aeroplanino atterra
 
-        public bool InputLocked => State == AirMailState.PlaneFlying || State == AirMailState.MouseFlying
+        public bool InputLocked => State == AirMailState.PlaneFlying
             || State == AirMailState.Delivering || State == AirMailState.Done;
         public bool BalloonTied => State == AirMailState.Ready || State == AirMailState.LetterTied || State == AirMailState.PlaneFlying;
         public bool LetterOnBalloon => State == AirMailState.LetterTied || State == AirMailState.Flying;
@@ -40,7 +35,6 @@ namespace Gotcha.Levels.V62
             planeFrom = AirMailState.Ready;
             Throws = 0;
             Pops = 0;
-            EggFound = false;
             CompletionReported = false;
         }
 
@@ -103,23 +97,6 @@ namespace Gotcha.Levels.V62
         {
             if (State != AirMailState.Flying) return false;
             State = AirMailState.Delivering;
-            return true;
-        }
-
-        /// <summary>Il topo sul palloncino legato (senza lettera): vola via salutando. È l'Easter egg.</summary>
-        public bool TryMouseOnBalloon()
-        {
-            if (State != AirMailState.Ready) return false;
-            State = AirMailState.MouseFlying;
-            EggFound = true;
-            return true;
-        }
-
-        /// <summary>Fine del volo del topo: il palloncino ricompare legato (e il topo dietro il cespuglio).</summary>
-        public bool TryFinishMouseFlight()
-        {
-            if (State != AirMailState.MouseFlying) return false;
-            State = AirMailState.Ready;
             return true;
         }
 

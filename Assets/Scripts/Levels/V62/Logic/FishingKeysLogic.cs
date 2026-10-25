@@ -12,27 +12,23 @@ namespace Gotcha.Levels.V62
     }
 
     /// <summary>Cosa c'è appeso all'amo della canna.</summary>
-    public enum HookBait { None, Magnet, Fish }
+    public enum HookBait { None, Magnet }
 
     /// <summary>Cosa esce dallo scarico calando la canna.</summary>
-    public enum CastResult { Nothing, Boot, Key, Piranha }
+    public enum CastResult { Nothing, Boot, Key }
 
     /// <summary>
     /// Logica pura del livello 251 "Fishing for keys": la chiave è caduta nello scarico del lavandino. Le dita non ci
     /// passano; la canna da sola pesca uno stivale. Soluzione: la calamita sull'amo, poi la canna nello scarico: la
-    /// chiave sale attaccata alla calamita e va portata nella serratura. Easter egg: il pesce della ciotola del gatto
-    /// sull'amo fa uscire un piranha sorridente (poi si continua). Nessuna dipendenza da Unity.
+    /// chiave sale attaccata alla calamita e va portata nella serratura. Nessuna dipendenza da Unity.
     /// </summary>
     public sealed class FishingKeysLogic
     {
-        public const string EggId = "v62_fish_in_sink";
-
         public FishingKeysState State { get; private set; } = FishingKeysState.Idle;
         public HookBait Bait { get; private set; } = HookBait.None;
         public CastResult LastCast { get; private set; } = CastResult.Nothing;
         public int Boots { get; private set; }
         public int FingerTries { get; private set; }
-        public bool EggFound { get; private set; }
         public bool CompletionReported { get; private set; }
 
         public bool InputLocked => State == FishingKeysState.Casting || State == FishingKeysState.Opening || State == FishingKeysState.Done;
@@ -46,7 +42,6 @@ namespace Gotcha.Levels.V62
             LastCast = CastResult.Nothing;
             Boots = 0;
             FingerTries = 0;
-            EggFound = false;
             CompletionReported = false;
         }
 
@@ -80,36 +75,22 @@ namespace Gotcha.Levels.V62
         {
             if (State != FishingKeysState.Idle) return CastResult.Nothing;
             State = FishingKeysState.Casting;
-            switch (Bait)
-            {
-                case HookBait.Magnet: LastCast = CastResult.Key; break;
-                case HookBait.Fish: LastCast = CastResult.Piranha; break;
-                default: LastCast = CastResult.Boot; break;
-            }
+            LastCast = Bait == HookBait.Magnet ? CastResult.Key : CastResult.Boot;
             return LastCast;
         }
 
         /// <summary>
-        /// Fine dell'animazione della pesca. Stivale: torna giù, si riprova. Piranha: si mangia il pesce (che
-        /// ricompare nella ciotola), saluta ed è l'Easter egg. Chiave: resta attaccata alla calamita, pronta da prendere.
+        /// Fine dell'animazione della pesca. Stivale: torna giù, si riprova. Chiave: resta attaccata alla calamita,
+        /// pronta da prendere.
         /// </summary>
         public bool TryFinishCast()
         {
             if (State != FishingKeysState.Casting) return false;
-            switch (LastCast)
+            if (LastCast == CastResult.Key) State = FishingKeysState.KeyOut;
+            else
             {
-                case CastResult.Key:
-                    State = FishingKeysState.KeyOut;
-                    break;
-                case CastResult.Piranha:
-                    EggFound = true;
-                    Bait = HookBait.None;
-                    State = FishingKeysState.Idle;
-                    break;
-                default:
-                    Boots++;
-                    State = FishingKeysState.Idle;
-                    break;
+                Boots++;
+                State = FishingKeysState.Idle;
             }
             return true;
         }
