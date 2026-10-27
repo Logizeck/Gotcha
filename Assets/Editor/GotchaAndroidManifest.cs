@@ -7,11 +7,16 @@ using UnityEditor.Android;
 /// Aggiunge il permesso VIBRATE al manifest Android a ogni build (APK e AAB). Unity lo mette da solo solo se trova
 /// Handheld.Vibrate nel codice rimasto dopo lo stripping, e la vibrazione del gioco passa dal Vibrator di sistema:
 /// senza permesso il telefono resta muto.
+/// Dichiara anche come FACOLTATIVE alcune caratteristiche hardware che Google Play altrimenti dà per obbligatorie:
+/// con l'orientamento bloccato in verticale (dalla 0.62) Play deduce "android.hardware.screen.portrait" obbligatorio
+/// ed esclude migliaia di dispositivi solo orizzontali (TV, Chromebook, box); il permesso del microfono fa lo stesso
+/// con "android.hardware.microphone" (i livelli col microfono hanno un'alternativa senza).
 /// </summary>
 public class GotchaAndroidManifest : IPostGenerateGradleAndroidProject
 {
     const string AndroidNs = "http://schemas.android.com/apk/res/android";
     static readonly string[] Permissions = { "android.permission.VIBRATE" };
+    static readonly string[] OptionalFeatures = { "android.hardware.screen.portrait", "android.hardware.microphone" };
 
     public int callbackOrder => 1;
 
@@ -34,6 +39,23 @@ public class GotchaAndroidManifest : IPostGenerateGradleAndroidProject
             p.SetAttribute("name", AndroidNs, permission);
             root.PrependChild(p);
             changed = true;
+        }
+        foreach (string feature in OptionalFeatures)
+        {
+            XmlElement found = null;
+            foreach (XmlNode n in root.SelectNodes("uses-feature"))
+                if (n is XmlElement e && e.GetAttribute("name", AndroidNs) == feature) found = e;
+            if (found == null)
+            {
+                found = doc.CreateElement("uses-feature");
+                found.SetAttribute("name", AndroidNs, feature);
+                root.PrependChild(found);
+            }
+            if (found.GetAttribute("required", AndroidNs) != "false")
+            {
+                found.SetAttribute("required", AndroidNs, "false");
+                changed = true;
+            }
         }
         if (changed) doc.Save(manifest);
     }
