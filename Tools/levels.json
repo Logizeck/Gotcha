@@ -4000,17 +4000,17 @@
   "eggHow": "Stacca il braccio dello zombie, daglielo a Toni (lo tiene in bocca), porta Toni sullo zerbino davanti alla porta e trascina la mano dello zombie sul campanello."
  },
  {
-  "folder": "V62FishingKeys",
-  "id": "v62_fishing_keys",
-  "title": "FISHING FOR KEYS",
-  "hint": "The key is made of metal. What sticks to metal?",
+  "folder": "V64FingerprintThief",
+  "id": "v64_fingerprint_thief",
+  "title": "THE FINGERPRINT THIEF",
+  "hint": "Maybe the phone knows someone you don't.",
   "egg": "",
   "n": 251,
-  "desc": "The key fell down the sink drain. The fishing rod alone fishes up a boot: stick the magnet on the hook, lower it into the drain, then drag the key to the keyhole.",
+  "desc": "Unlock the phone without the PIN. PINs fail (fake 30 s lockout), the scanner rejects your finger, shaking: 'VIOLENCE IS NOT A PASSWORD.' The owner's photo dropped on the scanner only blinks the LED yellow: hold it there with a finger and gently tilt the phone until the pictured fingertip is on the sensor for 1 s. 'FACE ID ENABLED' + giant face.",
   "hints": [
-   "The key is made of metal. What sticks to metal?",
-   "Your fingers are too big, but a fishing rod reaches down there. It just needs the right bait.",
-   "Drag the magnet from the frying pan onto the hook, then drag the rod over the sink and let go. Bring the key to the lock."
+   "Maybe the phone knows someone you don't.",
+   "The owner left something useful on the table.",
+   "The scanner needs to see the owner's finger, not yours."
   ],
   "eggName": "",
   "eggHow": ""
@@ -4032,97 +4032,97 @@
   "eggHow": ""
  },
  {
-  "folder": "V62AirMail",
-  "id": "v62_air_mail",
-  "title": "AIR MAIL",
-  "hint": "Paper planes can't fly that high. What floats?",
+  "folder": "V64PlasticFish",
+  "id": "v64_plastic_fish",
+  "title": "THE FISH THAT IS AFRAID OF WATER",
+  "hint": "Something smells fishy. And plasticky.",
   "egg": "",
   "n": 253,
-  "desc": "The paper plane falls short. Tie the letter to the balloon, untie the knot and steer it to the roof by tilting the phone, away from the candle flame.",
+  "desc": "The fish is an inflatable toy (it squeaks, valve on its back). Pump and emptying the bowl don't help. Spread the valve open with two fingers, turn the phone upside down so the fish floats with the valve above water, then blow into the mic for ~2 s (no mic: HOLD TO BLOW). 'YOU SAVED A PLASTIC FISH.'",
   "hints": [
-   "Paper planes can't fly that high. What floats?",
-   "The balloon could carry the letter... if it weren't tied to the post.",
-   "Drag the letter onto the balloon, tap the knot on the post, then tilt the phone to steer it to the roof. Avoid the candle!"
+   "Something smells fishy. And plasticky.",
+   "Real fish don't usually squeak.",
+   "Find the valve. Open it. Give your fish some air."
   ],
   "eggName": "",
   "eggHow": ""
  },
  {
-  "folder": "V62MirrorCat",
-  "id": "v62_mirror_cat",
-  "title": "MIRROR, MIRROR",
-  "hint": "That cat ignores everything... except another cat.",
+  "folder": "V64NeighboursAlarm",
+  "id": "v64_neighbours_alarm",
+  "title": "THE NEIGHBOUR'S ALARM",
+  "hint": "Maybe you're blaming the wrong clock.",
   "egg": "",
   "n": 254,
-  "desc": "The cat pushes the vase toward the edge (25 s). Touching, fish and bell don't help: put the mirror in front of the cat, it gets scared of its reflection and runs. If the vase falls: 'Cats 1, You 0.'",
+  "desc": "The ringing comes from the flat below, not the clock (tap, hold, pillow, shake don't stop it). Drag the heavy nightstand with two fingers to reveal a crack, tilt to roll the marble into it, then make one short loud sound: the shockwave bounces the marble onto the neighbour's SNOOZE. Then a rooster crows.",
   "hints": [
-   "That cat ignores everything... except another cat.",
-   "What scares a cat more than anything? Another cat staring back.",
-   "Quick: drag the mirror onto the shelf, right next to the cat, before the vase falls."
+   "Maybe you're blaming the wrong clock.",
+   "The floor seems unusually noisy.",
+   "Move the table. Something small might fit through that crack."
   ],
   "eggName": "",
   "eggHow": ""
  },
  {
-  "folder": "V62Umbrella",
-  "id": "v62_umbrella_bucket",
-  "title": "UPSIDE-DOWN UMBRELLA",
-  "hint": "The glass roof keeps the rain out. Bring the rain in.",
+  "folder": "V64InvisiblePassword",
+  "id": "v64_invisible_password",
+  "title": "THE INVISIBLE PASSWORD",
+  "hint": "Maybe the secret isn't behind the door.",
   "egg": "",
   "n": 255,
-  "desc": "The plant is under the glass roof. Open the umbrella, flip it upside down (double tap or round arrow), fill it in the rain, carry it over the plant and tilt/tap to pour.",
+  "desc": "Codes fail ('0000': NICE TRY, FORGOT PASSWORD: SO DID WE). Tapping the door loosens a hinge: hold both hinges with two fingers and drag outward, then tilt right to swing the door. The back says 0000 (false lead); tilt further and the mirror shows the real code 8008. Behind the door: a broom closet.",
   "hints": [
-   "The glass roof keeps the rain out. Bring the rain in.",
-   "An umbrella keeps the rain out... unless you double-tap it (or press the round arrow) and turn it upside down.",
-   "Tap the umbrella to open it, flip it upside down, fill it under the rain, carry it into the greenhouse over the plant, then tilt the phone (or tap it) to pour."
+   "Maybe the secret isn't behind the door.",
+   "Security doors have hinges for a reason.",
+   "The answer is easier to read from another perspective."
   ],
   "eggName": "",
   "eggHow": ""
  },
  {
-  "folder": "V63ChainReaction",
-  "id": "v63_chain_reaction",
-  "title": "CHAIN REACTION",
-  "hint": "Every piece pushes the next one. Where does it all start?",
+  "folder": "V64IncompetentMagician",
+  "id": "v64_incompetent_magician",
+  "title": "THE INCOMPETENT MAGICIAN",
+  "hint": "Magic works better without an audience of one.",
   "egg": "",
   "n": 256,
-  "desc": "An unfinished chain machine must ring an unreachable bell. Slots: ball on the shelf, book as ramp, dominoes on the table, candle before the balloon string, then GO: the flame burns the string, the balloon rises and rings the bell. The magnet is a decoy; every wrong setup stops at the first broken link with its own joke. Unlimited tries.",
+  "desc": "The magician ruins every trick (hat, boxes, wand). Cover both his eyes with two fingers and make a quiet sound: the rabbit points to a hidden trapdoor. Release (he rubs his eyes for a few seconds), drag the trapdoor open and drag the rabbit in. He bows; the rabbit shows 'WHAT AN IDIOT'.",
   "hints": [
-   "Every piece pushes the next one. Where does it all start?",
-   "Something round starts it, something flat gets it down, something in a row passes it on... and something hot finishes it.",
-   "Ball in the circle on the shelf, book as the ramp, dominoes on the table, candle right before the balloon string. The magnet is a trap. Then GO!"
+   "Magic works better without an audience of one.",
+   "The rabbit seems smarter than the magician.",
+   "Maybe the magician shouldn't see how the trick works."
   ],
   "eggName": "",
   "eggHow": ""
  },
  {
-  "folder": "V63LyingClocks",
-  "id": "v63_lying_clocks",
-  "title": "THE LYING CLOCKS",
-  "hint": "Every clock lies. But one of them tells you HOW it lies.",
+  "folder": "V64PerfectLiar",
+  "id": "v64_perfect_liar",
+  "title": "THE PERFECT LIAR",
+  "hint": "Perhaps the machine is lying too.",
   "egg": "",
   "n": 257,
-  "desc": "The door opens only at the right time. The alarm clock is stopped, the time clock runs double speed, the cuckoo clock is 10-25 min late but sings on the real hour. Watch the cuckoo, work out the delay, set the real current time on the keypad. 3 mistakes: 'Time's up. Literally.'",
+  "desc": "Three statements can't be solved by logic; TEST gives contradictory results. The lie detector is installed upside down (logo and sticker upside down): hold both ends with two fingers and turn the phone upside down, release (all green), press TEST and make any sound: 'PLAYER — LIAR'. 'CASE CLOSED. SOMEHOW.'",
   "hints": [
-   "Every clock lies. But one of them tells you HOW it lies.",
-   "The cuckoo clock is slow, but its bird sings exactly on the REAL hour. Watch where its hands are when it sings.",
-   "When the bird sings it's really HH:00 (count the cuckoos). If the cuckoo clock shows, say, 3:45, it's 15 minutes slow: add 15 to what it shows and type that time, then OK."
+   "Perhaps the machine is lying too.",
+   "Look at how the detector was installed.",
+   "Turn the detector's world upside down before testing anyone."
   ],
   "eggName": "",
   "eggHow": ""
  },
  {
-  "folder": "V63ShadowPuppet",
-  "id": "v63_shadow_puppet",
-  "title": "SHADOW PUPPET",
-  "hint": "Dogs are scared of one thing: a really, REALLY big cat.",
+  "folder": "V64RiggedCards",
+  "id": "v64_rigged_cards",
+  "title": "THE RIGGED THREE-CARD GAME",
+  "hint": "The dealer is very good at cheating.",
   "egg": "",
   "n": 258,
-  "desc": "The guard dog is afraid of giant cats. Build a cat shadow on the wall: yarn ball as head, two pizza slices as ears, feather as tail; slide the stand close to the lamp and turn it on. Small cat: 'Aww, a kitten!'. Other shapes get their own reactions; 3 wrong shadows: 'Woof. That means no.'",
+  "desc": "Every card is the Two of Spades. Hold two cards with two fingers and tilt: the free card slides off; under the middle one there is a crown-shaped ink stain. Drag it onto a card to make your own Queen and tap it. 'HEY! THAT'S CHEATING!' Hidden gag: tap the dealer's hat after the win (JOKER).",
   "hints": [
-   "Dogs are scared of one thing: a really, REALLY big cat.",
-   "Build a cat on the stand: a round head, two pointy ears, a tail. Then switch on the lamp. Size matters!",
-   "Yarn in the head circle, one pizza slice in each ear circle, the feather as the tail. Slide the stand all the way to the lamp, then tap the lamp."
+   "The dealer is very good at cheating.",
+   "What if the Queen was never there?",
+   "Look under the cards. Perhaps you can make your own Queen."
   ],
   "eggName": "",
   "eggHow": ""

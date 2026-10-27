@@ -267,6 +267,21 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.64 — Livelli 251-258 rifatti (specifica del proprietario)
+- Tolti i livelli 251 e 253-258 della 0.62/0.63; il 252 **Wake Up, Kitty!** resta. Livelli nuovi, senza Easter egg e
+  senza Toni: builder `Assets/Editor/GotchaLevels64.cs` (ordine) + `GotchaLevels64A/B/C.cs`, runtime
+  `Assets/Scripts/Levels/V64`, logica pura `V64/Logic` (asmdef `Gotcha.V64.Logic`), test `Assets/Tests/EditMode/V64*Tests.cs`.
+  - 251 **The Fingerprint Thief**: la foto del proprietario sul lettore d'impronte, tenuta con un dito, inclinando il telefono finché il polpastrello è sul sensore.
+  - 253 **The Fish That Is Afraid of Water**: il pesce è gonfiabile: aprire la valvola con due dita, telefono capovolto, soffiare nel microfono.
+  - 254 **The Neighbour's Alarm**: spostare il comodino con due dita, far rotolare la biglia nella crepa, un rumore secco nel microfono preme SNOOZE al piano di sotto.
+  - 255 **The Invisible Password**: sfilare le cerniere con due dita, inclinare: dietro c'è 0000 (falso), lo specchio mostra 8008.
+  - 256 **The Incompetent Magician**: coprire gli occhi del mago con due dita e fare un suono: il coniglio indica la botola.
+  - 257 **The Perfect Liar**: la macchina della verità è montata al contrario: tenerla con due dita e capovolgere il telefono, TEST, un suono: "PLAYER — LIAR".
+  - 258 **The Rigged Three-Card Game**: tenere due carte e inclinare: sotto quella libera c'è la macchia a corona, trascinarla su una carta per farsi la Regina. Gag del JOKER sul cappello (non conta come Easter egg).
+- Microfono: alternativa senza microfono (pulsante da tenere premuto) nei livelli 253, 254, 256 e 257; il microfono si
+  spegne quando non serve più. Tasti di prova nell'Editor: frecce = inclinazione (su = capovolto), B/N = microfono,
+  S = scossa, Shift+clic o Spazio = secondo dito, 1-3 = carte (258).
+
 ## Versione 0.63 — Livelli 251-260
 - **Livelli 251-255 senza Easter egg** (verranno aggiunti solo dove sono davvero esilaranti) e **senza Toni**, che
   compare solo nei livelli multipli di 25. Il 252 diventa **Wake Up, Kitty!**: dorme il gatto e il ladro è il topo.
