@@ -10,7 +10,8 @@ using UnityEditor.Android;
 /// Dichiara anche come FACOLTATIVE alcune caratteristiche hardware che Google Play altrimenti dà per obbligatorie:
 /// con l'orientamento bloccato in verticale (dalla 0.62) Play deduce "android.hardware.screen.portrait" obbligatorio
 /// ed esclude migliaia di dispositivi solo orizzontali (TV, Chromebook, box); il permesso del microfono fa lo stesso
-/// con "android.hardware.microphone" (i livelli col microfono hanno un'alternativa senza).
+/// con "android.hardware.microphone" (i livelli col microfono hanno un'alternativa senza). Marca l'app come gioco
+/// (android:appCategory="game").
 /// </summary>
 public class GotchaAndroidManifest : IPostGenerateGradleAndroidProject
 {
@@ -56,6 +57,13 @@ public class GotchaAndroidManifest : IPostGenerateGradleAndroidProject
                 found.SetAttribute("required", AndroidNs, "false");
                 changed = true;
             }
+        }
+        // Gotcha è un gioco: con targetSdk 36 (Android 16) i giochi sono esclusi dall'obbligo di ruotare e
+        // ridimensionarsi sugli schermi grandi, quindi il verticale fisso resta valido anche su tablet e pieghevoli
+        if (root.SelectSingleNode("application") is XmlElement app && app.GetAttribute("appCategory", AndroidNs) != "game")
+        {
+            app.SetAttribute("appCategory", AndroidNs, "game");
+            changed = true;
         }
         if (changed) doc.Save(manifest);
     }
