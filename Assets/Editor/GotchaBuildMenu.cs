@@ -245,6 +245,8 @@ public static class GotchaBuildMenu
             // (in Unity 6 si impostano una volta nel Build Profile Android: Debug Symbols = Symbol Table / Full)
 #if !UNITY_6000_0_OR_NEWER
             EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Public;
+#else
+            EnableDebugSymbols();
 #endif
 
             var options = new BuildPlayerOptions
@@ -287,6 +289,33 @@ public static class GotchaBuildMenu
         else
         {
             Debug.LogError("[Gotcha] Build AAB non riuscita (" + summary.result + "): " + summary.totalErrors + " errori. Vedi la Console.");
+        }
+    }
+    /// <summary>
+    /// Unity 6: simboli di debug nativi (Symbol Table) dentro l'AAB, così Play Console li riceve da sola e non avvisa
+    /// più "non hai caricato simboli di debug". L'API (UnityEditor.Android.UserBuildSettings.DebugSymbols) sta
+    /// nell'assembly Android dell'Editor: si usa per riflessione, così il progetto compila anche senza.
+    /// </summary>
+    static void EnableDebugSymbols()
+    {
+        try
+        {
+            Type settings = Type.GetType("UnityEditor.Android.UserBuildSettings+DebugSymbols, UnityEditor.Android.Extensions");
+            if (settings == null) { Debug.LogWarning("[Gotcha] Debug Symbols: API non trovata, impostali nel Build Profile Android"); return; }
+            System.Reflection.PropertyInfo level = settings.GetProperty("level");
+            System.Reflection.PropertyInfo format = settings.GetProperty("format");
+            if (level != null) level.SetValue(null, Enum.Parse(level.PropertyType, "SymbolTable"));
+            if (format != null)
+            {
+                // IncludeInBundle: i simboli finiscono nell'AAB (Zip resta, per averli anche come file a parte)
+                object zip = Enum.Parse(format.PropertyType, "Zip");
+                object inBundle = Enum.Parse(format.PropertyType, "IncludeInBundle");
+                format.SetValue(null, Enum.ToObject(format.PropertyType, Convert.ToInt32(zip) | Convert.ToInt32(inBundle)));
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning("[Gotcha] Debug Symbols non impostati (" + e.Message + "): impostali nel Build Profile Android");
         }
     }
 }
