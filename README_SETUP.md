@@ -267,7 +267,18 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
-## Versione 0.67 — R8 (riduzione e offuscamento del codice Android)
+## Versione 0.67 — R8 + livelli 261-262
+- **Livelli in coda dopo il 260** (`Assets/Editor/GotchaLevels67.cs`: ordine; builder `GotchaLevels67A/B.cs`; runtime
+  `Assets/Scripts/Levels/V67`; logica `V64/Logic/DarkRoomLogic.cs`, `ImmortalCandleLogic.cs`; test `V67*Tests.cs`).
+  L'esame finale di Toni resta al 260; ogni release aggiunge uno o due livelli in fondo.
+  - 261 **The Dark Room**: stanza al buio, il dito fa da torcia; interruttore senza lampadina, cavo rosicchiato, fiammiferi
+    bagnati. Indizi: orologio alle 2 PM, radio "sunny afternoon", filo di luce dalle tende. Soluzione: aprire le tende.
+  - 262 **The Immortal Candle**: soffiare la ingrandisce, ventilatore e acqua non servono, un dito le fa il solletico.
+    Soluzione: afferrare la fiamma con due dita, staccarla tirando su e portarla al bordo superiore.
+  - Tasti di prova nell'Editor: 261 K = apri tenda, 1-6 = mosse sbagliate; 262 Shift+clic = secondo dito, B/N = soffio,
+    F = ventola, G = acqua, T = solletico, C = presa e trasporto automatici.
+
+### R8 (riduzione e offuscamento del codice Android)
 - **Prima**: minify Release spento (`GotchaBuildMenu` non lo attivava, per paura di perdere le classi Java chiamate per
   nome); nessun template Gradle personalizzato, nessun file ProGuard del progetto; restavano solo le regole di Unity.
 - **Ora**: `PlayerSettings.Android.minifyRelease = true` (Debug resta spento) applicato da `ApplyStoreSettings` a ogni

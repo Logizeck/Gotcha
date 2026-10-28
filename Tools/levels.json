@@ -4158,5 +4158,37 @@
   ],
   "eggName": "",
   "eggHow": ""
+ },
+ {
+  "folder": "V67DarkRoom",
+  "id": "v67_dark_room",
+  "title": "THE DARK ROOM",
+  "hint": "Electricity is overrated.",
+  "egg": "",
+  "n": 261,
+  "desc": "The room is pitch dark; your finger is a small flashlight. The switch clicks (no bulb), the lamp's cable is chewed by a mouse, the matches are wet. Clues: the clock says 2 PM, the radio talks about a sunny afternoon, a thin line of light at the curtain edge. Open the curtains (drag one panel sideways): it was daytime.",
+  "hints": [
+   "Electricity is overrated.",
+   "What time is it, actually?",
+   "Light doesn't always come from a bulb. Check the window."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "V67ImmortalCandle",
+  "id": "v67_immortal_candle",
+  "title": "THE IMMORTAL CANDLE",
+  "hint": "The wind doesn't seem to work.",
+  "egg": "",
+  "n": 262,
+  "desc": "Blowing into the mic makes the flame grow ('KEEP GOING, I'M GROWING!'), the fan only bends it, the water just makes steam, one finger tickles it. Grab the flame with two fingers, pull it up off the wick and drag it to the top edge. It peeks back in and sticks its tongue out.",
+  "hints": [
+   "The wind doesn't seem to work.",
+   "That flame looks strangely solid.",
+   "Maybe you should take the fire away instead of putting it out."
+  ],
+  "eggName": "",
+  "eggHow": ""
  }
 ]
