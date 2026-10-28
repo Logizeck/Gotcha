@@ -4222,5 +4222,37 @@
   ],
   "eggName": "",
   "eggHow": ""
+ },
+ {
+  "folder": "V69DontLetItSink",
+  "id": "v69_dont_let_it_sink",
+  "title": "DON'T LET IT SINK",
+  "hint": "That's a strange ocean.",
+  "egg": "",
+  "n": 265,
+  "desc": "A toy boat with a hole slowly fills ('the sea'). Bucket, finger on the hole and tape only buy time; if it fills it sinks and pops back up (no fail). Clues: the horizon is a tub rim with tiles, a rubber duck, a chain in the corner. Pull the chain: the bathtub drains and the boat sits on the bottom. 'CAN'T SINK WITHOUT WATER.'",
+  "hints": [
+   "That's a strange ocean.",
+   "Why is there a rubber duck at sea?",
+   "Every bathtub has a plug."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "V69CrookedPicture",
+  "id": "v69_crooked_picture",
+  "title": "THE CROOKED PICTURE",
+  "hint": "Are you sure it's the picture that's crooked?",
+  "egg": "",
+  "n": 266,
+  "desc": "The picture looks crooked, but the whole room is tilted 12 degrees. Rotating, taping or nailing it fails. Clues: the water in the glass stays level with the screen, a marble rolls, the spirit level bubble is off. Tilt the phone by the room's angle for 1 s. 'THE PICTURE WAS FINE. YOU WERE CROOKED.'",
+  "hints": [
+   "Are you sure it's the picture that's crooked?",
+   "Look at the water in the glass.",
+   "Don't fix the picture. Fix your point of view: tilt the phone."
+  ],
+  "eggName": "",
+  "eggHow": ""
  }
 ]

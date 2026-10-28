@@ -267,6 +267,17 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.69 — Livelli 265-266
+- Ordine in `Assets/Editor/GotchaLevels69.cs`; builder `GotchaLevels69A/B.cs`; runtime `Assets/Scripts/Levels/V69`;
+  logica `V64/Logic/DontLetItSinkLogic.cs`, `CrookedPictureLogic.cs`; test `V69*Tests.cs`. Niente Easter egg, niente Toni.
+  - 265 **Don't Let It Sink**: la barchetta bucata si riempie piano (75 s); secchio, dito sul buco e nastro fanno solo
+    guadagnare tempo; se si riempie affonda e torna a galla vuota (nessuna sconfitta). Indizi: il "mare" è una vasca
+    (piastrelle, bordo smaltato, paperella, catenella nell'angolo). Soluzione: tirare la catenella del tappo.
+    Tasti Editor: K tirata completa, J mezza tirata, 1 secchio, 2 nastro, 3 paperella, H dito sul buco, F tanta acqua.
+  - 266 **The Crooked Picture**: il quadro è dritto, è la stanza a essere inclinata di 12°. Indizi: l'acqua nel bicchiere,
+    la biglia, la bolla della livella. Soluzione: inclinare il telefono di quell'angolo (relativo a come lo si tiene
+    all'inizio, ±4°) per 1 s; col telefono quasi piatto non conta. Tasti Editor: Q/E ruota, R azzera, F telefono piatto.
+
 ## Versione 0.68 — Livelli 263-264
 - Ordine in `Assets/Editor/GotchaLevels68.cs`; builder `GotchaLevels68A/B.cs`; runtime `Assets/Scripts/Levels/V68`;
   logica `V64/Logic/StuckSnackLogic.cs`, `CameraShyBirdLogic.cs`; test `V68*Tests.cs`. Niente Easter egg, niente Toni.
