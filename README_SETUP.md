@@ -267,6 +267,20 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.67 — R8 (riduzione e offuscamento del codice Android)
+- **Prima**: minify Release spento (`GotchaBuildMenu` non lo attivava, per paura di perdere le classi Java chiamate per
+  nome); nessun template Gradle personalizzato, nessun file ProGuard del progetto; restavano solo le regole di Unity.
+- **Ora**: `PlayerSettings.Android.minifyRelease = true` (Debug resta spento) applicato da `ApplyStoreSettings` a ogni
+  build per lo store; R8 è quello della toolchain Gradle di Unity (nessun aggiornamento forzato).
+- `Assets/Editor/GotchaProguard.cs` aggiunge `unityLibrary/proguard-gotcha.txt` ai `consumerProguardFiles`: protegge solo
+  `com.gotcha.game.GotchaKeys`, `com.gotcha.video.GotchaVideo` (chiamate per nome dal C#) e
+  `com.unity.androidnotifications.**`; mantiene numeri di riga per gli stack trace. Il codice C# (IL2CPP, Managed
+  Stripping) non cambia.
+- Con il minify acceso Gradle mette il mapping dentro l'AAB (`BUNDLE-METADATA/com.android.tools.build.obfuscation/proguard.map`):
+  Play Console lo usa da sola per de-offuscare crash e ANR.
+- **Gotcha > Controlla manifest AAB** ora riporta anche dimensione dell'AAB, dimensioni dei `.dex` e i file in
+  `BUNDLE-METADATA`: lanciarlo sull'AAB 0.66 e sullo 0.67 per il confronto prima/dopo.
+
 ## Versione 0.66 — Correzioni ai livelli 251 e 256
 - 251 **The Fingerprint Thief**: la foto agganciata al lettore non si stacca più continuando il trascinamento (serve
   tirarla via decisa); basta inclinare un po' a sinistra (tolleranza più larga); la prima volta che la foto è premuta

@@ -85,7 +85,11 @@ public static class GotchaBuildMenu
         PlayerSettings.SetScriptingBackend(BuildTargetGroup.Android, ScriptingImplementation.IL2CPP);
 #endif
         PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64 | AndroidArchitecture.ARMv7;
-        // minify (R8) resta spento: toglierebbe le classi Java chiamate per nome (GotchaKeys, GotchaVideo)
+        // R8 (dalla 0.67): riduzione, ottimizzazione e offuscamento del codice Java/Kotlin nelle build Release.
+        // Le classi Java chiamate per nome dal C# sono protette da GotchaProguard; il mapping finisce nell'AAB.
+        // Le build di prova (Development) restano senza minify per compilare più in fretta.
+        PlayerSettings.Android.minifyRelease = true;
+        PlayerSettings.Android.minifyDebug = false;
     }
 
     // ---------- Build di prova (APK) ----------

@@ -11,7 +11,9 @@ using UnityEditor;
 /// Menu "Gotcha > Controlla manifest AAB": legge il manifest vero da un file .aab (con il bundletool incluso in Unity
 /// e il JDK di Unity) e riassume ciò che Google Play usa per scegliere i dispositivi compatibili: versioni Android,
 /// caratteristiche hardware obbligatorie, librerie obbligatorie, schermi e ABI nativi. Il manifest completo viene
-/// salvato accanto all'AAB (Gotcha-x.y.aab.manifest.xml) e il riassunto in Gotcha-x.y.aab.report.txt.
+/// salvato accanto all'AAB (Gotcha-x.y.aab.manifest.xml) e il riassunto in Gotcha-x.y.aab.report.txt. Il riassunto
+/// riporta anche dimensione dell'AAB, dimensioni dei .dex e i file in BUNDLE-METADATA (mapping R8): serve per
+/// confrontare due build (es. 0.66 senza R8 e 0.67 con R8).
 /// </summary>
 public static class GotchaManifestCheck
 {
@@ -125,7 +127,45 @@ public static class GotchaManifestCheck
         var abis = System.Text.RegularExpressions.Regex.Matches(raw, @"base/lib/([a-z0-9_\-]+)/")
             .Cast<System.Text.RegularExpressions.Match>().Select(m => m.Groups[1].Value).Distinct().ToArray();
         sb.AppendLine("ABI nativi: " + (abis.Length > 0 ? string.Join(", ", abis) : "nessuno"));
+
+        // DEX e metadati R8: dimensioni dei .dex (non compressi) e file in BUNDLE-METADATA (mapping, metadati R8)
+        var entries = ZipEntries(File.ReadAllBytes(aab));
+        var dex = entries.Where(e => e.name.EndsWith(".dex", StringComparison.Ordinal)).ToArray();
+        long dexBytes = dex.Sum(e => e.size);
+        sb.AppendLine("AAB: " + (new FileInfo(aab).Length / 1024) + " KB");
+        sb.AppendLine("DEX: " + dex.Length + " file, " + (dexBytes / 1024) + " KB non compressi");
+        foreach (var e in dex) sb.AppendLine("  - " + e.name + "  " + (e.size / 1024) + " KB");
+        var meta = entries.Where(e => e.name.StartsWith("BUNDLE-METADATA/", StringComparison.Ordinal)).ToArray();
+        sb.AppendLine("BUNDLE-METADATA (" + meta.Length + "):");
+        foreach (var e in meta) sb.AppendLine("  - " + e.name + "  " + (e.size / 1024) + " KB");
+        bool mapping = meta.Any(e => e.name.IndexOf("obfuscation", StringComparison.OrdinalIgnoreCase) >= 0 || e.name.EndsWith("proguard.map", StringComparison.Ordinal));
+        sb.AppendLine(mapping ? "Mapping R8 incluso nell'AAB: SI" : "Mapping R8 incluso nell'AAB: NO (minify spento o non applicato)");
         return sb.ToString();
+    }
+
+    /// <summary>Elenco dei file di uno zip (nome e dimensione non compressa) letto dalla "central directory".</summary>
+    static System.Collections.Generic.List<(string name, long size)> ZipEntries(byte[] b)
+    {
+        var list = new System.Collections.Generic.List<(string, long)>();
+        for (int i = b.Length - 46; i >= 0; i--)
+        {
+            // fine della central directory: "PK\x05\x06"
+            if (b[i] != 0x50 || b[i + 1] != 0x4b || b[i + 2] != 0x05 || b[i + 3] != 0x06) continue;
+            int count = BitConverter.ToUInt16(b, i + 10);
+            long pos = BitConverter.ToUInt32(b, i + 16);
+            for (int k = 0; k < count && pos + 46 <= b.Length; k++)
+            {
+                if (BitConverter.ToUInt32(b, (int)pos) != 0x02014b50) break;
+                long size = BitConverter.ToUInt32(b, (int)pos + 24);
+                int nameLen = BitConverter.ToUInt16(b, (int)pos + 28);
+                int extraLen = BitConverter.ToUInt16(b, (int)pos + 30);
+                int commentLen = BitConverter.ToUInt16(b, (int)pos + 32);
+                list.Add((Encoding.UTF8.GetString(b, (int)pos + 46, nameLen), size));
+                pos += 46 + nameLen + extraLen + commentLen;
+            }
+            break;
+        }
+        return list;
     }
 }
 #endif
