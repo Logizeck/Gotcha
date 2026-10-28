@@ -42,7 +42,7 @@ namespace Gotcha.Levels
 
         // area in cui può stare il centro della foto (resta tutta dentro lo schermo, anche sui telefoni più corti)
         const float PhotoMinX = -1.35f, PhotoMaxX = 1.35f, PhotoMinY = -3.4f, PhotoMaxY = 1.9f;
-        const float UndockDistance = 0.9f;
+        const float UndockDistance = 1.8f;   // la foto agganciata si stacca solo tirandola via decisa (prima bastava continuare il trascinamento)
         const float ShakeLevel = 14f;
 
         static readonly string[] WrongPinLines = { "WRONG PIN", "STILL WRONG", "NOPE. NOT EVEN CLOSE." };
@@ -57,7 +57,7 @@ namespace Gotcha.Levels
         Vector3 phoneHome, photoHome, dockPos;
         Quaternion phoneRot;
         Vector2 undockFrom;
-        bool busy, clearBeforeRedock, celebrating;
+        bool busy, clearBeforeRedock, celebrating, almostShown;
         int lockedTaps;
         Coroutine photoMove, flashKey;
 
@@ -80,6 +80,7 @@ namespace Gotcha.Levels
             HalloweenKit.Show(unlockScreen, false);
             HalloweenKit.Show(bigFace, false);
             SetPhotoAlpha(1f);
+            almostShown = false;
             UpdateTexts();
             ShowLed();
         }
@@ -108,6 +109,12 @@ namespace Gotcha.Levels
             {
                 logic.SetContact(photoFingers.Count > 0, gravity.X, gravity.Y);
                 logic.Tilt(gravity.X, gravity.Y, dt);
+                // la prima volta che la foto è premuta sul lettore: il lettore "quasi" la riconosce (indizio per inclinare)
+                if (logic.Contact && !almostShown && photoMove == null)
+                {
+                    almostShown = true;
+                    toast.Show("SCANNING... FINGERTIP NOT CENTERED.", 2.4f);
+                }
                 if (photoMove == null) photo.position = dockPos + new Vector3(logic.OffsetX, logic.OffsetY, 0f);
                 if (logic.Step(dt)) { StartCoroutine(Unlock()); return; }
             }

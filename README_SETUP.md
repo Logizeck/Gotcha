@@ -267,6 +267,12 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.66 — Correzioni ai livelli 251 e 256
+- 251 **The Fingerprint Thief**: la foto agganciata al lettore non si stacca più continuando il trascinamento (serve
+  tirarla via decisa); basta inclinare un po' a sinistra (tolleranza più larga); la prima volta che la foto è premuta
+  sul lettore compare "SCANNING... FINGERTIP NOT CENTERED." come indizio.
+- 256 **The Incompetent Magician**: basta UN dito sugli occhi del mago (con due dita il riconoscimento era incerto).
+
 ## Versione 0.65 — Compatibilità Google Play
 - Nuovo numero di versione per Play (versionCode 6500): la 0.64.1 non era più accettata.
 - Manifest (`GotchaAndroidManifest`): schermo verticale e microfono dichiarati come caratteristiche facoltative,
@@ -282,7 +288,7 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
   - 253 **The Fish That Is Afraid of Water**: il pesce è gonfiabile: aprire la valvola con due dita, telefono capovolto, soffiare nel microfono.
   - 254 **The Neighbour's Alarm**: spostare il comodino con due dita, far rotolare la biglia nella crepa, un rumore secco nel microfono preme SNOOZE al piano di sotto.
   - 255 **The Invisible Password**: sfilare le cerniere con due dita, inclinare: dietro c'è 0000 (falso), lo specchio mostra 8008.
-  - 256 **The Incompetent Magician**: coprire gli occhi del mago con due dita e fare un suono: il coniglio indica la botola.
+  - 256 **The Incompetent Magician**: coprire gli occhi del mago con un dito (dalla 0.66; prima due) e fare un suono: il coniglio indica la botola.
   - 257 **The Perfect Liar**: la macchina della verità è montata al contrario: tenerla con due dita e capovolgere il telefono, TEST, un suono: "PLAYER — LIAR".
   - 258 **The Rigged Three-Card Game**: tenere due carte e inclinare: sotto quella libera c'è la macchia a corona, trascinarla su una carta per farsi la Regina. Gag del JOKER sul cappello (non conta come Easter egg).
 - Microfono: alternativa senza microfono (pulsante da tenere premuto) nei livelli 253, 254, 256 e 257; il microfono si

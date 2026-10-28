@@ -4006,7 +4006,7 @@
   "hint": "Maybe the phone knows someone you don't.",
   "egg": "",
   "n": 251,
-  "desc": "Unlock the phone without the PIN. PINs fail (fake 30 s lockout), the scanner rejects your finger, shaking: 'VIOLENCE IS NOT A PASSWORD.' The owner's photo dropped on the scanner only blinks the LED yellow: hold it there with a finger and gently tilt the phone until the pictured fingertip is on the sensor for 1 s. 'FACE ID ENABLED' + giant face.",
+  "desc": "Unlock the phone without the PIN. PINs fail (fake 30 s lockout), the scanner rejects your finger, shaking: 'VIOLENCE IS NOT A PASSWORD.' The owner's photo dropped on the scanner only blinks the LED yellow: hold it there with a finger and gently tilt the phone to the left until the pictured fingertip is on the sensor for 1 s. 'FACE ID ENABLED' + giant face.",
   "hints": [
    "Maybe the phone knows someone you don't.",
    "The owner left something useful on the table.",
@@ -4086,7 +4086,7 @@
   "hint": "Magic works better without an audience of one.",
   "egg": "",
   "n": 256,
-  "desc": "The magician ruins every trick (hat, boxes, wand). Cover both his eyes with two fingers and make a quiet sound: the rabbit points to a hidden trapdoor. Release (he rubs his eyes for a few seconds), drag the trapdoor open and drag the rabbit in. He bows; the rabbit shows 'WHAT AN IDIOT'.",
+  "desc": "The magician ruins every trick (hat, boxes, wand). Cover his eyes with one finger and make a quiet sound: the rabbit points to a hidden trapdoor. Release (he rubs his eyes for a few seconds), drag the trapdoor open and drag the rabbit in. He bows; the rabbit shows 'WHAT AN IDIOT'.",
   "hints": [
    "Magic works better without an audience of one.",
    "The rabbit seems smarter than the magician.",

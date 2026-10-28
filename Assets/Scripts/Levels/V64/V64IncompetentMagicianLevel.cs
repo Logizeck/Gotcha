@@ -10,7 +10,7 @@ namespace Gotcha.Levels
     /// Livello 256 "The Incompetent Magician" — il mago (quello di "The cheap magician") vuole far sparire il coniglio
     /// ma rovina ogni trucco: il coniglio nel cilindro ne esce col cilindro in testa, nelle scatole ricompare fuori,
     /// la bacchetta fa solo coriandoli, le formule al microfono non fanno niente, toccato si inchina e non aiuta.
-    /// Soluzione: due dita sugli occhi del mago (li chiude), un piccolo suono al microfono: il coniglio sente e indica
+    /// Soluzione: un dito sugli occhi del mago (li chiude), un piccolo suono al microfono: il coniglio sente e indica
     /// la botola nascosta. Tolte le dita il mago si stropiccia gli occhi per qualche secondo: aprire la botola e
     /// trascinarci il coniglio. Il mago riapre gli occhi, palco vuoto, si inchina fiero; il coniglio sbuca dal sipario
     /// col cartello "WHAT AN IDIOT". Senza microfono: tenere coperti gli occhi ancora un po' (compare un distintivo).
@@ -50,7 +50,7 @@ namespace Gotcha.Levels
         [SerializeField] TextMesh infoText;
         [SerializeField] Transform infoHolder;
 
-        const float TrapRadius = 0.65f, HatRadius = 0.6f, LidOpenDrag = 0.4f, LidOpenX = 1.05f, EyeSpread = 0.2f;
+        const float TrapRadius = 0.65f, HatRadius = 0.6f, LidOpenDrag = 0.4f, LidOpenX = 1.05f;
         static readonly string[] BowLines = { "Thank you, thank you! No autographs.", "A magician never helps. I mean... reveals.", "*bows deeper* You're welcome." };
         static readonly string[] SpellLines = { "ABRACADABRA!", "HOCUS POCUS!", "ALAKAZAM!" };
 
@@ -63,7 +63,7 @@ namespace Gotcha.Levels
         HwToast toast;
         Vector3 lidHome, hatHome, hatScale, magScale, pawScale;
         Vector2 lidGrab;
-        bool busy, draggingLid, micReleased, oneEyeWarned, almostSaid;
+        bool busy, draggingLid, micReleased, almostSaid;
         float glowT;
 
         public override void OnLevelStart()
@@ -114,31 +114,15 @@ namespace Gotcha.Levels
             Present();
         }
 
-        // ---------- Occhi (due dita) ----------
+        // ---------- Occhi (un dito) ----------
 
         void ReadEyes()
         {
-            // al massimo due dita sulla faccia (zona generosa); valgono se sono ai due lati, cioè su entrambi gli occhi
-            int fingersOnFace = 0;
-            float x0 = 0f, x1 = 0f;
+            // basta un dito sulla faccia (zona generosa) per coprire gli occhi: con due dita il riconoscimento era
+            // incerto su alcuni telefoni. Il dito deve restare giù fino al sussurro.
+            bool covered = false;
             foreach (S41KKit.Finger f in S41KKit.Fingers(cam))
-            {
-                if (f.ended || !faceArea.OverlapPoint(f.world)) continue;
-                if (fingersOnFace == 0) x0 = f.world.x; else if (fingersOnFace == 1) x1 = f.world.x;
-                fingersOnFace++;
-            }
-            float cx = faceArea.bounds.center.x;
-            bool spread = fingersOnFace >= 2 && (Mathf.Abs(x0 - x1) >= EyeSpread || (x0 - cx) * (x1 - cx) < 0f);
-#if UNITY_EDITOR
-            if (Input.GetKey(KeyCode.Space) && fingersOnFace == 1) { fingersOnFace = 2; spread = true; }   // Editor: Spazio = secondo dito
-#endif
-            bool covered = spread;
-            if (fingersOnFace == 1 && drag.Held == null && !draggingLid && !logic.EyesClosed && !oneEyeWarned)
-            {
-                oneEyeWarned = true;
-                magSay.Show("Ha! I can still see you with the other eye!", 2f);
-            }
-            if (fingersOnFace == 0) oneEyeWarned = false;
+                if (!f.ended && faceArea.OverlapPoint(f.world)) { covered = true; break; }
             if (covered && drag.Held != null) drag.Cancel();
             MagicianReaction r = logic.SetEyesCovered(covered);
             switch (r)

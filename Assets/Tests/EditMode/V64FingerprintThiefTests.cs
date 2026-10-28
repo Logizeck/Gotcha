@@ -18,14 +18,14 @@ namespace Gotcha.Tests
             }
         }
 
-        /// <summary>Foto agganciata e premuta col telefono dritto, poi inclinato verso sinistra e verso il basso.</summary>
+        /// <summary>Foto agganciata e premuta col telefono dritto, poi inclinato un po' verso sinistra.</summary>
         static FingerprintThiefLogic Solve(float g0x = 0f, float g0y = -0.7f)
         {
             var l = new FingerprintThiefLogic();
             Assert.IsTrue(l.Dock());
             l.SetContact(true, g0x, g0y);
             Assert.AreEqual(FpLed.Yellow, l.Led);
-            Run(l, 2f, g0x - 0.25f, g0y - 0.22f);
+            Run(l, 2f, g0x - 0.19f, g0y);
             return l;
         }
 
@@ -51,8 +51,8 @@ namespace Gotcha.Tests
         public void TiltTolerance_IsGenerous()
         {
             // inclinazioni diverse attorno a quella giusta funzionano tutte
-            foreach (float dx in new[] { -0.18f, -0.25f, -0.32f })
-                foreach (float dy in new[] { -0.15f, -0.22f, -0.3f })
+            foreach (float dx in new[] { -0.12f, -0.19f, -0.25f })
+                foreach (float dy in new[] { -0.05f, 0f, 0.05f })
                 {
                     var l = new FingerprintThiefLogic();
                     l.Dock();
@@ -107,9 +107,9 @@ namespace Gotcha.Tests
             var l = new FingerprintThiefLogic();
             l.Dock();
             l.SetContact(true, 0f, -0.7f);
-            Run(l, 0.9f, -0.25f, -0.92f, false);
+            Run(l, 0.9f, -0.19f, -0.7f, false);
             float ox = l.OffsetX, oy = l.OffsetY;
-            l.SetContact(false, -0.25f, -0.92f);
+            l.SetContact(false, -0.19f, -0.7f);
             Run(l, 1f, 0f, -0.7f);                 // senza dito l'inclinazione non conta
             Assert.AreEqual(ox, l.OffsetX, 1e-5);
             Assert.AreEqual(oy, l.OffsetY, 1e-5);
@@ -126,9 +126,9 @@ namespace Gotcha.Tests
             var l = new FingerprintThiefLogic();
             l.Dock();
             l.SetContact(true, 0f, -0.7f);
-            Run(l, 0.8f, -0.25f, -0.92f, false);
+            Run(l, 0.8f, -0.19f, -0.7f, false);
             Assert.IsTrue(l.Aligned);
-            for (int i = 0; i < 30; i++) { l.Tilt(-0.25f, -0.92f, Dt); l.Step(Dt); }   // mezzo secondo
+            for (int i = 0; i < 30; i++) { l.Tilt(-0.19f, -0.7f, Dt); l.Step(Dt); }   // mezzo secondo
             Assert.IsFalse(l.Unlocked);
             l.SetContact(false, 0f, -1f);
             l.Step(Dt);
@@ -173,7 +173,7 @@ namespace Gotcha.Tests
             Assert.IsTrue(l.IsLockedOut);
             Assert.IsTrue(l.Dock());
             l.SetContact(true, 0f, -0.7f);
-            Run(l, 2f, -0.25f, -0.92f);
+            Run(l, 2f, -0.19f, -0.7f);
             Assert.IsTrue(l.Unlocked);              // il blocco è finto
 
             var m = new FingerprintThiefLogic();

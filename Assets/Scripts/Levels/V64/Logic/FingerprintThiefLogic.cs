@@ -33,13 +33,13 @@ namespace Gotcha.Levels.V64
         /// <summary>Quanto si può spostare la foto agganciata (raggio del vassoio).</summary>
         public const float TrayRadius = 0.6f;
         /// <summary>Spostamento della foto per unità di gravità (rispetto a quando il dito l'ha premuta).</summary>
-        public const float TiltGain = 1.4f;
+        public const float TiltGain = 2.2f;
         /// <summary>Velocità con cui la foto raggiunge la posizione voluta dalla gravità (1/s).</summary>
         public const float SlideRate = 5f;
         /// <summary>Distanza massima tra il polpastrello della foto e il centro del lettore (tolleranza larga).</summary>
-        public const float AlignTolerance = 0.24f;
-        /// <summary>Appena agganciata, il polpastrello della foto è un po' in alto a destra rispetto al lettore.</summary>
-        public const float DockMisalignX = 0.36f, DockMisalignY = 0.3f;
+        public const float AlignTolerance = 0.3f;
+        /// <summary>Appena agganciata, il polpastrello della foto è un po' a destra del lettore: basta inclinare a sinistra.</summary>
+        public const float DockMisalignX = 0.42f, DockMisalignY = 0f;
 
         static readonly string[] ScannerLines =
         {
