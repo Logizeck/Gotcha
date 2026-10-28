@@ -33,8 +33,11 @@ public class GotchaProguard : IPostGenerateGradleAndroidProject
         string rulesFile = Path.Combine(path, "proguard-unity.txt");
         if (File.Exists(rulesFile))
         {
+            // se il file è rimasto da una build precedente, le nostre righe vecchie vengono sostituite
             string text = File.ReadAllText(rulesFile);
-            if (!text.Contains(Marker)) File.AppendAllText(rulesFile, Rules);
+            int old = text.IndexOf("\n" + Marker, System.StringComparison.Ordinal);
+            if (old >= 0) text = text.Substring(0, old);
+            File.WriteAllText(rulesFile, text + Rules);
         }
         else Debug.LogWarning("[Gotcha] proguard-unity.txt non trovato in " + path + ": regole R8 del gioco non aggiunte");
 
