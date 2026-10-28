@@ -267,6 +267,13 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.65 — Compatibilità Google Play
+- Nuovo numero di versione per Play (versionCode 6500): la 0.64.1 non era più accettata.
+- Manifest (`GotchaAndroidManifest`): schermo verticale e microfono dichiarati come caratteristiche facoltative,
+  app marcata come gioco (`android:appCategory="game"`, esente dall'obbligo di rotazione sugli schermi grandi).
+- Menu **Gotcha > Controlla manifest AAB**: legge il manifest vero dell'AAB (bundletool di Unity) e scrive accanto
+  all'AAB un riassunto con versioni Android, caratteristiche e librerie obbligatorie e ABI nativi.
+
 ## Versione 0.64 — Livelli 251-258 rifatti (specifica del proprietario)
 - Tolti i livelli 251 e 253-258 della 0.62/0.63; il 252 **Wake Up, Kitty!** resta. Livelli nuovi, senza Easter egg e
   senza Toni: builder `Assets/Editor/GotchaLevels64.cs` (ordine) + `GotchaLevels64A/B/C.cs`, runtime
