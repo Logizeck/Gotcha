@@ -1,21 +1,23 @@
 #if UNITY_EDITOR
 using System.IO;
-using System.Text.RegularExpressions;
 using UnityEditor.Android;
 using UnityEngine;
 
 /// <summary>
 /// Regole R8 del gioco, aggiunte a ogni build Android (dalla 0.67 il minify Release è acceso: GotchaBuildMenu).
-/// Unity scrive già le sue regole (proguard-unity.txt: classi del player, GameActivity, JNI); qui si proteggono solo le
-/// classi Java che il C# chiama per nome con AndroidJavaClass (com.gotcha.game.GotchaKeys, com.gotcha.video.GotchaVideo)
-/// e il plugin delle notifiche. Tutto il resto (androidx, librerie) resta libero di essere ridotto e offuscato.
-/// Le regole vanno in unityLibrary/proguard-gotcha.txt, aggiunto ai consumerProguardFiles del modulo.
+/// Unity scrive già le sue regole in unityLibrary/proguard-unity.txt (classi del player, GameActivity, JNI) e quel file
+/// è già collegato al progetto Gradle: le nostre righe vengono aggiunte in fondo, senza toccare i build.gradle.
+/// Si proteggono solo le classi Java che il C# chiama per nome con AndroidJavaClass (com.gotcha.game.GotchaKeys,
+/// com.gotcha.video.GotchaVideo) e il plugin delle notifiche; tutto il resto resta libero di essere ridotto e offuscato.
+/// Inoltre, nel modulo launcher, "proguard-android.txt" (non più accettato dai Gradle plugin recenti perché contiene
+/// -dontoptimize) diventa "proguard-android-optimize.txt".
 /// </summary>
 public class GotchaProguard : IPostGenerateGradleAndroidProject
 {
-    const string RulesFile = "proguard-gotcha.txt";
+    const string Marker = "# --- Gotcha! ---";
     const string Rules =
-        "# Gotcha! — classi chiamate dal C# per nome (AndroidJavaClass): nomi e metodi pubblici devono restare\n" +
+        "\n" + Marker + "\n" +
+        "# classi chiamate dal C# per nome (AndroidJavaClass): nomi e metodi pubblici devono restare\n" +
         "-keep class com.gotcha.game.GotchaKeys { public *; }\n" +
         "-keep class com.gotcha.video.GotchaVideo { public *; }\n" +
         "# notifiche Unity (com.unity.mobile.notifications): il plugin usa reflection e callback per nome\n" +
@@ -28,23 +30,23 @@ public class GotchaProguard : IPostGenerateGradleAndroidProject
 
     public void OnPostGenerateGradleAndroidProject(string path)
     {
-        File.WriteAllText(Path.Combine(path, RulesFile), Rules);
-        string gradle = Path.Combine(path, "build.gradle");
-        if (!File.Exists(gradle)) { Debug.LogWarning("[Gotcha] build.gradle non trovato in " + path + ": regole R8 non aggiunte"); return; }
-        string text = File.ReadAllText(gradle);
-        if (text.Contains(RulesFile)) return;
-        // consumerProguardFiles 'proguard-unity.txt'[, 'proguard-user.txt'] -> + 'proguard-gotcha.txt'
-        var m = Regex.Match(text, @"consumerProguardFiles\s+[^\r\n]+");
-        if (m.Success)
-            text = text.Substring(0, m.Index) + m.Value.TrimEnd() + ", '" + RulesFile + "'" + text.Substring(m.Index + m.Length);
-        else
+        string rulesFile = Path.Combine(path, "proguard-unity.txt");
+        if (File.Exists(rulesFile))
         {
-            var d = Regex.Match(text, @"defaultConfig\s*\{");
-            if (!d.Success) { Debug.LogWarning("[Gotcha] defaultConfig non trovato in build.gradle: regole R8 non aggiunte"); return; }
-            text = text.Insert(d.Index + d.Length, "\n        consumerProguardFiles '" + RulesFile + "'");
+            string text = File.ReadAllText(rulesFile);
+            if (!text.Contains(Marker)) File.AppendAllText(rulesFile, Rules);
         }
-        File.WriteAllText(gradle, text);
-        Debug.Log("[Gotcha] Regole R8 aggiunte: " + RulesFile);
+        else Debug.LogWarning("[Gotcha] proguard-unity.txt non trovato in " + path + ": regole R8 del gioco non aggiunte");
+
+        foreach (string module in new[] { path, Path.Combine(path, "..", "launcher") })
+        {
+            string gradle = Path.Combine(module, "build.gradle");
+            if (!File.Exists(gradle)) continue;
+            string g = File.ReadAllText(gradle);
+            string fixedG = g.Replace("'proguard-android.txt'", "'proguard-android-optimize.txt'")
+                             .Replace("\"proguard-android.txt\"", "\"proguard-android-optimize.txt\"");
+            if (fixedG != g) File.WriteAllText(gradle, fixedG);
+        }
     }
 }
 #endif

@@ -283,7 +283,7 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
   nome); nessun template Gradle personalizzato, nessun file ProGuard del progetto; restavano solo le regole di Unity.
 - **Ora**: `PlayerSettings.Android.minifyRelease = true` (Debug resta spento) applicato da `ApplyStoreSettings` a ogni
   build per lo store; R8 è quello della toolchain Gradle di Unity (nessun aggiornamento forzato).
-- `Assets/Editor/GotchaProguard.cs` aggiunge `unityLibrary/proguard-gotcha.txt` ai `consumerProguardFiles`: protegge solo
+- `Assets/Editor/GotchaProguard.cs` aggiunge le regole in fondo a `unityLibrary/proguard-unity.txt` (senza toccare i build.gradle; nel launcher `proguard-android.txt` diventa `proguard-android-optimize.txt`): protegge solo
   `com.gotcha.game.GotchaKeys`, `com.gotcha.video.GotchaVideo` (chiamate per nome dal C#) e
   `com.unity.androidnotifications.**`; mantiene numeri di riga per gli stack trace. Il codice C# (IL2CPP, Managed
   Stripping) non cambia.
