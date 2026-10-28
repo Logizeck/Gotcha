@@ -22,7 +22,7 @@ namespace Gotcha.UI
         public static bool TitleShown => current != null && current.titlePanel != null && current.titlePanel.activeSelf;
 
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.67";
+        public const string Version = "0.68";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli

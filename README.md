@@ -90,8 +90,8 @@ Livelli 251-258 (0.64):
 
 Livelli 259-260: 259 Almost There · 260 Toni's Final Exam.
 
-Livelli 261-262 (0.67; da qui ogni release aggiunge uno o due livelli in fondo):
-261 The Dark Room · 262 The Immortal Candle.
+Livelli 261-264 (dalla 0.67 ogni release aggiunge uno o due livelli in fondo):
+261 The Dark Room · 262 The Immortal Candle · 263 The Stuck Snack · 264 The Camera-shy Bird.
 
 Free to play: si gioca gratis; nel **negozio** (SHOP) si possono comprare **1 ora di vite infinite (0,99 €)** e
 **niente pubblicità per sempre (4,99 €)**. Vedi README_SETUP.md per la configurazione degli acquisti.

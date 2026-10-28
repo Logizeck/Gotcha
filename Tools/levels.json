@@ -4190,5 +4190,37 @@
   ],
   "eggName": "",
   "eggHow": ""
+ },
+ {
+  "folder": "V68StuckSnack",
+  "id": "v68_stuck_snack",
+  "title": "THE STUCK SNACK",
+  "hint": "Kicking is not a payment method.",
+  "egg": "",
+  "n": 263,
+  "desc": "The snack you just bought (B3) is stuck on the spiral and you have one coin. Kicking, shaking ('DO NOT ROCK THE MACHINE'), reaching into the flap and other slots don't help (the coin is always refunded). The same snack is in A3, right above: buy it, it falls and knocks B3 down. 'TWO FOR THE PRICE OF ONE.'",
+  "hints": [
+   "Kicking is not a payment method.",
+   "Look at what's right above it.",
+   "Gravity can push too. Buy the same snack again, from the row above."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "V68CameraShyBird",
+  "id": "v68_camera_shy_bird",
+  "title": "THE CAMERA-SHY BIRD",
+  "hint": "This bird hates being the subject.",
+  "egg": "",
+  "n": 264,
+  "desc": "The screen is a camera app. Aim at the bird and it stares at the lens and flies off; zoom: it covers its face; flash: tiny sunglasses. Clue: when the camera points away, it follows it. Flip to the selfie camera: the bird lands on your head and photobombs; shoot. 'THE BIRD IS IN THE PHOTO. YOU, HOWEVER, BLINKED.'",
+  "hints": [
+   "This bird hates being the subject.",
+   "It loves being in photos. Just not the ones you aim at it.",
+   "Turn the camera around."
+  ],
+  "eggName": "",
+  "eggHow": ""
  }
 ]

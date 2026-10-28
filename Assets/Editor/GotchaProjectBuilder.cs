@@ -31,7 +31,7 @@ public static partial class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 60;
+    const int BuilderVersion = 61;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -217,6 +217,7 @@ public static partial class GotchaProjectBuilder
         // subito dopo (256-258). Almost There e l'esame finale di Toni scalano a 259-260 (l'esame resta l'ultimo)
         levels.InsertRange(Mathf.Min(250, levels.Count), Levels64());   // 251-258
         levels.AddRange(Levels67());   // 261-262, dopo l'esame finale di Toni
+        levels.AddRange(Levels68());   // 263-264
 
         LevelCatalog catalog = LoadOrCreate<LevelCatalog>(LevelDir + "/LevelCatalog.asset");
         catalog.levels = levels;
@@ -633,8 +634,8 @@ public static partial class GotchaProjectBuilder
     static MusicTrack MusicFor(string folder)
     {
         string[] dungeon = { "KeyDoor", "Maze", "TrapMaze", "DarkMaze", "WaspMaze", "ArtTheft", "FrozenKey", "Maze2", "TrapMaze2", "DarkMaze2", "WaspMaze6", "TrapMaze3", "DarkMaze3", "WaspMaze3", "TwoDoors", "MirrorMaze", "Magnet", "DotToDot", "Sokoban", "Claw", "LockPattern", "Heist", "TreasureMap", "SnowGlobe", "Museum", "Cookie2", "MagnetMayhem", "StubbornDoor", "TheSilentAlarm", "TheUpsideDownKing", "SleepingGuard", "TheBrokenCompass", "TheGuiltyButton", "MirrorTwins", "FingerMaze", "TheMissingLetter", "TheDoorThatLies", "TheSecondKey", "DontBlink", "UpsideDownCode", "TheInvisibleInk", "HiddenFrequency", "TheFrozenWaterfall", "TheLaughingLock", "TheGreatEscape", "V64FingerprintThief", "V64InvisiblePassword", "V64PerfectLiar" };
-        string[] animals = { "V62WakeKitty", "V67DarkRoom", "V64PlasticFish", "V64NeighboursAlarm", "Idle", "Volume", "Roach", "Snowman", "Defend", "Bedtime", "Campfire", "Plant", "Shell", "Sunny", "CatEyes", "Copycat", "Shell2", "Defend2", "Plant2", "Copycat2", "Wasp2", "CatEyes2", "Campfire2", "Flashlight", "Bridge", "Chicken", "TheGlassCage", "TheLastDrop", "TheBackwardSong", "UnfairRace", "Heartbeat", "TheWrongShadow", "OneTooMany", "TheLonelyCloud", "RainbowThief", "Seasons", "Submarine", "Detective", "Elevator", "Fishing", "Sheep", "Giraffe", "WaterJugs", "Untangle", "Snake", "AirHockey", "Copycat3", "Shell3", "Defend3", "Plant3", "Tightrope", "Wasp3", "CatEyes3", "Fireflies", "Sneaky", "Whack", "Laser", "Rhythm", "Pipes", "Slide", "WhereMouse", "Carousel", "Toni1", "Toni2", "Toni3", "Toni4", "Toni5", "Toni6", "TheCowardlyDragon", "TheShyStar", "Toni7", "Toni8", "Toni9", "Toni10" };
-        string[] kitchen = { "V67ImmortalCandle", "Apple", "Cookie", "Birthday", "Soup", "Rope", "Pizza", "PizzaChef", "Pancake", "AppleCatch", "Pancake2", "Birthday2", "AppleCatch2", "Morning", "KitchenEscape", "Potion", "IceCream", "HotPotato", "ZeroGravityDinner", "PhoneSandwich", "ColdCoffee", "TheBottomlessCup" };
+        string[] animals = { "V62WakeKitty", "V67DarkRoom", "V68CameraShyBird", "V64PlasticFish", "V64NeighboursAlarm", "Idle", "Volume", "Roach", "Snowman", "Defend", "Bedtime", "Campfire", "Plant", "Shell", "Sunny", "CatEyes", "Copycat", "Shell2", "Defend2", "Plant2", "Copycat2", "Wasp2", "CatEyes2", "Campfire2", "Flashlight", "Bridge", "Chicken", "TheGlassCage", "TheLastDrop", "TheBackwardSong", "UnfairRace", "Heartbeat", "TheWrongShadow", "OneTooMany", "TheLonelyCloud", "RainbowThief", "Seasons", "Submarine", "Detective", "Elevator", "Fishing", "Sheep", "Giraffe", "WaterJugs", "Untangle", "Snake", "AirHockey", "Copycat3", "Shell3", "Defend3", "Plant3", "Tightrope", "Wasp3", "CatEyes3", "Fireflies", "Sneaky", "Whack", "Laser", "Rhythm", "Pipes", "Slide", "WhereMouse", "Carousel", "Toni1", "Toni2", "Toni3", "Toni4", "Toni5", "Toni6", "TheCowardlyDragon", "TheShyStar", "Toni7", "Toni8", "Toni9", "Toni10" };
+        string[] kitchen = { "V67ImmortalCandle", "V68StuckSnack", "Apple", "Cookie", "Birthday", "Soup", "Rope", "Pizza", "PizzaChef", "Pancake", "AppleCatch", "Pancake2", "Birthday2", "AppleCatch2", "Morning", "KitchenEscape", "Potion", "IceCream", "HotPotato", "ZeroGravityDinner", "PhoneSandwich", "ColdCoffee", "TheBottomlessCup" };
         // Halloween: i livelli dello speciale e tutti quelli con streghe, fantasmi, mostri, vampiri, draghi, zombie...
         string[] halloween = { "HwWerepug", "HwPumpkin", "HwGhost", "HwWitch", "HwZombie", "HwTrickOrTreat",
             "TwoDoors", "Knock", "Haunted", "BatteryVampire", "GhostSelfie", "TheWrongShadow", "TooBright",

@@ -267,6 +267,16 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.68 — Livelli 263-264
+- Ordine in `Assets/Editor/GotchaLevels68.cs`; builder `GotchaLevels68A/B.cs`; runtime `Assets/Scripts/Levels/V68`;
+  logica `V64/Logic/StuckSnackLogic.cs`, `CameraShyBirdLogic.cs`; test `V68*Tests.cs`. Niente Easter egg, niente Toni.
+  - 263 **The Stuck Snack**: lo snack B3 è incastrato e hai una sola moneta (calci, scossoni, mano nello sportello e
+    altri tasti non servono; la moneta torna sempre). Lo stesso snack è in A3, proprio sopra: compralo, cade e spinge
+    giù B3. "TWO FOR THE PRICE OF ONE." Tasti Editor: K = moneta + A3, T = prendi, 1-5 mosse sbagliate.
+  - 264 **The Camera-shy Bird**: lo schermo è una fotocamera; inquadrato l'uccellino fissa l'obiettivo e scappa, con lo
+    zoom si copre, col flash mette gli occhiali. Indizio: se inquadri altro ti segue. Soluzione: fotocamera frontale,
+    l'uccellino fa photobomb sulla tua testa. Tasti Editor: frecce = sposta, Z/X = zoom, L = flash, F = gira, Spazio = scatta.
+
 ## Versione 0.67 — R8 + livelli 261-262
 - **Livelli in coda dopo il 260** (`Assets/Editor/GotchaLevels67.cs`: ordine; builder `GotchaLevels67A/B.cs`; runtime
   `Assets/Scripts/Levels/V67`; logica `V64/Logic/DarkRoomLogic.cs`, `ImmortalCandleLogic.cs`; test `V67*Tests.cs`).
