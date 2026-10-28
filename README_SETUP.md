@@ -285,7 +285,7 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
   build per lo store; R8 è quello della toolchain Gradle di Unity (nessun aggiornamento forzato).
 - `Assets/Editor/GotchaProguard.cs` aggiunge le regole in fondo a `unityLibrary/proguard-unity.txt` (senza toccare i build.gradle; nel launcher `proguard-android.txt` diventa `proguard-android-optimize.txt`): protegge solo
   `com.gotcha.game.GotchaKeys`, `com.gotcha.video.GotchaVideo` (chiamate per nome dal C#) e
-  `com.unity.androidnotifications.**`; mantiene numeri di riga per gli stack trace. Il codice C# (IL2CPP, Managed
+  `com.unity.androidnotifications.**`. Nessuna opzione globale (Gradle le rifiuta nei file consumer). Il codice C# (IL2CPP, Managed
   Stripping) non cambia.
 - Con il minify acceso Gradle mette il mapping dentro l'AAB (`BUNDLE-METADATA/com.android.tools.build.obfuscation/proguard.map`):
   Play Console lo usa da sola per de-offuscare crash e ANR.
