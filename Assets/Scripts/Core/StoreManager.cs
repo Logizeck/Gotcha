@@ -40,17 +40,20 @@ namespace Gotcha.Core
             return new SimulatedStore();
         }
 
-        /// <summary>Prezzo da mostrare sul pulsante (quello del negozio, o quello di listino finché non arriva).</summary>
+        /// <summary>
+        /// Prezzo da mostrare sul pulsante: quello di Google Play se c'è (simboli resi leggibili), altrimenti il listino
+        /// in euro convertito nella valuta del giocatore e arrotondato (LocalPrice).
+        /// </summary>
         public string Price(string productId)
         {
             string p = store != null ? store.LocalizedPrice(productId) : null;
-            if (!string.IsNullOrEmpty(p)) return p;
+            if (!string.IsNullOrEmpty(p)) return LocalPrice.Readable(p);
             switch (productId)
             {
-                case Products.RemoveAds: return "4,99 €";
-                case Products.Hints3: return "0,39 €";
-                case Products.Hints15: return "1,49 €";
-                default: return "0,99 €";
+                case Products.RemoveAds: return LocalPrice.FromEuro(4.99);
+                case Products.Hints3: return LocalPrice.FromEuro(0.39);
+                case Products.Hints15: return LocalPrice.FromEuro(1.49);
+                default: return LocalPrice.FromEuro(0.99);
             }
         }
 

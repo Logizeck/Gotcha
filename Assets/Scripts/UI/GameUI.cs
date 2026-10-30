@@ -75,7 +75,7 @@ namespace Gotcha.UI
         // vite
         Image[] hearts;
         Text livesTimer;
-        GameObject livesPanel;
+        GameObject livesPanel, livesMenuButton;
         Text livesTitle, livesBody, playLabel;
         Button adButton, playButton;
         int pendingLevel = -1;
@@ -134,7 +134,7 @@ namespace Gotcha.UI
             {
                 if (rewardPanel.activeSelf) { }   // il premio va scelto
                 else if (shopPanel.activeSelf) CloseShop();
-                else if (livesPanel.activeSelf) CloseLives();
+                else if (livesPanel.activeSelf) { if (pendingLevel >= 0 && !flow.Lives.CanPlay && !titlePanel.activeSelf) LivesToMenu(); else CloseLives(); }
                 else if (betaPanel.activeSelf) betaPanel.SetActive(false);
                 else if (puzzlePanel.activeSelf) puzzlePanel.SetActive(false);
                 else if (settingsPanel.activeSelf) CloseSettings();
@@ -868,6 +868,9 @@ namespace Gotcha.UI
             bool atTitle = titlePanel.activeSelf;   // dal titolo si può sempre tornare indietro
             playButton.interactable = pendingLevel < 0 || canPlay || atTitle;
             playLabel.text = pendingLevel >= 0 ? (canPlay ? "PLAY!" : atTitle ? "BACK" : "WAITING...") : "CLOSE";
+            // MENU solo dentro un livello: dal titolo basta BACK / CLOSE
+            livesMenuButton.SetActive(!atTitle);
+            Place(playButton.transform, new Vector2(atTitle ? 0.25f : 0.52f, 0.07f), new Vector2(atTitle ? 0.75f : 0.88f, 0.19f));
         }
 
         void WatchAdForLife()
@@ -878,6 +881,14 @@ namespace Gotcha.UI
                 if (ok && flow.Lives != null) flow.Lives.GrantLife();
                 RefreshLivesPanel();
             });
+        }
+
+        /// <summary>Dal pannello delle vite al titolo: il livello in attesa viene lasciato (si riprende con CONTINUE).</summary>
+        void LivesToMenu()
+        {
+            pendingLevel = -1;
+            livesPanel.SetActive(false);
+            ShowTitle();
         }
 
         void CloseLives()
@@ -1141,7 +1152,10 @@ namespace Gotcha.UI
             Place(CreateButton(livesCard, "SHOP: INFINITE LIVES", new Color(0.95f, 0.7f, 0.15f), OpenShop).transform, new Vector2(0.12f, 0.2f), new Vector2(0.88f, 0.26f));
             playButton = CreateButton(livesCard, "CLOSE", Dark, CloseLives);
             playLabel = playButton.GetComponentInChildren<Text>();
-            Place(playButton.transform, new Vector2(0.25f, 0.07f), new Vector2(0.75f, 0.19f));
+            Place(playButton.transform, new Vector2(0.52f, 0.07f), new Vector2(0.88f, 0.19f));
+            // senza vite si può sempre tornare al titolo (prima si restava bloccati su "WAITING...")
+            livesMenuButton = CreateButton(livesCard, "MENU", EggColor, LivesToMenu).gameObject;
+            Place(livesMenuButton.transform, new Vector2(0.12f, 0.07f), new Vector2(0.48f, 0.19f));
 
             // Esito livello
             RectTransform resultCard;
