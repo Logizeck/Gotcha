@@ -268,6 +268,10 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
   Sprite, altrimenti l'icona disegnata.
 
 ## Versione 0.71 — Livelli 267-268 + AdMob pronto
+- **Test della logica**: l'assembly `Gotcha.Tests.EditMode` si compila in Unity solo con il define `GOTCHA_UNITY_TESTS`
+  (oltre a `UNITY_INCLUDE_TESTS`). Senza, Unity lo salta: così un pacchetto Test Framework entrato nel progetto con
+  altri pacchetti non blocca la compilazione se non trova NUnit. Per vedere i test nel Test Runner aggiungi
+  `GOTCHA_UNITY_TESTS` ai Scripting Define Symbols (Editor) e installa `com.unity.test-framework`.
 - Ordine in `Assets/Editor/GotchaLevels70.cs`; builder `GotchaLevels70A/B.cs`; runtime `Assets/Scripts/Levels/V70`;
   logica `V64/Logic/UnswattableFlyLogic.cs`, `StubbornKetchupLogic.cs`; test `V70*Tests.cs`. Niente Easter egg, niente Toni.
   - 267 **The Unswattable Fly**: la mosca schiva ogni tocco e la paletta (si schiaccia la torta), lo spray le fa
