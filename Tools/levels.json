@@ -4254,5 +4254,37 @@
   ],
   "eggName": "",
   "eggHow": ""
+ },
+ {
+  "folder": "V70UnswattableFly",
+  "id": "v70_unswattable_fly",
+  "title": "THE UNSWATTABLE FLY",
+  "hint": "Violence isn't working.",
+  "egg": "",
+  "n": 267,
+  "desc": "The fly dodges every touch and the swatter (you squash the cake instead); the spray gets a gas mask. Clue: it keeps bonking against the closed window. Unlatch and open the window: it flies out and waves. 'IT JUST WANTED TO GO HOME.'",
+  "hints": [
+   "Violence isn't working.",
+   "Listen to where it keeps bumping.",
+   "Maybe it wants to leave as much as you want it gone."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "V70StubbornKetchup",
+  "id": "v70_stubborn_ketchup",
+  "title": "THE STUBBORN KETCHUP",
+  "hint": "Shaking harder won't help.",
+  "egg": "",
+  "n": 268,
+  "desc": "Tipping, shaking, squeezing, slapping and the knife get nothing out. Clue: a 'NEW!' sticker and a foil tab under the cap. Unscrew the cap, peel the seal, then pour: a ketchup smiley on the fries. 'IT WAS STILL SEALED.'",
+  "hints": [
+   "Shaking harder won't help.",
+   "Brand new bottle. Look under the cap.",
+   "Open it properly first: cap off, then peel the seal."
+  ],
+  "eggName": "",
+  "eggHow": ""
  }
 ]

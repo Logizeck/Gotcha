@@ -267,6 +267,19 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.71 — Livelli 267-268 + AdMob pronto
+- Ordine in `Assets/Editor/GotchaLevels70.cs`; builder `GotchaLevels70A/B.cs`; runtime `Assets/Scripts/Levels/V70`;
+  logica `V64/Logic/UnswattableFlyLogic.cs`, `StubbornKetchupLogic.cs`; test `V70*Tests.cs`. Niente Easter egg, niente Toni.
+  - 267 **The Unswattable Fly**: la mosca schiva ogni tocco e la paletta (si schiaccia la torta), lo spray le fa
+    mettere la maschera antigas. Indizio: sbatte contro la finestra chiusa. Soluzione: sganciare e aprire la finestra.
+    Tasti Editor: K apri, C chiudi, L chiavistello, 1-4 mosse sbagliate, B bussa sul vetro.
+  - 268 **The Stubborn Ketchup**: capovolgere, scuotere, spremere, colpire e il coltello non servono. Indizio: adesivo
+    "NEW!" e linguetta di alluminio sotto il tappo. Soluzione: svitare il tappo, togliere il sigillo, versare.
+    Tasti Editor: K soluzione, U mezzo giro, C rimetti il tappo, P sigillo, 1-4 mosse sbagliate.
+- **AdMob**: plugin da Package Manager (`com.google.ads.mobile`, registro OpenUPM già configurato); define
+  `GOTCHA_ADMOB` e App ID impostati da soli (`Assets/Editor/AdMobSetup`, menu Gotcha > AdMob > Applica impostazioni);
+  ID in `Assets/Resources/AdMobIds.json` (vuoti = annunci di prova). Dettagli in PLAY_STORE.md, sezione 4.
+
 ## Versione 0.70 — Correzioni: vite, prezzi, tutorial
 - **Vite finite**: nel pannello delle vite c'è il pulsante **MENU** (anche il tasto indietro) che riporta al titolo.
 - **Prezzi del negozio** (`Assets/Scripts/Core/LocalPrice.cs`): valuta ricavata dalla regione del telefono, listino in
