@@ -47,22 +47,71 @@ public class GotchaAdMobSetup : IPreprocessBuildWithReport
         EditorUtility.DisplayDialog("Gotcha! — AdMob", msg, "OK");
     }
 
-    /// <summary>Il plugin di Google è nel progetto?</summary>
-    public static bool PluginInstalled =>
-        AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetType("GoogleMobileAds.Api.MobileAds", false) != null);
+    /// <summary>
+    /// Il plugin di Google è nel progetto? Si cerca la classe GoogleMobileAds.Api.MobileAds in qualunque assembly
+    /// caricato (anche quelli con nome diverso, a seconda della versione del plugin), oppure una DLL / un asmdef del
+    /// plugin tra i file del progetto o dei pacchetti.
+    /// </summary>
+    public static bool PluginInstalled => FindPlugin(out _);
+
+    static bool FindPlugin(out string where)
+    {
+        foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            Type t = null;
+            try { t = a.GetType("GoogleMobileAds.Api.MobileAds", false); } catch { }
+            if (t == null)
+            {
+                try { t = a.GetTypes().FirstOrDefault(x => x.FullName == "GoogleMobileAds.Api.MobileAds"); } catch { }
+            }
+            if (t != null) { where = "assembly " + a.GetName().Name; return true; }
+        }
+        // ricerca tra i file: DLL o asmdef del plugin (cartella Assets/GoogleMobileAds o pacchetto com.google.ads.mobile)
+        string[] guids = AssetDatabase.FindAssets("GoogleMobileAds");
+        foreach (string g in guids)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(g);
+            if (path.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) || path.EndsWith(".asmdef", StringComparison.OrdinalIgnoreCase))
+            {
+                where = path;
+                return true;
+            }
+        }
+        where = null;
+        return false;
+    }
+
+    /// <summary>In modalità provvisoria (errori di compilazione) i plugin non sono caricati: meglio non toccare nulla.</summary>
+    static bool InSafeMode
+    {
+        get
+        {
+            PropertyInfo p = typeof(EditorUtility).GetProperty("isInSafeMode", BindingFlags.Static | BindingFlags.Public);
+            try { return p != null && (bool)p.GetValue(null); } catch { return false; }
+        }
+    }
 
     static string Apply(bool verbose)
     {
-        bool plugin = PluginInstalled;
+        if (InSafeMode)
+            return "Unity è in modalità provvisoria (Safe Mode): prima vanno risolti gli errori di compilazione, poi riprova.";
+        bool plugin = FindPlugin(out string where);
         SetDefine(plugin);
         if (!plugin)
+        {
+            // per capire cosa c'è: assembly e file con "Google" nel nome
+            string asm = string.Join(", ", AppDomain.CurrentDomain.GetAssemblies().Select(a => a.GetName().Name)
+                .Where(n => n.IndexOf("Google", StringComparison.OrdinalIgnoreCase) >= 0).Take(12));
+            string files = string.Join(", ", AssetDatabase.FindAssets("GoogleMobileAds").Select(AssetDatabase.GUIDToAssetPath).Take(8));
             return "Plugin Google Mobile Ads non trovato: AdMob resta spento (nessuna pubblicità nella build per lo store).\n" +
-                   "Installalo come spiegato in PLAY_STORE.md, sezione 4.";
+                   "Installalo come spiegato in PLAY_STORE.md, sezione 4.\n\nAssembly Google caricati: " +
+                   (asm.Length > 0 ? asm : "nessuno") + "\nFile trovati: " + (files.Length > 0 ? files : "nessuno");
+        }
         Ids ids = ReadIds();
         string appId = string.IsNullOrWhiteSpace(ids.appId) ? TestAppId : ids.appId.Trim();
         bool ok = SetPluginAppId(appId);
         bool test = string.IsNullOrWhiteSpace(ids.appId) || string.IsNullOrWhiteSpace(ids.interstitialId) || string.IsNullOrWhiteSpace(ids.rewardedId);
-        string msg = (ok ? "App ID AdMob impostato: " + appId : "Non riesco a impostare l'App ID nel plugin: mettilo a mano in Assets > Google Mobile Ads > Settings (" + appId + ").") +
+        string msg = "Plugin trovato (" + where + ").\n" + (ok ? "App ID AdMob impostato: " + appId : "Non riesco a impostare l'App ID nel plugin: mettilo a mano in Assets > Google Mobile Ads > Settings (" + appId + ").") +
                      (test ? "\nATTENZIONE: in " + IdsPath + " mancano gli ID reali: si useranno gli annunci di PROVA." : "\nID reali presenti: le build Release mostreranno annunci veri.");
         if (verbose || !ok) Debug.Log("[Gotcha] AdMob: " + msg.Replace('\n', ' '));
         return msg;
