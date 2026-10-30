@@ -205,13 +205,17 @@ public static class GotchaBuildMenu
 #endif
         bool adMob = Array.IndexOf(defines.Split(';'), "GOTCHA_ADMOB") >= 0;
         if (!adMob && !EditorUtility.DisplayDialog("Gotcha!",
-                "AdMob non è attivo (manca il define GOTCHA_ADMOB): la build per lo store non avrà pubblicità.\nContinuare?",
+                "AdMob non è attivo: il plugin Google Mobile Ads non è installato (vedi PLAY_STORE.md, sezione 4), quindi " +
+                "la build per lo store non avrà pubblicità.\nContinuare?",
                 "Continua senza pubblicità", "Annulla"))
             return;
-        const string adMobFile = "Assets/Scripts/Ads/AdMobProvider.cs";
-        if (adMob && File.Exists(adMobFile) && File.ReadAllText(adMobFile).Contains("ca-app-pub-3940256099942544/") &&
+        // ID reali in Assets/Resources/AdMobIds.json: se mancano, gli annunci restano quelli di PROVA
+        const string idsFile = "Assets/Resources/AdMobIds.json";
+        string ids = File.Exists(idsFile) ? File.ReadAllText(idsFile) : "";
+        bool realIds = ids.Contains("\"interstitialId\": \"ca-app-pub-") && ids.Contains("\"rewardedId\": \"ca-app-pub-") && ids.Contains("\"appId\": \"ca-app-pub-");
+        if (adMob && !realIds &&
             !EditorUtility.DisplayDialog("Gotcha!",
-                "AdMobProvider usa ancora gli ID di PROVA di Google: in questa build gli annunci saranno finti e non pagati.\nContinuare?",
+                "In " + idsFile + " mancano gli ID AdMob reali: in questa build gli annunci saranno di PROVA (finti e non pagati).\nContinuare?",
                 "Continua (solo per test)", "Annulla"))
             return;
 

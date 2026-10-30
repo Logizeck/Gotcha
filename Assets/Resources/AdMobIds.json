@@ -1,0 +1,6 @@
+{
+  "_istruzioni": "ID AdMob reali (AdMob > App > Impostazioni app / Unita pubblicitarie). Lasciati vuoti, il gioco usa gli ID di PROVA di Google.",
+  "appId": "",
+  "interstitialId": "",
+  "rewardedId": ""
+}

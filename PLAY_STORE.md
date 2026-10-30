@@ -135,18 +135,18 @@ Senza AdMob la build per lo store **non mostra pubblicità** (`NoAdsProvider`: n
 
 - [ ] Crea l'account su <https://admob.google.com>, aggiungi l'app Android (anche prima che sia sullo store) e
       crea due unità pubblicitarie: **Interstitial** e **Rewarded** (premio: 1 "life").
-- [ ] Scarica e importa il plugin **Google Mobile Ads for Unity** (ultima versione, ≥ v9) da
-      <https://github.com/googleads/googleads-mobile-unity/releases> (Assets > Import Package > Custom Package).
-      Importa anche l'External Dependency Manager se richiesto, poi
-      Assets > External Dependency Manager > Android Resolver > **Force Resolve**.
-      Se richiesto, in Player Settings > Publishing Settings attiva *Custom Main Gradle Template* e
-      *Custom Gradle Properties Template*.
-- [ ] Assets > Google Mobile Ads > Settings: incolla l'**App ID** Android (`ca-app-pub-XXXX~YYYY`).
-- [ ] Player Settings > Android > Other Settings > Scripting Define Symbols: aggiungi `GOTCHA_ADMOB`.
-- [ ] In `Assets/Scripts/Ads/AdMobProvider.cs` sostituisci `InterstitialId` e `RewardedId` (ora sono gli ID di
-      PROVA di Google) con i tuoi. Il menu di build ti avvisa se trova ancora gli ID di prova.
-      Durante i test sul tuo telefono usa gli ID di prova (cliccare annunci veri sui propri telefoni può far
-      sospendere l'account AdMob).
+- [ ] **Installa il plugin** (una volta sola): Window > Package Manager > "+" > **Add package by name** >
+      `com.google.ads.mobile` (il registro OpenUPM è già configurato in `Packages/manifest.json`); in alternativa
+      Package Manager > My Registries > Google Mobile Ads. Se Unity lo chiede, accetta l'External Dependency Manager e
+      poi Assets > External Dependency Manager > Android Resolver > **Force Resolve**.
+      (Senza Package Manager: importa il `.unitypackage` da <https://github.com/googleads/googleads-mobile-unity/releases>.)
+- [ ] **Nient'altro da fare a mano in Unity**: quando il plugin c'è, l'Editor aggiunge da solo il define
+      `GOTCHA_ADMOB` e copia l'App ID nelle impostazioni del plugin (menu **Gotcha > AdMob > Applica impostazioni**
+      per farlo subito e vedere lo stato). Se il plugin viene tolto, il define viene tolto e il gioco compila lo stesso.
+- [ ] **Gli ID vanno in un solo file**: `Assets/Resources/AdMobIds.json` → `appId` (`ca-app-pub-XXXX~YYYY`),
+      `interstitialId` e `rewardedId` (`ca-app-pub-XXXX/ZZZZ`). Finché sono vuoti, e sempre nelle build di sviluppo,
+      il gioco usa gli ID di PROVA di Google (annunci finti: cliccare annunci veri sul proprio telefono può far
+      sospendere l'account AdMob). Il menu di build avvisa se nell'AAB finirebbero gli ID di prova.
 - [ ] AdMob > Privacy e messaggi > **GDPR**: crea e pubblica il messaggio di consenso (europeo), collega l'app e
       il link alla privacy policy. Senza questo messaggio il modulo UMP non compare e in UE non arrivano annunci.
 - [ ] Crea `app-ads.txt` sul dominio del sito sviluppatore (consigliato, non obbligatorio): AdMob ti dà la riga.

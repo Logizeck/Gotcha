@@ -15,5 +15,15 @@
     "com.unity.modules.uielements": "1.0.0",
     "com.unity.modules.unitywebrequest": "1.0.0",
     "com.unity.mobile.notifications": "2.3.2"
-  }
+  },
+  "scopedRegistries": [
+    {
+      "name": "package.openupm.com",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "com.google.ads.mobile",
+        "com.google.external-dependency-manager"
+      ]
+    }
+  ]
 }

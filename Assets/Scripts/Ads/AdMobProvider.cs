@@ -10,17 +10,15 @@ namespace Gotcha.Ads
 {
     /// <summary>
     /// Pubblicità vere con AdMob (plugin "Google Mobile Ads for Unity" v9 o successivo). Si compila solo con il
-    /// define GOTCHA_ADMOB (Player Settings > Scripting Define Symbols), da aggiungere dopo aver importato il plugin.
+    /// define GOTCHA_ADMOB, che l'Editor aggiunge da solo quando trova il plugin (Assets/Editor/AdMobSetup).
     /// Prima chiede il consenso GDPR con UMP (obbligatorio in UE), poi avvia AdMob e tiene sempre caricati
     /// un interstitial e un rewarded: dopo ogni visione ne carica subito un altro.
     /// </summary>
     public class AdMobProvider : IAdProvider
     {
-        // TODO prima della pubblicazione: sostituire con gli ID veri (AdMob > App > Unità pubblicitarie).
-        // Questi sono gli ID di PROVA ufficiali di Google: mostrano annunci finti e sono sicuri da usare nei test.
-        // Anche l'App ID va messo in Assets > Google Mobile Ads > Settings (non qui).
-        const string InterstitialId = "ca-app-pub-3940256099942544/1033173712";
-        const string RewardedId = "ca-app-pub-3940256099942544/5224354917";
+        // ID in Assets/Resources/AdMobIds.json (AdMobIds): vuoti o build di sviluppo = ID di prova di Google
+        static string InterstitialId => AdMobIds.Interstitial;
+        static string RewardedId => AdMobIds.Rewarded;
 
         static AdMobProvider instance;
 
