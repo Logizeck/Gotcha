@@ -22,12 +22,13 @@ namespace Gotcha.UI
         public static bool TitleShown => current != null && current.titlePanel != null && current.titlePanel.activeSelf;
 
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.69";
+        public const string Version = "0.70";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
         [SerializeField] Sprite heartSprite;     // cuori delle vite
         [SerializeField] Sprite puzzleSprite;    // immagine del puzzle degli Easter egg (Toni in palestra)
+        [SerializeField] Sprite[] tutorialSprites;   // pezzi delle icone animate dei consigli dei primi livelli (tut_*)
 
         // Palette "doodle": inchiostro scuro, corallo, verde acqua, carta
         static readonly Color Accent = new Color(1f, 0.36f, 0.42f);
@@ -130,6 +131,7 @@ namespace Gotcha.UI
 
             if (shopPanel.activeSelf) RefreshShop();
             if (hintPanel.activeSelf && !shopPanel.activeSelf) SwipeHints();
+            UpdateTip();
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 if (rewardPanel.activeSelf) { }   // il premio va scelto
@@ -156,10 +158,14 @@ namespace Gotcha.UI
             menuPanel.SetActive(false);
             resultPanel.SetActive(false);
             completedPanel.SetActive(false);
+            // mini tutorial dei primi 8 livelli: il consiglio si vede finché il livello non è mai stato superato
+            HideTip();
+            if (TutorialTips.ShouldShow(def.levelId, index, SaveData.HighestUnlocked, out TutorialTip tip)) ShowTip(tip);
         }
 
         void OnLevelFinished(LevelDefinition def, LevelResult result, string eggId)
         {
+            HideTip();
             hintPanel.SetActive(false);
             menuPanel.SetActive(false);
             flow.Paused = false;
@@ -346,6 +352,7 @@ namespace Gotcha.UI
         {
             if (flow.CurrentDefinition == null || resultPanel.activeSelf) return;
             RefreshHint(true);   // si apre sull'ultimo suggerimento sbloccato
+            HideTip();
             menuPanel.SetActive(false);
             hintPanel.SetActive(true);
             flow.Paused = true;
@@ -443,6 +450,7 @@ namespace Gotcha.UI
 
         void ShowTitle()
         {
+            HideTip();
             flow.StopLevel();
             titleText.text = "";
             hintPanel.SetActive(false);
@@ -656,6 +664,7 @@ namespace Gotcha.UI
             menuHeader.text = menuFromTitle ? "LEVELS" : "MENU";
             menuBackLabel.text = menuFromTitle ? "BACK" : "RESUME";
             menuMusicRow.SetActive(!menuFromTitle);
+            HideTip();
             RebuildLevelList();
             menuEggs.text = "TONI'S PUZZLE: " + EggPuzzle.Unlocked + " / " + EggPuzzle.Pieces;
             RefreshMusicLabel();
@@ -839,6 +848,7 @@ namespace Gotcha.UI
 
         void OnOutOfLives(int level)
         {
+            HideTip();
             pendingLevel = level;
             resultPanel.SetActive(false);
             menuPanel.SetActive(false);
@@ -912,6 +922,296 @@ namespace Gotcha.UI
             CloseOverlay(livesPanel);
         }
 
+        // ---------- Consigli dei primi livelli (mini tutorial) ----------
+
+        const float TipHeight = 190f;   // altezza della scheda (unità del canvas 1080x1920)
+        const float TipUnit = 82f;      // px dell'interfaccia per unità dei disegni tut_* (l'icona occupa circa -1..1)
+
+        // i pezzi di ogni icona, nell'ordine di disegno (indice = TipIcon); i nomi sono quelli di DoodleSpritesTutorial
+        static readonly string[][] TipPartNames =
+        {
+            null,
+            new[] { "tut_key", "tut_finger", "tut_finger" },
+            new[] { "tut_sun", "tut_arrow", "tut_phone" },
+            new[] { "tut_clues", "tut_sparkle", "tut_sparkle", "tut_sparkle", "tut_magnifier" },
+            new[] { "tut_ring", "tut_trail", "tut_finger" },
+            new[] { "tut_ear", "tut_wave_l", "tut_wave_m", "tut_wave_s" },
+            new[] { "tut_clock", "tut_hand_short", "tut_hand_long" },
+            new[] { "tut_side_key", "tut_side_key", "tut_phone", "tut_speaker", "tut_wave_s", "tut_wave_m", "tut_finger" },
+            new[] { "tut_button_blue", "tut_button_red", "tut_ring", "tut_ring", "tut_finger", "tut_finger" },
+        };
+
+        GameObject tipCard;
+        RectTransform tipCardRect;
+        CanvasGroup tipGroup;
+        Text tipCaption;
+        GameObject[] tipIcons;
+        RectTransform[][] tipParts;
+        Image[][] tipImages;
+        int tipIcon = -1;
+        float tipStart, tipFadeStart;
+
+        /// <summary>
+        /// La scheda dei consigli: in basso nell'area sicura, icona animata a sinistra e frase a destra (best fit).
+        /// Non blocca il livello: riceve i tocchi solo su se stessa, e solo per chiudersi.
+        /// </summary>
+        void BuildTipCard()
+        {
+            var lookup = new System.Collections.Generic.Dictionary<string, Sprite>();
+            if (tutorialSprites != null) foreach (Sprite s in tutorialSprites) if (s != null) lookup[s.name] = s;
+
+            tipCardRect = CreateRect("TutorialTip", safeRoot, new Vector2(0f, 0f), new Vector2(1f, 0f));
+            tipCardRect.pivot = new Vector2(0.5f, 0f);   // la comparsa "a molla" parte dal basso
+            tipCardRect.offsetMin = new Vector2(30f, 24f);
+            tipCardRect.offsetMax = new Vector2(-30f, 24f + TipHeight);
+            tipCard = tipCardRect.gameObject;
+            Image bg = tipCard.AddComponent<Image>();
+            SetSprite(bg);
+            bg.color = CardColor;
+            Shadow shadow = tipCard.AddComponent<Shadow>();
+            shadow.effectColor = Ink;
+            shadow.effectDistance = new Vector2(6, -7);
+            Button close = tipCard.AddComponent<Button>();
+            close.transition = Selectable.Transition.None;
+            close.onClick.AddListener(DismissTip);
+            tipGroup = tipCard.AddComponent<CanvasGroup>();
+
+            RectTransform iconBox = CreateRect("Icon", tipCardRect, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f));
+            iconBox.sizeDelta = new Vector2(TipHeight, TipHeight);
+            iconBox.anchoredPosition = new Vector2(TipHeight * 0.5f + 12f, 0f);
+
+            tipCaption = CreateText(tipCardRect, "", 52, Ink, FontStyle.Bold);
+            tipCaption.verticalOverflow = VerticalWrapMode.Truncate;   // così il best fit rimpicciolisce anche in altezza
+            tipCaption.resizeTextMinSize = 22;
+            RectTransform cap = (RectTransform)tipCaption.transform;
+            cap.offsetMin = new Vector2(TipHeight + 30f, 16f);
+            cap.offsetMax = new Vector2(-28f, -16f);
+
+            int n = TipPartNames.Length;
+            tipIcons = new GameObject[n];
+            tipParts = new RectTransform[n][];
+            tipImages = new Image[n][];
+            for (int i = 1; i < n; i++)
+            {
+                RectTransform root = CreateRect("Icon" + i, iconBox, Vector2.zero, Vector2.one);
+                string[] names = TipPartNames[i];
+                tipParts[i] = new RectTransform[names.Length];
+                tipImages[i] = new Image[names.Length];
+                for (int k = 0; k < names.Length; k++)
+                {
+                    RectTransform part = CreateRect(names[k], root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
+                    Image img = part.gameObject.AddComponent<Image>();
+                    img.raycastTarget = false;
+                    img.preserveAspect = true;
+                    // il pivot centrale coincide con l'origine del disegno (i tut_* sono simmetrici attorno al punto di aggancio)
+                    if (lookup.TryGetValue(names[k], out Sprite sp))
+                    {
+                        img.sprite = sp;
+                        part.sizeDelta = sp.rect.size / sp.pixelsPerUnit * TipUnit;
+                    }
+                    else img.enabled = false;   // scena non ancora rigenerata: resta solo la frase
+                    tipParts[i][k] = part;
+                    tipImages[i][k] = img;
+                }
+                // la scia dello swipe si allunga dalla punta del dito (estremo destro del disegno, x 0.5 su ±0.56)
+                if (i == (int)TipIcon.Touch) tipParts[i][1].pivot = new Vector2(0.95f, 0.5f);
+                tipIcons[i] = root.gameObject;
+                tipIcons[i].SetActive(false);
+            }
+            tipCard.SetActive(false);
+        }
+
+        void ShowTip(TutorialTip tip)
+        {
+            tipIcon = (int)tip.Icon;
+            for (int i = 1; i < tipIcons.Length; i++) tipIcons[i].SetActive(i == tipIcon);
+            tipCaption.text = tip.Caption;
+            tipStart = Time.unscaledTime;
+            tipFadeStart = TutorialTips.ShowSeconds;
+            tipCardRect.SetAsLastSibling();
+            tipCard.SetActive(true);
+            UpdateTip();   // posa iniziale subito, senza un fotogramma a grandezza piena
+        }
+
+        void HideTip()
+        {
+            tipIcon = -1;
+            if (tipCard != null && tipCard.activeSelf) tipCard.SetActive(false);
+        }
+
+        /// <summary>Tocco sulla scheda: sfuma subito (il livello sotto resta giocabile).</summary>
+        void DismissTip()
+        {
+            if (tipIcon < 0) return;
+            tipFadeStart = TutorialTips.FadeStartAfterTap(Time.unscaledTime - tipStart, tipFadeStart);
+        }
+
+        void UpdateTip()
+        {
+            if (tipIcon < 0 || !tipCard.activeSelf) return;
+            // pausa (menu, hint, impostazioni, vite), livello finito o di nuovo al titolo: il consiglio sparisce
+            bool gone = flow.Paused || titlePanel.activeSelf || resultPanel.activeSelf || completedPanel.activeSelf ||
+                        flow.CurrentDefinition == null || (flow.Current != null && flow.Current.IsFinished);
+            float age = Time.unscaledTime - tipStart;
+            if (gone || TutorialTips.Finished(age, tipFadeStart)) { HideTip(); return; }
+            tipGroup.alpha = TutorialTips.Alpha(age, tipFadeStart);
+            tipGroup.blocksRaycasts = age < tipFadeStart;
+            float s = TutorialTips.PopScale(age);
+            tipCardRect.localScale = new Vector3(s, s, 1f);
+            AnimateTipIcon(tipIcon, age);
+        }
+
+        static float Seg(float u, float a, float b) => Mathf.Clamp01((u - a) / (b - a));
+        static float Ease(float x) => x * x * (3f - 2f * x);
+        static float Bump(float x) => x <= 0f || x >= 1f ? 0f : Mathf.Sin(x * Mathf.PI);
+
+        static void Pose(RectTransform rt, float x, float y, float sx, float sy, float rot)
+        {
+            rt.anchoredPosition = new Vector2(x * TipUnit, y * TipUnit);
+            rt.localScale = new Vector3(sx, sy, 1f);
+            rt.localRotation = Quaternion.Euler(0f, 0f, rot);
+        }
+
+        static void Pose(RectTransform rt, float x, float y, float scale = 1f, float rot = 0f) => Pose(rt, x, y, scale, scale, rot);
+
+        static void Fade(Image img, float alpha)
+        {
+            Color c = img.color;
+            c.a = alpha;
+            img.color = c;
+        }
+
+        /// <summary>Anima i pezzi dell'icona (tempo reale, giro di 1.2-1.6 s). Solo strutture: nessuna allocazione.</summary>
+        void AnimateTipIcon(int icon, float t)
+        {
+            RectTransform[] p = tipParts[icon];
+            Image[] im = tipImages[icon];
+            switch ((TipIcon)icon)
+            {
+                case TipIcon.Pinch:
+                {
+                    // due dita da angoli opposti si avvicinano e la chiave si rimpicciolisce; poi spariscono e la chiave torna grande
+                    float u = t % 1.4f / 1.4f;
+                    float close = Ease(Seg(u, 0.1f, 0.55f));
+                    float key = u < 0.8f ? Mathf.Lerp(1.15f, 0.55f, close) : Mathf.Lerp(0.55f, 1.15f, Ease(Seg(u, 0.8f, 1f)));
+                    Pose(p[0], 0f, 0f, key);
+                    float d = 1f - close;
+                    float a = Mathf.Min(Seg(u, 0f, 0.1f), 1f - Seg(u, 0.72f, 0.8f));
+                    Pose(p[1], 0.2f + 0.36f * d, 0.12f + 0.28f * d, 0.85f, 135f);
+                    Pose(p[2], -0.2f - 0.36f * d, -0.12f - 0.28f * d, 0.85f, -45f);
+                    Fade(im[1], a);
+                    Fade(im[2], a);
+                    break;
+                }
+                case TipIcon.Flat:
+                {
+                    // il telefono si sdraia (schiacciato in prospettiva) a schermo in su, la freccia indica il cielo, poi dondola
+                    float u = t % 1.6f / 1.6f;
+                    float lie = u < 0.85f ? Ease(Seg(u, 0.05f, 0.35f)) : 1f - Ease(Seg(u, 0.85f, 1f));
+                    float rock = Mathf.Sin(Seg(u, 0.35f, 0.85f) * Mathf.PI * 4f) * 10f * lie;
+                    Pose(p[0], 0f, 0.68f, 0.8f, -t * 30f);
+                    Pose(p[1], 0f, Mathf.Lerp(-0.2f, 0.08f, lie) + Mathf.Sin(t * 7f) * 0.04f * lie, 0.75f);
+                    Fade(im[1], lie * lie);
+                    Pose(p[2], 0f, Mathf.Lerp(-0.05f, -0.5f, lie), 0.85f, Mathf.Lerp(0.85f, 0.3f, lie), rock);
+                    break;
+                }
+                case TipIcon.Clue:
+                {
+                    // la lente passa avanti e indietro sugli oggetti: quello sotto la lente brilla
+                    float lens = Mathf.Sin(t * Mathf.PI * 2f / 1.6f) * 0.62f;
+                    Pose(p[0], 0f, -0.3f);
+                    for (int k = 0; k < 3; k++)
+                    {
+                        float item = (k - 1) * 0.6f;
+                        float near = Mathf.Clamp01(1f - Mathf.Abs(lens - item) / 0.22f);
+                        Pose(p[1 + k], item + 0.16f, -0.02f, 0.2f + near, t * 120f);
+                        Fade(im[1 + k], near);
+                    }
+                    Pose(p[4], lens, -0.25f, 0.85f, Mathf.Sin(t * 3.9f) * 8f);
+                    break;
+                }
+                case TipIcon.Touch:
+                {
+                    // tocco (l'anello si allarga) e poi swipe con la scia
+                    float u = t % 1.6f / 1.6f;
+                    const float tx = -0.45f, ty = 0.3f, ex = 0.6f, ey = -0.12f;
+                    float press = Bump(Seg(u, 0.08f, 0.24f));
+                    float swipe = Ease(Seg(u, 0.4f, 0.72f));
+                    float fx = Mathf.Lerp(tx, ex, swipe), fy = Mathf.Lerp(ty, ey, swipe) + 0.12f * (1f - press) * (1f - Seg(u, 0.24f, 0.4f));
+                    float ring = Seg(u, 0.16f, 0.46f);
+                    Pose(p[0], tx, ty, Mathf.Lerp(0.3f, 1.2f, ring));
+                    Fade(im[0], u >= 0.16f && ring < 1f ? 1f - ring : 0f);
+                    float len = Mathf.Sqrt((ex - tx) * (ex - tx) + (ey - ty) * (ey - ty)) * swipe;
+                    Pose(p[1], fx, fy, Mathf.Min(1.1f, len / 1.06f), 2f, Mathf.Atan2(ey - ty, ex - tx) * Mathf.Rad2Deg);
+                    Fade(im[1], swipe > 0f ? 1f - Seg(u, 0.75f, 0.92f) : 0f);
+                    Pose(p[2], fx, fy, 0.95f, -12f);
+                    Fade(im[2], Mathf.Min(Seg(u, 0f, 0.08f), 1f - Seg(u, 0.82f, 0.95f)));
+                    break;
+                }
+                case TipIcon.Listen:
+                {
+                    // le onde arrivano all'orecchio una dopo l'altra (dalla più lontana)
+                    float u = t % 1.2f / 1.2f;
+                    float ear = 0f;
+                    for (int k = 0; k < 3; k++)
+                    {
+                        float ph = u - k * 0.22f;
+                        ph -= Mathf.Floor(ph);
+                        float glow = ph < 0.35f ? Mathf.Sin(ph / 0.35f * Mathf.PI) : 0f;
+                        Pose(p[1 + k], -0.2f, 0f, 1.25f * (1f + 0.08f * glow));
+                        Fade(im[1 + k], 0.2f + 0.8f * glow);
+                        if (k == 2) ear = glow;
+                    }
+                    Pose(p[0], -0.45f, 0f, 1.1f + 0.06f * ear, -4f * ear);
+                    break;
+                }
+                case TipIcon.Time:
+                {
+                    // la lancetta lunga fa un giro ogni 1.2 s, la sveglia trilla a ogni giro
+                    float burst = t % 1.2f / 1.2f;
+                    float shake = burst < 0.3f ? Mathf.Sin(burst * 80f) * 6f * (1f - burst / 0.3f) : 0f;
+                    Pose(p[0], 0f, -0.05f, 1.15f, shake);
+                    Pose(p[1], 0f, -0.05f, 1.15f, -t * 30f);
+                    Pose(p[2], 0f, -0.05f, 1.15f, -t * 300f);
+                    break;
+                }
+                case TipIcon.Buttons:
+                {
+                    // il dito preme due volte il tasto del volume: le onde dell'altoparlante sullo schermo si spengono
+                    float u = t % 1.6f / 1.6f;
+                    float press = Mathf.Max(Bump(Seg(u, 0.1f, 0.3f)), Bump(Seg(u, 0.4f, 0.6f)));
+                    Pose(p[0], 0.15f, 0.32f, 1.1f);
+                    Pose(p[1], 0.15f - 0.035f * press, 0.06f, 1.1f);
+                    Pose(p[2], -0.25f, 0f, 1.1f);
+                    Pose(p[3], -0.36f, 0.05f, 0.8f, 0f);
+                    Pose(p[4], -0.3f, 0.05f, 0.55f);
+                    Pose(p[5], -0.3f, 0.05f, 0.55f);
+                    bool reset = u > 0.9f;
+                    Fade(im[5], reset || u < 0.2f ? 1f : 0.12f);
+                    Fade(im[4], reset || u < 0.5f ? 1f : 0.12f);
+                    Pose(p[6], 0.21f + 0.14f * (1f - press), 0.06f, 0.85f, 90f);
+                    Fade(im[6], Mathf.Min(Seg(u, 0f, 0.08f), 1f - Seg(u, 0.78f, 0.9f)));
+                    break;
+                }
+                case TipIcon.Multitouch:
+                {
+                    // due dita premono insieme i due pulsanti: anelli da entrambi
+                    float u = t % 1.3f / 1.3f;
+                    float press = Ease(Seg(u, 0.15f, 0.3f)) * (1f - Ease(Seg(u, 0.72f, 0.88f)));
+                    float ring = Seg(u, 0.3f, 0.75f);
+                    for (int k = 0; k < 2; k++)
+                    {
+                        float x = k == 0 ? -0.45f : 0.45f;
+                        Pose(p[k], x, -0.38f, 1.05f, 1.05f * (1f - 0.12f * press), 0f);
+                        Pose(p[2 + k], x, -0.4f, Mathf.Lerp(0.6f, 1.6f, ring));
+                        Fade(im[2 + k], u >= 0.3f && ring < 1f ? 1f - ring : 0f);
+                        Pose(p[4 + k], x, -0.22f + 0.26f * (1f - press), 0.85f, 180f);
+                    }
+                    break;
+                }
+            }
+        }
+
         // ---------- Costruzione ----------
 
         void Build()
@@ -967,6 +1267,9 @@ namespace Gotcha.UI
             livesTimer = CreateText(heartsRow, "", 40, Ink, FontStyle.Bold);
             livesTimer.alignment = TextAnchor.MiddleRight;
             Place(livesTimer.transform, new Vector2(0.55f, 0), new Vector2(1, 1));
+
+            // Consiglio dei primi livelli: nell'area sicura, sotto a tutti i pannelli (che si aprono sopra)
+            BuildTipCard();
 
             // Schermata del titolo (sopra barra e cuori, sotto gli altri pannelli)
             RectTransform title = CreateRect("TitleScreen", safeRoot.parent, Vector2.zero, Vector2.one);

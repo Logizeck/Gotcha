@@ -267,6 +267,19 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.70 — Correzioni: vite, prezzi, tutorial
+- **Vite finite**: nel pannello delle vite c'è il pulsante **MENU** (anche il tasto indietro) che riporta al titolo.
+- **Prezzi del negozio** (`Assets/Scripts/Core/LocalPrice.cs`): valuta ricavata dalla regione del telefono, listino in
+  euro convertito con un cambio indicativo e arrotondato al prezzo "da negozio" più vicino (0,99 / 160 / 1400...).
+  Il font disegna male €, £, ¥: si scrive il codice (0,99 EUR, 0.79 GBP, 160 JPY; il dollaro resta "$"). Con Google
+  Play attivo vale il prezzo del negozio, di cui si sistemano solo i simboli.
+- **Tutorial dei primi 8 livelli** (`GameUI`: carta in basso con icona animata e frase; logica in
+  `Assets/Scripts/UI/Logic/TutorialTips.cs`, disegni `tut_*` in `Assets/Editor/Art/DoodleSpritesTutorial.cs`).
+  Compare finché il livello non è stato superato una volta, sparisce dopo 5 s o con un tocco, non blocca il gioco:
+  1 pizzico, 2 telefono piatto con lo schermo verso il cielo, 3 tutto può essere un indizio, 4 il dito interagisce,
+  5 il suono conta, 6 il tempo conta, 7 i tasti del telefono funzionano, 8 multitouch.
+- Sviluppo dei livelli nuovi in pausa: i livelli 267-268 parziali sono sul ramo `wip-v070-levels`.
+
 ## Versione 0.69 — Livelli 265-266
 - Ordine in `Assets/Editor/GotchaLevels69.cs`; builder `GotchaLevels69A/B.cs`; runtime `Assets/Scripts/Levels/V69`;
   logica `V64/Logic/DontLetItSinkLogic.cs`, `CrookedPictureLogic.cs`; test `V69*Tests.cs`. Niente Easter egg, niente Toni.

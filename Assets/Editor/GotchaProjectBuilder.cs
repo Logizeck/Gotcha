@@ -31,7 +31,7 @@ public static partial class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 62;
+    const int BuilderVersion = 63;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -299,6 +299,10 @@ public static partial class GotchaProjectBuilder
         SetField(ui, "roundedSprite", sprites["ui_panel"]);
         SetField(ui, "heartSprite", sprites["heart"]);
         SetField(ui, "puzzleSprite", sprites["puzzle_toni_gym"]);
+        // pezzi delle icone animate dei consigli dei primi 8 livelli (GameUI li cerca per nome)
+        var tutorialArt = new List<Object>();
+        foreach (DoodleArt a in DoodleSprites.ArtTutorial()) tutorialArt.Add(sprites[a.Name]);
+        SetArray(ui, "tutorialSprites", tutorialArt.ToArray());
         // logo della schermata del titolo: il PNG originale se importato come sprite, altrimenti l'icona disegnata
 
         EditorSceneManager.SaveScene(scene, ScenePath);
