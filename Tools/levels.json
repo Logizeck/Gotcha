@@ -4286,5 +4286,37 @@
   ],
   "eggName": "",
   "eggHow": ""
+ },
+ {
+  "folder": "V72CatBurglar",
+  "id": "v72_cat_burglar",
+  "title": "THE CAT BURGLAR",
+  "hint": "Some things in this house can climb better than you.",
+  "egg": "",
+  "n": 269,
+  "desc": "The cookie jar is on a very high shelf: ladder too short, books topple, shaking does nothing, the cat slides back down like liquid. Switch on the laser pointer and lead the cat with the red dot from perch to perch up to the shelf: it pushes the jar off. Put the cushion under the shelf first, or the jar breaks (a new one appears). 'THE CAT DID IT. TECHNICALLY, SO DID YOU.'",
+  "hints": [
+   "Some things in this house can climb better than you.",
+   "Cats love two things: red dots and pushing stuff off shelves.",
+   "Put something soft under the shelf, then lead the cat up with the laser."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "V72LostRemote",
+  "id": "v72_lost_remote",
+  "title": "THE LOST REMOTE",
+  "hint": "Remotes are overrated.",
+  "egg": "",
+  "n": 270,
+  "desc": "The TV shows 'PAINT DRYING LIVE'. Under the cushions: coins, a sock, a mouse; the remote is under the cat but has no batteries, and the clock's are dead too; unplugging is 'giving up'. The manual shows the side buttons: press CH+ on the side of the TV. 'TVs HAD BUTTONS ALL ALONG.'",
+  "hints": [
+   "Remotes are overrated.",
+   "Read the manual. Seriously.",
+   "Look at the side of the TV."
+  ],
+  "eggName": "",
+  "eggHow": ""
  }
 ]

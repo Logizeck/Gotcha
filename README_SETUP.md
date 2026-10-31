@@ -267,6 +267,21 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.72 — Livelli 269-270, prove della pubblicità
+- Ordine in `Assets/Editor/GotchaLevels72.cs`; builder `GotchaLevels72A/B.cs`; runtime `Assets/Scripts/Levels/V72`;
+  logica `V64/Logic/CatBurglarLogic.cs`, `LostRemoteLogic.cs`; test `V72*Tests.cs`. Niente Easter egg, niente Toni.
+  - 269 **The Cat Burglar**: barattolo su una mensola altissima; scaletta corta, libri che crollano, il gatto non si
+    lascia trascinare. Soluzione: cuscino sotto la mensola, poi il puntatore laser guida il gatto di mobile in mobile
+    fino alla mensola e lui butta giù il barattolo. Senza cuscino il barattolo si rompe e ne compare un altro.
+    Tasti Editor: L laser, 0-4 puntino sui ripiani, C cuscino, K un passo della soluzione.
+  - 270 **The Lost Remote**: la TV trasmette "PAINT DRYING LIVE"; il telecomando (sotto il gatto) non ha pile, quelle
+    dell'orologio sono scariche, staccare la spina non vale. Soluzione: il tasto CH+ sul fianco della TV (lo mostra il
+    libretto). Tasti Editor: C = CH+, V = CH-, M libretto, T gatto, R telecomando, K orologio, 1-3 cuscini, U spina.
+- **Pubblicità**: consenso GDPR chiesto 1,5 s dopo l'avvio (con un nuovo tentativo); con gli ID di prova le
+  Impostazioni mostrano la riga ADS con lo stato; in BETA TESTING i pulsanti TEST AD e TEST REWARD.
+- Build di prova (APK): firmate con `ReleaseSigning.json` se c'è, altrimenti con la chiave di debug (niente password).
+- R8: regole per il plugin Google Mobile Ads (classi del plugin protette, classi "next-gen" mancanti ignorate).
+
 ## Versione 0.71 — Livelli 267-268 + AdMob pronto
 - **Test della logica**: l'assembly `Gotcha.Tests.EditMode` si compila in Unity solo con il define `GOTCHA_UNITY_TESTS`
   (oltre a `UNITY_INCLUDE_TESTS`). Senza, Unity lo salta: così un pacchetto Test Framework entrato nel progetto con
