@@ -242,13 +242,13 @@ public static class GotchaBuildMenu
                 "la build per lo store non avrà pubblicità.\nContinuare?",
                 "Continua senza pubblicità", "Annulla"))
             return;
-        // ID reali in Assets/Resources/AdMobIds.json: se mancano, gli annunci restano quelli di PROVA
+        // ID reali in Assets/Resources/AdMobIds.json: se mancano o non sono nel formato giusto, gli annunci restano di PROVA
         const string idsFile = "Assets/Resources/AdMobIds.json";
-        string ids = File.Exists(idsFile) ? File.ReadAllText(idsFile) : "";
-        bool realIds = ids.Contains("\"interstitialId\": \"ca-app-pub-") && ids.Contains("\"rewardedId\": \"ca-app-pub-") && ids.Contains("\"appId\": \"ca-app-pub-");
+        string idsProblem = AdMobIdsProblem(idsFile);
+        bool realIds = idsProblem == null;
         if (adMob && !realIds &&
             !EditorUtility.DisplayDialog("Gotcha!",
-                "In " + idsFile + " mancano gli ID AdMob reali: in questa build gli annunci saranno di PROVA (finti e non pagati).\nContinuare?",
+                idsProblem + "\n\nIn questa build gli annunci saranno di PROVA (finti e non pagati).\nContinuare?",
                 "Continua (solo per test)", "Annulla"))
             return;
 
@@ -354,6 +354,28 @@ public static class GotchaBuildMenu
         {
             Debug.LogWarning("[Gotcha] Debug Symbols non impostati (" + e.Message + "): impostali nel Build Profile Android");
         }
+    }
+    [Serializable]
+    class AdMobIdsFile { public string appId, interstitialId, rewardedId; }
+
+    /// <summary>
+    /// Controlla gli ID in AdMobIds.json leggendo davvero il JSON (spazi e a capo non contano): null se sono tutti e tre
+    /// presenti e nel formato di AdMob (App ID con "~", unità con "/"), altrimenti la descrizione del problema.
+    /// </summary>
+    static string AdMobIdsProblem(string path)
+    {
+        if (!File.Exists(path)) return "Manca il file " + path + ".";
+        AdMobIdsFile ids;
+        try { ids = JsonUtility.FromJson<AdMobIdsFile>(File.ReadAllText(path)); }
+        catch (Exception e) { return path + " non è un JSON valido: " + e.Message; }
+        if (ids == null) return path + " è vuoto.";
+        var missing = new System.Collections.Generic.List<string>();
+        if (!System.Text.RegularExpressions.Regex.IsMatch((ids.appId ?? "").Trim(), @"^ca-app-pub-\d{10,20}~\d{6,12}$")) missing.Add("appId (ca-app-pub-…~…)");
+        if (!System.Text.RegularExpressions.Regex.IsMatch((ids.interstitialId ?? "").Trim(), @"^ca-app-pub-\d{10,20}/\d{6,12}$")) missing.Add("interstitialId (ca-app-pub-…/…)");
+        if (!System.Text.RegularExpressions.Regex.IsMatch((ids.rewardedId ?? "").Trim(), @"^ca-app-pub-\d{10,20}/\d{6,12}$")) missing.Add("rewardedId (ca-app-pub-…/…)");
+        if ((ids.appId ?? "").Contains("3940256099942544")) missing.Add("appId è quello di PROVA di Google");
+        if (missing.Count == 0) return null;
+        return "In " + path + " mancano o non sono validi: " + string.Join(", ", missing) + ".";
     }
 }
 #endif
