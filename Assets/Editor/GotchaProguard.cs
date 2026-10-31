@@ -21,7 +21,13 @@ public class GotchaProguard : IPostGenerateGradleAndroidProject
         "-keep class com.gotcha.game.GotchaKeys { public *; }\n" +
         "-keep class com.gotcha.video.GotchaVideo { public *; }\n" +
         "# notifiche Unity (com.unity.mobile.notifications): il plugin usa reflection e callback per nome\n" +
-        "-keep class com.unity.androidnotifications.** { *; }\n";
+        "-keep class com.unity.androidnotifications.** { *; }\n" +
+        "# plugin Google Mobile Ads: il codice Java del plugin viene chiamato dal C# per nome\n" +
+        "-keep class com.google.unity.ads.** { *; }\n" +
+        "# il plugin contiene anche il ponte per il nuovo SDK \"next-gen\" di Google, che non usiamo e non è incluso:\n" +
+        "# R8 si fermerebbe per le classi mancanti (Missing class com.google.android.libraries.ads.mobile.sdk...)\n" +
+        "-dontwarn com.google.android.libraries.ads.mobile.sdk.**\n" +
+        "-dontwarn com.google.unity.ads.nextgen.**\n";
     // Niente opzioni globali (-renamesourcefileattribute, -keepattributes...): proguard-unity.txt è un file "consumer"
     // del modulo unityLibrary e il Gradle plugin di Unity 6.3 le rifiuta lì ("Global keep option ... should not be
     // used in a consumer configuration file"). Il mapping per de-offuscare i crash finisce comunque nell'AAB.
