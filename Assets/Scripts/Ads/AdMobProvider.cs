@@ -43,20 +43,25 @@ namespace Gotcha.Ads
         void RequestConsent()
         {
             // se il consenso è già stato dato in una sessione precedente si parte subito, senza aspettare
+            AdsDiagnostics.Last = "consent: checking" + (AdMobIds.UsingTestAds ? " (TEST ads)" : "");
             if (ConsentInformation.CanRequestAds()) StartAds();
             ConsentInformation.Update(new ConsentRequestParameters(), updateError => AdMobDispatcher.Post(() =>
             {
                 if (updateError != null)
                 {
                     Debug.LogWarning("[Ads] Consenso non aggiornato: " + updateError.Message);
-                    if (ConsentInformation.CanRequestAds()) StartAds();
+                    AdsDiagnostics.Last = "consent error: " + updateError.Message;
+                    // con gli annunci di prova il consenso non serve: si parte lo stesso (per poter provare tutto)
+                    if (ConsentInformation.CanRequestAds() || AdMobIds.UsingTestAds) StartAds();
                     return;
                 }
                 // in UE il modulo compare la prima volta (e quando scade); altrove di solito non serve
                 ConsentForm.LoadAndShowConsentFormIfRequired(formError => AdMobDispatcher.Post(() =>
                 {
                     if (formError != null) Debug.LogWarning("[Ads] Modulo consenso: " + formError.Message);
-                    if (ConsentInformation.CanRequestAds()) StartAds();
+                    if (formError != null) AdsDiagnostics.Last = "consent form error: " + formError.Message;
+                    if (ConsentInformation.CanRequestAds() || AdMobIds.UsingTestAds) StartAds();
+                    else AdsDiagnostics.Last = "consent: ads not allowed yet";
                 }));
             }));
         }
@@ -78,8 +83,10 @@ namespace Gotcha.Ads
         {
             if (started) return;
             started = true;
+            AdsDiagnostics.Last = "initializing AdMob" + (AdMobIds.UsingTestAds ? " (TEST ads)" : "");
             MobileAds.Initialize(status => AdMobDispatcher.Post(() =>
             {
+                AdsDiagnostics.Last = "AdMob started, loading ads" + (AdMobIds.UsingTestAds ? " (TEST ads)" : "");
                 LoadInterstitial();
                 LoadRewarded();
             }));
@@ -98,12 +105,14 @@ namespace Gotcha.Ads
                 {
                     // nuovo tentativo con attesa crescente (5 s, 10 s... fino a 2 minuti)
                     Debug.LogWarning("[Ads] Interstitial non caricato: " + (error != null ? error.GetMessage() : "null"));
+                    AdsDiagnostics.Last = "interstitial load error: " + (error != null ? error.GetMessage() : "null");
                     AdMobDispatcher.Later(interstitialRetry, LoadInterstitial);
                     interstitialRetry = Mathf.Min(interstitialRetry * 2f, 120f);
                     return;
                 }
                 interstitialRetry = 5f;
                 interstitial = ad;
+                AdsDiagnostics.Last = "interstitial loaded";
             }));
         }
 
@@ -117,12 +126,14 @@ namespace Gotcha.Ads
                 if (error != null || ad == null)
                 {
                     Debug.LogWarning("[Ads] Rewarded non caricato: " + (error != null ? error.GetMessage() : "null"));
+                    AdsDiagnostics.Last = "rewarded load error: " + (error != null ? error.GetMessage() : "null");
                     AdMobDispatcher.Later(rewardedRetry, LoadRewarded);
                     rewardedRetry = Mathf.Min(rewardedRetry * 2f, 120f);
                     return;
                 }
                 rewardedRetry = 5f;
                 rewarded = ad;
+                AdsDiagnostics.Last = "rewarded loaded";
             }));
         }
 

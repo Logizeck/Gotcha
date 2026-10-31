@@ -60,6 +60,8 @@ namespace Gotcha.UI
 #if GOTCHA_ADMOB && !UNITY_EDITOR
         GameObject privacyButton;
 #endif
+        GameObject betaAdTest;   // prova della pubblicità nel pannello BETA TESTING
+        Text betaAdStatus;
         Text hintBody, menuEggs, resultTitle, resultBody, resultButton, musicLabel, shareLabel;
         Button shareButton;
         // hint a pagamento, premio per la condivisione degli Easter egg
@@ -130,6 +132,7 @@ namespace Gotcha.UI
             if (menuPanel.activeSelf || settingsPanel.activeSelf) RefreshMusicLabel();   // si aggiorna se alzi il volume col menu aperto
 
             if (shopPanel.activeSelf) RefreshShop();
+            if (betaPanel.activeSelf && betaAdTest.activeSelf) betaAdStatus.text = "ADS: " + flow.Ads.Status;
             if (hintPanel.activeSelf && !shopPanel.activeSelf) SwipeHints();
             UpdateTip();
             if (Input.GetKeyDown(KeyCode.Escape))
@@ -525,7 +528,7 @@ namespace Gotcha.UI
         void OpenBeta()
         {
             betaInput.text = "";
-            RefreshBeta(BetaMode.Active ? "Beta mode is ON:\nall levels open, unlimited lives and hints, no ads." : "Enter the beta tester password.");
+            RefreshBeta(BetaMode.Active ? "Beta mode is ON:\nall levels open, unlimited lives and hints,\nno ad breaks (use the test buttons)." : "Enter the beta tester password.");
             betaPanel.SetActive(true);
         }
 
@@ -533,6 +536,7 @@ namespace Gotcha.UI
         {
             betaStatus.text = status;
             betaInput.gameObject.SetActive(!BetaMode.Active);
+            betaAdTest.SetActive(BetaMode.Active);
             betaActionLabel.text = BetaMode.Active ? "TURN OFF" : "ACTIVATE";
         }
 
@@ -1418,6 +1422,12 @@ namespace Gotcha.UI
             Button betaGo = CreateButton(betaCard, "ACTIVATE", Accent, BetaAction);
             betaActionLabel = betaGo.GetComponentInChildren<Text>();
             Place(betaGo.transform, new Vector2(0.2f, 0.22f), new Vector2(0.8f, 0.35f));
+            // prova della pubblicità (solo a modalità beta attiva, al posto del campo password)
+            betaAdTest = CreateRect("AdTest", betaCard, new Vector2(0.06f, 0.37f), new Vector2(0.94f, 0.55f)).gameObject;
+            betaAdStatus = CreateText(betaAdTest.transform, "", 30, Ink, FontStyle.Normal);
+            Place(betaAdStatus.transform, new Vector2(0f, 0.45f), new Vector2(1f, 1f));
+            Place(CreateButton(betaAdTest.transform, "TEST AD", Dark, () => flow.Ads.ShowTestBreak(null)).transform, new Vector2(0.02f, 0f), new Vector2(0.48f, 0.42f));
+            Place(CreateButton(betaAdTest.transform, "TEST REWARD", Dark, () => flow.Ads.ShowTestRewarded(null)).transform, new Vector2(0.52f, 0f), new Vector2(0.98f, 0.42f));
             Place(CreateButton(betaCard, "BACK", Dark, () => betaPanel.SetActive(false)).transform, new Vector2(0.3f, 0.06f), new Vector2(0.7f, 0.18f));
 
             // Negozio (sopra a tutto: si apre anche dal pannello delle vite)

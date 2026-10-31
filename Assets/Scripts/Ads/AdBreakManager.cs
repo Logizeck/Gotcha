@@ -82,6 +82,25 @@ namespace Gotcha.Ads
             });
         }
 
+        /// <summary>Stato per il pannello di prova: tipo di pubblicità, spot pronti, ultimo evento.</summary>
+        public string Status =>
+            (provider != null ? provider.GetType().Name : "none") + "\ninterstitial: " + (provider != null && provider.IsReady ? "READY" : "not ready") +
+            "  rewarded: " + (provider != null && provider.RewardedReady ? "READY" : "not ready") + "\n" + AdsDiagnostics.Last;
+
+        /// <summary>Pannello di prova: mostra subito una pausa pubblicitaria (ignora contatori e "niente pubblicità").</summary>
+        public void ShowTestBreak(Action done)
+        {
+            if (provider != null && provider.IsReady) provider.Show(done);
+            else done?.Invoke();
+        }
+
+        /// <summary>Pannello di prova: mostra subito uno spot con premio (il premio non viene dato).</summary>
+        public void ShowTestRewarded(Action<bool> done)
+        {
+            if (provider != null && provider.RewardedReady) provider.ShowRewarded(done);
+            else done?.Invoke(false);
+        }
+
         public void TryShowBreak(Action proceed)
         {
             if (IsDue && provider != null && provider.IsReady)
