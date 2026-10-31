@@ -267,6 +267,16 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.74 — Livelli 273-274
+- Ordine in `Assets/Editor/GotchaLevels74.cs`; builder `GotchaLevels74A/B.cs`; runtime `Assets/Scripts/Levels/V74`;
+  logica `V64/Logic/PiggyBankLogic.cs`, `CryingOnionLogic.cs`; test `V74*Tests.cs`. Niente Easter egg, niente Toni.
+  - 273 **The Piggy Bank**: martello fermato dal bambino, scuotere o il coltello fanno uscire una moneta alla volta.
+    Soluzione: girare il salvadanaio e tirare il tappo di gomma. Tasti Editor: F gira, P tappo, H martello, K coltello.
+  - 274 **The Crying Onion**: tagliare fa piangere il cuoco; occhialini, ventilatore, apnea, candela e pane non servono.
+    Soluzione: cipolla in frigo (sportello chiuso, ~5 s), poi tagliarla. Tasti Editor: F frigo, I cipolla in frigo,
+    B cipolla sul tagliere, C taglia.
+- Build AAB: il controllo degli ID AdMob legge davvero `AdMobIds.json` e dice quale campo manca o non è valido.
+
 ## Versione 0.73 — Livelli 271-272, Impostazioni e consenso
 - Regola: **ogni release contiene almeno un livello nuovo**.
 - Ordine in `Assets/Editor/GotchaLevels73.cs`; builder `GotchaLevels73A/B.cs`; runtime `Assets/Scripts/Levels/V73`;

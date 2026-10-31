@@ -4350,5 +4350,37 @@
   ],
   "eggName": "",
   "eggHow": ""
+ },
+ {
+  "folder": "V74PiggyBank",
+  "id": "v74_piggy_bank",
+  "title": "THE PIGGY BANK",
+  "hint": "Violence is not a savings plan.",
+  "egg": "",
+  "n": 273,
+  "desc": "The ice cream truck is coming. The hammer is stopped by the kid ('Not Mr. Oink!'), shaking or the knife get one coin at a time ('the truck leaves in 2031'). Clues: the down-arrow sticker, the rattle from underneath. Turn the piggy over and pull the rubber plug: all the coins pour out. 'PIGGY BANKS HAVE A PLUG. MR. OINK IS SAFE.'",
+  "hints": [
+   "Violence is not a savings plan.",
+   "Look at the piggy from every side.",
+   "Turn it over: there's a plug underneath."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "V74CryingOnion",
+  "id": "v74_crying_onion",
+  "title": "THE CRYING ONION",
+  "hint": "Goggles won't save you.",
+  "egg": "",
+  "n": 274,
+  "desc": "Chopping makes the cook cry fountains; goggles fog up, the fan blows tears sideways, holding the breath turns him blue, candle and bread do little ('Grandma lied.'). Clue: the fridge note 'Cold onions don't bite.' Put the onion in the fridge, close it, wait ~5 s, take it out and chop it. 'COLD ONIONS DON'T CRY. NEITHER DO YOU.'",
+  "hints": [
+   "Goggles won't save you.",
+   "Read the note on the fridge.",
+   "Chill the onion first, then chop."
+  ],
+  "eggName": "",
+  "eggHow": ""
  }
 ]
