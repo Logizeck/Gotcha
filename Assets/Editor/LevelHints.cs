@@ -10,7 +10,7 @@ public static partial class LevelHints
     public static string[] For(string levelId, string first)
     {
         foreach (Dictionary<string, string[]> pack in new[] { Extra, V39A, V39B, V39C, V39D, V39E, V40A, V40B, V40C, V40D, V40E,
-            V41A, V41B, V41C, V41D, V41E, V41F, V41G, V41H, V41I, V41J, V41K, V41L, VHalloween, V62, V64A, V64B, V64C, V67A, V67B, V68A, V68B, V69A, V69B, V70A, V70B, V72A, V72B })
+            V41A, V41B, V41C, V41D, V41E, V41F, V41G, V41H, V41I, V41J, V41K, V41L, VHalloween, V62, V64A, V64B, V64C, V67A, V67B, V68A, V68B, V69A, V69B, V70A, V70B, V72A, V72B, V73A, V73B })
             if (pack.TryGetValue(levelId, out string[] more)) return new[] { first, more[0], more[1] };
         return new[] { first };
     }

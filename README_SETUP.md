@@ -267,7 +267,16 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
-## Versione 0.73 — Impostazioni e consenso
+## Versione 0.73 — Livelli 271-272, Impostazioni e consenso
+- Regola: **ogni release contiene almeno un livello nuovo**.
+- Ordine in `Assets/Editor/GotchaLevels73.cs`; builder `GotchaLevels73A/B.cs`; runtime `Assets/Scripts/Levels/V73`;
+  logica `V64/Logic/StuckDrawerLogic.cs`, `MissingSockLogic.cs`; test `V73*Tests.cs`. Niente Easter egg, niente Toni.
+  - 271 **The Stuck Drawer**: la maniglia si stacca (decorativa), lubrificante, cacciavite e phon non servono. Indizi: il
+    post-it "No handles! Push to open :)", gli altri cassetti che scattano fuori. Soluzione: tenere premuto il frontale
+    del cassetto (lo si spinge) e prendere le chiavi. Tasti Editor: P spingi, H tira forte, L/X/G attrezzi, K urto, T chiavi.
+  - 272 **The Missing Sock**: calzini sbagliati, asciugatrice con solo pelucchi, il gatto dorme su un calzino a pois.
+    Indizio: un pezzetto con la stella spunta dalla guarnizione dell'oblò. Soluzione: aprire l'oblò, tirare la
+    guarnizione, portare il calzino sullo stendino. Tasti Editor: O oblò, P guarnizione, M calzino sullo stendino.
 - Pannello **SETTINGS** più alto (1520) con il testo in una zona riservata: si rimpicciolisce invece di finire sotto i
   pulsanti; la riga ADS (solo con gli ID di prova) si aggiorna mentre il pannello è aperto.
 - Consenso GDPR: la richiesta a Google viene ripetuta se non arriva risposta entro 10 s (al massimo 3 tentativi);

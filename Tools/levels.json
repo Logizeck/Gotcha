@@ -4318,5 +4318,37 @@
   ],
   "eggName": "",
   "eggHow": ""
+ },
+ {
+  "folder": "V73StuckDrawer",
+  "id": "v73_stuck_drawer",
+  "title": "THE STUCK DRAWER",
+  "hint": "Pulling harder won't help.",
+  "egg": "",
+  "n": 271,
+  "desc": "The top drawer won't open: the handle comes off ('Decorative. Of course.'), lube, screwdriver and hairdryer don't help. Clues: the note 'No handles! Push to open :)', the other drawers spring out by themselves. Hold a finger on the drawer front to push it in: it clicks open. 'IT WAS PUSH-TO-OPEN. THE HANDLE WAS A LIE.'",
+  "hints": [
+   "Pulling harder won't help.",
+   "Read the note on the wall.",
+   "Sometimes you open things by pushing them."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "V73MissingSock",
+  "id": "v73_missing_sock",
+  "title": "THE MISSING SOCK",
+  "hint": "It didn't just vanish.",
+  "egg": "",
+  "n": 272,
+  "desc": "Pairing other socks gets fashion jokes, the dryer has only a lint bunny, the cat sleeps on the wrong sock, the drum is empty. Clue: a green scrap with a star peeks out of the washer door seal. Open the door, pull the seal, drag the twin onto the rack. 'THE SEAL EATS SOCKS. EVERYONE KNOWS THAT.'",
+  "hints": [
+   "It didn't just vanish.",
+   "Washing machines have hiding places.",
+   "Look inside the rubber seal of the door."
+  ],
+  "eggName": "",
+  "eggHow": ""
  }
 ]
