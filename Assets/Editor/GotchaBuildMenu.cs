@@ -165,14 +165,18 @@ public static class GotchaBuildMenu
     /// </summary>
     public static bool IsVulnerableUnity(string version)
     {
-        // formato "2022.3.62f1"
+        // formato "2022.3.62f1" / "6000.3.27f2"
         string[] p = version.Split('.');
-        if (p.Length < 3 || p[0] != "2022" || p[1] != "3") return false;   // le altre serie: vedi l'avviso di Unity
+        if (p.Length < 3) return false;
         int i = 0;
         while (i < p[2].Length && char.IsDigit(p[2][i])) i++;
         if (!int.TryParse(p[2].Substring(0, i), out int patch)) return false;
         int.TryParse(p[2].Length > i + 1 ? p[2].Substring(i + 1) : "0", out int build);
-        return patch < 62 || (patch == 62 && build < 2);
+        // CVE-2025-59489 (Play rifiuta l'app): corretta in 2022.3.62f2
+        if (p[0] == "2022" && p[1] == "3") return patch < 62 || (patch == 62 && build < 2);
+        // eMudhra CA (CVE-2026-111943) e Brotli RCE (CVE-2026-111497): corrette in 6000.3.27f2
+        if (p[0] == "6000" && p[1] == "3") return patch < 27 || (patch == 27 && build < 2);
+        return false;   // le altre serie: vedi gli avvisi di sicurezza di Unity
     }
 
     static void BuildRelease()
@@ -180,9 +184,9 @@ public static class GotchaBuildMenu
         if (IsVulnerableUnity(Application.unityVersion))
         {
             EditorUtility.DisplayDialog("Gotcha! – Unity da aggiornare",
-                "Questo Unity (" + Application.unityVersion + ") ha la falla di sicurezza CVE-2025-59489: Google Play rifiuta " +
-                "l'app (\"Device and Network Abuse\").\n\nDa Unity Hub installa Unity 6.3 LTS (consigliato) o almeno 2022.3.62f2, " +
-                "apri il progetto con quella versione e rifai la build. Dettagli in PLAY_STORE.md.", "OK");
+                "Questo Unity (" + Application.unityVersion + ") ha falle di sicurezza note (CVE-2025-59489 per la 2022.3, " +
+                "eMudhra CA e Brotli RCE per la 6.3 fino a 6000.3.27f1).\n\nDa Unity Hub installa Unity 6.3 LTS 6000.3.27f2 " +
+                "o successiva, apri il progetto con quella versione e rifai la build. Dettagli in PLAY_STORE.md.", "OK");
             return;
         }
         ReleaseSigning signing = LoadSigning(out string problem);

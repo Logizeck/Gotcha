@@ -12,7 +12,8 @@ niente vincolo dei 12 tester/14 giorni, che vale solo per passare alla produzion
 Scelte fatte per questa beta: pacchetto **`com.gotcha.zeck`**, **niente acquisti in-app** (il pacchetto Unity IAP
 è stato tolto: il negozio risponde "Store not available"), pubblicità reali assenti (nessun AdMob).
 
-0. **Unity 6.3 LTS** (dalla versione 0.59 il progetto è per Unity 6.3): Unity Hub > Installs > Install Editor >
+0. **Unity 6.3 LTS, almeno 6000.3.27f2** (dalla versione 0.59 il progetto è per Unity 6.3; la 6000.3.27f1 e precedenti hanno
+   le falle eMudhra CA e Brotli RCE, ottobre 2026, e il menu di build le blocca): Unity Hub > Installs > Install Editor >
    **Unity 6.3 (LTS)** con **Android Build Support** + **OpenJDK** + **Android SDK & NDK Tools**. Poi in
    *Edit > Preferences > External Tools* lascia spuntate le quattro caselle "installed with Unity (recommended)".
    (Le versioni di Unity senza la correzione CVE-2025-59489 vengono rifiutate da Google Play: il menu della build
