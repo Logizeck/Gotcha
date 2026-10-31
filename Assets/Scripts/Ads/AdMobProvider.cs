@@ -41,24 +41,50 @@ namespace Gotcha.Ads
 
         // ---------- Consenso (UMP) ----------
 
+        int consentAttempts;
+        bool consentAnswered;
+
         void RequestConsent()
         {
+            consentAttempts++;
+            consentAnswered = false;
             // se il consenso è già stato dato in una sessione precedente si parte subito, senza aspettare
-            AdsDiagnostics.Last = "consent: checking" + (AdMobIds.UsingTestAds ? " (TEST ads)" : "");
-            if (ConsentInformation.CanRequestAds()) StartAds();
-            ConsentInformation.Update(new ConsentRequestParameters(), updateError => AdMobDispatcher.Post(() =>
+            AdsDiagnostics.Last = "consent: checking (" + consentAttempts + ")" + (AdMobIds.UsingTestAds ? " TEST ads" : "");
+            try
             {
-                if (updateError != null)
+                if (ConsentInformation.CanRequestAds()) StartAds();
+                ConsentInformation.Update(new ConsentRequestParameters(), updateError =>
                 {
-                    Debug.LogWarning("[Ads] Consenso non aggiornato: " + updateError.Message);
-                    AdsDiagnostics.Last = "consent error: " + updateError.Message;
-                    // con gli annunci di prova il consenso non serve: si parte lo stesso (per poter provare tutto)
-                    if (ConsentInformation.CanRequestAds() || AdMobIds.UsingTestAds) StartAds();
-                    return;
-                }
-                AdsDiagnostics.Last = "consent status: " + ConsentInformation.ConsentStatus;
-                ShowConsentFormIfRequired(true);
-            }));
+                    // la risposta può arrivare da un altro thread: qui solo un segno, il resto sul thread di Unity
+                    consentAnswered = true;
+                    AdMobDispatcher.Post(() => OnConsentUpdated(updateError));
+                });
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                AdsDiagnostics.Last = "consent exception: " + e.Message;
+            }
+            // se Google non risponde entro 10 s si riprova (al massimo 3 tentativi in tutto)
+            AdMobDispatcher.Later(10f, () =>
+            {
+                if (consentAnswered || consentAttempts >= 3) return;
+                RequestConsent();
+            });
+        }
+
+        void OnConsentUpdated(FormError updateError)
+        {
+            if (updateError != null)
+            {
+                Debug.LogWarning("[Ads] Consenso non aggiornato: " + updateError.Message);
+                AdsDiagnostics.Last = "consent error: " + updateError.Message;
+                // con gli annunci di prova il consenso non serve: si parte lo stesso (per poter provare tutto)
+                if (ConsentInformation.CanRequestAds() || AdMobIds.UsingTestAds) StartAds();
+                return;
+            }
+            AdsDiagnostics.Last = "consent status: " + ConsentInformation.ConsentStatus;
+            ShowConsentFormIfRequired(true);
         }
 
         /// <summary>

@@ -22,7 +22,7 @@ namespace Gotcha.UI
         public static bool TitleShown => current != null && current.titlePanel != null && current.titlePanel.activeSelf;
 
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.72";
+        public const string Version = "0.73";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
@@ -132,6 +132,8 @@ namespace Gotcha.UI
             if (menuPanel.activeSelf || settingsPanel.activeSelf) RefreshMusicLabel();   // si aggiorna se alzi il volume col menu aperto
 
             if (shopPanel.activeSelf) RefreshShop();
+            // con gli annunci di prova la riga ADS si aggiorna mentre le Impostazioni sono aperte
+            if (settingsPanel.activeSelf && Gotcha.Ads.AdMobIds.UsingTestAds && Time.frameCount % 15 == 0) RefreshSettingsInfo();
             if (betaPanel.activeSelf && betaAdTest.activeSelf) betaAdStatus.text = "ADS: " + flow.Ads.Status;
             if (hintPanel.activeSelf && !shopPanel.activeSelf) SwipeHints();
             UpdateTip();
@@ -490,10 +492,7 @@ namespace Gotcha.UI
             resetArmed = false;
             resetLabel.text = "RESET PROGRESS";
             RefreshMusicLabel();
-            settingsInfo.text = "Levels: " + Mathf.Min(SaveData.HighestUnlocked + 1, flow.LevelCount) + " / " + flow.LevelCount +
-                "\nEaster eggs found: " + SaveData.EasterEggCount + "\nVersion " + Version + (BetaMode.Active ? "  -  BETA MODE ON" : "") +
-                // con gli annunci di prova (ID reali non ancora inseriti) lo stato della pubblicità, per le verifiche
-                (Gotcha.Ads.AdMobIds.UsingTestAds ? "\nADS: " + flow.Ads.Status.Replace("\n", " | ") : "");
+            RefreshSettingsInfo();
 #if GOTCHA_ADMOB && !UNITY_EDITOR
             privacyButton.SetActive(Gotcha.Ads.AdMobProvider.PrivacyOptionsRequired);
 #endif
@@ -677,6 +676,14 @@ namespace Gotcha.UI
             hintPanel.SetActive(false);
             menuPanel.SetActive(true);
             if (!menuFromTitle) flow.Paused = true;
+        }
+
+        void RefreshSettingsInfo()
+        {
+            settingsInfo.text = "Levels: " + Mathf.Min(SaveData.HighestUnlocked + 1, flow.LevelCount) + " / " + flow.LevelCount +
+                "\nEaster eggs found: " + SaveData.EasterEggCount + "\nVersion " + Version + (BetaMode.Active ? "  -  BETA MODE ON" : "") +
+                // con gli annunci di prova (ID reali non ancora inseriti) lo stato della pubblicità, per le verifiche
+                (Gotcha.Ads.AdMobIds.UsingTestAds ? "\nADS: " + flow.Ads.Status.Replace("\n", " | ") : "");
         }
 
         void ToggleMusic()
@@ -1381,29 +1388,33 @@ namespace Gotcha.UI
 
             // Impostazioni
             RectTransform setCard;
-            settingsPanel = CreateOverlay("SettingsPanel", out setCard, 1100);
+            // carta più alta e testo in una zona riservata: il testo si rimpicciolisce (best fit) invece di uscire
+            // dai bordi e finire sotto i pulsanti
+            settingsPanel = CreateOverlay("SettingsPanel", out setCard, 1520);
             AddHeader(setCard, "SETTINGS");
             Button setMusic = CreateButton(setCard, "MUSIC: ON", Dark, ToggleMusic);
             settingsMusicLabel = setMusic.GetComponentInChildren<Text>();
-            Place(setMusic.transform, new Vector2(0.12f, 0.66f), new Vector2(0.88f, 0.77f));
-            settingsInfo = CreateText(setCard, "", 46, Ink, FontStyle.Normal);
-            Place(settingsInfo.transform, new Vector2(0.08f, 0.47f), new Vector2(0.92f, 0.65f));
-            Button reset = CreateButton(setCard, "RESET PROGRESS", Accent, ResetProgress);
-            resetLabel = reset.GetComponentInChildren<Text>();
-            Place(reset.transform, new Vector2(0.12f, 0.235f), new Vector2(0.88f, 0.325f));
-            Button reminders = CreateButton(setCard, ComebackNotifier.Enabled ? "REMINDERS: ON" : "REMINDERS: OFF", Dark, ToggleReminders);
-            remindersLabel = reminders.GetComponentInChildren<Text>();
-            Place(reminders.transform, new Vector2(0.08f, 0.17f), new Vector2(0.49f, 0.225f));
-            Button vibration = CreateButton(setCard, Haptics.Enabled ? "VIBRATION: ON" : "VIBRATION: OFF", Dark, ToggleVibration);
-            vibrationLabel = vibration.GetComponentInChildren<Text>();
-            Place(vibration.transform, new Vector2(0.51f, 0.17f), new Vector2(0.92f, 0.225f));
-            Place(CreateButton(setCard, "BETA TESTING", new Color(0.45f, 0.4f, 0.55f), OpenBeta).transform, new Vector2(0.25f, 0.405f), new Vector2(0.75f, 0.465f));
+            Place(setMusic.transform, new Vector2(0.12f, 0.785f), new Vector2(0.88f, 0.855f));
+            settingsInfo = CreateText(setCard, "", 42, Ink, FontStyle.Normal);
+            settingsInfo.verticalOverflow = VerticalWrapMode.Truncate;   // con Overflow il best fit non rimpicciolisce
+            settingsInfo.resizeTextMinSize = 18;
+            Place(settingsInfo.transform, new Vector2(0.07f, 0.535f), new Vector2(0.93f, 0.77f));
+            Place(CreateButton(setCard, "BETA TESTING", new Color(0.45f, 0.4f, 0.55f), OpenBeta).transform, new Vector2(0.22f, 0.455f), new Vector2(0.78f, 0.515f));
 #if GOTCHA_ADMOB && !UNITY_EDITOR
             // GDPR: chi ha dato (o negato) il consenso alla pubblicità deve poterlo cambiare
             privacyButton = CreateButton(setCard, "PRIVACY OPTIONS", EggColor, Gotcha.Ads.AdMobProvider.ShowPrivacyOptions).gameObject;
-            Place(privacyButton.transform, new Vector2(0.2f, 0.338f), new Vector2(0.8f, 0.398f));
+            Place(privacyButton.transform, new Vector2(0.18f, 0.38f), new Vector2(0.82f, 0.44f));
 #endif
-            Place(CreateButton(setCard, "BACK", Dark, CloseSettings).transform, new Vector2(0.25f, 0.06f), new Vector2(0.75f, 0.16f));
+            Button reset = CreateButton(setCard, "RESET PROGRESS", Accent, ResetProgress);
+            resetLabel = reset.GetComponentInChildren<Text>();
+            Place(reset.transform, new Vector2(0.12f, 0.285f), new Vector2(0.88f, 0.36f));
+            Button reminders = CreateButton(setCard, ComebackNotifier.Enabled ? "REMINDERS: ON" : "REMINDERS: OFF", Dark, ToggleReminders);
+            remindersLabel = reminders.GetComponentInChildren<Text>();
+            Place(reminders.transform, new Vector2(0.06f, 0.195f), new Vector2(0.485f, 0.265f));
+            Button vibration = CreateButton(setCard, Haptics.Enabled ? "VIBRATION: ON" : "VIBRATION: OFF", Dark, ToggleVibration);
+            vibrationLabel = vibration.GetComponentInChildren<Text>();
+            Place(vibration.transform, new Vector2(0.515f, 0.195f), new Vector2(0.94f, 0.265f));
+            Place(CreateButton(setCard, "BACK", Dark, CloseSettings).transform, new Vector2(0.25f, 0.05f), new Vector2(0.75f, 0.15f));
 
             // Obiettivo giornaliero raggiunto
             RectTransform dailyCard;

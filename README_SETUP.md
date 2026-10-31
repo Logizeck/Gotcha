@@ -267,6 +267,12 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.73 — Impostazioni e consenso
+- Pannello **SETTINGS** più alto (1520) con il testo in una zona riservata: si rimpicciolisce invece di finire sotto i
+  pulsanti; la riga ADS (solo con gli ID di prova) si aggiorna mentre il pannello è aperto.
+- Consenso GDPR: la richiesta a Google viene ripetuta se non arriva risposta entro 10 s (al massimo 3 tentativi);
+  eccezioni e risposte finiscono nella riga ADS ("consent exception: ...", "consent error: ...", "consent status: ...").
+
 ## Versione 0.72 — Livelli 269-270, prove della pubblicità
 - Ordine in `Assets/Editor/GotchaLevels72.cs`; builder `GotchaLevels72A/B.cs`; runtime `Assets/Scripts/Levels/V72`;
   logica `V64/Logic/CatBurglarLogic.cs`, `LostRemoteLogic.cs`; test `V72*Tests.cs`. Niente Easter egg, niente Toni.
