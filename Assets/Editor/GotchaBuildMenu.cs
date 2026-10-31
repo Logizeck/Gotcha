@@ -113,18 +113,35 @@ public static class GotchaBuildMenu
             targetGroup = BuildTargetGroup.Android,
             options = run ? BuildOptions.AutoRunPlayer : BuildOptions.None,
         };
-        // le APK di prova si firmano con la chiave di debug di Unity: la chiave di Google Play (e le sue password, che
-        // Unity non ricorda tra una sessione e l'altra) serve solo all'AAB. Dopo si torna all'impostazione di prima.
+        // Unity non ricorda le password della chiave tra una sessione e l'altra: le impostiamo qui solo per questa build
+        // e poi si torna all'impostazione di prima.
+        // Se c'è ReleaseSigning.json si firma con quella chiave (stesse password dell'AAB: niente richieste),
+        // altrimenti con la chiave di debug.
         bool prevCustom = PlayerSettings.Android.useCustomKeystore;
+        string prevKeystore = PlayerSettings.Android.keystoreName, prevKsPass = PlayerSettings.Android.keystorePass;
+        string prevAlias = PlayerSettings.Android.keyaliasName, prevAliasPass = PlayerSettings.Android.keyaliasPass;
+        ReleaseSigning signing = LoadSigning(out _);
         BuildReport report;
         try
         {
-            PlayerSettings.Android.useCustomKeystore = false;
+            if (signing != null)
+            {
+                PlayerSettings.Android.useCustomKeystore = true;
+                PlayerSettings.Android.keystoreName = signing.keystorePath;
+                PlayerSettings.Android.keystorePass = signing.keystorePass;
+                PlayerSettings.Android.keyaliasName = signing.keyAlias;
+                PlayerSettings.Android.keyaliasPass = signing.keyAliasPass;
+            }
+            else PlayerSettings.Android.useCustomKeystore = false;
             report = BuildPipeline.BuildPlayer(options);
         }
         finally
         {
             PlayerSettings.Android.useCustomKeystore = prevCustom;
+            PlayerSettings.Android.keystoreName = prevKeystore;
+            PlayerSettings.Android.keystorePass = prevKsPass;
+            PlayerSettings.Android.keyaliasName = prevAlias;
+            PlayerSettings.Android.keyaliasPass = prevAliasPass;
         }
         BuildSummary summary = report.summary;
 
