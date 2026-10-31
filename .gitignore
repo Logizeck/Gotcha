@@ -14,6 +14,14 @@
 
 # file che Unity crea e riscrive da solo sul PC: non vanno nella repository (evitano conflitti a ogni pull)
 *.meta
+# ...tranne quelli dei plugin di terze parti: contengono le impostazioni d'importazione delle librerie (piattaforme
+# Android/iOS/Editor delle DLL e degli AAR) e senza di essi il plugin AdMob si rompe su un'altra copia del progetto
+!Assets/GoogleMobileAds/**/*.meta
+!Assets/GoogleMobileAds.meta
+!Assets/ExternalDependencyManager/**/*.meta
+!Assets/ExternalDependencyManager.meta
+!Assets/Plugins/**/*.meta
+!Assets/Plugins.meta
 .vsconfig
 /ProjectSettings/
 /Packages/packages-lock.json
