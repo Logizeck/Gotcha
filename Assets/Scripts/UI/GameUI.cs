@@ -491,7 +491,9 @@ namespace Gotcha.UI
             resetLabel.text = "RESET PROGRESS";
             RefreshMusicLabel();
             settingsInfo.text = "Levels: " + Mathf.Min(SaveData.HighestUnlocked + 1, flow.LevelCount) + " / " + flow.LevelCount +
-                "\nEaster eggs found: " + SaveData.EasterEggCount + "\nVersion " + Version + (BetaMode.Active ? "  -  BETA MODE ON" : "");
+                "\nEaster eggs found: " + SaveData.EasterEggCount + "\nVersion " + Version + (BetaMode.Active ? "  -  BETA MODE ON" : "") +
+                // con gli annunci di prova (ID reali non ancora inseriti) lo stato della pubblicità, per le verifiche
+                (Gotcha.Ads.AdMobIds.UsingTestAds ? "\nADS: " + flow.Ads.Status.Replace("\n", " | ") : "");
 #if GOTCHA_ADMOB && !UNITY_EDITOR
             privacyButton.SetActive(Gotcha.Ads.AdMobProvider.PrivacyOptionsRequired);
 #endif
@@ -536,7 +538,7 @@ namespace Gotcha.UI
         {
             betaStatus.text = status;
             betaInput.gameObject.SetActive(!BetaMode.Active);
-            betaAdTest.SetActive(BetaMode.Active);
+            betaAdTest.SetActive(BetaMode.Active);   // i pulsanti di prova degli annunci: solo a modalità beta attiva
             betaActionLabel.text = BetaMode.Active ? "TURN OFF" : "ACTIVATE";
         }
 

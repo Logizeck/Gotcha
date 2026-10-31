@@ -35,7 +35,8 @@ namespace Gotcha.Ads
         {
             instance = this;
             MobileAds.RaiseAdEventsOnUnityMainThread = true;
-            AdMobDispatcher.Later(0f, RequestConsent);   // al primo frame: l'Activity è pronta per il modulo
+            // dopo un attimo dall'avvio: con la chiamata al primo frame su alcuni telefoni il modulo del consenso non compariva
+            AdMobDispatcher.Later(1.5f, RequestConsent);
         }
 
         // ---------- Consenso (UMP) ----------
@@ -55,14 +56,32 @@ namespace Gotcha.Ads
                     if (ConsentInformation.CanRequestAds() || AdMobIds.UsingTestAds) StartAds();
                     return;
                 }
-                // in UE il modulo compare la prima volta (e quando scade); altrove di solito non serve
-                ConsentForm.LoadAndShowConsentFormIfRequired(formError => AdMobDispatcher.Post(() =>
+                AdsDiagnostics.Last = "consent status: " + ConsentInformation.ConsentStatus;
+                ShowConsentFormIfRequired(true);
+            }));
+        }
+
+        /// <summary>
+        /// In UE il modulo compare al primo avvio (e quando il consenso scade); altrove di solito non serve. Se il modulo non
+        /// riesce a comparire (Activity non pronta, rete lenta) si riprova una volta dopo qualche secondo.
+        /// </summary>
+        void ShowConsentFormIfRequired(bool retry)
+        {
+            ConsentForm.LoadAndShowConsentFormIfRequired(formError => AdMobDispatcher.Post(() =>
+            {
+                if (formError != null)
                 {
-                    if (formError != null) Debug.LogWarning("[Ads] Modulo consenso: " + formError.Message);
-                    if (formError != null) AdsDiagnostics.Last = "consent form error: " + formError.Message;
-                    if (ConsentInformation.CanRequestAds() || AdMobIds.UsingTestAds) StartAds();
-                    else AdsDiagnostics.Last = "consent: ads not allowed yet";
-                }));
+                    Debug.LogWarning("[Ads] Modulo consenso: " + formError.Message);
+                    AdsDiagnostics.Last = "consent form error: " + formError.Message;
+                    if (retry && ConsentInformation.ConsentStatus == ConsentStatus.Required)
+                    {
+                        AdMobDispatcher.Later(4f, () => ShowConsentFormIfRequired(false));
+                        return;
+                    }
+                }
+                else AdsDiagnostics.Last = "consent status: " + ConsentInformation.ConsentStatus;
+                if (ConsentInformation.CanRequestAds() || AdMobIds.UsingTestAds) StartAds();
+                else AdsDiagnostics.Last = "consent: ads not allowed yet (" + ConsentInformation.ConsentStatus + ")";
             }));
         }
 
