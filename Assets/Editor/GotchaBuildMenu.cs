@@ -113,7 +113,19 @@ public static class GotchaBuildMenu
             targetGroup = BuildTargetGroup.Android,
             options = run ? BuildOptions.AutoRunPlayer : BuildOptions.None,
         };
-        BuildReport report = BuildPipeline.BuildPlayer(options);
+        // le APK di prova si firmano con la chiave di debug di Unity: la chiave di Google Play (e le sue password, che
+        // Unity non ricorda tra una sessione e l'altra) serve solo all'AAB. Dopo si torna all'impostazione di prima.
+        bool prevCustom = PlayerSettings.Android.useCustomKeystore;
+        BuildReport report;
+        try
+        {
+            PlayerSettings.Android.useCustomKeystore = false;
+            report = BuildPipeline.BuildPlayer(options);
+        }
+        finally
+        {
+            PlayerSettings.Android.useCustomKeystore = prevCustom;
+        }
         BuildSummary summary = report.summary;
 
         if (summary.result == BuildResult.Succeeded)
