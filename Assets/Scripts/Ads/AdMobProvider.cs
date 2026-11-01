@@ -36,6 +36,7 @@ namespace Gotcha.Ads
         public AdMobProvider()
         {
             instance = this;
+            ConsentGate.Pending = true;   // microfono e notifiche aspettano il modulo dei cookie (FirstLaunchPermissions)
             MobileAds.RaiseAdEventsOnUnityMainThread = true;
             // dopo un attimo dall'avvio: con la chiamata al primo frame su alcuni telefoni il modulo del consenso non compariva
             AdMobDispatcher.Later(1.5f, RequestConsent);
@@ -66,11 +67,13 @@ namespace Gotcha.Ads
             {
                 Debug.LogException(e);
                 AdsDiagnostics.Last = "consent exception: " + e.Message;
+                ConsentGate.Pending = false;
             }
             // se Google non risponde entro 10 s si riprova (al massimo 3 tentativi in tutto)
             AdMobDispatcher.Later(10f, () =>
             {
-                if (consentAnswered || consentAttempts >= 3) return;
+                if (consentAnswered) return;
+                if (consentAttempts >= 3) { ConsentGate.Pending = false; return; }
                 RequestConsent();
             });
         }
@@ -83,6 +86,7 @@ namespace Gotcha.Ads
                 AdsDiagnostics.Last = "consent error: " + updateError.Message;
                 // con gli annunci di prova il consenso non serve: si parte lo stesso (per poter provare tutto)
                 if (ConsentInformation.CanRequestAds() || AdMobIds.UsingTestAds) StartAds();
+                ConsentGate.Pending = false;
                 return;
             }
             AdsDiagnostics.Last = "consent status: " + ConsentInformation.ConsentStatus;
@@ -108,6 +112,7 @@ namespace Gotcha.Ads
                     }
                 }
                 else AdsDiagnostics.Last = "consent status: " + ConsentInformation.ConsentStatus;
+                ConsentGate.Pending = false;
                 if (ConsentInformation.CanRequestAds() || AdMobIds.UsingTestAds) StartAds();
                 else AdsDiagnostics.Last = "consent: ads not allowed yet (" + ConsentInformation.ConsentStatus + ")";
             }));
@@ -117,12 +122,70 @@ namespace Gotcha.Ads
         public static bool PrivacyOptionsRequired =>
             ConsentInformation.PrivacyOptionsRequirementStatus == PrivacyOptionsRequirementStatus.Required;
 
+        /// <summary>Esito dell'ultimo tocco su PRIVACY OPTIONS, da mostrare al giocatore (null = modulo aperto).</summary>
+        public static System.Action<string> PrivacyFeedback;
+
+        /// <summary>
+        /// Pulsante PRIVACY OPTIONS (sempre visibile dalla 0.76). Se lo stato del consenso non è ancora noto lo si
+        /// aggiorna prima; poi si apre il modulo delle opzioni privacy di Google. Se Google dice che qui non serve, si
+        /// prova comunque il modulo del consenso; se non c'è nemmeno quello, il giocatore riceve un messaggio.
+        /// </summary>
         public static void ShowPrivacyOptions()
+        {
+            AdsDiagnostics.Last = "privacy options: opening";
+            try
+            {
+                ConsentInformation.Update(new ConsentRequestParameters(), updateError => AdMobDispatcher.Post(() =>
+                {
+                    if (updateError != null) AdsDiagnostics.Last = "privacy options update error: " + updateError.Message;
+                    if (PrivacyOptionsRequired) OpenPrivacyForm();
+                    else OpenConsentForm();
+                }));
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                PrivacyFeedback?.Invoke("Privacy options are not available right now. Check your connection and try again.");
+            }
+        }
+
+        static void OpenPrivacyForm()
         {
             ConsentForm.ShowPrivacyOptionsForm(formError => AdMobDispatcher.Post(() =>
             {
-                if (formError != null) Debug.LogWarning("[Ads] Opzioni privacy: " + formError.Message);
+                if (formError != null)
+                {
+                    Debug.LogWarning("[Ads] Opzioni privacy: " + formError.Message);
+                    AdsDiagnostics.Last = "privacy options error: " + formError.Message;
+                    OpenConsentForm();
+                    return;
+                }
+                AdsDiagnostics.Last = "consent status: " + ConsentInformation.ConsentStatus;
                 if (instance != null && ConsentInformation.CanRequestAds()) instance.StartAds();
+            }));
+        }
+
+        static void OpenConsentForm()
+        {
+            if (!ConsentInformation.IsConsentFormAvailable())
+            {
+                PrivacyFeedback?.Invoke("No privacy choices are needed in your region.");
+                return;
+            }
+            ConsentForm.Load((form, loadError) => AdMobDispatcher.Post(() =>
+            {
+                if (loadError != null || form == null)
+                {
+                    AdsDiagnostics.Last = "consent form load error: " + (loadError != null ? loadError.Message : "null");
+                    PrivacyFeedback?.Invoke("Privacy options are not available right now. Check your connection and try again.");
+                    return;
+                }
+                form.Show(showError => AdMobDispatcher.Post(() =>
+                {
+                    if (showError != null) AdsDiagnostics.Last = "consent form error: " + showError.Message;
+                    else AdsDiagnostics.Last = "consent status: " + ConsentInformation.ConsentStatus;
+                    if (instance != null && ConsentInformation.CanRequestAds()) instance.StartAds();
+                }));
             }));
         }
 

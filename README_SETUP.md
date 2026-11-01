@@ -275,6 +275,11 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
   "WATCH AD" quando il rewarded normale non è pronto.
 - **Pubblicità**: una ogni **8 livelli** superati o ogni **120 secondi** di gioco attivo (prima 5 livelli / 140 s).
 - **Vite**: se ne ricarica una ogni **30 minuti** (prima 15).
+- **Primo avvio, una richiesta alla volta** (`FirstLaunchPermissions`): prima il modulo dei cookie di Google
+  (`ConsentGate` tiene ferme le altre richieste finché non è chiuso, al massimo 30 s), poi il permesso del
+  **microfono**, poi quello delle **notifiche**. Prima il microfono veniva chiesto subito e copriva il modulo dei cookie.
+- **PRIVACY OPTIONS** nelle Impostazioni è sempre visibile: aggiorna lo stato del consenso e apre il modulo per cambiare
+  le scelte sui cookie; se il modulo non si apre lo dice nel riquadro informazioni.
 
 ## Versione 0.75 — Livelli 275-276 e punture di vespa
 - Ordine in `Assets/Editor/GotchaLevels75.cs`; builder `GotchaLevels75A/B.cs`; runtime `Assets/Scripts/Levels/V75`;

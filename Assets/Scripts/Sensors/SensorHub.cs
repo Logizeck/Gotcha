@@ -52,11 +52,29 @@ namespace Gotcha.Sensors
 
         void Start()
         {
-            // Il permesso del microfono si chiede una volta sola all'avvio del gioco, non a metà livello.
-            RequestMicPermission();
+            // Il permesso del microfono si chiede all'avvio, ma DOPO il modulo dei cookie: lo fa FirstLaunchPermissions.
 #if UNITY_ANDROID && !UNITY_EDITOR
             try { using (var keys = new AndroidJavaClass("com.gotcha.game.GotchaKeys")) keys.CallStatic("install"); }
             catch (System.Exception e) { Debug.LogWarning("[Gotcha] Tasti volume non intercettabili: " + e.Message); }
+#endif
+        }
+
+        /// <summary>Come <see cref="RequestMicPermission"/>, ma aspetta la risposta del giocatore (al massimo 60 s).</summary>
+        public System.Collections.IEnumerator RequestMicPermissionAndWait()
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            string perm = UnityEngine.Android.Permission.Microphone;
+            if (micPermissionAsked || UnityEngine.Android.Permission.HasUserAuthorizedPermission(perm)) yield break;
+            micPermissionAsked = true;
+            bool answered = false;
+            var callbacks = new UnityEngine.Android.PermissionCallbacks();
+            callbacks.PermissionGranted += _ => answered = true;
+            callbacks.PermissionDenied += _ => answered = true;
+            UnityEngine.Android.Permission.RequestUserPermission(perm, callbacks);
+            float t = 0f;
+            while (!answered && t < 60f) { t += Time.unscaledDeltaTime; yield return null; }
+#else
+            yield break;
 #endif
         }
 

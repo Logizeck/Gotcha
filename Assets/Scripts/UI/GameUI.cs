@@ -490,11 +490,12 @@ namespace Gotcha.UI
         void OpenSettings()
         {
             resetArmed = false;
+            privacyNote = null;
             resetLabel.text = "RESET PROGRESS";
             RefreshMusicLabel();
             RefreshSettingsInfo();
 #if GOTCHA_ADMOB && !UNITY_EDITOR
-            privacyButton.SetActive(Gotcha.Ads.AdMobProvider.PrivacyOptionsRequired);
+            privacyButton.SetActive(true);   // dalla 0.76 sempre visibile: si possono rivedere le scelte sui cookie
 #endif
             settingsPanel.SetActive(true);
             if (!titlePanel.activeSelf) flow.Paused = true;
@@ -678,9 +679,11 @@ namespace Gotcha.UI
             if (!menuFromTitle) flow.Paused = true;
         }
 
+        string privacyNote;   // esito di PRIVACY OPTIONS quando il modulo non si apre
+
         void RefreshSettingsInfo()
         {
-            settingsInfo.text = "Levels: " + Mathf.Min(SaveData.HighestUnlocked + 1, flow.LevelCount) + " / " + flow.LevelCount +
+            settingsInfo.text = (privacyNote != null ? privacyNote + "\n" : "") + "Levels: " + Mathf.Min(SaveData.HighestUnlocked + 1, flow.LevelCount) + " / " + flow.LevelCount +
                 "\nEaster eggs found: " + SaveData.EasterEggCount + "\nVersion " + Version + (BetaMode.Active ? "  -  BETA MODE ON" : "") +
                 // con gli annunci di prova (ID reali non ancora inseriti) lo stato della pubblicità, per le verifiche
                 (Gotcha.Ads.AdMobIds.UsingTestAds ? "\nADS: " + flow.Ads.Status.Replace("\n", " | ") : "");
@@ -1403,6 +1406,7 @@ namespace Gotcha.UI
 #if GOTCHA_ADMOB && !UNITY_EDITOR
             // GDPR: chi ha dato (o negato) il consenso alla pubblicità deve poterlo cambiare
             privacyButton = CreateButton(setCard, "PRIVACY OPTIONS", EggColor, Gotcha.Ads.AdMobProvider.ShowPrivacyOptions).gameObject;
+            Gotcha.Ads.AdMobProvider.PrivacyFeedback = msg => { privacyNote = msg; if (settingsInfo != null) RefreshSettingsInfo(); };
             Place(privacyButton.transform, new Vector2(0.18f, 0.38f), new Vector2(0.82f, 0.44f));
 #endif
             Button reset = CreateButton(setCard, "RESET PROGRESS", Accent, ResetProgress);

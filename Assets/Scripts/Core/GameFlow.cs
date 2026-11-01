@@ -65,6 +65,7 @@ namespace Gotcha.Core
             if (Lives == null) Lives = gameObject.AddComponent<LivesManager>();
             if (GetComponent<StoreManager>() == null) gameObject.AddComponent<StoreManager>();   // acquisti in-app
             if (GetComponent<ComebackNotifier>() == null) gameObject.AddComponent<ComebackNotifier>();   // "I'm missing you! <3"
+            if (GetComponent<FirstLaunchPermissions>() == null) gameObject.AddComponent<FirstLaunchPermissions>();   // cookie, poi microfono, poi notifiche
             // Mentre il gioco è aperto lo schermo non si spegne e non si abbassa (molti livelli si giocano
             // senza toccarlo: inclinazione, attesa...). Su Android è il flag KEEP_SCREEN_ON.
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
