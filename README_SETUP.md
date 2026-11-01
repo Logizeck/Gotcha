@@ -267,7 +267,17 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
-## Versione 0.75 — Punture di vespa
+## Versione 0.75 — Livelli 275-276 e punture di vespa
+- Ordine in `Assets/Editor/GotchaLevels75.cs`; builder `GotchaLevels75A/B.cs`; runtime `Assets/Scripts/Levels/V75`;
+  logica `V64/Logic/ToniArmchairLogic.cs`, `LockedBikeLogic.cs`; test `V75*Tests.cs`. Niente Easter egg.
+  - 275 **Toni's Armchair** (livello di Toni): Toni dorme nella tua poltrona, la partita inizia fra 60 s. Spingerlo,
+    biscotti, paperella, coperta non servono. Indizio: se qualcosa finisce sull'altra poltrona Toni apre un occhio.
+    Soluzione: siediti sull'altra poltrona, Toni ci salta, poi torna nella tua. **Si perde** se il conto alla rovescia
+    arriva a 0 o con 3 colpi di aspirapolvere. Tasti Editor: R siedi a destra, L a sinistra, V aspirapolvere, K -> 5 s.
+  - 276 **The Locked Bike**: lucchetto indistruttibile; chiavi, combinazioni, calci al palo non servono. Indizi: il
+    cartello caduto ("il palo non ha la cima") e il piccione sulla cima. Soluzione: sollevare la bici sopra il palo
+    basso e portarla via a destra. **Si perde** con 3 colpi di tronchese (arriva il vigile). Tasti Editor: L solleva,
+    R porta via, B tronchese.
 - **Labirinti con le vespe** (`WaspMazeLevel`, `DarkMazeLevel`) e **livelli col gatto che dorme** (`DefendLevel`):
   basta **una** puntura per perdere il livello. Nei livelli con la **paletta** (`WaspLevel`) ne servono ancora **due**.
 - Da qui in poi ogni livello nuovo ha almeno un modo per essere **perso** (Fail con battuta), sempre annunciato

@@ -4382,5 +4382,37 @@
   ],
   "eggName": "",
   "eggHow": ""
+ },
+ {
+  "folder": "V75ToniArmchair",
+  "id": "v75_toni_armchair",
+  "title": "TONI'S ARMCHAIR",
+  "hint": "Toni can't be moved. Toni can be tricked.",
+  "egg": "",
+  "n": 275,
+  "desc": "Toni sleeps in your armchair and the match starts in 60 s. Pushing, treats, the squeaky duck, the blanket do nothing ('Toni weighs 400 kg when he doesn't want to move.'); the vacuum makes him growl: 3 times and he steals the remote (FAIL). Clue: whatever lands on the other armchair, Toni opens one eye and stares at it. Sit on the OTHER armchair: Toni wants it, jumps over; then sit in yours. FAIL also if the countdown reaches 0. 'PUGS ALWAYS WANT YOUR SEAT.'",
+  "hints": [
+   "Toni can't be moved. Toni can be tricked.",
+   "Watch what happens when something lands on the other armchair.",
+   "Sit in the other armchair. Toni will want it."
+  ],
+  "eggName": "",
+  "eggHow": ""
+ },
+ {
+  "folder": "V75LockedBike",
+  "id": "v75_locked_bike",
+  "title": "THE LOCKED BIKE",
+  "hint": "The lock is unbreakable. The pole isn't that tall.",
+  "egg": "",
+  "n": 276,
+  "desc": "The bike is chained to a short pole with an unbreakable lock. Wrong keys, combinations, kicking or shaking the pole don't help. Bolt cutters: 3 strikes and the police officer arrests you (FAIL). Clues: the fallen 'P' sign ('the pole has no top'), the pigeon sitting on top. Lift the bike high (1.0+) so the chain slides over the top of the pole, then roll it off to the right. 'THE LOCK WAS FINE. THE POLE WASN'T.'",
+  "hints": [
+   "The lock is unbreakable. The pole isn't that tall.",
+   "Look at the top of the pole.",
+   "Lift the bike over the pole."
+  ],
+  "eggName": "",
+  "eggHow": ""
  }
 ]
