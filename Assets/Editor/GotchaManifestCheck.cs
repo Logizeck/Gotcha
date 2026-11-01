@@ -37,7 +37,7 @@ public static class GotchaManifestCheck
             string report = Summarize(xml, aab);
             File.WriteAllText(aab + ".report.txt", report);
             UnityEngine.Debug.Log("[Gotcha] Manifest dell'AAB:\n" + report);
-            EditorUtility.DisplayDialog("Gotcha! — manifest AAB", report.Length > 1800 ? report.Substring(0, 1800) + "\n..." : report, "OK");
+            EditorUtility.DisplayDialog("Gotcha! — manifest AAB", report.Length > 2500 ? report.Substring(0, 2500) + "\n..." : report, "OK");
             EditorUtility.RevealInFinder(aab + ".report.txt");
         }
         catch (Exception e)
@@ -105,9 +105,10 @@ public static class GotchaManifestCheck
             n++;
         }
         if (n == 0) sb.AppendLine("  (nessuna)");
-        sb.AppendLine("Caratteristiche facoltative:");
+        // le facoltative non filtrano i dispositivi: in fondo e su una riga sola, così la finestra mostra prima ciò che conta
+        var optional = new System.Collections.Generic.List<string>();
         foreach (XmlElement e in root.SelectNodes("uses-feature"))
-            if (e.GetAttribute("required", AndroidNs) == "false") sb.AppendLine("  - " + e.GetAttribute("name", AndroidNs));
+            if (e.GetAttribute("required", AndroidNs) == "false") optional.Add(e.GetAttribute("name", AndroidNs).Replace("android.hardware.", ""));
         foreach (XmlElement e in root.SelectNodes("application/uses-library"))
             if (e.GetAttribute("required", AndroidNs) != "false") sb.AppendLine("Libreria OBBLIGATORIA: " + e.GetAttribute("name", AndroidNs));
         foreach (XmlElement e in root.SelectNodes("application/uses-native-library"))
@@ -140,6 +141,7 @@ public static class GotchaManifestCheck
         foreach (var e in meta) sb.AppendLine("  - " + e.name + "  " + (e.size / 1024) + " KB");
         bool mapping = meta.Any(e => e.name.IndexOf("obfuscation", StringComparison.OrdinalIgnoreCase) >= 0 || e.name.EndsWith("proguard.map", StringComparison.Ordinal));
         sb.AppendLine(mapping ? "Mapping R8 incluso nell'AAB: SI" : "Mapping R8 incluso nell'AAB: NO (minify spento o non applicato)");
+        sb.AppendLine("Caratteristiche facoltative (" + optional.Count + "): " + string.Join(", ", optional));
         return sb.ToString();
     }
 
