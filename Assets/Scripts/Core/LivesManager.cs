@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Gotcha.Core
 {
     /// <summary>
-    /// Vite: al massimo <see cref="MaxLives"/>; ogni fallimento ne costa una; se ne ricarica una ogni 15 minuti,
+    /// Vite: al massimo <see cref="MaxLives"/>; ogni fallimento ne costa una; se ne ricarica una ogni 30 minuti (dalla 0.76),
     /// una guardando una pubblicità, una per ogni amico che accetta un invito.
     ///
     /// A prova di "cambio dell'ora": la ricarica NON usa mai l'orologio del telefono (che l'utente può spostare).
@@ -20,7 +20,7 @@ namespace Gotcha.Core
     public class LivesManager : MonoBehaviour
     {
         public const int MaxLives = 5;
-        public const float RegenSeconds = 15f * 60f;
+        public const float RegenSeconds = 30f * 60f;
 
         const string DataKey = "gotcha.lives.v1";
         const string SigKey = "gotcha.lives.sig";

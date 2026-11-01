@@ -356,7 +356,7 @@ public static class GotchaBuildMenu
         }
     }
     [Serializable]
-    class AdMobIdsFile { public string appId, interstitialId, rewardedId; }
+    class AdMobIdsFile { public string appId, interstitialId, rewardedId, rewardedInterstitialId; }
 
     /// <summary>
     /// Controlla gli ID in AdMobIds.json leggendo davvero il JSON (spazi e a capo non contano): null se sono tutti e tre
@@ -373,6 +373,8 @@ public static class GotchaBuildMenu
         if (!System.Text.RegularExpressions.Regex.IsMatch((ids.appId ?? "").Trim(), @"^ca-app-pub-\d{10,20}~\d{6,12}$")) missing.Add("appId (ca-app-pub-…~…)");
         if (!System.Text.RegularExpressions.Regex.IsMatch((ids.interstitialId ?? "").Trim(), @"^ca-app-pub-\d{10,20}/\d{6,12}$")) missing.Add("interstitialId (ca-app-pub-…/…)");
         if (!System.Text.RegularExpressions.Regex.IsMatch((ids.rewardedId ?? "").Trim(), @"^ca-app-pub-\d{10,20}/\d{6,12}$")) missing.Add("rewardedId (ca-app-pub-…/…)");
+        // facoltativo: se c'è deve essere nel formato giusto
+        if (!string.IsNullOrWhiteSpace(ids.rewardedInterstitialId) && !System.Text.RegularExpressions.Regex.IsMatch(ids.rewardedInterstitialId.Trim(), @"^ca-app-pub-\d{10,20}/\d{6,12}$")) missing.Add("rewardedInterstitialId (ca-app-pub-…/…)");
         if ((ids.appId ?? "").Contains("3940256099942544")) missing.Add("appId è quello di PROVA di Google");
         if (missing.Count == 0) return null;
         return "In " + path + " mancano o non sono validi: " + string.Join(", ", missing) + ".";

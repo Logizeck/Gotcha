@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Gotcha.Ads
 {
     /// <summary>
-    /// ID di AdMob in un solo posto: Assets/Resources/AdMobIds.json (appId, interstitialId, rewardedId). L'App ID lo
+    /// ID di AdMob in un solo posto: Assets/Resources/AdMobIds.json (appId, interstitialId, rewardedId, rewardedInterstitialId). L'App ID lo
     /// legge anche l'Editor (Gotcha.AdMobSetup) per impostarlo nel plugin prima di ogni build.
     /// Finché un ID è vuoto, e sempre nelle build di sviluppo, si usano gli ID di PROVA ufficiali di Google: annunci
     /// finti, sicuri da cliccare (cliccare annunci veri sul proprio telefono può far sospendere l'account AdMob).
@@ -13,9 +13,10 @@ namespace Gotcha.Ads
         public const string TestAppId = "ca-app-pub-3940256099942544~3347511713";
         public const string TestInterstitialId = "ca-app-pub-3940256099942544/1033173712";
         public const string TestRewardedId = "ca-app-pub-3940256099942544/5224354917";
+        public const string TestRewardedInterstitialId = "ca-app-pub-3940256099942544/5354046379";
 
         [System.Serializable]
-        class Ids { public string appId, interstitialId, rewardedId; }
+        class Ids { public string appId, interstitialId, rewardedId, rewardedInterstitialId; }
 
         static Ids ids;
 
@@ -35,5 +36,7 @@ namespace Gotcha.Ads
 
         public static string Interstitial => UsingTestAds ? TestInterstitialId : Load().interstitialId.Trim();
         public static string Rewarded => UsingTestAds ? TestRewardedId : Load().rewardedId.Trim();
+        /// <summary>Rewarded interstitial (facoltativo): vuoto = non si usa (con gli annunci veri).</summary>
+        public static string RewardedInterstitial => UsingTestAds ? TestRewardedInterstitialId : (Load().rewardedInterstitialId ?? "").Trim();
     }
 }

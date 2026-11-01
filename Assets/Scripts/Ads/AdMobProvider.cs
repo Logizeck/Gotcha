@@ -24,12 +24,14 @@ namespace Gotcha.Ads
 
         InterstitialAd interstitial;
         RewardedAd rewarded;
-        bool started, loadingInterstitial, loadingRewarded;
-        float interstitialRetry = 5f, rewardedRetry = 5f;
+        RewardedInterstitialAd rewardedInterstitial;   // riserva per i pulsanti "WATCH AD" (dalla 0.76)
+        bool started, loadingInterstitial, loadingRewarded, loadingRewardedInterstitial;
+        float interstitialRetry = 5f, rewardedRetry = 5f, rewardedInterstitialRetry = 5f;
         float savedTimeScale = 1f;
 
         public bool IsReady => interstitial != null && interstitial.CanShowAd();
-        public bool RewardedReady => rewarded != null && rewarded.CanShowAd();
+        public bool RewardedReady => (rewarded != null && rewarded.CanShowAd()) || RewardedInterstitialReady;
+        bool RewardedInterstitialReady => rewardedInterstitial != null && rewardedInterstitial.CanShowAd();
 
         public AdMobProvider()
         {
@@ -134,6 +136,7 @@ namespace Gotcha.Ads
                 AdsDiagnostics.Last = "AdMob started, loading ads" + (AdMobIds.UsingTestAds ? " (TEST ads)" : "");
                 LoadInterstitial();
                 LoadRewarded();
+                LoadRewardedInterstitial();
             }));
         }
 
@@ -182,6 +185,30 @@ namespace Gotcha.Ads
             }));
         }
 
+        /// <summary>
+        /// Rewarded interstitial: si usa solo quando il giocatore ha già scelto di guardare uno spot per il premio
+        /// (pulsante "WATCH AD") e il rewarded normale non è pronto. Così c'è sempre il consenso esplicito al premio.
+        /// </summary>
+        void LoadRewardedInterstitial()
+        {
+            string id = AdMobIds.RewardedInterstitial;
+            if (string.IsNullOrEmpty(id) || loadingRewardedInterstitial || rewardedInterstitial != null) return;
+            loadingRewardedInterstitial = true;
+            RewardedInterstitialAd.Load(id, new AdRequest(), (ad, error) => AdMobDispatcher.Post(() =>
+            {
+                loadingRewardedInterstitial = false;
+                if (error != null || ad == null)
+                {
+                    Debug.LogWarning("[Ads] Rewarded interstitial non caricato: " + (error != null ? error.GetMessage() : "null"));
+                    AdMobDispatcher.Later(rewardedInterstitialRetry, LoadRewardedInterstitial);
+                    rewardedInterstitialRetry = Mathf.Min(rewardedInterstitialRetry * 2f, 120f);
+                    return;
+                }
+                rewardedInterstitialRetry = 5f;
+                rewardedInterstitial = ad;
+            }));
+        }
+
         // ---------- Visione ----------
 
         public void Show(Action onClosed)
@@ -208,7 +235,13 @@ namespace Gotcha.Ads
         public void ShowRewarded(Action<bool> onDone)
         {
             RewardedAd ad = rewarded;
-            if (ad == null || !ad.CanShowAd()) { onDone?.Invoke(false); LoadRewarded(); return; }
+            if (ad == null || !ad.CanShowAd())
+            {
+                LoadRewarded();
+                if (RewardedInterstitialReady) { ShowRewardedInterstitial(onDone); return; }
+                onDone?.Invoke(false);
+                return;
+            }
             rewarded = null;
             bool earned = false, done = false;
             Action finish = () =>
@@ -221,6 +254,26 @@ namespace Gotcha.Ads
                 LoadRewarded();
             };
             // il premio di solito arriva prima della chiusura; un attimo di margine per i telefoni che lo mandano dopo
+            ad.OnAdFullScreenContentClosed += () => AdMobDispatcher.Post(() => AdMobDispatcher.Later(0.3f, finish));
+            ad.OnAdFullScreenContentFailed += error => AdMobDispatcher.Post(finish);
+            Pause();
+            ad.Show(reward => AdMobDispatcher.Post(() => earned = true));
+        }
+
+        void ShowRewardedInterstitial(Action<bool> onDone)
+        {
+            RewardedInterstitialAd ad = rewardedInterstitial;
+            rewardedInterstitial = null;
+            bool earned = false, done = false;
+            Action finish = () =>
+            {
+                if (done) return;
+                done = true;
+                ad.Destroy();
+                Resume();
+                onDone?.Invoke(earned);
+                LoadRewardedInterstitial();
+            };
             ad.OnAdFullScreenContentClosed += () => AdMobDispatcher.Post(() => AdMobDispatcher.Later(0.3f, finish));
             ad.OnAdFullScreenContentFailed += error => AdMobDispatcher.Post(finish);
             Pause();

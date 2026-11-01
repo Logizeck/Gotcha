@@ -177,7 +177,7 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 ## Vite
 - 5 cuori pulsanti sotto la barra in alto (toccandoli si apre il pannello delle vite). Ogni fallimento costa una
   vita (gli Easter egg no: sono scoperte; si cambia con `easterEggCostsLife` su GameFlow).
-- Se ne ricarica una ogni 15 minuti; +1 guardando una pubblicità (simulata, 5 secondi); +1 per ogni amico che
+- Se ne ricarica una ogni 30 minuti (dalla 0.76; prima 15); +1 guardando una pubblicità (simulata, 5 secondi); +1 per ogni amico che
   accetta l'invito. A zero vite compare "OUT OF LIVES!" con attesa, pubblicità e invito.
 - Cambiare l'ora del telefono non serve: la ricarica usa il tempo dall'accensione (SystemClock.elapsedRealtime,
   non modificabile) e il contatore dei riavvii; dopo un riavvio si accredita solo il tempo dall'accensione. I dati
@@ -266,6 +266,15 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
   progresso compare anche **CONTINUE (LEVEL N)**.
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
+
+## Prossima release (0.76) — già pronto su main
+- **Consenso cookie al primo avvio e annunci**: R8 rinominava le classi Java di Google Mobile Ads e del consenso UMP che
+  il plugin chiama per nome dal C#, così la richiesta non partiva. `GotchaProguard` ora le protegge
+  (`com.google.unity.**`, `com.google.android.gms.ads.**`, `com.google.ads.**`, `com.google.android.ump.**`).
+- **Rewarded interstitial** (`rewardedInterstitialId` in `AdMobIds.json`, facoltativo): si usa per i pulsanti
+  "WATCH AD" quando il rewarded normale non è pronto.
+- **Pubblicità**: una ogni **8 livelli** superati o ogni **120 secondi** di gioco attivo (prima 5 livelli / 140 s).
+- **Vite**: se ne ricarica una ogni **30 minuti** (prima 15).
 
 ## Versione 0.75 — Livelli 275-276 e punture di vespa
 - Ordine in `Assets/Editor/GotchaLevels75.cs`; builder `GotchaLevels75A/B.cs`; runtime `Assets/Scripts/Levels/V75`;

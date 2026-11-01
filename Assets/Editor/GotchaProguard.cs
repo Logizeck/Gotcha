@@ -23,7 +23,12 @@ public class GotchaProguard : IPostGenerateGradleAndroidProject
         "# notifiche Unity (com.unity.mobile.notifications): il plugin usa reflection e callback per nome\n" +
         "-keep class com.unity.androidnotifications.** { *; }\n" +
         "# plugin Google Mobile Ads: il codice Java del plugin viene chiamato dal C# per nome\n" +
-        "-keep class com.google.unity.ads.** { *; }\n" +
+        "-keep class com.google.unity.** { *; }\n" +
+        "# SDK di Google Mobile Ads e del consenso UMP: il plugin crea i loro oggetti e i loro listener (AndroidJavaProxy)\n" +
+        "# dal C# usando il NOME delle classi; se R8 li rinomina il modulo dei cookie non arriva mai e gli annunci non partono\n" +
+        "-keep public class com.google.android.gms.ads.** { public *; }\n" +
+        "-keep public class com.google.ads.** { public *; }\n" +
+        "-keep class com.google.android.ump.** { *; }\n" +
         "# il plugin contiene anche il ponte per il nuovo SDK \"next-gen\" di Google, che non usiamo e non è incluso:\n" +
         "# R8 si fermerebbe per le classi mancanti (Missing class com.google.android.libraries.ads.mobile.sdk...)\n" +
         "-dontwarn com.google.android.libraries.ads.mobile.sdk.**\n" +
