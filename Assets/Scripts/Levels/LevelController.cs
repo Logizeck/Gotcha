@@ -23,6 +23,12 @@ namespace Gotcha.Levels
         public virtual string[] DynamicHints => null;
 
         protected void Win() { Finish(LevelResult.Solved, null); }
+
+        /// <summary>Complimento su misura per la schermata di vittoria (al posto di "Nice one."), dalla 0.76.</summary>
+        public string WinCompliment { get; private set; }
+
+        /// <summary>Vittoria con un complimento specifico del livello (es. "YOU OUTSMARTED A BUTTON!").</summary>
+        protected void Win(string compliment) { WinCompliment = compliment; Win(); }
         protected void Fail() { Finish(LevelResult.Failed, null); }
 
         /// <summary>Frase di scherno su misura per la schermata GOTCHA! (al posto di quella a caso).</summary>

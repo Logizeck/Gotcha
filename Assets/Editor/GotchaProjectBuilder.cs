@@ -31,7 +31,7 @@ public static partial class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 69;
+    const int BuilderVersion = 70;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -224,6 +224,10 @@ public static partial class GotchaProjectBuilder
         levels.AddRange(Levels73());   // 271-272
         levels.AddRange(Levels74());   // 273-274
         levels.AddRange(Levels75());   // 275 (Toni) - 276
+        // dalla 0.76 l'ordine di gioco è quello della roadmap 1-300 (GotchaLevelOrder.cs); i livelli nuovi si aggiungono
+        // qui sopra (o in una lista nuova) e prendono da soli la posizione prevista dalla roadmap
+        levels.AddRange(Levels76());   // roadmap 2 e 5
+        levels = ApplyRoadmapOrder(levels, out List<LevelDefinition> bonusLevels);
 
         LevelCatalog catalog = LoadOrCreate<LevelCatalog>(LevelDir + "/LevelCatalog.asset");
         catalog.levels = levels;
@@ -231,7 +235,9 @@ public static partial class GotchaProjectBuilder
         AssetDatabase.SaveAssets();
 
         BuildScene(catalog);
-        RemoveStaleAssets(levels);
+        var keepLevels = new List<LevelDefinition>(levels);
+        keepLevels.AddRange(bonusLevels);   // i bonus fuori progressione (es. il carlino mannaro) restano nel progetto
+        RemoveStaleAssets(keepLevels);
         ConfigurePlayer();
         File.WriteAllText(VersionFile, BuilderVersion.ToString());
         Debug.Log("[Gotcha] Scena e livelli generati. Apri " + ScenePath + " e premi Play.");

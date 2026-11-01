@@ -110,7 +110,26 @@ namespace Gotcha.Core
         }
 
         /// <summary>Primo livello non ancora risolto (per "Continua").</summary>
-        public int ResumeIndex => Mathf.Clamp(SaveData.HighestUnlocked, 0, Mathf.Max(0, LevelCount - 1));
+        public int ResumeIndex => Gotcha.Progress.ProgressLogic.Frontier(LevelIds, SaveData.IsCompleted);
+
+        /// <summary>Gli identificativi dei livelli nell'ordine attuale (i progressi sono legati a questi, non alla posizione).</summary>
+        public System.Collections.Generic.IList<string> LevelIds
+        {
+            get
+            {
+                if (levelIds == null || levelIds.Count != LevelCount)
+                {
+                    levelIds = new System.Collections.Generic.List<string>(LevelCount);
+                    for (int i = 0; i < LevelCount; i++) levelIds.Add(catalog.levels[i] != null ? catalog.levels[i].levelId : "");
+                }
+                return levelIds;
+            }
+        }
+        System.Collections.Generic.List<string> levelIds;
+
+        /// <summary>Livello giocabile: già superato, oppure non oltre il primo non superato (o tutto aperto in beta).</summary>
+        public bool IsUnlocked(int index) =>
+            AllLevelsOpen || Gotcha.Progress.ProgressLogic.IsOpen(index, LevelIds, SaveData.IsCompleted);
 
         // All'avvio non parte nessun livello: la UI mostra la schermata del titolo.
 
@@ -182,7 +201,7 @@ namespace Gotcha.Core
             Ads.RegisterLevelResult(result == LevelResult.Solved);
             if (result == LevelResult.Solved)
             {
-                SaveData.UnlockUpTo(CurrentIndex + 1);
+                SaveData.MarkCompleted(CurrentDefinition != null ? CurrentDefinition.levelId : null);
                 DailyReward.RegisterSolved();   // obiettivo del giorno: 5 livelli superati
                 if (ComebackNotifier.Instance != null) ComebackNotifier.Instance.AskPermissionOnce();
             }
@@ -193,12 +212,19 @@ namespace Gotcha.Core
 
         /// <summary>
         /// Da chiamare quando il giocatore preme "Avanti"/"Riprova" (dopo l'eventuale schermata di condivisione).
-        /// Se è dovuta (5 livelli superati o 140 s di gioco dall'ultima), la pubblicità parte qui, alla fine del
+        /// Se è dovuta (8 livelli superati o 120 s di gioco dall'ultima), la pubblicità parte qui, alla fine del
         /// livello, sia dopo una vittoria sia dopo una sconfitta.
         /// </summary>
         public void Continue()
         {
             int next = lastResult == LevelResult.Solved ? CurrentIndex + 1 : CurrentIndex;
+            // chi è già avanti e ha appena giocato un livello nuovo inserito presto: si salta al prossimo non superato,
+            // invece di rigiocare quelli già fatti
+            if (lastResult == LevelResult.Solved && next < LevelCount && SaveData.IsCompleted(LevelIds[next]))
+            {
+                int frontier = ResumeIndex;
+                if (frontier > next && !SaveData.IsCompleted(LevelIds[frontier])) next = frontier;
+            }
             if (next >= LevelCount)
             {
                 if (MusicPlayer.Instance != null) MusicPlayer.Instance.Play(MusicTrack.Title);
