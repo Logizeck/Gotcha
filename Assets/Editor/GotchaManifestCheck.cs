@@ -35,6 +35,10 @@ public static class GotchaManifestCheck
             }
             File.WriteAllText(aab + ".manifest.xml", xml);
             string report = Summarize(xml, aab);
+            // configurazione del bundle (divisione per ABI/densità/lingua/texture, livelli dispositivo, ottimizzazioni):
+            // anche questa decide su quali dispositivi Play può installare l'app
+            string config = Bundletool("dump config --bundle \"" + aab + "\"", out string configError);
+            report += "\nBUNDLE CONFIG:\n" + (config ?? ("(non leggibile: " + configError + ")")).Trim() + "\n";
             File.WriteAllText(aab + ".report.txt", report);
             UnityEngine.Debug.Log("[Gotcha] Manifest dell'AAB:\n" + report);
             EditorUtility.DisplayDialog("Gotcha! — manifest AAB", report.Length > 2500 ? report.Substring(0, 2500) + "\n..." : report, "OK");
@@ -46,7 +50,10 @@ public static class GotchaManifestCheck
         }
     }
 
-    static string DumpManifest(string aab, out string error)
+    static string DumpManifest(string aab, out string error) => Bundletool("dump manifest --bundle \"" + aab + "\"", out error);
+
+    /// <summary>Esegue il bundletool di Unity con il JDK di Unity; restituisce l'output o null (errore in <paramref name="error"/>).</summary>
+    static string Bundletool(string args, out string error)
     {
         error = null;
         string engine = BuildPipeline.GetPlaybackEngineDirectory(BuildTarget.Android, BuildOptions.None);
@@ -55,7 +62,7 @@ public static class GotchaManifestCheck
             : null;
         if (jar == null) { error = "bundletool non trovato in " + engine; return null; }
         string java = FindJava(engine);
-        var psi = new ProcessStartInfo(java, "-jar \"" + jar + "\" dump manifest --bundle \"" + aab + "\"")
+        var psi = new ProcessStartInfo(java, "-jar \"" + jar + "\" " + args)
         {
             UseShellExecute = false,
             RedirectStandardOutput = true,
@@ -131,6 +138,8 @@ public static class GotchaManifestCheck
 
         // DEX e metadati R8: dimensioni dei .dex (non compressi) e file in BUNDLE-METADATA (mapping, metadati R8)
         var entries = ZipEntries(File.ReadAllBytes(aab));
+        var modules = entries.Select(e => e.name.Split('/')[0]).Where(m => m.Length > 0 && m != "BUNDLE-METADATA" && m != "META-INF" && !m.EndsWith(".pb")).Distinct().ToArray();
+        sb.AppendLine("Moduli e asset pack: " + (modules.Length > 0 ? string.Join(", ", modules) : "nessuno") + "  (" + entries.Count + " file)");
         var dex = entries.Where(e => e.name.EndsWith(".dex", StringComparison.Ordinal)).ToArray();
         long dexBytes = dex.Sum(e => e.size);
         sb.AppendLine("AAB: " + (new FileInfo(aab).Length / 1024) + " KB");
@@ -149,7 +158,7 @@ public static class GotchaManifestCheck
     static System.Collections.Generic.List<(string name, long size)> ZipEntries(byte[] b)
     {
         var list = new System.Collections.Generic.List<(string, long)>();
-        for (int i = b.Length - 46; i >= 0; i--)
+        for (int i = b.Length - 22; i >= 0; i--)
         {
             // fine della central directory: "PK\x05\x06"
             if (b[i] != 0x50 || b[i + 1] != 0x4b || b[i + 2] != 0x05 || b[i + 3] != 0x06) continue;
