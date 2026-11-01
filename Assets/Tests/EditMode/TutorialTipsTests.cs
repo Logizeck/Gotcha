@@ -53,26 +53,19 @@ namespace Gotcha.Tests
             Assert.IsFalse(TutorialTips.TryGet("", out _));
             Assert.IsFalse(TutorialTips.TryGet(null, out _));
             Assert.IsFalse(TutorialTips.TryGet("KEY_DOOR", out _));
-            Assert.IsFalse(TutorialTips.ShouldShow("bug_spray", 8, 0, out _));
+            Assert.IsFalse(TutorialTips.ShouldShow("bug_spray", false, out _));
         }
 
         [Test]
         public void ShownUntilTheLevelHasBeenSolvedOnce()
         {
-            // nuovo giocatore: il primo livello mostra il consiglio, anche ai tentativi successivi (nessun livello sbloccato in più)
-            Assert.IsTrue(TutorialTips.ShouldShow("key_door", 0, 0, out TutorialTip tip));
+            // dalla 0.76 "superato" è per identificativo (SaveData.IsCompleted), non per posizione
+            Assert.IsTrue(TutorialTips.ShouldShow("key_door", false, out TutorialTip tip));
             Assert.AreEqual(TipIcon.Pinch, tip.Icon);
-            Assert.IsTrue(TutorialTips.ShouldShow("key_door", 0, 0, out _));
-            // superato il primo (sbloccato il secondo): rigiocandolo niente consiglio, il secondo invece sì
-            Assert.IsFalse(TutorialTips.ShouldShow("key_door", 0, 1, out _));
-            Assert.IsTrue(TutorialTips.ShouldShow("tilt_maze", 1, 1, out _));
-            // giocatore avanti (es. livello 20 sbloccato): nessun consiglio nei primi 8
-            for (int i = 0; i < FirstEight.Length; i++) Assert.IsFalse(TutorialTips.ShouldShow(FirstEight[i], i, 20, out _));
-            // modalità beta / tutti i livelli aperti: un livello non ancora superato mostra il consiglio anche se si salta avanti
-            Assert.IsTrue(TutorialTips.ShouldShow("hold_both", 7, 2, out _));
-            // l'ultimo dei primi otto superato
-            Assert.IsFalse(TutorialTips.ShouldShow("hold_both", 7, 8, out _));
-            Assert.IsFalse(TutorialTips.ShouldShow("key_door", -1, 0, out _));
+            Assert.IsTrue(TutorialTips.ShouldShow("key_door", false, out _));
+            Assert.IsFalse(TutorialTips.ShouldShow("key_door", true, out _));
+            for (int i = 0; i < FirstEight.Length; i++) Assert.IsFalse(TutorialTips.ShouldShow(FirstEight[i], true, out _));
+            for (int i = 0; i < FirstEight.Length; i++) Assert.IsTrue(TutorialTips.ShouldShow(FirstEight[i], false, out _));
         }
 
         [Test]

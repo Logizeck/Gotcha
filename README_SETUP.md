@@ -267,7 +267,27 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
-## Prossima release (0.76) — già pronto su main
+## Versione 0.76 — Roadmap 1-300, progressi per livello, livelli 2 e 5, Easter egg epici
+- **Ordine dei livelli = roadmap del proprietario** (`Gotcha_roadmap_300_retention_virality.xlsx`, foglio "Sequenza
+  1-300"), scritto in `Assets/Editor/GotchaLevelOrder.cs` per identificativo. I 25 livelli nuovi hanno già il loro id:
+  finché non sono pronti vengono saltati (quelli dopo scalano), quando arrivano prendono da soli la loro posizione.
+  Per ora Toni non cade esattamente sui multipli di 25 (STUCK! è al 19): coinciderà quando i nuovi saranno tutti pronti.
+  TONI THE WERE-PUG esce dalla progressione (bonus di Halloween: prefab e disegni restano).
+- **Progressi per identificativo** (`SaveData.IsCompleted/MarkCompleted`, `UI/Logic/ProgressLogic.cs`): aperti i livelli
+  già superati e tutti quelli fino al primo non superato. Al primo avvio della 0.76 il vecchio "livello più alto
+  sbloccato" viene convertito con l'ordine della 0.75 (`UI/Logic/LegacyOrder.cs`): nessun livello superato va perso. Chi
+  è avanti trova come prossimo livello il primo nuovo inserito presto; superato quello, si salta al successivo non fatto.
+- **Festa di vittoria comune** dei livelli nuovi: `Levels/Common/LevelReward.cs` + `RewardRig` (`GotchaReward.cs`),
+  complimento del livello (anche nella schermata SOLVED! con `Win(complimento)`), bagliore neon, coriandoli, arpeggio.
+- **Livelli nuovi** (`GotchaLevels76.cs`, builder `76A/B`, runtime `Levels/V76`, non si possono perdere):
+  - 2 **The Shy Button**: il pulsante START scappa a ogni tocco; tienilo fermo con un dito (0,25 s) e toccalo con un
+    secondo dito. Tasti Editor: H tieni, J secondo dito, T tocco.
+  - 5 **The Cowardly Lion**: il leone ruggisce sempre di più; la criniera è un costume: trascinala via (oltre 1,6) e
+    sotto c'è un gattino che scappa. Tasti Editor: T tocca, B ROAR, D toglie la criniera.
+- **Easter egg epici** (`UI/EggCelebration.cs`, `UI/Logic/EggCelebrationTimeline.cs`, `GotchaEggFanfare.cs`): prima
+  della schermata del risultato, 5 s con la fanfara `Assets/Audio/Sfx/EasterEggFanfare.ogg` (musica abbassata e poi
+  ripristinata): raggi dorati, uovo d'oro, "SECRET FOUND!" con flash e vibrazione, nome del segreto, il pezzo nuovo
+  che vola nel puzzle di Toni e il contatore. Tocca per saltare dopo 1,5 s. Se il segreto era già trovato: 2,2 s.
 - **Consenso cookie al primo avvio e annunci**: R8 rinominava le classi Java di Google Mobile Ads e del consenso UMP che
   il plugin chiama per nome dal C#, così la richiesta non partiva. `GotchaProguard` ora le protegge
   (`com.google.unity.**`, `com.google.android.gms.ads.**`, `com.google.ads.**`, `com.google.android.ump.**`).

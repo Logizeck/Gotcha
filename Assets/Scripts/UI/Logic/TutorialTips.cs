@@ -68,17 +68,12 @@ namespace Gotcha.UI
             return false;
         }
 
-        /// <summary>
-        /// Livello superato almeno una volta: superare il livello di posizione i sblocca i + 1 (SaveData.UnlockUpTo),
-        /// quindi è superato se il più alto sbloccato è oltre la sua posizione.
-        /// </summary>
-        public static bool Completed(int levelIndex, int highestUnlocked) => highestUnlocked > levelIndex;
-
         /// <summary>Il consiglio da mostrare all'avvio del livello: solo per i livelli col consiglio, e solo finché non sono stati superati.</summary>
-        public static bool ShouldShow(string levelId, int levelIndex, int highestUnlocked, out TutorialTip tip)
+        /// (Dalla 0.76 "superato" viene dall'elenco dei livelli superati, per identificativo: SaveData.IsCompleted.)
+        public static bool ShouldShow(string levelId, bool completed, out TutorialTip tip)
         {
-            if (levelIndex < 0 || !TryGet(levelId, out tip)) { tip = default; return false; }
-            if (Completed(levelIndex, highestUnlocked)) { tip = default; return false; }
+            if (!TryGet(levelId, out tip)) { tip = default; return false; }
+            if (completed) { tip = default; return false; }
             return true;
         }
 

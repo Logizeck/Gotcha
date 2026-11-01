@@ -15,14 +15,14 @@ namespace Gotcha.UI
     /// barra in alto (Menu, titolo, Hint), pannelli Hint, Menu, Impostazioni, Esito livello e Fine gioco. Si aggancia agli eventi di GameFlow.
     /// Menu e Hint mettono in pausa il gioco; il tasto Indietro di Android apre/chiude il menu.
     /// </summary>
-    public class GameUI : MonoBehaviour
+    public partial class GameUI : MonoBehaviour   // la scena degli Easter egg è in EggCelebration.cs
     {
         static GameUI current;
         /// <summary>La schermata del titolo è aperta (il logo animato si mostra solo lì).</summary>
         public static bool TitleShown => current != null && current.titlePanel != null && current.titlePanel.activeSelf;
 
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.75";
+        public const string Version = "0.76";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
@@ -137,9 +137,11 @@ namespace Gotcha.UI
             if (betaPanel.activeSelf && betaAdTest.activeSelf) betaAdStatus.text = "ADS: " + flow.Ads.Status;
             if (hintPanel.activeSelf && !shopPanel.activeSelf) SwipeHints();
             UpdateTip();
+            UpdateEggCelebration();
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                if (rewardPanel.activeSelf) { }   // il premio va scelto
+                if (EggCelebrating) SkipEggCelebration();   // "SECRET FOUND!": Indietro = tocco per saltare
+                else if (rewardPanel.activeSelf) { }   // il premio va scelto
                 else if (shopPanel.activeSelf) CloseShop();
                 else if (livesPanel.activeSelf) { if (pendingLevel >= 0 && !flow.Lives.CanPlay && !titlePanel.activeSelf) LivesToMenu(); else CloseLives(); }
                 else if (betaPanel.activeSelf) betaPanel.SetActive(false);
@@ -156,6 +158,8 @@ namespace Gotcha.UI
 
         void OnLevelStarted(LevelDefinition def, int index)
         {
+            AbortEggCelebration();
+            eggsAtLevelStart = SaveData.EasterEggCount;   // per capire, alla fine, se il segreto trovato è nuovo
             titleText.text = def.title;
             titlePanel.SetActive(false);
             settingsPanel.SetActive(false);
@@ -165,7 +169,7 @@ namespace Gotcha.UI
             completedPanel.SetActive(false);
             // mini tutorial dei primi 8 livelli: il consiglio si vede finché il livello non è mai stato superato
             HideTip();
-            if (TutorialTips.ShouldShow(def.levelId, index, SaveData.HighestUnlocked, out TutorialTip tip)) ShowTip(tip);
+            if (TutorialTips.ShouldShow(def.levelId, SaveData.IsCompleted(def.levelId), out TutorialTip tip)) ShowTip(tip);
         }
 
         void OnLevelFinished(LevelDefinition def, LevelResult result, string eggId)
@@ -175,11 +179,25 @@ namespace Gotcha.UI
             menuPanel.SetActive(false);
             flow.Paused = false;
 
+            // Easter egg trovato: prima la scena "SECRET FOUND!" (completa alla prima scoperta, breve se era già
+            // stato trovato), poi l'esito del livello come sempre
+            if (!string.IsNullOrEmpty(eggId))
+            {
+                bool firstTime = eggsAtLevelStart < 0 || SaveData.EasterEggCount > eggsAtLevelStart;
+                PlayEggCelebration(eggId, firstTime, () => ShowLevelResult(result, eggId));
+                return;
+            }
+            ShowLevelResult(result, eggId);
+        }
+
+        void ShowLevelResult(LevelResult result, string eggId)
+        {
             bool solved = result == LevelResult.Solved;
             resultTitle.text = solved ? "SOLVED!" : "GOTCHA!";
             lastEggId = eggId;
             string secret = string.IsNullOrEmpty(eggId) ? "" : "\"" + EasterEggs.Name(eggId) + "\"";
-            if (solved) resultBody.text = string.IsNullOrEmpty(eggId) ? "Nice one." : "Solved... AND you found the secret\n" + secret + "!\nPuzzle: " + EggPuzzle.Unlocked + " / " + EggPuzzle.Pieces + " pieces";
+            string compliment = flow.Current != null ? flow.Current.WinCompliment : null;
+            if (solved) resultBody.text = string.IsNullOrEmpty(eggId) ? (string.IsNullOrEmpty(compliment) ? "Nice one." : compliment) : "Solved... AND you found the secret\n" + secret + "!\nPuzzle: " + EggPuzzle.Unlocked + " / " + EggPuzzle.Pieces + " pieces";
             else if (!string.IsNullOrEmpty(eggId)) resultBody.text = "Secret found:\n" + secret + "!\nPuzzle: " + EggPuzzle.Unlocked + " / " + EggPuzzle.Pieces + " pieces";
             else
             {
@@ -455,6 +473,7 @@ namespace Gotcha.UI
 
         void ShowTitle()
         {
+            AbortEggCelebration();
             HideTip();
             flow.StopLevel();
             titleText.text = "";
@@ -683,7 +702,7 @@ namespace Gotcha.UI
 
         void RefreshSettingsInfo()
         {
-            settingsInfo.text = (privacyNote != null ? privacyNote + "\n" : "") + "Levels: " + Mathf.Min(SaveData.HighestUnlocked + 1, flow.LevelCount) + " / " + flow.LevelCount +
+            settingsInfo.text = (privacyNote != null ? privacyNote + "\n" : "") + "Levels solved: " + SaveData.CompletedCount + " / " + flow.LevelCount +
                 "\nEaster eggs found: " + SaveData.EasterEggCount + "\nVersion " + Version + (BetaMode.Active ? "  -  BETA MODE ON" : "") +
                 // con gli annunci di prova (ID reali non ancora inseriti) lo stato della pubblicità, per le verifiche
                 (Gotcha.Ads.AdMobIds.UsingTestAds ? "\nADS: " + flow.Ads.Status.Replace("\n", " | ") : "");
@@ -725,7 +744,6 @@ namespace Gotcha.UI
 
             int count = flow.LevelCount;
             int pages = Mathf.Max(1, (count + LevelsPerPage - 1) / LevelsPerPage);
-            int unlocked = Mathf.Min(SaveData.HighestUnlocked, count - 1);
             for (int p = 0; p < pages; p++)
             {
                 RectTransform page = CreateRect("Page" + p, pagesContent, new Vector2(p, 0f), new Vector2(p + 1, 1f));
@@ -734,7 +752,7 @@ namespace Gotcha.UI
                     int index = p * LevelsPerPage + k;
                     if (index >= count) break;
                     int col = k % 2, row = k / 2;
-                    RectTransform cell = LevelCell(page, index, GameFlow.AllLevelsOpen || index <= unlocked);
+                    RectTransform cell = LevelCell(page, index, flow.IsUnlocked(index));
                     Place(cell, new Vector2(col * 0.5f + 0.015f, 1f - (row + 1) * 0.2f + 0.012f), new Vector2((col + 1) * 0.5f - 0.015f, 1f - row * 0.2f - 0.012f));
                 }
                 Image dot = CreateRect("Dot" + p, pageDots, Vector2.zero, Vector2.zero).gameObject.AddComponent<Image>();
@@ -1528,6 +1546,9 @@ namespace Gotcha.UI
                 ShowTitle();
             }).transform, new Vector2(0.2f, 0.06f), new Vector2(0.8f, 0.24f));
             shopPanel.transform.SetAsLastSibling();   // il negozio si apre anche sopra il pannello delle vite
+
+            // "SECRET FOUND!" degli Easter egg (quando parte si porta sopra a tutto)
+            BuildEggCelebration();
         }
 
         void ApplySafeArea()
