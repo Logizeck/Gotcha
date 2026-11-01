@@ -17,7 +17,7 @@ namespace Gotcha.Levels
         [SerializeField] SpeechBubble bubble;
 
         [Tooltip("Punture prima di perdere: la prima fa solo male (la vespa torna al suo posto), la seconda è fatale.")]
-        [SerializeField] int stingsAllowed = 2;
+        [SerializeField] int stingsAllowed = 1;   // nei labirinti basta una puntura (dalla 0.75)
 
         GoalZone goal;
         bool over, hurting;

@@ -117,7 +117,7 @@ namespace Gotcha.Levels
                 if (!MoveBug(b) || hurt > 0f) continue;
                 stings++;
                 Haptics.Medium();
-                if (stings >= 2) { done = true; StartCoroutine(Stung()); return; }
+                if (stings >= 1) { done = true; StartCoroutine(Stung()); return; }   // gatto che dorme: basta una puntura (dalla 0.75)
                 // prima puntura: il gatto salta, la vespa viene ricacciata al suo posto
                 hurt = 1.2f;
                 b.t.position = new Vector3(b.home.x, b.home.y, b.t.position.z);

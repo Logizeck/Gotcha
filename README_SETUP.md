@@ -267,6 +267,12 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.75 — Punture di vespa
+- **Labirinti con le vespe** (`WaspMazeLevel`, `DarkMazeLevel`) e **livelli col gatto che dorme** (`DefendLevel`):
+  basta **una** puntura per perdere il livello. Nei livelli con la **paletta** (`WaspLevel`) ne servono ancora **due**.
+- Da qui in poi ogni livello nuovo ha almeno un modo per essere **perso** (Fail con battuta), sempre annunciato
+  (conto alla rovescia visibile o avviso al primo/secondo errore).
+
 ## Versione 0.74 — Livelli 273-274
 - Ordine in `Assets/Editor/GotchaLevels74.cs`; builder `GotchaLevels74A/B.cs`; runtime `Assets/Scripts/Levels/V74`;
   logica `V64/Logic/PiggyBankLogic.cs`, `CryingOnionLogic.cs`; test `V74*Tests.cs`. Niente Easter egg, niente Toni.

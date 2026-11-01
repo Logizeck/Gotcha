@@ -74,7 +74,7 @@ namespace Gotcha.Levels
             if (over || hurting || IsFinished) return;
             stings++;
             Haptics.Medium();
-            if (stings < 2) { StartCoroutine(Ouch()); return; }   // la prima puntura fa solo male
+            if (stings < 1) { StartCoroutine(Ouch()); return; }   // dalla 0.75 nei labirinti basta una puntura
             over = true;
             StartCoroutine(Stung());
         }
