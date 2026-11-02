@@ -51,7 +51,7 @@ namespace Gotcha.Levels
         [SerializeField] Transform infoHolder;
 
         const string Compliment = "KING OF THE JUNGLE DEFEATED!";
-        const float TapSlop = 0.2f, RoarShow = 0.55f, GrowPerLevel = 0.05f;
+        const float TapSlop = 0.2f, RoarShow = 0.55f, GrowPerLevel = 0.035f;   // al ruggito massimo la criniera non tocca la fascia dei messaggi
         const float ManeMinX = -2.25f, ManeMaxX = 2.25f, ManeMinY = -4.1f, ManeMaxY = 2.55f;
 
         static readonly string[] CappedLines = { "ROAAAAAAR! ...it can't get any bigger.", "Maximum scary. Still just roaring.", "ROAAAAAAR! (same size. it tried.)" };
@@ -470,7 +470,10 @@ namespace Gotcha.Levels
             Vector3 home = ManeHomeWorld();
             if (Vector2.Distance(mane.position, home) < CowardlyLionLogic.RevealDistance)
                 mane.position = home + new Vector3(home.x > 0f ? -1.75f : 1.75f, -0.3f, 0f);   // ripresa dopo uno spegnimento
-            Vector3 ground = new Vector3(Mathf.Clamp(mane.position.x, ManeMinX, ManeMaxX), Mathf.Min(mane.position.y, -2.9f), mane.position.z);
+            // a terra di lato e un po' più piccola, così non copre il pulsante ROAR
+            float side = mane.position.x >= 0f ? 1f : -1f;
+            Vector3 ground = new Vector3(Mathf.Clamp(side * 1.6f, ManeMinX, ManeMaxX), -2.35f, mane.position.z);
+            StartCoroutine(HalloweenKit.ScaleTo(mane, mane.localScale * 0.75f, 0.25f));
             yield return HalloweenKit.Move(mane, ground, 0.25f);
             mane.localRotation = Quaternion.Euler(0f, 0f, mane.position.x > 0f ? -18f : 18f);
             V76CowardlyLionSound.Play(this, "thud", 0.5f);
