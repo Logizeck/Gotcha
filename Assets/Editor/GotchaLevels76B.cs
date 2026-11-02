@@ -71,7 +71,7 @@ public static partial class GotchaProjectBuilder
         Transform trophyLanding = Child(r, "TrophyLanding", new Vector2(0f, -2.6f)).transform;
 
         HW_Goal(r, "SCARE THE LION.");
-        TextMesh info = HW_Toast(r, new Vector2(0f, 2.62f), out Transform infoHolder);
+        TextMesh info = HW_Toast(r, new Vector2(0f, 2.85f), out Transform infoHolder);
         SetField(level, "rig", lion);
         SetField(level, "body", body);
         SetField(level, "bodyArea", bodyCol);

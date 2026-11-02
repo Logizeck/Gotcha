@@ -267,6 +267,18 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.77 — Livelli 8 e 10 della roadmap
+- Ordine in `Assets/Editor/GotchaLevels77.cs` (posizione dalla roadmap); builder `GotchaLevels77A/B.cs`; runtime
+  `Assets/Scripts/Levels/V77`; logica `V64/Logic/LoveTheBugLogic.cs`, `HalfFullLogic.cs`; test `V77*Tests.cs`.
+  Festa comune `LevelReward`; non si possono perdere.
+  - 8 **Love the Bug**: ogni tocco divide l'insetto (massimo 8) e l'app finta peggiora; tieni premuto un insetto per
+    2 s: diventa un cuore e l'app si ripara. Tasti Editor: T tocco, H tieni/lascia, M scivola via.
+  - 10 **Half Full**: acqua e bicchiere non servono; togli EMPTY dal fumetto e metti FULL dal cartello "STAY FULL"
+    (anche FULL direttamente su EMPTY). Le zone di rilascio si calcolano dalla larghezza delle parole (traduzioni).
+    Tasti Editor: P versa, E toglie EMPTY, W mette FULL.
+- Leone (5): cresce meno quando ruggisce e la fascia dei messaggi è più in alto (la criniera non la tocca più); nel
+  finale la criniera cade di lato e più piccola, senza coprire il pulsante ROAR.
+
 ## Versione 0.76 — Roadmap 1-300, progressi per livello, livelli 2 e 5, Easter egg epici
 - **Ordine dei livelli = roadmap del proprietario** (`Gotcha_roadmap_300_retention_virality.xlsx`, foglio "Sequenza
   1-300"), scritto in `Assets/Editor/GotchaLevelOrder.cs` per identificativo. I 25 livelli nuovi hanno già il loro id:
