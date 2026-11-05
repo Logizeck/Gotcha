@@ -290,7 +290,7 @@ public static partial class GotchaProjectBuilder
         "snow_globe",                  // 272 SNOW GLOBE (old 147)
         "knight_quest",                // 273 KNIGHT'S QUEST (old 148)
         "the_gauntlet",                // 274 THE GAUNTLET (old 149)
-        "v75_toni_armchair",           // 275 TONI'S ARMCHAIR (old 275)
+        "toni_final_exam",             // 275 TONI'S FINAL EXAM (old 260) — al 275 per richiesta del proprietario (0.81)
         "v64_fingerprint_thief",       // 276 THE FINGERPRINT THIEF (old 251)
         "v62_wake_kitty",              // 277 WAKE UP, KITTY! (old 252)
         "v64_plastic_fish",            // 278 THE FISH THAT IS AFRAID OF WATER (old 253)
@@ -315,8 +315,14 @@ public static partial class GotchaProjectBuilder
         "v74_piggy_bank",              // 297 THE PIGGY BANK (old 273)
         "v74_crying_onion",            // 298 THE CRYING ONION (old 274)
         "v75_locked_bike",             // 299 THE LOCKED BIKE (old 276)
-        "toni_final_exam",             // 300 TONI'S FINAL EXAM (old 260)
+        "v75_toni_armchair",           // 300 TONI'S ARMCHAIR (old 275) — scambiato con l'esame finale (0.81)
     };
+
+    /// <summary>
+    /// Livelli con un numero fisso anche finché mancano livelli nuovi prima di loro (dalla 0.81: l'esame finale di Toni
+    /// è sempre il 275, non l'ultimo). Con tutti i 300 livelli pronti coincide con la posizione della roadmap.
+    /// </summary>
+    static readonly (string id, int number)[] PinnedLevels = { ("toni_final_exam", 275) };
 
     /// <summary>Livelli costruiti ma fuori dalla progressione (bonus stagionali): il prefab resta, il catalogo no.</summary>
     static readonly string[] BonusLevels = { "hw_werepug" };
@@ -344,6 +350,14 @@ public static partial class GotchaProjectBuilder
                 ordered.Add(d);
                 used.Add(d.levelId);
             }
+        foreach ((string id, int number) pin in PinnedLevels)
+        {
+            int at = ordered.FindIndex(d => d.levelId == pin.id);
+            if (at < 0) continue;
+            LevelDefinition d0 = ordered[at];
+            ordered.RemoveAt(at);
+            ordered.Insert(Mathf.Clamp(pin.number - 1, 0, ordered.Count), d0);
+        }
         if (missing > 0) Debug.Log("[Gotcha] Roadmap: " + ordered.Count + " livelli in gioco, " + missing + " livelli nuovi ancora da fare (saltati).");
         return ordered;
     }

@@ -267,6 +267,18 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.81 — Livelli 34 e 38, esame finale al 275, selettore livelli più veloce
+- Ordine in `Assets/Editor/GotchaLevels81.cs` (posizione dalla roadmap); builder `GotchaLevels81A/B.cs`; runtime
+  `Assets/Scripts/Levels/V81`; logica `V64/Logic/TooEasyLogic.cs`, `ImpossibleHugLogic.cs`; test `V81*Tests.cs`.
+  - 34 **Too Easy!**: il pulsante WIN scappa e prende in giro (non vince mai); l'obiettivo "COMPLETE THIS LEVEL." è fatto
+    di parole separate (righe misurate dalla larghezza, pronte per le traduzioni): tocca LEVEL. Tasti Editor: W, L, C, T.
+  - 38 **The Impossible Hug**: con un dito solo l'amico resiste e tornano indietro entrambi; un dito per amico (in
+    qualsiasi ordine) e portali al centro. Tasti Editor: H soluzione, O/I un dito solo, L un dito si stacca.
+- **Toni's Final Exam al 275** (richiesta del proprietario): nella roadmap scambiato con Toni's Armchair (ora al 300) e
+  fissato al 275 anche finché mancano livelli nuovi (`PinnedLevels` in `GotchaLevelOrder.cs`).
+- **Selettore livelli**: la barra dei puntini è un cursore (`UI/PageScrubber.cs`, logica `UI/Logic/PageScrub.cs`):
+  tocca o trascina per saltare a qualsiasi pagina; tenendo premute le frecce le pagine scorrono da sole, sempre più veloci.
+
 ## Versione 0.80 — Livelli 27 e 30 della roadmap
 - Ordine in `Assets/Editor/GotchaLevels80.cs` (posizione dalla roadmap); builder `GotchaLevels80A/B.cs`; runtime
   `Assets/Scripts/Levels/V80`; logica `V64/Logic/SadBalloonLogic.cs`, `InvisibleTreasureLogic.cs`; test `V80*Tests.cs`.

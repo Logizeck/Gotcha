@@ -22,7 +22,7 @@ namespace Gotcha.UI
         public static bool TitleShown => current != null && current.titlePanel != null && current.titlePanel.activeSelf;
 
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.80";
+        public const string Version = "0.81";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
@@ -1422,11 +1422,24 @@ namespace Gotcha.UI
             pager.viewport = viewport;
             pager.content = pagesContent;
             pager.PageChanged += OnPageChanged;
-            pageDots = CreateRect("Dots", menuCard, new Vector2(0.25f, 0.255f), new Vector2(0.75f, 0.305f));
-            Button prev = CreateButton(menuCard, "<", Dark, () => pager.SetPage(pager.Page - 1));
+            pageDots = CreateRect("Dots", menuCard, new Vector2(0.22f, 0.25f), new Vector2(0.78f, 0.31f));
+            // 0.81: la barra dei puntini è un cursore (tocca/trascina per saltare a qualsiasi pagina) e le frecce, tenute
+            // premute, scorrono da sole sempre più veloci
+            Image scrubHit = pageDots.gameObject.AddComponent<Image>();
+            SetSprite(scrubHit);
+            scrubHit.color = new Color(Ink.r, Ink.g, Ink.b, 0.07f);
+            PageScrubber scrubber = pageDots.gameObject.AddComponent<PageScrubber>();
+            scrubber.pager = pager;
+            scrubber.ScrubbingChanged += on => { if (pageLabel != null) pageLabel.color = on ? Accent : Ink; };
+            HoldRepeat prevHold = null, nextHold = null;
+            Button prev = CreateButton(menuCard, "<", Dark, () => { if (prevHold == null || !prevHold.ConsumeClick()) pager.SetPage(pager.Page - 1); });
             Place(prev.transform, new Vector2(0.06f, 0.25f), new Vector2(0.2f, 0.31f));
-            Button nextPage = CreateButton(menuCard, ">", Dark, () => pager.SetPage(pager.Page + 1));
+            prevHold = prev.gameObject.AddComponent<HoldRepeat>();
+            prevHold.step = () => pager.SetPage(pager.Page - 1, true);
+            Button nextPage = CreateButton(menuCard, ">", Dark, () => { if (nextHold == null || !nextHold.ConsumeClick()) pager.SetPage(pager.Page + 1); });
             Place(nextPage.transform, new Vector2(0.8f, 0.25f), new Vector2(0.94f, 0.31f));
+            nextHold = nextPage.gameObject.AddComponent<HoldRepeat>();
+            nextHold.step = () => pager.SetPage(pager.Page + 1, true);
             RectTransform musicRow = CreateRect("Row", menuCard, new Vector2(0.06f, 0.155f), new Vector2(0.94f, 0.235f));
             menuMusicRow = musicRow.gameObject;
             Button music = CreateButton(musicRow, "MUSIC: ON", Dark, ToggleMusic);
