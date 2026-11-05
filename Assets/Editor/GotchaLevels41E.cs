@@ -15,7 +15,7 @@ public static partial class GotchaProjectBuilder
         Define("MirrorTwins", "mirror_twins", "MIRROR TWINS", "Reflection can be useful.", BuildS41EMirrorTwins()),
         Define("TheHungryPrinter", "the_hungry_printer", "THE HUNGRY PRINTER", "The printer doesn't need special paper.", BuildS41EHungryPrinter()),
         Define("FingerMaze", "finger_maze", "FINGER MAZE", "Your finger is blocking the view.", BuildS41EFingerMaze()),
-        Define("FalseFinish", "false_finish", "FALSE FINISH", "The race isn't really over.", BuildS41EFalseFinish()),
+        Define("FalseFinish", "false_finish", "FALSE FINISH", "Who says the winner is the winner?", BuildS41EFalseFinish()),
         Define("Heartbeat", "heartbeat", "HEARTBEAT", "Listen with your hands.", BuildS41EHeartbeat()),
     };
 
@@ -386,20 +386,29 @@ public static partial class GotchaProjectBuilder
         mc.radius = 1.0f;
         mc.offset = new Vector2(0f, 0.15f);
 
-        Transform banner = Child(root.transform, "Banner", new Vector2(0f, -1.2f)).transform;
-        Bar(banner, "Ribbon", new Vector2(0f, 0.1f), new Vector2(6.2f, 1.5f), new Color(1f, 0.82f, 0.3f, 0.55f), 7);
-        TextMesh win = Fit(Label(banner, new Vector2(0f, 0.1f), 9, "YOU WIN!", 0.2f), 5.4f, 1.4f);
+        // il topolino sei TU (cartellino "YOU"): la scritta YOU WIN! compare al centro, sopra il vincitore, e va
+        // trascinata sul topo (0.78, richiesta del proprietario)
+        TextMesh youTag = Fit(Label(mouse, new Vector2(0f, 2.05f), 7, "YOU", 0.12f), 1.6f, 0.8f);
+        youTag.color = new Color(0.2f, 0.45f, 0.95f);
+
+        Transform banner = Child(root.transform, "Banner", new Vector2(0f, 1.3f)).transform;
+        banner.localScale = Vector3.one * 0.8f;
+        Bar(banner, "Ribbon", new Vector2(0f, 0.1f), new Vector2(6.2f, 1.5f), new Color(1f, 0.82f, 0.3f, 0.75f), 17);
+        TextMesh win = Fit(Label(banner, new Vector2(0f, 0.1f), 19, "YOU WIN!", 0.2f), 5.4f, 1.4f);
         win.color = new Color(0.85f, 0.15f, 0.25f);
-        Transform next = Child(banner, "Next", new Vector2(0f, -2.1f)).transform;
+        BoxCollider2D bc = banner.gameObject.AddComponent<BoxCollider2D>();
+        bc.size = new Vector2(6.2f, 1.7f);
+        bc.offset = new Vector2(0f, 0.1f);
+        Transform next = Child(root.transform, "Next", new Vector2(0f, -3.05f)).transform;
         Art(next, "Art", "s41e_next_btn", 10, false);
         Fit(Label(next, new Vector2(-0.15f, 0.02f), 11, "NEXT", 0.07f), 1.2f, 0.5f).color = Color.white;
         BoxCollider2D nc = next.gameObject.AddComponent<BoxCollider2D>();
         nc.size = new Vector2(1.9f, 0.9f);
 
-        Transform trophy = Child(root.transform, "Trophy", new Vector2(2.3f, -0.75f)).transform;
-        trophy.localScale = Vector3.one * 0.7f;
+        Transform trophy = Child(root.transform, "Trophy", new Vector2(0f, 0f)).transform;
+        trophy.localScale = Vector3.one * 0.6f;
         Art(trophy, "Art", "s41e_trophy", 8, false);
-        TextMesh realWin = Fit(Label(root.transform, new Vector2(0f, -3.3f), 12, "REAL WINNER: MOUSE!", 0.09f), 5.2f, 0.8f);
+        TextMesh realWin = Fit(Label(root.transform, new Vector2(0f, -2.4f), 22, "REAL WINNER: YOU!", 0.09f), 5.0f, 0.8f);
         realWin.color = new Color(0.85f, 0.15f, 0.25f);
         TextMesh countdown = Fit(Label(root.transform, new Vector2(0f, -0.6f), 20, "", 0.22f), 3f, 1.4f);
         countdown.color = new Color(1f, 0.95f, 0.5f);
@@ -408,14 +417,15 @@ public static partial class GotchaProjectBuilder
         SetField(level, "hero", hero);
         SetField(level, "mouse", mouse);
         SetField(level, "banner", banner);
+        SetField(level, "bannerArea", bc);
         SetField(level, "nextButton", next);
         SetField(level, "trophy", trophy);
         SetField(level, "nextArea", nc);
         SetField(level, "mouseArea", mc);
         SetField(level, "countdown", countdown);
-        SetField(level, "falseText", S41E_Info(root.transform, "Early", new Vector2(0f, 2.72f), 3.0f));
+        SetField(level, "falseText", S41E_Info(root.transform, "Early", new Vector2(0f, -4.05f), 3.0f));
         SetField(level, "realWin", realWin);
-        SetField(level, "bubble", SmallBubble(root.transform, new Vector2(-0.6f, 1.75f)));
+        SetField(level, "bubble", SmallBubble(root.transform, new Vector2(-1.0f, 2.15f)));
         SetArray(level, "confetti", S41E_Confetti(root.transform));
         return SaveLevel(root, "FalseFinish");
     }
@@ -471,7 +481,7 @@ public static partial class LevelHints
         { "mirror_twins", new[] { "Align the reflected key.", "Move the mirror until the reflected key matches the lock." } },
         { "the_hungry_printer", new[] { "Look for something made of paper.", "Feed the instructions sheet into the printer." } },
         { "finger_maze", new[] { "Keep one finger on the print.", "Hold the fingerprint with one finger and guide the character with another." } },
-        { "false_finish", new[] { "Someone is still running.", "Wait for the mouse and tap him at the finish line." } },
+        { "false_finish", new[] { "Which one is YOU?", "Drag YOU WIN! onto the mouse." } },
         { "heartbeat", new[] { "The vibration has a rhythm.", "Repeat two short beats followed by one long beat." } },
     };
 }

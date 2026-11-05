@@ -22,7 +22,7 @@ namespace Gotcha.UI
         public static bool TitleShown => current != null && current.titlePanel != null && current.titlePanel.activeSelf;
 
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.77";
+        public const string Version = "0.78";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
@@ -66,7 +66,8 @@ namespace Gotcha.UI
         Button shareButton;
         // hint a pagamento, premio per la condivisione degli Easter egg
         Text hintWalletLabel, hintRevealLabel, shopHints3Label, shopHints15Label, hintPageLabel;
-        Button hintRevealButton, hintPrevButton, hintNextButton;
+        Button hintRevealButton, hintPrevButton, hintNextButton, hintAdButton;
+        Text hintAdLabel;
         int hintPage;   // pagina del libretto dei suggerimenti (0 = la prima)
         GameObject rewardPanel;
         string lastEggId;
@@ -136,6 +137,8 @@ namespace Gotcha.UI
             if (settingsPanel.activeSelf && Gotcha.Ads.AdMobIds.UsingTestAds && Time.frameCount % 15 == 0) RefreshSettingsInfo();
             if (betaPanel.activeSelf && betaAdTest.activeSelf) betaAdStatus.text = "ADS: " + flow.Ads.Status;
             if (hintPanel.activeSelf && !shopPanel.activeSelf) SwipeHints();
+            // lo spot si carica in background: il pulsante passa da "AD LOADING..." a pronto da solo
+            if (hintPanel.activeSelf && Time.frameCount % 20 == 0) RefreshHintAd();
             UpdateTip();
             UpdateEggCelebration();
             if (Input.GetKeyDown(KeyCode.Escape))
@@ -420,14 +423,14 @@ namespace Gotcha.UI
             hintNextButton.interactable = hintPage < shown - 1;
             hintWalletLabel.text = BetaMode.Active ? "Your hints: unlimited (beta)" : "Your hints: " + HintWallet.Balance;
             bool more = shown < hints.Length;
-            // senza hint e senza pubblicità pronta il pulsante sparisce: restano quelli del negozio
-            bool canReveal = BetaMode.Active || HintWallet.Balance > 0 || flow.Ads.RewardedReady;
+            // dalla 0.78 il video con premio ha un pulsante tutto suo, sempre visibile (fuori dalla beta): "WATCH AD: +1 HINT"
+            bool canReveal = BetaMode.Active || HintWallet.Balance > 0;
             hintRevealButton.gameObject.SetActive(more && canReveal);
             if (!more) hintWalletLabel.text += "   (that was the solution!)";
-            else if (!canReveal) hintWalletLabel.text += "   (get more below)";
-            else if (BetaMode.Active || HintWallet.Balance > 0) hintRevealLabel.text = "SHOW HINT " + (shown + 1) + "/" + hints.Length + "  (-1)";
-            else hintRevealLabel.text = "WATCH AD: +1 HINT";
+            else if (!canReveal) hintWalletLabel.text += "   (watch an ad or get more below)";
+            else hintRevealLabel.text = "SHOW HINT " + (shown + 1) + "/" + hints.Length + "  (-1)";
             hintRevealButton.interactable = true;
+            RefreshHintAd();
         }
 
         void TurnHintPage(int delta)
@@ -460,11 +463,45 @@ namespace Gotcha.UI
         {
             LevelDefinition def = flow.CurrentDefinition;
             if (def == null) return;
-            if (BetaMode.Active || HintWallet.Balance > 0) { HintWallet.TryReveal(def.levelId, CurrentHints().Length); RefreshHint(true); return; }
-            hintRevealButton.interactable = false;
+            if (BetaMode.Active || HintWallet.Balance > 0) { HintWallet.TryReveal(def.levelId, CurrentHints().Length); RefreshHint(true); }
+        }
+
+        bool hintAdBusy;
+
+        /// <summary>Pulsante del video con premio: pronto, in caricamento o nascosto (beta: hint illimitati).</summary>
+        void RefreshHintAd()
+        {
+            if (hintAdButton == null) return;
+            hintAdButton.gameObject.SetActive(!BetaMode.Active);
+            bool ready = flow.Ads.RewardedReady && !hintAdBusy;
+            hintAdButton.interactable = ready;
+            hintAdLabel.text = hintAdBusy ? "PLAYING AD..." : ready ? "WATCH AD: +1 HINT" : "AD LOADING...";
+        }
+
+        /// <summary>
+        /// Video con premio (volontario, quindi anche con "niente pubblicità"): +1 hint nel portafoglio e, se il livello ha
+        /// ancora hint da scoprire, si mostra subito il prossimo. Se il video non viene guardato fino in fondo, niente premio.
+        /// </summary>
+        void WatchAdForHint()
+        {
+            if (hintAdBusy || !flow.Ads.RewardedReady) return;
+            hintAdBusy = true;
+            RefreshHintAd();
             flow.Ads.ShowRewarded(ok =>
             {
-                if (ok) HintWallet.Add(1);
+                hintAdBusy = false;
+                LevelDefinition def = flow.CurrentDefinition;
+                if (ok)
+                {
+                    HintWallet.Add(1);
+                    Haptics.Success();
+                    if (def != null && HintWallet.Revealed(def.levelId) < CurrentHints().Length)
+                    {
+                        HintWallet.TryReveal(def.levelId, CurrentHints().Length);
+                        RefreshHint(true);
+                        return;
+                    }
+                }
                 RefreshHint();
             });
         }
@@ -1357,7 +1394,11 @@ namespace Gotcha.UI
             hintRevealButton = CreateButton(hintCard, "", Accent, RevealHint);
             hintRevealLabel = hintRevealButton.GetComponentInChildren<Text>();
             Place(hintRevealButton.transform, new Vector2(0.1f, 0.26f), new Vector2(0.9f, 0.36f));
-            Place(CreateButton(hintCard, "GET MORE HINTS", new Color(0.95f, 0.7f, 0.15f), OpenShop).transform, new Vector2(0.15f, 0.15f), new Vector2(0.85f, 0.24f));
+            // video con premio e negozio uno accanto all'altro
+            hintAdButton = CreateButton(hintCard, "WATCH AD: +1 HINT", new Color(0.2f, 0.62f, 0.38f), WatchAdForHint);
+            hintAdLabel = hintAdButton.GetComponentInChildren<Text>();
+            Place(hintAdButton.transform, new Vector2(0.06f, 0.15f), new Vector2(0.49f, 0.24f));
+            Place(CreateButton(hintCard, "GET MORE HINTS", new Color(0.95f, 0.7f, 0.15f), OpenShop).transform, new Vector2(0.51f, 0.15f), new Vector2(0.94f, 0.24f));
             Place(CreateButton(hintCard, "OK", Dark, () => CloseOverlay(hintPanel)).transform, new Vector2(0.3f, 0.04f), new Vector2(0.7f, 0.13f));
 
             // Menu
@@ -1620,9 +1661,11 @@ namespace Gotcha.UI
             t.color = color;
             t.alignment = TextAnchor.MiddleCenter;
             t.horizontalOverflow = HorizontalWrapMode.Wrap;
-            t.verticalOverflow = VerticalWrapMode.Overflow;
+            // dalla 0.78 Truncate per tutti: con Overflow il best fit non rimpicciolisce in altezza e i testi lunghi
+            // (es. i complimenti di vittoria) uscivano dal riquadro e dallo schermo
+            t.verticalOverflow = VerticalWrapMode.Truncate;
             t.resizeTextForBestFit = true;
-            t.resizeTextMinSize = 20;
+            t.resizeTextMinSize = 16;
             t.resizeTextMaxSize = size;
             t.raycastTarget = false;
             return t;

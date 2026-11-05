@@ -267,6 +267,21 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.78 — Livelli 13 e 15, video per gli hint, FALSE FINISH, testi sempre nello schermo
+- Ordine in `Assets/Editor/GotchaLevels78.cs` (posizione dalla roadmap); builder `GotchaLevels78A/B.cs`; runtime
+  `Assets/Scripts/Levels/V78`; logica `V64/Logic/AristocraticCatLogic.cs`, `HonestThiefLogic.cs`; test `V78*Tests.cs`.
+  - 13 **The Aristocratic Cat**: scala, ciotola e gioco non lo convincono; capovolgi il telefono e tienilo così ~0,7 s
+    (se il telefono è già capovolto all'avvio, prima va rimesso dritto). Tasti Editor: U capovolgi, T tocca, L scala.
+  - 15 **The Honest Thief**: toccare il diamante fa suonare l'allarme, prenderlo fa arrivare la guardia; trascina il
+    cartellino FREE sulla teca (si blocca lì), poi il diamante al ladro. Tasti Editor: F cartellino, W diamante, T, D.
+- **Video con premio per gli hint**: nella finestra HINTS il pulsante WATCH AD: +1 HINT è sempre presente (fuori dalla
+  beta); se il video è guardato fino in fondo +1 hint e, se il livello ne ha ancora, si scopre subito il prossimo.
+- **FALSE FINISH** (roadmap 73) rifatto: il topolino è "YOU"; la scritta YOU WIN! compare al centro sopra il corridore
+  e va trascinata sul topo; NEXT dà la vittoria al corridore (3 volte: la gara riparte).
+- **Testi**: `TextMeshFit` tiene ogni scritta dentro i quattro bordi dello schermo (tenendo conto della posizione) e
+  ricalcola anche quando un'animazione ne cambia la scala o la posizione; i testi delle finestre (uGUI) usano
+  `Truncate` così il best fit li rimpicciolisce anche in altezza.
+
 ## Versione 0.77 — Livelli 8 e 10 della roadmap
 - Ordine in `Assets/Editor/GotchaLevels77.cs` (posizione dalla roadmap); builder `GotchaLevels77A/B.cs`; runtime
   `Assets/Scripts/Levels/V77`; logica `V64/Logic/LoveTheBugLogic.cs`, `HalfFullLogic.cs`; test `V77*Tests.cs`.
