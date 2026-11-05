@@ -6,23 +6,32 @@ using Gotcha.Core;
 namespace Gotcha.Levels
 {
     /// <summary>
-    /// Livello "False finish" — il corridore taglia il traguardo e appare un enorme "YOU WIN!" col pulsante NEXT. Ma la
-    /// gara non è finita: sotto la scritta corre ancora un topolino lentissimo. Soluzione: NON premere NEXT, aspetta che
-    /// il topolino passi il traguardo e toccalo. Tre NEXT prematuri fanno ripartire la gara (nessuna vita persa).
+    /// Livello "False finish" (rifatto nella 0.78 su indicazione del proprietario). Obiettivo "WIN THE RACE": il corridore
+    /// taglia il traguardo e al centro, sopra di lui, compare un enorme "YOU WIN!" col pulsante NEXT. Ma TU sei il
+    /// topolino lentissimo (ha il cartellino "YOU"). Soluzione: trascinare la scritta YOU WIN! sopra il topo. NEXT dà
+    /// la vittoria al corridore: tre NEXT fanno ripartire la gara (nessuna vita persa). La scritta lasciata altrove torna
+    /// al suo posto.
     /// </summary>
     public class FalseFinishLevel : LevelController
     {
         [SerializeField] Transform hero, mouse, banner, nextButton, trophy;
-        [SerializeField] Collider2D nextArea, mouseArea;
+        [SerializeField] Collider2D nextArea, mouseArea, bannerArea;
         [SerializeField] TextMesh countdown, falseText, realWin;
         [SerializeField] SpeechBubble bubble;
         [SerializeField] SmokeEmitter[] confetti;
-        [SerializeField] float finishX = 1.9f, heroSeconds = 1.5f, mouseSpeed = 0.42f, mouseStop = 2.3f;
+        [SerializeField] float finishX = 1.9f, heroSeconds = 1.5f, mouseSpeed = 0.42f, mouseStop = 2.3f, dropRadius = 1.5f;
+
+        static readonly string[] MissLines =
+        {
+            "That's HIS win. Whose is it supposed to be?",
+            "The banner went back to the runner.",
+            "Not there. Who are YOU in this race?",
+        };
 
         Camera cam;
-        Vector3 heroStart, mouseStart, bannerScale;
-        bool racing, busy, mouseDone, heroDone;
-        int premature;
+        Vector3 heroStart, mouseStart, bannerHome, bannerScale, grabOffset;
+        bool racing, busy, mouseDone, heroDone, dragging;
+        int premature, misses;
         float clock;
 
         public override void OnLevelStart()
@@ -30,6 +39,7 @@ namespace Gotcha.Levels
             cam = Camera.main;
             heroStart = hero.localPosition;
             mouseStart = mouse.localPosition;
+            bannerHome = banner.localPosition;
             bannerScale = banner.localScale;
             trophy.gameObject.SetActive(false);
             realWin.gameObject.SetActive(false);
@@ -38,14 +48,18 @@ namespace Gotcha.Levels
             StartCoroutine(Race());
         }
 
-        void UpdateFalse() { if (falseText != null) falseText.text = "EARLY NEXT " + premature + "/3"; }
+        void UpdateFalse() { if (falseText != null) falseText.text = "NEXT PRESSED " + premature + "/3"; }
 
         IEnumerator Race()
         {
             busy = true;
             racing = false;
+            dragging = false;
             heroDone = mouseDone = false;
             banner.gameObject.SetActive(false);
+            nextButton.gameObject.SetActive(false);
+            banner.localPosition = bannerHome;
+            banner.localRotation = Quaternion.identity;
             hero.localPosition = heroStart;
             mouse.localPosition = mouseStart;
             foreach (string s in new[] { "3", "2", "1", "GO!" })
@@ -67,8 +81,9 @@ namespace Gotcha.Levels
             }
             hero.localPosition = end;
             heroDone = true;
-            // la falsa vittoria
+            // la vittoria del corridore: la scritta al centro, sopra di lui
             banner.gameObject.SetActive(true);
+            nextButton.gameObject.SetActive(true);
             banner.localScale = Vector3.zero;
             Sfx.Play(this, "ding", 0.9f);
             for (float k = 0f; k < 1f; k += Time.deltaTime / 0.3f) { banner.localScale = bannerScale * (k + Mathf.Sin(k * Mathf.PI) * 0.2f); yield return null; }
@@ -89,16 +104,66 @@ namespace Gotcha.Levels
                 if (p.x >= mouseStop) { mouseDone = true; mouse.localRotation = Quaternion.identity; Sfx.Play(this, "pop", 0.6f); }
             }
             if (nextButton.gameObject.activeInHierarchy) nextButton.localScale = Vector3.one * (1f + 0.06f * Mathf.Sin(clock * 6f));
-            if (busy || !racing) return;
-            if (!PointerInput.AnyTouchBegan() || !S41EKit.Pointer(cam, out Vector2 w, out _, out _)) return;
-            if (mouseArea.OverlapPoint(w))
+            if (busy || !racing) { dragging = false; return; }
+            if (!S41EKit.Pointer(cam, out Vector2 w, out bool began, out bool ended)) { if (dragging) DropBanner(); return; }
+
+            if (dragging)
             {
-                if (mouse.position.x >= finishX + 0.05f) { StartCoroutine(RealWin()); return; }
-                Sfx.Play(this, "tick", 0.5f);
-                S41EKit.Say(bubble, "Squeak! Not yet... still running!");
+                // la scritta segue il dito (dentro lo schermo), un po' più piccola per vedere dove la si lascia
+                Vector3 target = new Vector3(w.x, w.y, banner.position.z) + grabOffset;
+                target.x = Mathf.Clamp(target.x, -2.3f, 2.3f);
+                target.y = Mathf.Clamp(target.y, -4.2f, 3.0f);
+                banner.position = target;
+                banner.localScale = Vector3.Lerp(banner.localScale, bannerScale * 0.6f, 12f * Time.deltaTime);
+                if (ended) DropBanner();
                 return;
             }
-            if (heroDone && banner.gameObject.activeSelf && nextArea.OverlapPoint(w)) StartCoroutine(Next());
+            if (!began) return;
+            if (heroDone && banner.gameObject.activeSelf && bannerArea != null && bannerArea.OverlapPoint(w))
+            {
+                dragging = true;
+                grabOffset = banner.position - new Vector3(w.x, w.y, banner.position.z);
+                grabOffset *= 0.6f;
+                Sfx.Play(this, "tick", 0.5f);
+                return;
+            }
+            if (mouseArea.OverlapPoint(w))
+            {
+                Sfx.Play(this, "tick", 0.5f);
+                S41EKit.Say(bubble, heroDone ? "Squeak! I'm still racing... and I'm YOU!" : "Squeak! I'm doing my best!");
+                return;
+            }
+            if (heroDone && nextButton.gameObject.activeSelf && nextArea.OverlapPoint(w)) StartCoroutine(Next());
+        }
+
+        void DropBanner()
+        {
+            dragging = false;
+            Vector3 target = mouse.position + Vector3.up * 0.4f;
+            if (Vector2.Distance(banner.position, target) <= dropRadius) { StartCoroutine(RealWin()); return; }
+            misses++;
+            Sfx.Play(this, "buzz", 0.5f);
+            S41EKit.Say(bubble, MissLines[(misses - 1) % MissLines.Length]);
+            StartCoroutine(BannerHome());
+        }
+
+        IEnumerator BannerHome()
+        {
+            busy = true;
+            yield return S41EKit.Move(banner, bannerHome, 0.25f);
+            banner.localScale = bannerScale;
+            busy = false;
+        }
+
+        void OnApplicationPause(bool paused) { if (paused) CancelDrag(); }
+        void OnApplicationFocus(bool focus) { if (!focus) CancelDrag(); }
+
+        void CancelDrag()
+        {
+            if (!dragging) return;
+            dragging = false;
+            banner.localPosition = bannerHome;
+            banner.localScale = bannerScale;
         }
 
         IEnumerator Next()
@@ -106,12 +171,6 @@ namespace Gotcha.Levels
             busy = true;
             Sfx.Play(this, "pop", 0.7f);
             yield return StartCoroutine(S41EKit.Pop(nextButton, 0.85f, 0.15f));
-            if (mouseDone)
-            {
-                S41EKit.Say(bubble, "NEXT is broken... someone else finished too!");
-                busy = false;
-                yield break;
-            }
             premature++;
             UpdateFalse();
             Sfx.Play(this, "buzz", 0.7f);
@@ -119,7 +178,7 @@ namespace Gotcha.Levels
             yield return StartCoroutine(S41EKit.Shake(banner, 0.15f, 0.4f));
             if (premature >= 3)
             {
-                S41EKit.Say(bubble, "Race restarted! Watch more carefully.");
+                S41EKit.Say(bubble, "Race restarted! Weren't YOU racing too?");
                 premature = 0;
                 UpdateFalse();
                 yield return new WaitForSeconds(0.8f);
@@ -127,7 +186,7 @@ namespace Gotcha.Levels
                 yield return Race();
                 yield break;
             }
-            S41EKit.Say(bubble, premature == 1 ? "Squeak! Hey! The race isn't over!" : "Wait for me! I'm still running!");
+            S41EKit.Say(bubble, premature == 1 ? "NEXT just gives HIM the win." : "Squeak! And what about ME?");
             busy = false;
         }
 
@@ -135,29 +194,26 @@ namespace Gotcha.Levels
         {
             busy = true;
             Sfx.Play(this, "ding", 0.9f);
-            // la falsa scritta cade giù
-            Vector3 b = banner.localPosition;
-            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.5f)
-            {
-                banner.localPosition = b + Vector3.down * 7f * k * k;
-                banner.localRotation = Quaternion.Euler(0f, 0f, -25f * k);
-                yield return null;
-            }
-            banner.gameObject.SetActive(false);
             Haptics.Light();
+            nextButton.gameObject.SetActive(false);
+            // la scritta si appoggia sopra il topo, il corridore protesta
+            Vector3 above = mouse.position + Vector3.up * 1.35f;
+            above.x = Mathf.Clamp(above.x, -1.6f, 1.6f);
+            StartCoroutine(S41EKit.Move(banner, banner.parent.InverseTransformPoint(above), 0.3f));
+            S41EKit.Say(bubble, "Hey! That was MINE!");
+            yield return new WaitForSeconds(0.4f);
             trophy.gameObject.SetActive(true);
-            Vector3 t = trophy.localPosition;
+            Vector3 t = trophy.parent.InverseTransformPoint(mouse.position + Vector3.up * 0.2f);
             trophy.localPosition = t + Vector3.up * 3f;
             yield return S41EKit.Move(trophy, t, 0.4f);
             Sfx.Play(this, "clunk", 0.7f);
             realWin.gameObject.SetActive(true);
             StartCoroutine(S41EKit.Pop(realWin.transform, 1.25f, 0.3f));
-            S41EKit.Say(bubble, "The real champion: patience!");
             yield return S41EKit.Move(mouse, mouse.localPosition, 0.35f, 0.4f);
             S41EKit.Confetti(confetti, true);
             yield return new WaitForSeconds(1.8f);
             S41EKit.Confetti(confetti, false);
-            Win();
+            Win("YOU WROTE YOUR OWN ENDING!");
         }
     }
 }
