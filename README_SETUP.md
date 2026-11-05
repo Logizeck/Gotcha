@@ -267,6 +267,16 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.80 — Livelli 27 e 30 della roadmap
+- Ordine in `Assets/Editor/GotchaLevels80.cs` (posizione dalla roadmap); builder `GotchaLevels80A/B.cs`; runtime
+  `Assets/Scripts/Levels/V80`; logica `V64/Logic/SadBalloonLogic.cs`, `InvisibleTreasureLogic.cs`; test `V80*Tests.cs`.
+  - 27 **The Sad Balloon**: tirare su il palloncino, gonfiarlo col pizzico o toccarlo non serve (niente microfono).
+    Trascina il sassolino a più di 1 unità: il nodo si scioglie durante il trascinamento e il palloncino vola.
+    Tasti Editor: U soluzione, J sasso corto, B palloncino tirato, G pizzico.
+  - 30 **The Invisible Treasure**: scavare dove indica la X della mappa non dà niente. Trascina la X dalla mappa sulla
+    sabbia (resta lì), poi trascina la pala sulla X e lascia: si scava dove c'è la punta. Tasti Editor: Y X sulla
+    sabbia, G scava sulla X, W soluzione completa, D scava al punto della mappa.
+
 ## Versione 0.79 — Livelli 19 e 24 della roadmap
 - Ordine in `Assets/Editor/GotchaLevels79.cs` (posizione dalla roadmap); builder `GotchaLevels79A/B.cs`; runtime
   `Assets/Scripts/Levels/V79`; logica `V64/Logic/ShyMonsterLogic.cs`, `LazySunLogic.cs`; test `V79*Tests.cs`.

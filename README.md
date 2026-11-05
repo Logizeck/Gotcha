@@ -92,7 +92,7 @@ Livelli 259-260: 259 Almost There · 260 Toni's Final Exam.
 
 Dalla 0.76 l'ordine dei livelli segue la roadmap 1-300 del proprietario (`Assets/Editor/GotchaLevelOrder.cs`; l'elenco
 completo e aggiornato è in `Gotcha_livelli.xlsx`). Livelli nuovi della roadmap già pronti: 2 The Shy Button, 5 The
-Cowardly Lion, 8 Love the Bug, 10 Half Full, 13 The Aristocratic Cat, 15 The Honest Thief, 19 The Shy Monster, 24 The Lazy Sun.
+Cowardly Lion, 8 Love the Bug, 10 Half Full, 13 The Aristocratic Cat, 15 The Honest Thief, 19 The Shy Monster, 24 The Lazy Sun, 27 The Sad Balloon, 30 The Invisible Treasure.
 
 Livelli 261-276 (dalla 0.67 ogni release aggiunge uno o due livelli in fondo):
 261 The Dark Room · 262 The Immortal Candle · 263 The Stuck Snack · 264 The Camera-shy Bird · 265 Don't Let It Sink · 266 The Crooked Picture · 267 The Unswattable Fly · 268 The Stubborn Ketchup · 269 The Cat Burglar · 270 The Lost Remote · 271 The Stuck Drawer · 272 The Missing Sock · 273 The Piggy Bank · 274 The Crying Onion · 275 Toni's Armchair (Toni) · 276 The Locked Bike.
