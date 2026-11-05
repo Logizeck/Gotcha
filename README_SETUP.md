@@ -267,6 +267,17 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.79 — Livelli 19 e 24 della roadmap
+- Ordine in `Assets/Editor/GotchaLevels79.cs` (posizione dalla roadmap); builder `GotchaLevels79A/B.cs`; runtime
+  `Assets/Scripts/Levels/V79`; logica `V64/Logic/ShyMonsterLogic.cs`, `LazySunLogic.cs`; test `V79*Tests.cs`.
+  Con questi due i primi 25 livelli sono quelli della roadmap: STUCK! di Toni è di nuovo al 25.
+  - 19 **The Shy Monster**: colpirlo lo fa crescere (massimo 4 passi, poi si sgonfia col tempo); spada e fionda gli fanno
+    il solletico. Rilascia la medaglia BEST MONSTER sul petto (conta solo il rilascio): arrossisce, si rimpicciolisce e
+    scappa. Tasti Editor: T colpo, M medaglia sul petto, H sulla testa, O passa sul petto e lascia altrove.
+  - 24 **The Lazy Sun**: cielo, luna, gallo e attesa non servono; il russare viene da dietro la collina. Trascina la
+    collina (l'orizzonte) giù oltre il 75% e lascia: il sole che dormiva dietro si sveglia. Il sole non si trascina.
+    Tasti Editor: L abbassa a metà, W abbassa tutto, S trascina il sole.
+
 ## Versione 0.78 — Livelli 13 e 15, video per gli hint, FALSE FINISH, testi sempre nello schermo
 - Ordine in `Assets/Editor/GotchaLevels78.cs` (posizione dalla roadmap); builder `GotchaLevels78A/B.cs`; runtime
   `Assets/Scripts/Levels/V78`; logica `V64/Logic/AristocraticCatLogic.cs`, `HonestThiefLogic.cs`; test `V78*Tests.cs`.
