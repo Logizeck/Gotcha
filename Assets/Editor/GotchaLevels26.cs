@@ -22,6 +22,23 @@ public static partial class GotchaProjectBuilder
         return b;
     }
 
+    /// <summary>
+    /// Come Art(...), ma il disegno si vede solo dentro una finestra rettangolare (coordinate locali di "window"):
+    /// un quad ritagliato (SpriteWindowClip) al posto di SpriteMask + VisibleInsideMask, che non dipende dallo stencil.
+    /// </summary>
+    static Transform ClipArt(Transform parent, string name, string sprite, int order, Transform window, Vector2 windowOffset, Vector2 windowSize, Color color, Vector2 offset = default)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        go.transform.localPosition = centers[sprite] + offset;
+        go.AddComponent<MeshFilter>();
+        MeshRenderer mr = go.AddComponent<MeshRenderer>();
+        mr.sharedMaterial = StrokeMaterial();   // Sprites/Default: la texture la mette il componente
+        mr.sortingOrder = order;
+        go.AddComponent<SpriteWindowClip>().Configure(sprites[sprite], color, order, window, windowOffset, windowSize);
+        return go.transform;
+    }
+
     static GameObject SaveLevel(GameObject root, string folder) => SavePrefab(root, LevelDir + "/" + folder + "/Level_" + folder + ".prefab");
 
     /// <summary>Barra orizzontale che si accorcia verso sinistra (scala x del Transform restituito).</summary>
@@ -510,9 +527,14 @@ public static partial class GotchaProjectBuilder
         Transform dog = Child(root.transform, "Guard", new Vector2(0, 2.95f)).transform;
         Art(dog, "Art", "cat", 8).localScale = Vector3.one * 0.55f;
         Transform cone = Child(root.transform, "Cone", new Vector2(0, 2.72f)).transform;
-        Transform beam = Art(cone, "Beam", "light_cone", 6, false);
-        cone.localScale = Vector3.one * 1.35f;
-        beam.GetComponent<SpriteRenderer>().color = new Color(1f, 0.95f, 0.6f);
+        // La luce: un ventaglio di raggi fermati dagli ostacoli, ricostruito ogni frame dal livello (mesh a ventaglio,
+        // Sprites/Default, colori per vertice caldi e semitrasparenti). Al posto dello sprite "light_cone" che passava
+        // sopra i mobili: ora la luce si ferma davanti agli ostacoli e dietro resta l'ombra.
+        GameObject light = Child(root.transform, "TorchLight", Vector2.zero);
+        MeshFilter lightMesh = light.AddComponent<MeshFilter>();
+        MeshRenderer lightRenderer = light.AddComponent<MeshRenderer>();
+        lightRenderer.sharedMaterial = StrokeMaterial();
+        lightRenderer.sortingOrder = 6;
         // più mobili: la posizione la sceglie il livello a caso a ogni partita
         var furniture = new List<Collider2D>();
         foreach (var f in new[] { ("sofa", new Vector2(2.3f, 1.0f)), ("box", new Vector2(1f, 0.9f)), ("box", new Vector2(1f, 0.9f)),
@@ -523,9 +545,21 @@ public static partial class GotchaProjectBuilder
             g.AddComponent<BoxCollider2D>().size = f.Item2;
             furniture.Add(g.GetComponent<BoxCollider2D>());
         }
-        Transform mouse = Child(root.transform, "Mouse", new Vector2(-2.2f, -3.4f)).transform;
+        // il muro in basso (battiscopa) con la tana del topo: ferma la luce come i mobili
+        GameObject wall = Child(root.transform, "Wall", new Vector2(0f, -4.8f));
+        Bar(wall.transform, "Face", Vector2.zero, new Vector2(7f, 1.1f), new Color(0.36f, 0.25f, 0.22f), 8);
+        Bar(wall.transform, "Edge", new Vector2(0f, 0.53f), new Vector2(7f, 0.08f), new Color(0.2f, 0.13f, 0.12f), 9);
+        wall.AddComponent<BoxCollider2D>().size = new Vector2(7f, 1.1f);   // bordo alto a y -4.25
+        Transform hole = Art(root.transform, "MouseHole", "mouse_hole", 9, false, new Vector2(-1.6f, -4.62f));
+        hole.localScale = Vector3.one * 0.85f;
+        Transform holeAt = Child(root.transform, "HoleSpot", new Vector2(-1.6f, -4.55f)).transform;
+        Transform eyes = Art(root.transform, "PeekEyes", "wolf_eyes", 10, false, new Vector2(-1.6f, -4.6f));
+        eyes.localScale = Vector3.one * 0.55f;
+        eyes.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.9f);
+
+        Transform mouse = Child(root.transform, "Mouse", new Vector2(-1.6f, -4.55f)).transform;
         mouse.localScale = Vector3.one * 0.4f;
-        Art(mouse, "Art", "mouse", 10);
+        Transform mouseArt = Art(mouse, "Art", "mouse", 10);
         SpriteRenderer noise = Art(mouse, "Noise", "ring_waves", 11, false, new Vector2(0, 1.4f)).GetComponent<SpriteRenderer>();
         noise.color = new Color(1f, 1f, 1f, 0f);
         Transform cheese = Art(root.transform, "Cheese", "cheese_wedge", 8, true, new Vector2(2.2f, 1.5f));
@@ -536,6 +570,11 @@ public static partial class GotchaProjectBuilder
         SetField(level, "cone", cone);
         SetField(level, "fish", cheese);
         SetArray(level, "furniture", furniture.ToArray());
+        SetArray(level, "walls", new Object[] { wall.GetComponent<BoxCollider2D>() });
+        SetField(level, "hole", holeAt);
+        SetField(level, "mouseArt", mouseArt.gameObject);
+        SetField(level, "peekEyes", eyes);
+        SetField(level, "lightMesh", lightMesh);
         SetField(level, "noiseIcon", noise);
         SetField(level, "bubble", SmallBubble(root.transform, new Vector2(-1.2f, 3.5f)));
         return SaveLevel(root, "Sneaky");
@@ -555,19 +594,18 @@ public static partial class GotchaProjectBuilder
                 Transform h = Child(root.transform, "Hole", new Vector2(-1.7f + c * 1.7f + (r == 0 ? 0.25f : -0.25f), -3.05f - r * 1.3f)).transform;   // tutte nel prato (che inizia sotto y -2.8)
                 Art(h, "Back", "mole_hole", 2 + r * 10, false);
                 Transform pop = Child(h, "Pop", new Vector2(0, -0.9f)).transform;
+                // Le talpe si vedono solo sopra il bordo della buca. Prima c'era una SpriteMask ("plain") con le talpe
+                // VisibleInsideMask: sul telefono la maschera (stencil) non disegnava niente e le talpe restavano
+                // invisibili. Ora ogni talpa è ritagliata dalla finestra sopra la buca (SpriteWindowClip, niente stencil).
                 foreach (var k in new[] { ("Angry", "mole_angry"), ("Party", "mole_party"), ("Gold", "mole_gold"), ("Cat", "cat") })
                 {
-                    Transform a = Art(pop, k.Item1, k.Item2, 3 + r * 10, false);
+                    Transform a = ClipArt(pop, k.Item1, k.Item2, 3 + r * 10, h, new Vector2(0f, 0.78f), new Vector2(1.5f, 1.6f), Color.white);
                     if (k.Item1 == "Cat") { a.localScale = Vector3.one * 0.4f; a.localPosition = a.localPosition * 0.4f + new Vector3(0, 0.45f, 0); }
-                    a.GetComponent<SpriteRenderer>().maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
                 }
                 Art(h, "Front", "mole_hole_front", 4 + r * 10, false);
-                GameObject mask = Child(h, "Mask", new Vector2(0, 0.78f));
-                mask.transform.localScale = new Vector3(1.5f, 1.6f, 1f);
-                mask.AddComponent<SpriteMask>().sprite = sprites["plain"];
                 holes.Add(h);
             }
-        TextMesh counter = Label(root.transform, new Vector2(1.9f, 3.6f), 30, "0 / 12", 0.06f);
+        TextMesh counter = Fit(Label(root.transform, new Vector2(1.9f, 3.6f), 30, "0 / 12", 0.06f), 1.3f, 0.45f);
         Transform time = GaugeBar(root.transform, "Time", new Vector2(-0.6f, 3.6f), new Vector2(2.2f, 0.18f), new Color(0.17f, 0.13f, 0.2f, 0.6f), new Color(0.4f, 0.85f, 0.4f), 30);
         Transform hammer = Art(root.transform, "Hammer", "mallet", 40, false);
 

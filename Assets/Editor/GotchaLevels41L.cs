@@ -84,9 +84,13 @@ public static partial class GotchaProjectBuilder
         return t;
     }
 
-    static void S41L_Masked(Transform t)
+    /// <summary>Come S41L_ArtAt, ma il disegno si vede solo dentro la finestra dello scanner (ClipArt).</summary>
+    static Transform S41L_ClipArtAt(Transform parent, string name, string sprite, int order, Vector2 pos, float scale, Transform window, Vector2 windowSize, Color color)
     {
-        foreach (SpriteRenderer sr in t.GetComponentsInChildren<SpriteRenderer>(true)) sr.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+        Transform t = Child(parent, name, pos).transform;
+        t.localScale = Vector3.one * scale;
+        ClipArt(t, "Art", sprite, order, window, Vector2.zero, windowSize, color);
+        return t;
     }
 
     // ---------- 196 The great escape ----------
@@ -328,31 +332,32 @@ public static partial class GotchaProjectBuilder
         Transform padlock = S41L_ArtAt(r, "Padlock", "s41l_padlock", 1, new Vector2(-2.05f, -2.55f), 0.9f);
         ToniPug toni = ToniRig(r, new Vector2(0.55f, -2.7f), 1.35f, r);
 
-        // l'interno della pancia ai raggi X (visibile solo dentro lo scanner)
-        Transform xray = Child(toni.transform, "Xray", Vector2.zero).transform;
-        Art(xray, "Bones", "s41l_xray_bones", 10, false);
-        S41L_ArtAt(xray, "Sock", "sock", 11, new Vector2(0.05f, 0.0f), 0.3f).GetComponentInChildren<SpriteRenderer>().color = new Color(0.75f, 0.92f, 1f);
-        S41L_ArtAt(xray, "Duck", "pond_duck", 11, new Vector2(0.62f, -0.07f), 0.28f).GetComponentInChildren<SpriteRenderer>().color = new Color(0.8f, 0.95f, 1f);
-        Transform xKey = S41L_ArtAt(r, "XrayKey", "key", 12, Vector2.zero, 0.26f);
-        xKey.GetComponentInChildren<SpriteRenderer>().color = new Color(1f, 1f, 0.75f);
-        S41L_Masked(xray);
-        S41L_Masked(xKey);
-
+        // lo scanner: cornice con una finestra 1,5 x 1,2 (locale) centrata nel suo perno, e la maniglia sotto
         Transform scanner = Child(r, "Scanner", new Vector2(-1.0f, 0.9f)).transform;
+        scanner.localScale = Vector3.one * 1.2f;   // finestra 1,8 x 1,44: ci stanno insieme la pancia e la gola
         Art(scanner, "Frame", "s41l_scanner", 20, false);
-        Transform mask = Child(scanner, "Mask", Vector2.zero).transform;
-        mask.localScale = new Vector3(1.5f, 1.2f, 1f);
-        mask.gameObject.AddComponent<SpriteMask>().sprite = sprites["plain"];
+        Vector2 window = new Vector2(1.5f, 1.2f);
         Fit(Label(scanner, new Vector2(0f, -0.85f), 21, "X-RAY", 0.03f), 0.34f, 0.2f).color = Color.white;
+        // presa generosa: tutta la cornice, la maniglia e un margine attorno
         BoxCollider2D scanBox = scanner.gameObject.AddComponent<BoxCollider2D>();
-        scanBox.size = new Vector2(1.9f, 1.85f);
-        scanBox.offset = new Vector2(0f, -0.12f);
+        scanBox.size = new Vector2(2.3f, 2.3f);
+        scanBox.offset = new Vector2(0f, -0.15f);
+
+        // L'interno della pancia ai raggi X, visibile solo nella finestra dello scanner. Prima era fatto con una
+        // SpriteMask ("plain") e i disegni VisibleInsideMask: sul telefono la maschera (stencil) non disegnava niente,
+        // lo scanner restava vuoto e non si vedeva mai la chiave. Ora ogni disegno è ritagliato sulla finestra
+        // (SpriteWindowClip, niente stencil).
+        Transform xray = Child(toni.transform, "Xray", Vector2.zero).transform;
+        ClipArt(xray, "Bones", "s41l_xray_bones", 10, scanner, Vector2.zero, window, Color.white);
+        S41L_ClipArtAt(xray, "Sock", "sock", 11, new Vector2(0.05f, 0.0f), 0.3f, scanner, window, new Color(0.75f, 0.92f, 1f));
+        S41L_ClipArtAt(xray, "Duck", "pond_duck", 11, new Vector2(0.62f, -0.07f), 0.28f, scanner, window, new Color(0.8f, 0.95f, 1f));
+        Transform xKey = S41L_ClipArtAt(r, "XrayKey", "key", 12, Vector2.zero, 0.26f, scanner, window, new Color(1f, 1f, 0.75f));
 
         Transform realKey = S41L_ArtAt(r, "Key", "key", 30, Vector2.zero, 0.4f);
         SmokeEmitter sneeze = Emitter(r, "Sneeze", Vector2.zero, "puff", 40f, 0.5f, 0.2f, 0.5f, 0.35f, new Color(0.9f, 1f, 0.95f, 0.9f), 25);
         sneeze.sideDrift = -2.5f;
         S41L_Goal(r, "GET THE FRIDGE KEY BACK");
-        Fit(Label(r, new Vector2(0f, 2.65f), 30, "SCAN HIS BELLY - TILT - TAP HIS NOSE", 0.035f), 5f, 0.3f).color = new Color(0.25f, 0.2f, 0.35f);
+        Fit(Label(r, new Vector2(0f, 2.65f), 30, "SCAN THE BELLY - MOVE THE KEY UP - TAP THE NOSE", 0.035f), 5f, 0.3f).color = new Color(0.25f, 0.2f, 0.35f);
 
         SetField(level, "toni", toni);
         SetField(level, "scanner", scanner);
