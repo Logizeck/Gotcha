@@ -9,8 +9,10 @@ namespace Gotcha.Levels
     /// Livello di Toni "TONI'S X-RAY" — Toni ha ingoiato la chiave del frigo e fa l'innocente. Lo scanner (una finestra
     /// a raggi X da trascinare) mostra dentro la pancia ossa, un calzino, una paperella e la chiave. Inclinando il
     /// telefono la chiave scivola nella pancia (fisica semplice) fino alla gola; poi si tocca il naso di Toni, che
-    /// starnutisce e la sputa fuori. Tre starnuti con la chiave fuori posto = sconfitta. Senza accelerometro la
-    /// chiave si sposta col dito dentro lo scanner.
+    /// starnutisce e la sputa fuori. Tre starnuti con la chiave fuori posto = sconfitta. La chiave si può anche
+    /// spingere col dito dentro la finestra dello scanner (sempre, non solo senza accelerometro). Arrivata in fondo
+    /// alla gola resta incastrata lì (il telefono tenuto dritto non la fa più ricadere) finché Toni non starnutisce.
+    /// Il contenuto ai raggi X è ritagliato sulla finestra con SpriteWindowClip (niente SpriteMask/stencil).
     /// </summary>
     public class ToniXRayLevel : LevelController
     {
@@ -21,14 +23,17 @@ namespace Gotcha.Levels
         [SerializeField] TextMesh strikeText;
         [SerializeField] SmokeEmitter[] confetti;
         [SerializeField] int strikesAllowed = 3;
-        [SerializeField] float noseRadius = 0.5f, gravity = 3.2f;
+        [SerializeField] float noseRadius = 0.65f, gravity = 3.2f;
+        [Tooltip("Finestra dello scanner (coordinate locali dello scanner): lì dentro si vede e si tocca la chiave.")]
+        [SerializeField] Vector2 windowSize = new Vector2(1.5f, 1.2f);
+        [SerializeField] float keyGrabRadius = 0.6f, keyDragSpeed = 4f;
         // la pancia (coordinate locali di Toni): ellisse + gola verso la bocca
         [SerializeField] Vector2 bellyCenter = new Vector2(0.2f, 0.06f), bellyRadii = new Vector2(0.65f, 0.27f);
         [SerializeField] Vector2 throatFrom = new Vector2(-0.35f, 0.06f), throatTo = new Vector2(-0.7f, 0.2f);
         [SerializeField] float throatRadius = 0.09f, readyDistance = 0.14f;
 
         Camera cam;
-        bool busy, dragScanner, keyDrag, hasTilt, nosePress;
+        bool busy, dragScanner, keyDrag, hasTilt, nosePress, stuck;
         int strikes;
         Vector2 keyPos, keyVel, dragOffset, pressAt;
         float pressTime;
@@ -43,6 +48,10 @@ namespace Gotcha.Levels
             toni.LookPoint = toni.HeadWorld + new Vector3(0.3f, 2f, 0f);   // guarda in alto: "chi, io?"
             toni.Wag = 0.2f;
             keyPos = new Vector2(0.55f, -0.08f);
+            keyVel = Vector2.zero;
+            strikes = 0;
+            busy = dragScanner = keyDrag = nosePress = stuck = false;
+            xKey.gameObject.SetActive(true);
             realKey.gameObject.SetActive(false);
             sneezeCloud.Stop();
             S41LKit.Confetti(confetti, false);
@@ -93,6 +102,39 @@ namespace Gotcha.Levels
 
         bool KeyReady => Vector2.Distance(keyPos, throatTo) < readyDistance;
 
+        /// <summary>
+        /// Il punto (mondo) è nella zona di presa dello scanner? Calcolato dal Transform e non con
+        /// Collider2D.OverlapPoint: il collider statico che si trascina viene risincronizzato dalla fisica solo al passo
+        /// successivo, e la presa poteva "scappare" durante il trascinamento.
+        /// </summary>
+        bool OnScanner(Vector2 w)
+        {
+            Vector2 l = scanner.InverseTransformPoint(w);
+            if (scannerArea is BoxCollider2D b)
+                return Mathf.Abs(l.x - b.offset.x) <= b.size.x * 0.5f && Mathf.Abs(l.y - b.offset.y) <= b.size.y * 0.5f;
+            return Mathf.Abs(l.x) <= windowSize.x * 0.5f + 0.3f && Mathf.Abs(l.y) <= windowSize.y * 0.5f + 0.4f;
+        }
+
+        /// <summary>Il punto (mondo) è dentro la finestra a raggi X (con un piccolo margine)?</summary>
+        bool InWindow(Vector2 w, float margin)
+        {
+            Vector2 l = scanner.InverseTransformPoint(w);
+            return Mathf.Abs(l.x) <= windowSize.x * 0.5f + margin && Mathf.Abs(l.y) <= windowSize.y * 0.5f + margin;
+        }
+
+        /// <summary>In fondo alla gola la chiave si incastra: da lì basta lo starnuto.</summary>
+        void CheckStuck()
+        {
+            if (stuck || !KeyReady) return;
+            stuck = true;
+            keyPos = throatTo;
+            keyVel = Vector2.zero;
+            keyDrag = false;
+            Sfx.Play(this, "tick", 1f);
+            Haptics.Light();
+            toni.Say("*gulp* ...something tickles!", 1.6f);
+        }
+
         void Update()
         {
             if (IsFinished || busy) return;
@@ -100,7 +142,7 @@ namespace Gotcha.Levels
             bool down = S41LKit.Pointer(cam, out Vector2 w, out bool began, out bool ended);
 
             // fisica della chiave nella pancia: l'inclinazione è la gravità
-            if (hasTilt && !keyDrag)
+            if (hasTilt && !keyDrag && !stuck)
             {
                 Vector2 g = Inputs.Tilt();
                 keyVel += g * gravity * dt;
@@ -114,8 +156,9 @@ namespace Gotcha.Levels
                 pressAt = w;
                 pressTime = Time.time;
                 nosePress = Vector2.Distance(w, toni.NoseWorld) < noseRadius;
-                if (!hasTilt && Vector2.Distance(w, xKey.position) < 0.45f && scannerArea.OverlapPoint(w)) keyDrag = true;
-                else if (!nosePress && scannerArea.OverlapPoint(w)) { dragScanner = true; dragOffset = (Vector2)scanner.position - w; }
+                // la chiave si prende anche vicino al naso (la gola è lì accanto): un tocco breve sul naso resta uno starnuto
+                if (!stuck && Vector2.Distance(w, xKey.position) < keyGrabRadius && InWindow(xKey.position, 0.05f) && InWindow(w, 0.15f)) keyDrag = true;
+                else if (!nosePress && OnScanner(w)) { dragScanner = true; dragOffset = (Vector2)scanner.position - w; }
             }
             if (down && dragScanner)
             {
@@ -124,22 +167,24 @@ namespace Gotcha.Levels
             }
             if (down && keyDrag)
             {
-                keyPos = Vector2.MoveTowards(keyPos, toni.transform.InverseTransformPoint(w), 2.5f * dt);
+                keyPos = Vector2.MoveTowards(keyPos, toni.transform.InverseTransformPoint(w), keyDragSpeed * dt);
                 keyVel = Vector2.zero;
                 Constrain();
             }
             if (ended || !down)
             {
-                if (nosePress && down && ended && Vector2.Distance(w, pressAt) < 0.3f && Time.time - pressTime < 0.6f) StartCoroutine(Sneeze());
+                if (nosePress && down && ended && Vector2.Distance(w, pressAt) < 0.45f && Time.time - pressTime < 0.8f) StartCoroutine(Sneeze());
                 nosePress = dragScanner = keyDrag = false;
             }
+            CheckStuck();
+            if (stuck) keyPos = throatTo;
             PlaceKey();
         }
 
         IEnumerator Sneeze()
         {
             busy = true;
-            bool ready = KeyReady;
+            bool ready = stuck || KeyReady;
             Transform t = toni.transform;
             toni.Say("AH... AH...", 0.9f);
             Vector3 s0 = t.localScale;

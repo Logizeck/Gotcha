@@ -23,6 +23,7 @@ namespace Gotcha.Levels
         static readonly string[] kinds = { "Angry", "Party", "Gold", "Cat" };
         int[] kind;           // -1 = vuota
         float[] up;           // tempo rimasto fuori
+        float[] dur;          // quanto doveva restare fuori in tutto (per l'animazione di salita)
         float clock, spawn = 0.8f;
         int score;
         bool done, catShown;
@@ -33,6 +34,7 @@ namespace Gotcha.Levels
             cam = Camera.main;
             kind = new int[holes.Length];
             up = new float[holes.Length];
+            dur = new float[holes.Length];
             for (int i = 0; i < holes.Length; i++) { kind[i] = -1; Set(i, -1, 0f); }
             hammer.gameObject.SetActive(false);
             Count();
@@ -69,13 +71,15 @@ namespace Gotcha.Levels
                     if (k == 3) catShown = true;
                     kind[i] = k;
                     up[i] = Mathf.Lerp(1.1f, 0.7f, clock / seconds) + (k == 1 ? 0.4f : 0f);
+                    dur[i] = up[i];
                 }
             }
             for (int i = 0; i < holes.Length; i++)
             {
                 if (kind[i] < 0) continue;
                 up[i] -= dt;
-                float h = Mathf.Clamp01(Mathf.Min(up[i] * 6f, 1f));
+                // sale in ~0,14 s, resta su, scende in ~0,17 s (prima saltava fuori di colpo)
+                float h = Mathf.Clamp01(Mathf.Min((dur[i] - up[i]) * 7f, up[i] * 6f));
                 Set(i, kind[i], h);
                 if (up[i] <= 0f) { kind[i] = -1; Set(i, -1, 0f); }
             }

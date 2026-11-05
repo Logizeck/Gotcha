@@ -267,6 +267,23 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.82 — Livelli 42 e 44, correzioni di Toni's X-ray, Sneaky Mouse e Whack-a-mole
+- Ordine in `Assets/Editor/GotchaLevels82.cs` (posizione dalla roadmap); builder `GotchaLevels82A/B.cs`; runtime
+  `Assets/Scripts/Levels/V82`; logica `V64/Logic/PoliteBombLogic.cs`, `StupidGenius2Logic.cs`; test `V82*Tests.cs`.
+  - 42 **The Polite Bomb**: STOP accelera, i fili mostrano errori buffi, a zero uno sbuffo innocuo e si ricomincia
+    (niente sconfitta). Trascina fuori la batteria (≥ 0,85). Tasti Editor: B soluzione, S STOP, W fili, Z va a 00:00.
+  - 44 **The Stupid Genius 2**: ogni risposta è "sbagliata"; trascina il 5 della lavagna sul pulsante 4 (il 4 vola
+    nell'equazione, il 5 si rompe), poi premi 4 (riconosciuto dal valore, non dalla posizione). Tasti Editor: F, 4, H.
+- **SpriteMask non affidabile sul telefono**: in Toni's X-ray e Whack-a-mole tutto ciò che stava dietro una SpriteMask
+  ("plain") non si vedeva. Nuovo `Components/SpriteWindowClip.cs` + helper `ClipArt` (GotchaLevels26.cs): lo sprite
+  viene ritagliato su un rettangolo cambiando gli UV, senza stencil. Da verificare sul telefono anche gli altri livelli
+  che usano ancora SpriteMask: GotchaLevels40A/40D (talpa della serra), 64A, 67A (dark room), 69B.
+- **Toni's X-ray**: contenuto della pancia con `ClipArt`; la chiave si trascina anche col dito (non solo inclinando) e
+  si ferma in gola; naso più facile da toccare.
+- **Sneaky Mouse**: il topo parte nascosto nella tana; la luce è un ventaglio di raggi (`V64/Logic/SneakyLightLogic.cs`,
+  test `SneakyLightTests.cs`) che si ferma sui mobili e disegna le ombre; la scoperta usa lo stesso poligono disegnato.
+- **Whack-a-mole**: talpe con `ClipArt` e salita/discesa animate.
+
 ## Versione 0.81 — Livelli 34 e 38, esame finale al 275, selettore livelli più veloce
 - Ordine in `Assets/Editor/GotchaLevels81.cs` (posizione dalla roadmap); builder `GotchaLevels81A/B.cs`; runtime
   `Assets/Scripts/Levels/V81`; logica `V64/Logic/TooEasyLogic.cs`, `ImpossibleHugLogic.cs`; test `V81*Tests.cs`.
