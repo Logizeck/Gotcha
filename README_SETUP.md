@@ -267,8 +267,16 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.85 — Livelli 82 e 91 della roadmap
+- Ordine in `Assets/Editor/GotchaLevels85.cs`; builder `GotchaLevels85A/B.cs`; runtime `Levels/V85`; logica
+  `V64/Logic/DishonestHourglassLogic.cs`, `MirrorLiarLogic.cs`; test `V85*Tests.cs`.
+  - 82 **The Dishonest Hourglass**: ADD TIME toglie tempo; a zero si ricarica (niente sconfitta). Capovolgi il telefono
+    (prima dritto): la clessidra si gira e guadagni 10 secondi. Tasti Editor: H soluzione, A ADD TIME, U capovolgi.
+  - 91 **Mirror Liar**: tocchi e trascinamenti con un dito sono speculari. Due dita, una per gemello, in direzioni
+    diverse: il falso resta riflesso, si incrina e va in frantumi (lato vero casuale). Tasti Editor: W, M, D, 1/2.
+
 ## Programma delle prossime release (livelli nuovi della roadmap, due per release)
-- 0.85: 82 The Dishonest Hourglass, 91 Mirror Liar
+- 0.85: 82 The Dishonest Hourglass, 91 Mirror Liar (uscita)
 - 0.86: 101 The Upside-Down Rain, 110 The Imaginary Bridge
 - 0.87: 119 The Fireless Dragon, 129 The Fake Trophy
 - 0.88: 138 The Broken Applause
