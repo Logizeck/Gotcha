@@ -267,6 +267,18 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.84 — Livelli 63 e 72, video con premio più generosi, niente spot dopo un Easter egg, testi del banner
+- Ordine in `Assets/Editor/GotchaLevels84.cs`; builder `GotchaLevels84A/B.cs`; runtime `Levels/V84`; logica
+  `V64/Logic/TinyCrownLogic.cs`, `ShortLadderLogic.cs`; test `V84*Tests.cs`.
+  - 63 **The Tiny Crown**: ingrandisci la corona col pizzico (≥ 2,2x, poi la si trascina) e mettila sulla testa del re.
+    Tasti Editor: W soluzione, S corona piccola, G pizzico.
+  - 72 **The Short Ladder**: allunga la scala col pizzico (≥ 10 pioli, fatta di segmenti) e mettila sotto la finestra.
+    Tasti Editor: W soluzione, S scala corta, E/X allunga/accorcia.
+- **Video con premio**: 3 hint (prima 1) e 2 vite (prima 1); pulsanti "WATCH AD: +3 HINTS" / "+2 LIVES".
+- **Pausa pubblicitaria** mai dopo un Easter egg trovato (oltre che mai dopo una sconfitta): `GameFlow.lastHadEgg`.
+- **Testi uGUI**: `UI/UiTextFit.cs` misura il testo e sceglie la dimensione più grande che sta nel riquadro; usato per il
+  nastro dorato dell'Easter egg (una riga) e per titoli ed etichetta SECRET EGG nel selettore livelli.
+
 ## Versione 0.83 — Livelli 47 e 54, pubblicità solo dopo le vittorie, cuori animati, banner dorato, condivisioni verificate, pizza
 - Ordine in `Assets/Editor/GotchaLevels83.cs`; builder `GotchaLevels83A/B.cs`; runtime `Levels/V83`; logica
   `V64/Logic/WrongPrizeLogic.cs`, `LuckHackLogic.cs`; test `V83*Tests.cs`.

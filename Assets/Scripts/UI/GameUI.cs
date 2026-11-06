@@ -22,7 +22,7 @@ namespace Gotcha.UI
         public static bool TitleShown => current != null && current.titlePanel != null && current.titlePanel.activeSelf;
 
         /// <summary>Versione mostrata nel MENU: serve a capire al volo quale build è installata sul telefono.</summary>
-        public const string Version = "0.83";
+        public const string Version = "0.84";
 
         [SerializeField] GameFlow flow;
         [SerializeField] Sprite roundedSprite;   // 9-slice, per pulsanti e pannelli
@@ -409,7 +409,7 @@ namespace Gotcha.UI
             hintNextButton.interactable = hintPage < shown - 1;
             hintWalletLabel.text = BetaMode.Active ? "Your hints: unlimited (beta)" : "Your hints: " + HintWallet.Balance;
             bool more = shown < hints.Length;
-            // dalla 0.78 il video con premio ha un pulsante tutto suo, sempre visibile (fuori dalla beta): "WATCH AD: +1 HINT"
+            // dalla 0.78 il video con premio ha un pulsante tutto suo, sempre visibile (fuori dalla beta): "WATCH AD: +3 HINTS" (0.84)
             bool canReveal = BetaMode.Active || HintWallet.Balance > 0;
             hintRevealButton.gameObject.SetActive(more && canReveal);
             if (!more) hintWalletLabel.text += "   (that was the solution!)";
@@ -461,13 +461,17 @@ namespace Gotcha.UI
             hintAdButton.gameObject.SetActive(!BetaMode.Active);
             bool ready = flow.Ads.RewardedReady && !hintAdBusy;
             hintAdButton.interactable = ready;
-            hintAdLabel.text = hintAdBusy ? "PLAYING AD..." : ready ? "WATCH AD: +1 HINT" : "AD LOADING...";
+            hintAdLabel.text = hintAdBusy ? "PLAYING AD..." : ready ? "WATCH AD: +3 HINTS" : "AD LOADING...";
         }
 
         /// <summary>
-        /// Video con premio (volontario, quindi anche con "niente pubblicità"): +1 hint nel portafoglio e, se il livello ha
+        /// Video con premio (volontario, quindi anche con "niente pubblicità"): +3 hint nel portafoglio (dalla 0.84; prima +1,
+        /// ma gli spot con premio sono lunghi) e, se il livello ha
         /// ancora hint da scoprire, si mostra subito il prossimo. Se il video non viene guardato fino in fondo, niente premio.
         /// </summary>
+        /// <summary>Premi di un video con premio (0.84): 3 hint, 2 vite.</summary>
+        const int AdHintReward = 3, AdLifeReward = 2;
+
         void WatchAdForHint()
         {
             if (hintAdBusy || !flow.Ads.RewardedReady) return;
@@ -479,7 +483,7 @@ namespace Gotcha.UI
                 LevelDefinition def = flow.CurrentDefinition;
                 if (ok)
                 {
-                    HintWallet.Add(1);
+                    HintWallet.Add(AdHintReward);
                     Haptics.Success();
                     if (def != null && HintWallet.Revealed(def.levelId) < CurrentHints().Length)
                     {
@@ -821,11 +825,18 @@ namespace Gotcha.UI
             Place(label.transform, new Vector2(0.06f, 0.05f), new Vector2(0.32f, 0.95f));
             Text title = CreateText(b.transform, open ? (def != null ? def.title : "?") : "LOCKED", 34, Color.white, FontStyle.Bold);
             title.alignment = TextAnchor.MiddleLeft;
+            UiTextFit titleFit = title.gameObject.AddComponent<UiTextFit>();   // 0.84: titoli lunghi dentro la casella
+            titleFit.maxSize = 34;
+            titleFit.minSize = 14;
             Place(title.transform, new Vector2(0.32f, egg ? 0.36f : 0.08f), new Vector2(0.97f, 0.92f));
             if (egg)
             {
                 Text tag = CreateText(b.transform, found ? "EGG FOUND!" : "SECRET EGG", 24, new Color(1f, 0.92f, 0.5f), FontStyle.Normal);
                 tag.alignment = TextAnchor.MiddleLeft;
+                UiTextFit tagFit = tag.gameObject.AddComponent<UiTextFit>();   // 0.84: mai fuori dalla casella
+                tagFit.maxSize = 24;
+                tagFit.minSize = 12;
+                tagFit.singleLine = true;
                 Place(tag.transform, new Vector2(0.32f, 0.06f), new Vector2(0.97f, 0.4f));
             }
             return (RectTransform)b.transform;
@@ -946,7 +957,7 @@ namespace Gotcha.UI
             adButton.interactable = false;
             flow.Ads.ShowRewarded(ok =>
             {
-                if (ok && flow.Lives != null) flow.Lives.GrantLife();
+                if (ok && flow.Lives != null) flow.Lives.GrantLife(AdLifeReward);
                 RefreshLivesPanel();
             });
         }
@@ -1384,7 +1395,7 @@ namespace Gotcha.UI
             hintRevealLabel = hintRevealButton.GetComponentInChildren<Text>();
             Place(hintRevealButton.transform, new Vector2(0.1f, 0.26f), new Vector2(0.9f, 0.36f));
             // video con premio e negozio uno accanto all'altro
-            hintAdButton = CreateButton(hintCard, "WATCH AD: +1 HINT", new Color(0.2f, 0.62f, 0.38f), WatchAdForHint);
+            hintAdButton = CreateButton(hintCard, "WATCH AD: +3 HINTS", new Color(0.2f, 0.62f, 0.38f), WatchAdForHint);
             hintAdLabel = hintAdButton.GetComponentInChildren<Text>();
             Place(hintAdButton.transform, new Vector2(0.06f, 0.15f), new Vector2(0.49f, 0.24f));
             Place(CreateButton(hintCard, "GET MORE HINTS", new Color(0.95f, 0.7f, 0.15f), OpenShop).transform, new Vector2(0.51f, 0.15f), new Vector2(0.94f, 0.24f));
@@ -1537,7 +1548,7 @@ namespace Gotcha.UI
             livesTitle = AddHeader(livesCard, "LIVES");
             livesBody = CreateText(livesCard, "", 50, Ink, FontStyle.Normal);
             Place(livesBody.transform, new Vector2(0.08f, 0.6f), new Vector2(0.92f, 0.82f));
-            adButton = CreateButton(livesCard, "WATCH AD: +1 LIFE", Accent, WatchAdForLife);
+            adButton = CreateButton(livesCard, "WATCH AD: +2 LIVES", Accent, WatchAdForLife);
             Place(adButton.transform, new Vector2(0.12f, 0.43f), new Vector2(0.88f, 0.55f));
             Place(CreateButton(livesCard, "INVITE A FRIEND", EggColor, InviteService.Share).transform, new Vector2(0.12f, 0.27f), new Vector2(0.88f, 0.39f));
             Place(CreateButton(livesCard, "SHOP: INFINITE LIVES", new Color(0.95f, 0.7f, 0.15f), OpenShop).transform, new Vector2(0.12f, 0.2f), new Vector2(0.88f, 0.26f));
