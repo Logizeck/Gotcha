@@ -140,6 +140,7 @@ namespace Gotcha.UI
             // lo spot si carica in background: il pulsante passa da "AD LOADING..." a pronto da solo
             if (hintPanel.activeSelf && Time.frameCount % 20 == 0) RefreshHintAd();
             UpdateTip();
+            UpdateSecretBanner();
             UpdateEggCelebration();
             if (Input.GetKeyDown(KeyCode.Escape))
             {
@@ -173,11 +174,15 @@ namespace Gotcha.UI
             // mini tutorial dei primi 8 livelli: il consiglio si vede finché il livello non è mai stato superato
             HideTip();
             if (TutorialTips.ShouldShow(def.levelId, SaveData.IsCompleted(def.levelId), out TutorialTip tip)) ShowTip(tip);
+            // livello con un Easter egg: il nastro dorato lo annuncia (in alto; il consiglio sta in basso)
+            HideSecretBanner();
+            if (!string.IsNullOrEmpty(def.easterEggId)) ShowSecretBanner(SaveData.HasEasterEgg(def.easterEggId));
         }
 
         void OnLevelFinished(LevelDefinition def, LevelResult result, string eggId)
         {
             HideTip();
+            HideSecretBanner();
             hintPanel.SetActive(false);
             menuPanel.SetActive(false);
             flow.Paused = false;
@@ -211,13 +216,9 @@ namespace Gotcha.UI
             }
             resultButton.text = solved ? "NEXT" : "RETRY";
             if (solved && !DailyReward.DoneToday) resultBody.text += "\nDaily goal: " + DailyReward.LevelsToday + " / " + DailyReward.LevelsNeeded;
-            // Easter egg trovato per la prima volta: il video degli ultimi secondi (con l'audio) è pronto, e condividerlo
-            // vale un premio. La proposta arriva una volta sola per segreto.
-            bool clip = !string.IsNullOrEmpty(eggId) && ClipRecorder.Instance != null && ClipRecorder.Instance.HasClip && EasterEggs.OfferShareOnce(eggId);
-            shareButton.gameObject.SetActive(clip);
-            shareLabel.text = "SHARE VIDEO + REWARD";
-            shareButton.interactable = true;
-            if (clip) resultBody.text += "\nShare the video: 3 min of infinite lives or 1 free hint!";
+            // condivisione (0.83): il segreto trovato si può condividere OGNI volta (premio una volta per segreto);
+            // sui livelli memorabili o ogni 5 vittorie "Ti è piaciuto? Condividilo: +2 vite" (ShareOffers.cs)
+            SetupShareOffers(solved, eggId);
             resultPanel.SetActive(true);
             // livello perso (non un segreto trovato): la schermata GOTCHA! ti prende in giro
             if (mockRoutine != null) { StopCoroutine(mockRoutine); EndMock(); }
@@ -301,26 +302,6 @@ namespace Gotcha.UI
             resultTitle.transform.localRotation = Quaternion.identity;
         }
 
-        void ShareClip()
-        {
-            if (ClipRecorder.Instance == null || ClipRecorder.Instance.IsSharing) return;
-            shareButton.interactable = false;
-            shareLabel.text = "PREPARING...";
-            // nome del segreto + link personale per scaricare il gioco
-            ClipRecorder.Instance.Share(EasterEggs.ShareText(lastEggId), ok =>
-            {
-                // il premio si sceglie una volta per ogni segreto (il menu di condivisione si è aperto)
-                if (ok && !EasterEggs.RewardClaimed(lastEggId))
-                {
-                    EasterEggs.MarkRewardClaimed(lastEggId);
-                    rewardPanel.SetActive(true);
-                }
-                // condiviso: il pulsante sparisce per sempre; se non è riuscito si può riprovare finché si è qui
-                if (ok) shareButton.gameObject.SetActive(false);
-                else { shareLabel.text = "SHARE FAILED - RETRY"; shareButton.interactable = true; }
-            });
-        }
-
         void ClaimReward(bool infiniteLives)
         {
             if (infiniteLives) { if (flow.Lives != null) flow.Lives.GrantInfinite(EasterEggs.RewardInfiniteSeconds); }
@@ -355,7 +336,11 @@ namespace Gotcha.UI
                         RawImage img = cell.gameObject.AddComponent<RawImage>();
                         img.texture = tex;
                         img.uvRect = new Rect(min.x, min.y, w, h);
-                        img.raycastTarget = false;
+                        // 0.83: toccando un pezzo scoperto si condivide (testo + link) il segreto che lo ha sbloccato
+                        int eggIndex = EggPuzzle.RankOf(c, r);
+                        Button piece = cell.gameObject.AddComponent<Button>();
+                        piece.transition = Selectable.Transition.None;
+                        piece.onClick.AddListener(() => { Haptics.Tap(); SharePuzzlePiece(eggIndex); });
                     }
                     else
                     {
@@ -371,6 +356,7 @@ namespace Gotcha.UI
             puzzleInfo.text = EggPuzzle.Complete
                 ? "COMPLETE! Toni is the strongest pug in the world!"
                 : EggPuzzle.Unlocked + " / " + EggPuzzle.Pieces + " pieces. Every Easter egg you find unlocks one!";
+            if (EggPuzzle.Unlocked > 0) puzzleInfo.text += "\nTap a piece to share its secret.";
             puzzlePanel.SetActive(true);
         }
 
@@ -877,29 +863,30 @@ namespace Gotcha.UI
         {
             if (hearts == null || flow.Lives == null) return;
             int lives = flow.Lives.Lives;
+            bool infinite = flow.Lives.Infinite;
             float t = Time.unscaledTime;
             for (int i = 0; i < hearts.Length; i++)
             {
                 RectTransform rt = (RectTransform)hearts[i].transform;
-                bool full = i < lives;
-                if (i == brokenHeart && t - brokenAt < 0.8f)
+                bool full = i < lives || infinite;
+                if (i == brokenHeart && t - brokenAt < 0.8f && !infinite)
                 {
                     // il cuore appena perso: si gonfia, trema e si spegne
                     float k = (t - brokenAt) / 0.8f;
+                    HomeHeart(i, rt);
                     rt.localScale = Vector3.one * (1f + Mathf.Sin(k * Mathf.PI) * 0.7f);
                     rt.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(k * 40f) * 20f * (1f - k));
                     hearts[i].color = Color.Lerp(Color.white, new Color(0.45f, 0.4f, 0.5f, 0.35f), k);
                     continue;
                 }
-                rt.localRotation = Quaternion.identity;
-                hearts[i].color = full ? Color.white : new Color(0.45f, 0.4f, 0.5f, 0.35f);
-                float beat = full ? Mathf.Pow(Mathf.Abs(Mathf.Sin(t * 2.6f + i * 0.35f)), 8f) * 0.18f : 0f;   // battito
-                rt.localScale = Vector3.one * (1f + beat);
+                // 0.83: niente più battito ordinato tutti insieme; ogni cuore pieno fa ogni tanto una mossa a caso
+                // (saltello, battito doppio, giravolta, dondolio): SecretBanner.cs / HeartIdle
+                hearts[i].color = infinite ? new Color(1f, 0.85f, 0.3f) : full ? Color.white : new Color(0.45f, 0.4f, 0.5f, 0.35f);
+                PoseHeart(i, rt, full, t);
             }
-            if (flow.Lives.Infinite)
+            if (infinite)
             {
-                // vite infinite: i cuori pulsano tutti, dorati, e il timer conta all'indietro
-                for (int i = 0; i < hearts.Length; i++) hearts[i].color = new Color(1f, 0.85f, 0.3f);
+                // vite infinite: i cuori sono tutti dorati (e tutti "vivi"), e il timer conta all'indietro
                 livesTimer.text = BetaMode.Active ? "BETA: UNLIMITED" : "UNLIMITED " + FormatTime(flow.Lives.InfiniteSecondsLeft);
                 return;
             }
@@ -1341,6 +1328,8 @@ namespace Gotcha.UI
 
             // Consiglio dei primi livelli: nell'area sicura, sotto a tutti i pannelli (che si aprono sopra)
             BuildTipCard();
+            // nastro dorato dei livelli con un Easter egg (sotto i cuori)
+            BuildSecretBanner();
 
             // Schermata del titolo (sopra barra e cuori, sotto gli altri pannelli)
             RectTransform title = CreateRect("TitleScreen", safeRoot.parent, Vector2.zero, Vector2.one);
@@ -1571,6 +1560,7 @@ namespace Gotcha.UI
             shareLabel = shareButton.GetComponentInChildren<Text>();
             Place(shareButton.transform, new Vector2(0.15f, 0.27f), new Vector2(0.85f, 0.41f));
             shareButton.gameObject.SetActive(false);
+            BuildViralButton(resultCard);   // stesso posto del pulsante di condivisione (non compaiono mai insieme)
             Button next = CreateButton(resultCard, "", Accent, () =>
             {
                 resultPanel.SetActive(false);

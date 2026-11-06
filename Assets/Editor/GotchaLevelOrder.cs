@@ -38,7 +38,7 @@ public static partial class GotchaProjectBuilder
         "defuse",                      // 20 TICK TOCK (old 6)
         "the_missing_letter",          // 21 THE MISSING LETTER (old 207)
         "the_cheap_magician",          // 22 THE CHEAP MAGICIAN (old 164)
-        "pizza_chef",                  // 23 PIZZA CHEF (old 33)
+        "pizza_party",                 // 23 PIZZA PARTY (old 32) — scambiato con PIZZA CHEF (0.83): prima si taglia, poi si cucina
         "lazy_sun",                    // 24 THE LAZY SUN (idea 295 (nuovo))
         "toni_stuck",                  // 25 STUCK! (old 25)
         "tilt_maze",                   // 26 TILT MAZE (old 2)
@@ -150,7 +150,7 @@ public static partial class GotchaProjectBuilder
         "thirsty_plant",               // 132 THIRSTY PLANT (old 27)
         "shell_game",                  // 133 SHELL GAME (old 28)
         "sky_wire",                    // 134 SKY WIRE (old 29)
-        "pizza_party",                 // 135 PIZZA PARTY (old 32)
+        "pizza_chef",                  // 135 PIZZA CHEF (old 33) — scambiato con PIZZA PARTY (0.83)
         "balloon",                     // 136 BLOW IT UP (old 34)
         "pancake",                     // 137 PANCAKE FLIP (old 36)
         "broken_applause",             // 138 THE BROKEN APPLAUSE (idea 302 (nuovo))

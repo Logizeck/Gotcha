@@ -32,6 +32,10 @@ namespace Gotcha.Core
         /// <summary>Il pezzo (colonna c, riga r dall'alto) è già scoperto?</summary>
         public static bool IsUnlocked(int c, int r) => Rank[r * Cols + c] < Unlocked;
 
+        /// <summary>Quanti Easter egg servono prima di vedere il pezzo: è anche l'indice (in SaveData.EasterEggIds)
+        /// del segreto che lo ha sbloccato.</summary>
+        public static int RankOf(int c, int r) => Rank[r * Cols + c];
+
         public static bool Complete => Unlocked >= Pieces;
     }
 }

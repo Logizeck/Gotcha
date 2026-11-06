@@ -6,8 +6,10 @@ namespace Gotcha.Core
     /// <summary>
     /// Il catalogo degli Easter egg: ogni segreto ha un nome (mostrato quando lo trovi e nel messaggio di
     /// condivisione). Quando se ne aggiunge uno nuovo in un livello, va dato un nome anche qui.
-    /// Il video di un Easter egg si può condividere solo quando il segreto viene trovato per la prima volta (e mai più
-    /// dopo averlo condiviso); condividerlo dà un premio a scelta: 3 minuti di vite infinite o un hint gratis.
+    /// Dalla 0.83 un segreto trovato si può condividere ogni volta: il video subito dopo averlo trovato (o ritrovato),
+    /// il testo con il link più tardi dal puzzle di Toni (toccando il suo pezzo). Il premio a scelta (3 minuti di vite
+    /// infinite o un hint gratis) resta UNO per segreto (<see cref="RewardClaimed"/>) e arriva solo se la condivisione
+    /// risulta avvenuta (VerifiedShare).
     /// </summary>
     public static class EasterEggs
     {
@@ -52,7 +54,8 @@ namespace Gotcha.Core
         public static bool RewardClaimed(string id) => ("|" + PlayerPrefs.GetString(SharedKey, "") + "|").Contains("|" + id + "|");
 
         /// <summary>
-        /// La condivisione si propone una volta sola: alla prima scoperta del segreto (se non è già stato condiviso).
+        /// (Fino alla 0.82) la condivisione si proponeva una volta sola, alla prima scoperta del segreto. Dalla 0.83
+        /// GameUI non la usa più (il pulsante c'è sempre); resta per compatibilità con i dati salvati.
         /// Restituisce true se va proposta adesso, e la segna come proposta.
         /// </summary>
         public static bool OfferShareOnce(string id)

@@ -218,7 +218,9 @@ namespace Gotcha.Core
             if (small != null) { small.Release(); Destroy(small); small = null; }
         }
 
-        /// <summary>Crea il video e apre la condivisione. onDone(true) se è andato tutto bene.</summary>
+        /// <summary>Crea il video e apre la condivisione. onDone(true) solo se la condivisione risulta avvenuta
+        /// (VerifiedShare: app scelta nel menu e almeno 4 s passati in quell'app); nell'Editor è simulata (true).
+        /// Si può condividere più volte la stessa clip.</summary>
         public void Share(string message, Action<bool> onDone)
         {
             if (!HasClip || IsSharing) { onDone?.Invoke(false); return; }
@@ -257,8 +259,22 @@ namespace Gotcha.Core
                 yield return null;
                 encoder.Call("finish");
                 encoder.Dispose();
-                using (var cls = new AndroidJavaClass("com.gotcha.video.GotchaVideo"))
-                    ok = cls.CallStatic<bool>("share", path, "Gotcha!", message);
+                // dalla 0.83 "ok" vuol dire condivisione verificata (app scelta nel menu + almeno 4 s fuori dal gioco),
+                // non solo "il menu si è aperto": è quello che dà il premio
+                bool? verified = null;
+                if (VerifiedShare.Begin(v => verified = v))
+                {
+                    bool opened = false;
+                    try
+                    {
+                        using (var cls = new AndroidJavaClass("com.gotcha.video.GotchaVideo"))
+                            opened = cls.CallStatic<bool>("share", path, "Gotcha!", message);
+                    }
+                    catch (Exception e) { Debug.LogWarning("[Gotcha] Condivisione del video non riuscita: " + e.Message); }
+                    if (!opened) VerifiedShare.Abort();
+                    while (verified == null) yield return null;
+                    ok = verified.Value;
+                }
             }
 #else
             // Editor / altre piattaforme: salva i fotogrammi per controllo

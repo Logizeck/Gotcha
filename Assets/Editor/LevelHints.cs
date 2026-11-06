@@ -10,7 +10,7 @@ public static partial class LevelHints
     public static string[] For(string levelId, string first)
     {
         foreach (Dictionary<string, string[]> pack in new[] { Extra, V39A, V39B, V39C, V39D, V39E, V40A, V40B, V40C, V40D, V40E,
-            V41A, V41B, V41C, V41D, V41E, V41F, V41G, V41H, V41I, V41J, V41K, V41L, VHalloween, V62, V64A, V64B, V64C, V67A, V67B, V68A, V68B, V69A, V69B, V70A, V70B, V72A, V72B, V73A, V73B, V74A, V74B, V75A, V75B, V76A, V76B, V77A, V77B, V78A, V78B, V79A, V79B, V80A, V80B, V81A, V81B, V82A, V82B })
+            V41A, V41B, V41C, V41D, V41E, V41F, V41G, V41H, V41I, V41J, V41K, V41L, VHalloween, V62, V64A, V64B, V64C, V67A, V67B, V68A, V68B, V69A, V69B, V70A, V70B, V72A, V72B, V73A, V73B, V74A, V74B, V75A, V75B, V76A, V76B, V77A, V77B, V78A, V78B, V79A, V79B, V80A, V80B, V81A, V81B, V82A, V82B, V83A, V83B })
             if (pack.TryGetValue(levelId, out string[] more)) return new[] { first, more[0], more[1] };
         return new[] { first };
     }
@@ -51,7 +51,7 @@ public static partial class LevelHints
         { "sunny_day", new[] { "Keep the sun covered.", "Drag the cloud over the sun and keep it there until the sun sets." } },
         { "cut_rope", new[] { "Timing is everything.", "Cut one rope, wait until the candy swings toward the mouse, cut the other." } },
         { "pizza_party", new[] { "Two cuts are enough.", "Swipe once across and once down through the centre, then drag a slice to each mouse." } },
-        { "pizza_chef", new[] { "Read the board carefully.", "Put on exactly the toppings drawn on the board, bake it, cut it and serve it." } },
+        { "pizza_chef", new[] { "Read the board carefully. And never, ever pineapple.", "Put on exactly the toppings drawn on the board (never pineapple!), bake it, cut it in four and serve a slice to each mouse." } },
         { "balloon", new[] { "Stop at the line.", "Pump (or blow) until the balloon fills the dotted outline, then wait 2 seconds." } },
         { "cat_eyes", new[] { "The eyes follow the tilt.", "Tilt the phone so the cat's eyes look at the mouse and hold it for 3 seconds." } },
         { "pancake", new[] { "One short flick upward.", "Give the phone a quick, medium upward flick, three times." } },
