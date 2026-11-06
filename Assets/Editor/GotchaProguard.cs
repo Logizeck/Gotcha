@@ -8,7 +8,7 @@ using UnityEngine;
 /// Unity scrive già le sue regole in unityLibrary/proguard-unity.txt (classi del player, GameActivity, JNI) e quel file
 /// è già collegato al progetto Gradle: le nostre righe vengono aggiunte in fondo, senza toccare i build.gradle.
 /// Si proteggono solo le classi Java che il C# chiama per nome con AndroidJavaClass (com.gotcha.game.GotchaKeys,
-/// com.gotcha.video.GotchaVideo) e il plugin delle notifiche; tutto il resto resta libero di essere ridotto e offuscato.
+/// com.gotcha.game.GotchaShare, com.gotcha.video.GotchaVideo) e il plugin delle notifiche; tutto il resto resta libero di essere ridotto e offuscato.
 /// Inoltre, nel modulo launcher, "proguard-android.txt" (non più accettato dai Gradle plugin recenti perché contiene
 /// -dontoptimize) diventa "proguard-android-optimize.txt".
 /// </summary>
@@ -20,6 +20,8 @@ public class GotchaProguard : IPostGenerateGradleAndroidProject
         "# classi chiamate dal C# per nome (AndroidJavaClass): nomi e metodi pubblici devono restare\n" +
         "-keep class com.gotcha.game.GotchaKeys { public *; }\n" +
         "-keep class com.gotcha.video.GotchaVideo { public *; }\n" +
+        "# menu di condivisione con la ricevuta della scelta (VerifiedShare.cs), dalla 0.83\n" +
+        "-keep class com.gotcha.game.GotchaShare { public *; }\n" +
         "# notifiche Unity (com.unity.mobile.notifications): il plugin usa reflection e callback per nome\n" +
         "-keep class com.unity.androidnotifications.** { *; }\n" +
         "# plugin Google Mobile Ads: il codice Java del plugin viene chiamato dal C# per nome\n" +

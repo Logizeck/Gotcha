@@ -31,7 +31,7 @@ public static partial class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 76;
+    const int BuilderVersion = 77;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -233,6 +233,7 @@ public static partial class GotchaProjectBuilder
         levels.AddRange(Levels80());   // roadmap 27 e 30
         levels.AddRange(Levels81());   // roadmap 34 e 38
         levels.AddRange(Levels82());   // roadmap 42 e 44
+        levels.AddRange(Levels83());   // roadmap 47 e 54
         levels = ApplyRoadmapOrder(levels, out List<LevelDefinition> bonusLevels);
 
         LevelCatalog catalog = LoadOrCreate<LevelCatalog>(LevelDir + "/LevelCatalog.asset");
@@ -3456,25 +3457,38 @@ public static partial class GotchaProjectBuilder
 
     static GameObject BuildPizzaChefLevel()
     {
+        // 0.83: nove ingredienti (anche prosciutto, salamino, carciofi), pezzi sparsi a caso dal livello, ricetta di 4-5
+        // ingredienti su due righe, l'ananas fa sempre perdere. Logica pura in Gotcha.Levels.V64.PizzaChefLogic.
+        string[] ids = Gotcha.Levels.V64.PizzaChefLogic.Ingredients;
+        string[] pool = Gotcha.Levels.V64.PizzaChefLogic.RecipePool;
+        string TopSprite(string id) => id == "ham" || id == "salami" || id == "artichoke" ? "pz83_top_" + id : "top_" + id;
+        string ChalkSprite(string id) => id == "ham" || id == "salami" || id == "artichoke" ? "pz83_chalk_" + id : "chalk_" + id;
+
         var root = new GameObject("Level_PizzaChef");
         PizzaChefLevel level = root.AddComponent<PizzaChefLevel>();
         Art(root.transform, "Kitchen", "kitchen_bg", -20, false);
-        Transform board = Art(root.transform, "Chalkboard", "chalkboard", -5, true, new Vector2(-1.35f, 2.4f));
+        Transform board = Art(root.transform, "Chalkboard", "pz83_chalkboard", -5, true, new Vector2(-1.35f, 2.4f));
         board.localScale = Vector3.one * 0.95f;
-        // ricetta (casuale) sulla lavagna: 4 posti, disegno a gesso + nome
+        // ricetta (casuale) sulla lavagna: 5 posti su due righe (3 + 2), disegno a gesso + nome; il livello li dispone
         TextMesh recipeTitle = Fit(Label(board, new Vector2(0f, 0.68f), -3, "GRANDMA'S PIZZA", 0.035f), 2.3f, 0.35f);
         recipeTitle.color = new Color(0.95f, 0.95f, 0.9f);
+        var recipeSlots = new List<Transform>();
         var recipeIcons = new List<SpriteRenderer>();
         var recipeNames = new List<TextMesh>();
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 5; i++)
         {
-            Vector2 at = new Vector2(-0.84f + i * 0.56f, 0.12f);
-            Transform icon = Art(board, "Recipe" + i, "chalk_tomato", -3, false, at);
+            var slot = new GameObject("RecipeSlot" + i).transform;
+            slot.SetParent(board, false);
+            slot.localPosition = new Vector3(((i < 3 ? i : i - 3) - (i < 3 ? 1f : 0.5f)) * 0.74f, i < 3 ? 0.28f : -0.32f, 0f);
+            Transform icon = Art(slot, "Recipe" + i, ChalkSprite(pool[i]), -3, false);
+            icon.localPosition = Vector3.zero;
+            icon.localScale = Vector3.one * 0.62f;
             recipeIcons.Add(icon.GetComponent<SpriteRenderer>());
-            TextMesh n = Label(board, at + new Vector2(0f, -0.4f), -3, "", 0.024f);
+            TextMesh n = Label(slot, new Vector2(0f, -0.26f), -3, "", 0.02f);
             n.color = new Color(0.95f, 0.95f, 0.9f);
-            Fit(n, 0.52f);
+            Fit(n, 0.68f, 0.13f);
             recipeNames.Add(n);
+            recipeSlots.Add(slot);
         }
 
         // forno su una mensola
@@ -3500,8 +3514,9 @@ public static partial class GotchaProjectBuilder
         ovenButton.pressedScaleY = 0.95f;
         SmokeEmitter ovenSmoke = Emitter(oven, "Smoke", new Vector2(0.62f, 1.9f), "puff", 6f, 1.6f, 0.9f, 0.15f, 0.4f, new Color(0.8f, 0.8f, 0.85f, 0.8f));
 
-        // pizza: pasta + strati (accesi man mano che si aggiungono gli ingredienti)
-        string[] ids = { "tomato", "mozzarella", "mushroom", "olive", "chili", "pineapple" };
+        // pizza: pasta + strati (accesi man mano che si aggiungono gli ingredienti). I condimenti a pezzi hanno i loro
+        // "Bit" (quanti ne dice PizzaChefLogic.PiecesFor): qui sparsi con un seme fisso, a ogni partita il livello li
+        // risparpaglia a caso (dentro il disco, ruotati, a distanza minima).
         var pizza = new GameObject("Pizza").transform;
         pizza.SetParent(root.transform, false);
         pizza.localPosition = new Vector3(0, -0.4f, 0);
@@ -3511,7 +3526,7 @@ public static partial class GotchaProjectBuilder
         pizzaDrag.itemId = "pizza";
         var wholeLayers = new List<GameObject>();
         SpriteRenderer cheeseWhole = null;
-        float[][] bitsWhole = { new[] { 0.45f, 0.3f }, new[] { -0.4f, 0.45f }, new[] { -0.55f, -0.25f }, new[] { 0.2f, -0.55f }, new[] { 0.6f, -0.2f }, new[] { -0.05f, 0.05f }, new[] { 0.05f, 0.65f } };
+        var preview = new Gotcha.Levels.V64.PizzaChefLogic(83, new[] { "tomato" });
         for (int k = 0; k < ids.Length; k++)
         {
             var layer = new GameObject("Layer_" + ids[k]).transform;
@@ -3519,16 +3534,16 @@ public static partial class GotchaProjectBuilder
             if (ids[k] == "tomato") Art(layer, "Sauce", "sauce", 4, false);
             else if (ids[k] == "mozzarella") cheeseWhole = Art(layer, "Cheese", "cheese", 5, false).GetComponent<SpriteRenderer>();
             else
-                for (int b = 0; b < bitsWhole.Length; b++)
+                foreach (Gotcha.Levels.V64.PizzaChefPiece q in preview.PlacePieces(ids[k]))
                 {
-                    float[] q = bitsWhole[(b + k * 2) % bitsWhole.Length];
-                    Transform bit = Art(layer, "Bit", "top_" + ids[k], 6 + k, false, new Vector2(q[0] + k * 0.04f, q[1] - k * 0.05f));
-                    bit.localRotation = Quaternion.Euler(0, 0, b * 47f + k * 13f);
+                    Transform bit = Art(layer, "Bit", TopSprite(ids[k]), 6 + k, false, new Vector2(q.X, q.Y));
+                    bit.localRotation = Quaternion.Euler(0, 0, q.Rotation);
                 }
             wholeLayers.Add(layer.gameObject);
         }
 
-        // i quattro spicchi: stessi strati ritagliati a quarto (pivot nel baricentro, per afferrarli bene)
+        // i quattro spicchi: pasta, sugo e mozzarella ritagliati a quarto (pivot nel baricentro, per afferrarli bene);
+        // i pezzi dei condimenti li copia il livello al taglio, nella stessa posizione che avevano sulla pizza
         float c = 4f * 1.1f / (3f * Mathf.PI) / Mathf.Sqrt(2f);
         var slices = new List<Transform>();
         for (int i = 0; i < 4; i++)
@@ -3543,12 +3558,6 @@ public static partial class GotchaProjectBuilder
                 layer.SetParent(sl.transform, false);
                 if (ids[k] == "tomato") Art(layer, "Sauce", "sauce_q", o + 1, false, new Vector2(-c, -c));
                 else if (ids[k] == "mozzarella") Art(layer, "Cheese", "cheese_q", o + 2, false, new Vector2(-c, -c));
-                else
-                    foreach (float[] q in new[] { new[] { 25f + k * 6f, 0.45f }, new[] { 62f - k * 5f, 0.72f } })
-                    {
-                        float a = q[0] * Mathf.Deg2Rad;
-                        Art(layer, "Bit", "top_" + ids[k], o + 3, false, new Vector2(Mathf.Cos(a) * q[1] - c, Mathf.Sin(a) * q[1] - c));
-                    }
                 layer.gameObject.SetActive(false);
             }
             sl.AddComponent<CircleCollider2D>().radius = 0.5f;
@@ -3558,24 +3567,33 @@ public static partial class GotchaProjectBuilder
             slices.Add(sl.transform);
         }
 
-        // ciotole degli ingredienti
+        // ciotole degli ingredienti sul bancone: 4 sopra e 5 sotto (tutte dentro x ±2.25); restano anche dopo il forno
+        // (l'ananas fa perdere in qualunque momento)
         var bowls = new List<Draggable2D>();
         for (int k = 0; k < ids.Length; k++)
         {
+            bool top = k < 4;
+            float x = top ? -1.32f + k * 0.88f : -1.8f + (k - 4) * 0.9f;
             var bowl = new GameObject("Bowl_" + ids[k]);
             bowl.transform.SetParent(root.transform, false);
-            bowl.transform.localPosition = new Vector3(-2.3f + k * 0.92f, -3.25f, 0);
-            Art(bowl.transform, "Art", "ing_bowl", 8);
+            bowl.transform.localPosition = new Vector3(x, top ? -2.9f : -3.97f, 0);
+            Art(bowl.transform, "Art", "ing_bowl", 24);
             // contenuto bello pieno, che si riconosce a colpo d'occhio, e il nome sotto
-            if (ids[k] == "tomato") Art(bowl.transform, "Content", "sauce", 9, false, new Vector2(0, 0.08f)).localScale = new Vector3(0.4f, 0.12f, 1f);
-            else if (ids[k] == "mozzarella") Art(bowl.transform, "Content", "cheese", 9, false, new Vector2(0, 0.14f)).localScale = Vector3.one * 0.42f;
+            if (ids[k] == "tomato") Art(bowl.transform, "Content", "sauce", 25, false, new Vector2(0, 0.08f)).localScale = new Vector3(0.4f, 0.12f, 1f);
+            else if (ids[k] == "mozzarella") Art(bowl.transform, "Content", "cheese", 25, false, new Vector2(0, 0.14f)).localScale = Vector3.one * 0.42f;
             else
-                foreach (float[] q in new[] { new[] { -0.18f, 0.1f }, new[] { 0.16f, 0.12f }, new[] { -0.01f, 0.22f } })
-                    Art(bowl.transform, "Content", "top_" + ids[k], 9, false, new Vector2(q[0], q[1])).localScale = Vector3.one * 1.35f;
-            string[] names = { "TOMATO", "MOZZARELLA", "MUSHROOMS", "OLIVES", "CHILI", "PINEAPPLE" };
-            TextMesh name = Label(bowl.transform, new Vector2(0, -0.45f), 9, names[k], 0.03f);
-            Fit(name, 0.86f);
-            bowl.AddComponent<BoxCollider2D>().size = new Vector2(0.88f, 0.7f);
+            {
+                float sc = ids[k] == "ham" || ids[k] == "artichoke" ? 1.05f : ids[k] == "salami" ? 1.2f : 1.35f;
+                foreach (float[] q in new[] { new[] { -0.2f, 0.1f, -20f }, new[] { 0.18f, 0.11f, 25f }, new[] { -0.01f, 0.2f, 5f } })
+                {
+                    Transform piece = Art(bowl.transform, "Content", TopSprite(ids[k]), 25, false, new Vector2(q[0], q[1]));
+                    piece.localScale = Vector3.one * sc;
+                    piece.localRotation = Quaternion.Euler(0, 0, q[2]);
+                }
+            }
+            TextMesh name = Label(bowl.transform, new Vector2(0, -0.43f), 25, Gotcha.Levels.V64.PizzaChefLogic.Labels[k], 0.03f);
+            Fit(name, 0.84f, 0.2f);
+            bowl.AddComponent<BoxCollider2D>().size = new Vector2(0.86f, 0.7f);
             Draggable2D d = bowl.AddComponent<Draggable2D>();
             d.itemId = ids[k];
             bowls.Add(d);
@@ -3587,7 +3605,7 @@ public static partial class GotchaProjectBuilder
         var plates = new List<DropSlot>();
         var miceArt = new List<SpriteRenderer>();
         var spicy = new List<GameObject>();
-        foreach (Vector2 m in new[] { new Vector2(-2.15f, 0.55f), new Vector2(2.15f, -0.5f), new Vector2(-2.15f, -2.45f), new Vector2(2.15f, -2.45f) })
+        foreach (Vector2 m in new[] { new Vector2(-2.15f, 0.55f), new Vector2(2.15f, -0.5f), new Vector2(-2.15f, -2.3f), new Vector2(2.15f, -2.3f) })
         {
             var mouse = new GameObject("Mouse").transform;
             mouse.SetParent(mice, false);
@@ -3622,9 +3640,12 @@ public static partial class GotchaProjectBuilder
         SpeechBubble bubble = Bubble(root.transform, new Vector2(0.2f, 1.0f));
         bubble.transform.localScale = Vector3.one * 0.5f;
 
+        SetArray(level, "recipeSlots", recipeSlots.ToArray());
         SetArray(level, "recipeIcons", recipeIcons.ToArray());
         SetArray(level, "recipeNames", recipeNames.ToArray());
-        SetArray(level, "chalkSprites", new Object[] { sprites["chalk_tomato"], sprites["chalk_mozzarella"], sprites["chalk_mushroom"], sprites["chalk_olive"], sprites["chalk_pineapple"] });
+        var chalk = new List<Object>();
+        foreach (string id in pool) chalk.Add(sprites[ChalkSprite(id)]);
+        SetArray(level, "chalkSprites", chalk.ToArray());
         SetArray(level, "bowls", bowls.ToArray());
         var idField = new SerializedObject(level);
         SerializedProperty idsProp = idField.FindProperty("layerIds");

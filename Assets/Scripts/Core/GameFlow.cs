@@ -212,8 +212,8 @@ namespace Gotcha.Core
 
         /// <summary>
         /// Da chiamare quando il giocatore preme "Avanti"/"Riprova" (dopo l'eventuale schermata di condivisione).
-        /// Se è dovuta (8 livelli superati o 120 s di gioco dall'ultima), la pubblicità parte qui, alla fine del
-        /// livello, sia dopo una vittoria sia dopo una sconfitta.
+        /// Se è dovuta (10 livelli superati o 120 s di gioco dall'ultima), la pubblicità parte qui, alla fine del
+        /// livello, e solo dopo una vittoria (dalla 0.83 mai dopo una sconfitta).
         /// </summary>
         public void Continue()
         {
@@ -231,7 +231,9 @@ namespace Gotcha.Core
                 GameCompleted?.Invoke();
                 return;
             }
-            Ads.TryShowBreak(() => TryStartLevel(next));
+            // pausa pubblicitaria solo dopo un livello superato (0.83): dopo una sconfitta si riprova subito
+            if (lastResult == LevelResult.Solved) Ads.TryShowBreak(() => TryStartLevel(next));
+            else TryStartLevel(next);
         }
     }
 }

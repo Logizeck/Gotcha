@@ -267,6 +267,25 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.83 — Livelli 47 e 54, pubblicità solo dopo le vittorie, cuori animati, banner dorato, condivisioni verificate, pizza
+- Ordine in `Assets/Editor/GotchaLevels83.cs`; builder `GotchaLevels83A/B.cs`; runtime `Levels/V83`; logica
+  `V64/Logic/WrongPrizeLogic.cs`, `LuckHackLogic.cs`; test `V83*Tests.cs`.
+  - 47 **The Wrong Prize**: trascina il numero 1 del primo gradino sul tuo gradino (il 3 si scambia). Tasti Editor: 1/H.
+  - 54 **Luck Hack**: premi FLIP e capovolgi il telefono mentre la moneta è in aria (2 s + 0,3 s). Tasti Editor: H, U, F.
+- **Pubblicità**: ogni 10 livelli superati o 120 s di gioco, e solo alla fine di un livello superato; mai dopo una
+  sconfitta (`GameFlow.Continue`).
+- **Cuori delle vite** (`UI/Logic/HeartIdle.cs`, `UI/SecretBanner.cs`): ogni cuore sceglie a caso, ogni 1,5-4 s, un
+  saltello, un battito, una piroetta o un dondolio.
+- **Banner dorato** all'inizio dei livelli con Easter egg ("SECRET EGG HIDDEN IN THIS LEVEL!" / "ALREADY FOUND").
+- **Condivisioni** (`UI/ShareOffers.cs`, `Core/VerifiedShare.cs`, `Core/ViralShare.cs`, `Plugins/Android/GotchaShare.java`,
+  regola R8 in `GotchaProguard`): l'Easter egg si può condividere ogni volta (anche dal puzzle di Toni toccando un pezzo);
+  "LIKED IT? SHARE WITH A FRIEND: +2 LIVES" dopo i livelli della roadmap o ogni 5 vittorie (vite non piene, max 3 al
+  giorno, firmato HMAC). Premio solo se la condivisione è verificata: app scelta nel menu di Android (callback del
+  chooser) e almeno 4 s passati in quell'app. Android non può confermare che il messaggio sia stato davvero inviato.
+- **Pizza**: PIZZA PARTY (taglia e servi) ora al 23, PIZZA CHEF al 135. PIZZA CHEF: 9 ingredienti (nuovi prosciutto,
+  salamino, carciofi: `Art/DoodleSpritesPizza83.cs`), ricetta di 4-5, pezzi in posizioni casuali sulla pizza
+  (`V64/Logic/PizzaChefLogic.cs`, test `PizzaChefTests.cs`); l'ananas fa sempre perdere con una presa in giro.
+
 ## Versione 0.82 — Livelli 42 e 44, correzioni di Toni's X-ray, Sneaky Mouse e Whack-a-mole
 - Ordine in `Assets/Editor/GotchaLevels82.cs` (posizione dalla roadmap); builder `GotchaLevels82A/B.cs`; runtime
   `Assets/Scripts/Levels/V82`; logica `V64/Logic/PoliteBombLogic.cs`, `StupidGenius2Logic.cs`; test `V82*Tests.cs`.

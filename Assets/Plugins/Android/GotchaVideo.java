@@ -16,6 +16,7 @@ import android.os.Build;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 
+import com.gotcha.game.GotchaShare;
 import com.unity3d.player.UnityPlayer;
 
 import java.io.File;
@@ -267,7 +268,7 @@ public class GotchaVideo {
                     Intent send = new Intent(Intent.ACTION_SEND);
                     send.setType("text/plain");
                     send.putExtra(Intent.EXTRA_TEXT, text);
-                    activity.startActivity(Intent.createChooser(send, chooserTitle));
+                    activity.startActivity(GotchaShare.chooser(activity, send, chooserTitle));   // con la ricevuta della scelta
                 }
             });
             return true;
@@ -293,7 +294,7 @@ public class GotchaVideo {
             send.putExtra(Intent.EXTRA_STREAM, uri);
             send.putExtra(Intent.EXTRA_TEXT, text);
             send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            activity.startActivity(Intent.createChooser(send, chooserTitle));
+            activity.startActivity(GotchaShare.chooser(activity, send, chooserTitle));   // con la ricevuta della scelta
             return true;
         } catch (Exception e) {
             return false;

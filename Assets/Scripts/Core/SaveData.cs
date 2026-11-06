@@ -62,6 +62,16 @@ namespace Gotcha.Core
             return ("|" + PlayerPrefs.GetString(EggsKey, "") + "|").Contains("|" + id + "|");
         }
 
+        /// <summary>Gli Easter egg trovati, nell'ordine in cui sono stati scoperti (il k-esimo sblocca il pezzo con rank k).</summary>
+        public static string[] EasterEggIds
+        {
+            get
+            {
+                string s = PlayerPrefs.GetString(EggsKey, "");
+                return string.IsNullOrEmpty(s) ? new string[0] : s.Split('|');
+            }
+        }
+
         public static int EasterEggCount
         {
             get
