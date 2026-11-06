@@ -70,7 +70,11 @@ namespace Gotcha.UI
             bannerStarR = BannerStar("StarR", -46f);
 
             bannerText = CreateText(bannerRect, "", 44, Ink, FontStyle.Bold);
-            bannerText.resizeTextMinSize = 20;
+            // 0.84: la frase resta su una riga e si rimpicciolisce quanto serve per non uscire dal nastro
+            UiTextFit bannerFit = bannerText.gameObject.AddComponent<UiTextFit>();
+            bannerFit.maxSize = 44;
+            bannerFit.minSize = 14;
+            bannerFit.singleLine = true;
             RectTransform tr = (RectTransform)bannerText.transform;
             float pad = eggStarSprite != null ? 92f : 24f;
             tr.offsetMin = new Vector2(pad, 8f);

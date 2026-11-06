@@ -36,7 +36,7 @@ namespace Gotcha.Ads
     /// <summary>
     /// Regola (dalla 0.83): pubblicità ogni 10 livelli superati OPPURE dopo 120 secondi di gioco attivo (timer invisibile),
     /// e SOLO alla fine di un livello superato: dopo una sconfitta mai (il giocatore potrebbe aver appena finito vite o
-    /// hint e doverne chiedere altri guardando uno spot volontario). Prima della 0.83: 8 livelli, anche dopo le sconfitte.
+    /// hint e doverne chiedere altri guardando uno spot volontario) e, dalla 0.84, mai dopo un Easter egg trovato. Prima della 0.83: 8 livelli, anche dopo le sconfitte.
     /// quello che avviene prima. Entrambi i contatori si azzerano dopo ogni pubblicità mostrata.
     /// La pubblicità parte solo in TryShowBreak, cioè alla fine del livello in corso (superato o fallito): chi resta
     /// bloccato più di 120 s su un livello la vede al termine del tentativo. Se non è pronta, i contatori restano e

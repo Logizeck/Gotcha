@@ -49,6 +49,7 @@ namespace Gotcha.Core
         /// <summary>Il livello in corso (null se non se ne sta giocando uno).</summary>
         public LevelController Current => current;
         LevelResult lastResult;
+        bool lastHadEgg;   // l'ultimo livello ha svelato un Easter egg: niente pausa pubblicitaria dopo (0.84)
         bool paused;
 
         public LevelDefinition GetDefinition(int index)
@@ -193,6 +194,7 @@ namespace Gotcha.Core
         void OnFinished(LevelResult result, string eggId)
         {
             lastResult = result;
+            lastHadEgg = !string.IsNullOrEmpty(eggId);
             if (ClipRecorder.Instance != null)
             {
                 if (string.IsNullOrEmpty(eggId)) ClipRecorder.Instance.Discard();
@@ -213,7 +215,7 @@ namespace Gotcha.Core
         /// <summary>
         /// Da chiamare quando il giocatore preme "Avanti"/"Riprova" (dopo l'eventuale schermata di condivisione).
         /// Se è dovuta (10 livelli superati o 120 s di gioco dall'ultima), la pubblicità parte qui, alla fine del
-        /// livello, e solo dopo una vittoria (dalla 0.83 mai dopo una sconfitta).
+        /// livello, e solo dopo una vittoria (dalla 0.83 mai dopo una sconfitta, dalla 0.84 mai dopo un Easter egg).
         /// </summary>
         public void Continue()
         {
@@ -231,8 +233,9 @@ namespace Gotcha.Core
                 GameCompleted?.Invoke();
                 return;
             }
-            // pausa pubblicitaria solo dopo un livello superato (0.83): dopo una sconfitta si riprova subito
-            if (lastResult == LevelResult.Solved) Ads.TryShowBreak(() => TryStartLevel(next));
+            // pausa pubblicitaria solo dopo un livello superato (0.83) e mai dopo un Easter egg (0.84): dopo una sconfitta
+            // o un segreto trovato si prosegue subito; i contatori restano e lo spot arriva alla vittoria successiva
+            if (lastResult == LevelResult.Solved && !lastHadEgg) Ads.TryShowBreak(() => TryStartLevel(next));
             else TryStartLevel(next);
         }
     }
