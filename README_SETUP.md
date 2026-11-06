@@ -267,6 +267,18 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Programma delle prossime release (livelli nuovi della roadmap, due per release)
+- 0.85: 82 The Dishonest Hourglass, 91 Mirror Liar
+- 0.86: 101 The Upside-Down Rain, 110 The Imaginary Bridge
+- 0.87: 119 The Fireless Dragon, 129 The Fake Trophy
+- 0.88: 138 The Broken Applause
+- 0.89: **299 nuovo** (id `lost_sheet`, richiesta del proprietario): sembra impossibile, la stampante vuole un foglio
+  che nel livello non c'è. Soluzione = Easter egg: dal menu andare a PAPERWORK NIGHTMARE, prendere un foglio e
+  trascinarlo fuori dal bordo destro dello schermo (il gioco lo ricorda anche se si chiude l'app), tornare al 299 dal
+  menu: il foglio è finito lì; infilarlo nella stampante, che stampa un uovo dorato con la scritta "You rock!", e
+  parte la sequenza epica dell'Easter egg. PAPERWORK NIGHTMARE resta giocabile come prima.
+- THE LOCKED BIKE (era il 299 della roadmap) è ora il 301, dopo Toni's Armchair (300).
+
 ## Versione 0.84 — Livelli 63 e 72, video con premio più generosi, niente spot dopo un Easter egg, testi del banner
 - Ordine in `Assets/Editor/GotchaLevels84.cs`; builder `GotchaLevels84A/B.cs`; runtime `Levels/V84`; logica
   `V64/Logic/TinyCrownLogic.cs`, `ShortLadderLogic.cs`; test `V84*Tests.cs`.

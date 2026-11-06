@@ -314,8 +314,9 @@ public static partial class GotchaProjectBuilder
         "v73_missing_sock",            // 296 THE MISSING SOCK (old 272)
         "v74_piggy_bank",              // 297 THE PIGGY BANK (old 273)
         "v74_crying_onion",            // 298 THE CRYING ONION (old 274)
-        "v75_locked_bike",             // 299 THE LOCKED BIKE (old 276)
+        "lost_sheet",                  // 299 NUOVO (da fare, release dopo la 0.88): il foglio portato via da PAPERWORK NIGHTMARE
         "v75_toni_armchair",           // 300 TONI'S ARMCHAIR (old 275) — scambiato con l'esame finale (0.81)
+        "v75_locked_bike",             // 301 THE LOCKED BIKE (old 276) — spostato dal 299 al 301 (richiesta del proprietario)
     };
 
     /// <summary>
