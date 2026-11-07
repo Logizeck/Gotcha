@@ -267,6 +267,14 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.87 — Livelli 119 e 129 della roadmap
+- Ordine in `Assets/Editor/GotchaLevels87.cs`; builder `GotchaLevels87A/B.cs`; runtime `Levels/V87`; logica
+  `V64/Logic/FirelessDragonLogic.cs`, `FakeTrophyLogic.cs`; test `V87*Tests.cs`.
+  - 119 **The Fireless Dragon**: il drago fa solo bolle; trascina una fiammella dal falò alla sua bocca (altrove si
+    spegne e ne rinasce un'altra). Tasti Editor: F soluzione, T, S, G.
+  - 129 **The Fake Trophy**: tieni premuta la parola WIN del cartello (0,7 s) finché si stacca e trascinala sul trofeo,
+    che diventa d'oro. Tasti Editor: W soluzione, H tocco breve, E WIN altrove.
+
 ## Versione 0.86 — Livelli 101 e 110 della roadmap
 - Ordine in `Assets/Editor/GotchaLevels86.cs`; builder `GotchaLevels86A/B.cs`; runtime `Levels/V86`; logica
   `V64/Logic/UpsideDownRainLogic.cs`, `ImaginaryBridgeLogic.cs`; test `V86*Tests.cs`.
@@ -286,7 +294,7 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 ## Programma delle prossime release (livelli nuovi della roadmap, due per release)
 - 0.85: 82 The Dishonest Hourglass, 91 Mirror Liar (uscita)
 - 0.86: 101 The Upside-Down Rain, 110 The Imaginary Bridge (uscita)
-- 0.87: 119 The Fireless Dragon, 129 The Fake Trophy
+- 0.87: 119 The Fireless Dragon, 129 The Fake Trophy (uscita)
 - 0.88: 138 The Broken Applause
 - 0.89: **299 nuovo** (id `lost_sheet`, richiesta del proprietario): sembra impossibile, la stampante vuole un foglio
   che nel livello non c'è. Soluzione = Easter egg: dal menu andare a PAPERWORK NIGHTMARE, prendere un foglio e
