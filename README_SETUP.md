@@ -267,6 +267,19 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.89 — Livello 299 THE IMPOSSIBLE PRINT: tutti i 301 livelli al loro posto
+- Ordine in `Assets/Editor/GotchaLevels89.cs`; builder `GotchaLevels89A.cs`; runtime `Levels/V89`; logica
+  `V64/Logic/LostSheetLogic.cs`; test `V89*Tests.cs`. Easter egg `you_rock` ("You Rock!") registrato in EasterEggs.cs.
+  - 299 **The Impossible Print**: nel livello non c'è carta (PRINT, vassoio, cestino, pinzatrice, scuotere: battute,
+    niente sconfitta). In PAPERWORK NIGHTMARE trascinare un foglio fuori dal bordo destro dello schermo (non vicino al
+    cestino) salva `gotcha.lostsheet.carried` = 1 (subito, resta anche chiudendo l'app; Paperwork resta risolvibile:
+    i fogli erano solo ostacoli). Tornando al 299 il foglio arriva svolazzando: infilarlo nella stampante, che stampa
+    l'uovo d'oro con "You rock!", poi `WinWithEgg("you_rock")` e la sequenza epica con la fanfara. Il segno non si
+    cancella: rigiocando il 299 il foglio c'è sempre. Tasti Editor: C imposta il segno, F infila il foglio; in
+    Paperwork, L butta un foglio a destra.
+- Con questa release l'ordine coincide con la roadmap: 301 livelli, Toni sui multipli di 25 (al 250 TRICK OR TREAT! di Halloween come da roadmap, Final Exam al 275,
+  Toni's Armchair al 300), The Locked Bike al 301.
+
 ## Versione 0.88 — Livello 138 della roadmap (ultimo dei 25 nuovi)
 - Ordine in `Assets/Editor/GotchaLevels88.cs`; builder `GotchaLevels88A.cs`; runtime `Levels/V88`; logica
   `V64/Logic/BrokenApplauseLogic.cs`; test `V88*Tests.cs`.
@@ -302,7 +315,7 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - 0.86: 101 The Upside-Down Rain, 110 The Imaginary Bridge (uscita)
 - 0.87: 119 The Fireless Dragon, 129 The Fake Trophy (uscita)
 - 0.88: 138 The Broken Applause (uscita)
-- 0.89: **299 nuovo** (id `lost_sheet`, richiesta del proprietario): sembra impossibile, la stampante vuole un foglio
+- 0.89 (uscita): **299 nuovo** (id `lost_sheet`, richiesta del proprietario): sembra impossibile, la stampante vuole un foglio
   che nel livello non c'è. Soluzione = Easter egg: dal menu andare a PAPERWORK NIGHTMARE, prendere un foglio e
   trascinarlo fuori dal bordo destro dello schermo (il gioco lo ricorda anche se si chiude l'app), tornare al 299 dal
   menu: il foglio è finito lì; infilarlo nella stampante, che stampa un uovo dorato con la scritta "You rock!", e
