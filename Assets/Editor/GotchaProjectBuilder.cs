@@ -31,7 +31,7 @@ public static partial class GotchaProjectBuilder
     const int BallLayer = 1;   // TransparentFX: la sfera non si riflette in se stessa
 
     // Da aumentare a ogni cambio di grafica o livelli: all'apertura del progetto il builder si rilancia da solo.
-    const int BuilderVersion = 81;
+    const int BuilderVersion = 82;
     const string VersionFile = "ProjectSettings/GotchaBuilderVersion.txt";
 
     static readonly Color Paper = new Color(1f, 0.97f, 0.9f);
@@ -238,6 +238,7 @@ public static partial class GotchaProjectBuilder
         levels.AddRange(Levels85());   // roadmap 82 e 91
         levels.AddRange(Levels86());   // roadmap 101 e 110
         levels.AddRange(Levels87());   // roadmap 119 e 129
+        levels.AddRange(Levels88());   // roadmap 138
         levels = ApplyRoadmapOrder(levels, out List<LevelDefinition> bonusLevels);
 
         LevelCatalog catalog = LoadOrCreate<LevelCatalog>(LevelDir + "/LevelCatalog.asset");

@@ -267,6 +267,12 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.88 — Livello 138 della roadmap (ultimo dei 25 nuovi)
+- Ordine in `Assets/Editor/GotchaLevels88.cs`; builder `GotchaLevels88A.cs`; runtime `Levels/V88`; logica
+  `V64/Logic/BrokenApplauseLogic.cs`; test `V88*Tests.cs`.
+  - 138 **The Broken Applause**: una mano sola fa "pat"; un dito per mano (in qualsiasi ordine) e portale insieme:
+    CLAP, il pubblico si unisce fino all'ovazione (audio della folla fermato all'uscita). Tasti Editor: C soluzione.
+
 ## Versione 0.87 — Livelli 119 e 129 della roadmap
 - Ordine in `Assets/Editor/GotchaLevels87.cs`; builder `GotchaLevels87A/B.cs`; runtime `Levels/V87`; logica
   `V64/Logic/FirelessDragonLogic.cs`, `FakeTrophyLogic.cs`; test `V87*Tests.cs`.
@@ -295,7 +301,7 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - 0.85: 82 The Dishonest Hourglass, 91 Mirror Liar (uscita)
 - 0.86: 101 The Upside-Down Rain, 110 The Imaginary Bridge (uscita)
 - 0.87: 119 The Fireless Dragon, 129 The Fake Trophy (uscita)
-- 0.88: 138 The Broken Applause
+- 0.88: 138 The Broken Applause (uscita)
 - 0.89: **299 nuovo** (id `lost_sheet`, richiesta del proprietario): sembra impossibile, la stampante vuole un foglio
   che nel livello non c'è. Soluzione = Easter egg: dal menu andare a PAPERWORK NIGHTMARE, prendere un foglio e
   trascinarlo fuori dal bordo destro dello schermo (il gioco lo ricorda anche se si chiude l'app), tornare al 299 dal
