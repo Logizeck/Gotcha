@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using Gotcha.Components;
+using Gotcha.Levels.V64;
 
 namespace Gotcha.Levels
 {
@@ -9,6 +10,10 @@ namespace Gotcha.Levels
     /// Toccare i fogli non serve ("not it"); si trascinano e quelli lasciati sul cestino "decorativo" a fiori spariscono.
     /// Trucco: il contratto non è un foglio, è stampato sul piano della scrivania sotto la pila: si sgombera la
     /// scrivania e si tocca il contratto stampato.
+    /// Gancio della 0.89 (livello 299 "The Impossible Print"): un foglio trascinato oltre il bordo DESTRO dello schermo
+    /// vola via ("whoosh") e conta come buttato (non serve più a questo livello: sgombera soltanto); il gioco salva subito
+    /// la preferenza LostSheetLogic.CarriedKey = 1 e il foglio ricompare nel livello 299. Nell'Editor: L lancia via a
+    /// destra il foglio più in alto.
     /// </summary>
     public class PaperworkNightmareLevel : LevelController
     {
@@ -64,13 +69,58 @@ namespace Gotcha.Levels
             left -= Time.deltaTime;
             ShowTime();
             if (left <= 0f) { StartCoroutine(TimeUp()); return; }
+#if UNITY_EDITOR
+            if (Input.GetKeyDown(KeyCode.L) && grabbed < 0)
+            {
+                int top = -1;
+                for (int i = 0; i < sheets.Length; i++) if (!gone[i] && (top < 0 || sheetArts[i].sortingOrder > sheetArts[top].sortingOrder)) top = i;
+                if (top >= 0) FlyOffRight(top);
+            }
+#endif
             if (!Kit41C.Pointer(cam, out Vector2 w, out bool began, out bool ended)) { if (grabbed >= 0) Drop(); return; }
             if (began) { Grab(w); return; }
             if (grabbed < 0) return;
             if ((w - grabStart).magnitude > 0.15f) moved = true;
             Vector2 p = w + grabOffset;
+            if (moved && LeavesRight(p)) { FlyOffRight(grabbed); return; }
             sheets[grabbed].position = new Vector3(Mathf.Clamp(p.x, -2.5f, 2.5f), Mathf.Clamp(p.y, -4.4f, 2.3f), 0f);
             if (ended) Drop();
+        }
+
+        // ---------- Gancio del livello 299: il foglio che esce a destra ----------
+
+        bool LeavesRight(Vector2 p)
+        {
+            float edge = (cam != null ? cam.transform.position.x + cam.orthographicSize * cam.aspect : 2.8f);
+            Vector3 b = binMouth != null ? binMouth.position : new Vector3(99f, 99f, 0f);
+            return LostSheetLogic.ShouldLeaveRight(p.x, p.y, edge, b.x, b.y, 0.85f);
+        }
+
+        void FlyOffRight(int i)
+        {
+            grabbed = -1;
+            if (i < 0 || gone[i]) return;
+            gone[i] = true;   // come un foglio buttato: questo livello resta risolvibile (anzi, un foglio in meno)
+            PlayerPrefs.SetInt(LostSheetLogic.CarriedKey, 1);
+            PlayerPrefs.Save();
+            StartCoroutine(Flutter(sheets[i]));
+        }
+
+        IEnumerator Flutter(Transform s)
+        {
+            Sfx.Play(this, "whoosh", 0.5f);
+            Vector3 from = s.position;
+            float edge = (cam != null ? cam.transform.position.x + cam.orthographicSize * cam.aspect : 2.8f);
+            Vector3 to = new Vector3(edge + 1.2f, from.y + 0.6f, from.z);
+            Quaternion r0 = s.localRotation;
+            for (float k = 0f; k < 1f; k += Time.deltaTime / 0.45f)
+            {
+                s.position = Vector3.Lerp(from, to, k) + Vector3.up * Mathf.Sin(k * Mathf.PI * 3f) * 0.12f;
+                s.localRotation = r0 * Quaternion.Euler(0f, 0f, -k * 160f);
+                yield return null;
+            }
+            s.gameObject.SetActive(false);
+            if (!Covered()) Say("Hey... something's printed on my desk!", 2f);
         }
 
         void Grab(Vector2 w)

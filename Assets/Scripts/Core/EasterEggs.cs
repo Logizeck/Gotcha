@@ -38,6 +38,7 @@ namespace Gotcha.Core
             { "adpocalypse", "Adpocalypse" },
             { "mouse_union", "Mouse Union" },
             { "true_monster_pug", "The Real Monster Is The Pug" },
+            { "you_rock", "You Rock!" },
         };
 
         public static string Name(string id)
