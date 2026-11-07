@@ -267,6 +267,14 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 - Nel MENU di gioco c'è **HOME** per tornare al titolo. Il logo è `Assets/Art/Icon/AppIcon.png` se importato come
   Sprite, altrimenti l'icona disegnata.
 
+## Versione 0.86 — Livelli 101 e 110 della roadmap
+- Ordine in `Assets/Editor/GotchaLevels86.cs`; builder `GotchaLevels86A/B.cs`; runtime `Levels/V86`; logica
+  `V64/Logic/UpsideDownRainLogic.cs`, `ImaginaryBridgeLogic.cs`; test `V86*Tests.cs`.
+  - 101 **The Upside-Down Rain**: ombrello bucato, spostarlo o tappare i buchi non serve (niente sconfitta). Capovolgi il
+    telefono (prima dritto) e tieni 1,5 s: la pioggia torna nella nuvola. Tasti Editor: H soluzione, U capovolgi, M, O.
+  - 110 **The Imaginary Bridge**: l'asse corta cade nel canyon; allungala col pizzico (≥ 1,9) e appoggiala con le due
+    estremità sulle rocce: diventa un ponte. Tasti Editor: W soluzione, S asse corta, E/X allunga/accorcia.
+
 ## Versione 0.85 — Livelli 82 e 91 della roadmap
 - Ordine in `Assets/Editor/GotchaLevels85.cs`; builder `GotchaLevels85A/B.cs`; runtime `Levels/V85`; logica
   `V64/Logic/DishonestHourglassLogic.cs`, `MirrorLiarLogic.cs`; test `V85*Tests.cs`.
@@ -277,7 +285,7 @@ Dopo la prima generazione conviene fare commit anche dei file `.meta` e degli as
 
 ## Programma delle prossime release (livelli nuovi della roadmap, due per release)
 - 0.85: 82 The Dishonest Hourglass, 91 Mirror Liar (uscita)
-- 0.86: 101 The Upside-Down Rain, 110 The Imaginary Bridge
+- 0.86: 101 The Upside-Down Rain, 110 The Imaginary Bridge (uscita)
 - 0.87: 119 The Fireless Dragon, 129 The Fake Trophy
 - 0.88: 138 The Broken Applause
 - 0.89: **299 nuovo** (id `lost_sheet`, richiesta del proprietario): sembra impossibile, la stampante vuole un foglio
